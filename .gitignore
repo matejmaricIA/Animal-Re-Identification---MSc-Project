@@ -1,0 +1,68 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# Distribution/build directories
+build/
+dist/
+*.egg-info/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.bak
+*.pid
+*.seed
+*.cover
+
+# Python packaging artifacts
+*.egg
+*.wheel
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Test output
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Pytest cache
+.pytest_cache/
+
+# MyPy type checker
+.mypy_cache/
+
+# Pylint reports
+pylint-report.txt
+
+# Pyre type checker
+.pyre/
+
+# Other
+*.env  # Environment variable files
+
+#Datasets
+data/elephants
