@@ -1,4 +1,9 @@
+torch==2.3.1
+torchvision==0.18.1
+torchaudio==2.3.1
+-f https://download.pytorch.org/whl/cu118
 segment-anything==1.0
-torch
 numpy
 pillow
+rembg[gpu]
+#onnxruntime-gpu
