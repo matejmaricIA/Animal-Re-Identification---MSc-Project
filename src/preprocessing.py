@@ -16,3 +16,9 @@ def mantiuk_tone_mapping(image):
 def background_removal(image, save_path):
     """Remove the background using SAM and ISNet."""
     pass
+
+def preprocess_dataset(input_dir, output_dir_segmented, use_mantiuk = True):
+    """
+    Preprocess the dataset by applying Mantiuk tone mapping
+    and background removal using SAM and ISNet."""
+    pass
