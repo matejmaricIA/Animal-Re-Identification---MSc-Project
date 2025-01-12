@@ -6,4 +6,5 @@ segment-anything==1.0
 numpy
 pillow
 rembg[gpu]
+wildlife-datasets
 #onnxruntime-gpu

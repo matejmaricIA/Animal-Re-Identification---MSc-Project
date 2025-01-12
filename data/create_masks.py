@@ -1,3 +1,0 @@
-from segment_anything import SamAutomaticMaskGenerator
-import rembg
-
