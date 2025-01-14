@@ -1,7 +1,7 @@
 from rembg import remove
 
-input_path = "test1.jpg"
-output_path = "./out.jpg"
+input_path = "image1.png"
+output_path = "./out1.png"
 
 with open(input_path, 'rb') as i:
     with open(output_path, 'wb') as o:

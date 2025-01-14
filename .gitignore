@@ -68,4 +68,6 @@ pylint-report.txt
 #Datasets
 data/elephants
 data/ATRW
+data/segmented_dataset
 utils/*.jpg
+utils/*.png
