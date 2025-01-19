@@ -23,6 +23,7 @@ dist/
 *.pid
 *.seed
 *.cover
+*.pkl
 
 # Python packaging artifacts
 *.egg
@@ -71,3 +72,4 @@ data/ATRW
 data/segmented_dataset
 utils/*.jpg
 utils/*.png
+data/

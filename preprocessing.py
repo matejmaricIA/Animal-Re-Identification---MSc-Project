@@ -2,8 +2,10 @@ from multiprocessing import Pool
 import os
 import cv2
 import numpy as np
-from rembg import remove
+from rembg import remove, new_session
 
+MODEL_NAME = 'sam'
+session = new_session(MODEL_NAME)
 
 def mantiuk_tone_mapping(image):
     
@@ -19,7 +21,7 @@ def mantiuk_tone_mapping(image):
 
 def background_removal(image):
     _, buffer = cv2.imencode('.png', image)
-    background_removed = remove(buffer.tobytes())
+    background_removed = remove(buffer.tobytes(), session = session)
 
     processed_image = cv2.imdecode(np.frombuffer(background_removed, np.uint8), cv2.IMREAD_UNCHANGED)
 

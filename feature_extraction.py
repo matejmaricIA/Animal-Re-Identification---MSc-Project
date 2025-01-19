@@ -7,29 +7,32 @@ import pandas as pd
 import torch
 
 MODEL_PATH = './disk/depth-save.pth'
-DATAFRAME_PATH = './data/processed_metadata.csv'
-DEVICE = 'CPU'
-SAVE_DESCRIPTORS_PATH = './data/feature_descriptors/'
+#MODEL_PATH = './disk/epipolar-save.pth'
+DATAFRAME_PATH = './data/processed_metadata_train.csv'
+DATAFRAME_PATH_TEST = './data/processed_metadata_test.csv'
+DEVICE = 'GPU'
+SAVE_DESCRIPTORS_PATH = './data/feature_descriptors_train/'
+SAVE_TEST_DESCRIPTORS_PATH = './data/feature_descriptors_test/'
 
-def get_image_paths(df_path, split = 'train'):
+def get_image_paths(df_path):
 
     
 
     df = pd.read_csv(df_path)
-    if split == 'train':
-        img_locations = df[df['original_split'] == 'train']
-    elif split == 'test':
-        img_locations = df[df['original_split'] == 'test']
-    else:
-        return None
+    #if split == 'train':
+    #    img_locations = df[df['original_split'] == 'train']
+    #elif split == 'test':
+    #    img_locations = df[df['original_split'] == 'test']
+    #else:
+    #    return None
     #print(len(img_locations))
-    img_locations = (img_locations['processed_path'] + "/" + img_locations['image_id'] + '.jpg').tolist()
+    img_locations = (df['processed_path'] + "/" + df['image_id'] + '.jpg').tolist()
     
     print(img_locations[0])
     return img_locations
 
 
-def process_images(image_paths, model_path):
+def process_images(image_paths, model_path, output_dir):
     sys.path.append('./disk/')
     from disk import DISK
     import detect
@@ -42,7 +45,7 @@ def process_images(image_paths, model_path):
     model = model.to(torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
 
     try:
-        described_samples = detect.extract(dataset, SAVE_DESCRIPTORS_PATH, model)
+        described_samples = detect.extract(dataset, output_dir, model)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
@@ -54,10 +57,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Feature extraction using DISK")
     parser.add_argument('--model', type = str, help = "Path to the model's .pth save file", default = MODEL_PATH)
     parser.add_argument('--df', type = str, help = "Path to the saved dataframe file", default = DATAFRAME_PATH)
+    parser.add_argument('--output_dir', type = str, default = SAVE_TEST_DESCRIPTORS_PATH)
 
     args = parser.parse_args()
     
-    img_paths = get_image_paths(args.df, 'train')
-    process_images(img_paths, args.model)
+    img_paths = get_image_paths(args.df)
+    process_images(img_paths, args.model, args.output_dir)
 
 
