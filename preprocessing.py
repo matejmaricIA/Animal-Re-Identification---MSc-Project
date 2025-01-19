@@ -3,8 +3,9 @@ import os
 import cv2
 import numpy as np
 from rembg import remove, new_session
+import argparse
+from constants import *
 
-MODEL_NAME = 'sam'
 session = new_session(MODEL_NAME)
 
 def mantiuk_tone_mapping(image):
@@ -48,16 +49,38 @@ def process_image(row, output_dir, use_mantiuk):
     return save_dir
 
 
-def preprocess_dataset(df, output_dir, use_mantiuk = True, num_workers = 2):
+def preprocess_dataset(df, output_dir, use_mantiuk = True):
     """
     Preprocess the dataset by applying Mantiuk tone mapping
     and background removal using SAM and ISNet."""
     
+    
     args = [(row, output_dir, use_mantiuk) for _, row in df.iterrows()]
-    with Pool(num_workers) as p:
-        processed_paths = p.starmap(process_image, args)
+    
+    # Process sequentially instead of using multiprocessing
+    processed_paths = []
+    for arg in args:
+        processed_path = process_image(*arg)
+        processed_paths.append(processed_path)
         
     df['processed_path'] = processed_paths
     return df
         
+def preprocess_inference(image_paths, use_mantiuk = True):
+    save_dir = os.path.join(TMP, 'segmented')
+    os.makedirs(save_dir, exist_ok = True)
+    for image_path in image_paths:
+        image = cv2.imread(image_path)
+        if use_mantiuk:
+            image = mantiuk_tone_mapping(image)
+        
+        masked_image = background_removal(image)
+
+        cv2.imwrite(os.path.join(save_dir, f'{os.path.basename(image_path)}'), masked_image)
+
+    return save_dir
+
+        
+if __name__ == '__main__':
+    print('radi...')
     

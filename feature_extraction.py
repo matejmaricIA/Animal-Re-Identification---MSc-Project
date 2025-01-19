@@ -5,20 +5,14 @@ import argparse
 import sys
 import pandas as pd
 import torch
+from constants import MODEL_PATH, DATAFRAME_PATH, DEVICE, SAVE_TEST_DESCRIPTORS_PATH, SAVE_TRAIN_DESCRIPTORS_PATH
 
-MODEL_PATH = './disk/depth-save.pth'
-#MODEL_PATH = './disk/epipolar-save.pth'
-DATAFRAME_PATH = './data/processed_metadata_train.csv'
-DATAFRAME_PATH_TEST = './data/processed_metadata_test.csv'
-DEVICE = 'GPU'
-SAVE_DESCRIPTORS_PATH = './data/feature_descriptors_train/'
-SAVE_TEST_DESCRIPTORS_PATH = './data/feature_descriptors_test/'
 
-def get_image_paths(df_path):
+def get_image_paths(df):
 
     
 
-    df = pd.read_csv(df_path)
+    #df = pd.read_csv(df_path)
     #if split == 'train':
     #    img_locations = df[df['original_split'] == 'train']
     #elif split == 'test':
@@ -32,11 +26,11 @@ def get_image_paths(df_path):
     return img_locations
 
 
-def process_images(image_paths, model_path, output_dir):
+def extract_features(image_paths, model_path, output_dir):
     sys.path.append('./disk/')
     from disk import DISK
     import detect
-
+    
     dataset = detect.SceneDataset(image_paths, crop_size = (640, 640))
     state_dict = torch.load(model_path, map_location = 'cpu')
     weights = state_dict['extractor']
@@ -45,7 +39,7 @@ def process_images(image_paths, model_path, output_dir):
     model = model.to(torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
 
     try:
-        described_samples = detect.extract(dataset, output_dir, model)
+        detect.extract(dataset, output_dir, model)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
@@ -62,6 +56,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     img_paths = get_image_paths(args.df)
-    process_images(img_paths, args.model, args.output_dir)
+    extract_features(img_paths, args.model, args.output_dir)
 
 
