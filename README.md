@@ -88,5 +88,24 @@ Tijekom predikcije:
 
 - **Podrška za GPU**: Aplikacija koristi GPU za ubrzanje rada. Ako GPU nije dostupan, automatski će se koristiti CPU.
 
+## **Rezultati**
+Evaluacija modela pokazala je sljedeće rezultate na testnom skupu od 723 slike:
+
+- **Točnost (Accuracy)**: 81.33%
+- **Top-5 Točnost**: 89.35%
+
+Detaljni statistički podaci:
+```
+              precision    recall  f1-score   support
+
+   accuracy                           0.81       723
+  macro avg       0.82      0.79      0.78       723
+weighted avg       0.83      0.81      0.81       723
+```
+
+---
+
+
+
 
 Za dodatne informacije ili pomoć, obratite se na [kontakt](mailto:matej.maric99@gmail.com).
