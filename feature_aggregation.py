@@ -87,4 +87,4 @@ def compute_fisher_vectors(image_descriptors, pca, gmm):
 
 
 if __name__ == '__main__':
-    print('radi takodjer')
+    print('...')

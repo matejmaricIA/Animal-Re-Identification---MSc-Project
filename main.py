@@ -11,6 +11,9 @@ from predict import classify_test_images, predict
 from evaluate import evaluate_predictions
 import pandas as pd
 import shutil
+import cv2
+from visualize import visualize_results
+import numpy as np
 
 def save_stuff(pca, gmm, fisher_vectors, paths = (PCA_PATH, GMM_PATH, FISHER_VECTORS)):
     with open(paths[0], "wb") as f:
@@ -145,6 +148,9 @@ if __name__ == '__main__':
         pred_fisher_vectors = compute_fisher_vectors(descriptors, pca_model, gmm_model)
 
         predict(pred_fisher_vectors, fisher_vectors)
+
+
+
         shutil.rmtree(TMP)
         
         

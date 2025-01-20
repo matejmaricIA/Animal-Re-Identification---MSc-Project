@@ -82,5 +82,5 @@ def preprocess_inference(image_paths, use_mantiuk = True):
 
         
 if __name__ == '__main__':
-    print('radi...')
+    print('...')
     

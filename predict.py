@@ -62,3 +62,4 @@ def predict(pred_fisher_vectors, db_fisher_vectors, threshold = 0.4):
             print(f"Determine class is: {db_class_labels[top_indices]}")
         else:
             print("Unknown class.")
+        

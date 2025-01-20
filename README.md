@@ -94,7 +94,6 @@ Evaluacija modela pokazala je sljedeće rezultate na testnom skupu od 723 slike:
 - **Točnost (Accuracy)**: 81.33%
 - **Top-5 Točnost**: 89.35%
 
-Detaljni statistički podaci:
 ```
               precision    recall  f1-score   support
 
