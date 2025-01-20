@@ -1,6 +1,5 @@
-# **Repository for my Master's Project Animal Re-Identification**
+# **Master's Project Animal Re-Identification Application**
 
-Ova aplikacija koristi napredne metode računalnog vida i dubokog učenja za re-identifikaciju životinja na temelju njihovih vizualnih obilježja. U nastavku su detaljne upute za instalaciju i korištenje.
 
 ---
 
@@ -90,4 +89,4 @@ Tijekom predikcije:
 - **Podrška za GPU**: Aplikacija koristi GPU za ubrzanje rada. Ako GPU nije dostupan, automatski će se koristiti CPU.
 
 
-Za dodatne informacije ili pomoć, obratite se na [kontakt autora](mailto:matej.maric99@gmail.com).
+Za dodatne informacije ili pomoć, obratite se na [kontakt](mailto:matej.maric99@gmail.com).
