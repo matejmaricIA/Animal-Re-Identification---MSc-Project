@@ -9,17 +9,6 @@ from constants import MODEL_PATH, DATAFRAME_PATH, DEVICE, SAVE_TEST_DESCRIPTORS_
 
 
 def get_image_paths(df):
-
-    
-
-    #df = pd.read_csv(df_path)
-    #if split == 'train':
-    #    img_locations = df[df['original_split'] == 'train']
-    #elif split == 'test':
-    #    img_locations = df[df['original_split'] == 'test']
-    #else:
-    #    return None
-    #print(len(img_locations))
     img_locations = (df['processed_path'] + "/" + df['image_id'] + '.jpg').tolist()
     
     print(img_locations[0])
