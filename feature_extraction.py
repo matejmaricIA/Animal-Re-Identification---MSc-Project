@@ -9,9 +9,9 @@ from constants import MODEL_PATH, DATAFRAME_PATH, DEVICE, SAVE_TEST_DESCRIPTORS_
 
 
 def get_image_paths(df):
-    img_locations = (df['processed_path'] + "/" + df['image_id'] + '.jpg').tolist()
+    img_locations = (df['processed_path'] + "/" + df['image_id'].apply(str) + '.jpg').tolist()
     
-    print(img_locations[0])
+    #print(img_locations)
     return img_locations
 
 
@@ -27,13 +27,14 @@ def extract_features(image_paths, model_path, output_dir):
     model.load_state_dict(weights)
     model = model.to(torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
 
-    try:
-        detect.extract(dataset, output_dir, model)
-    except Exception as e:
-        print(f"Error: {e}")
-        sys.exit(1)
-    finally:
-        print("Feature extraction complete.")
+    detect.extract(dataset, output_dir, model)
+    #try:
+    #    detect.extract(dataset, output_dir, model)
+    #except Exception as e:
+    #    print(f"Error: {e}")
+    #    sys.exit(1)
+    #finally:
+    print("Feature extraction complete.")
 
 if __name__ == "__main__":
     

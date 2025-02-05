@@ -28,13 +28,13 @@ def background_removal(image):
 
     return processed_image
 
-def process_image(row, output_dir, use_mantiuk):
+def process_image(row, output_dir, use_mantiuk, dataset_name, remove_background):
     """ Process an image by applying Mantiuk tone mapping and background removal."""
 
-    image_path = os.path.join('./data/ATRW', row['path'])
+    image_path = os.path.join(f'./data/{dataset_name}', row['path'])
     identity = row['identity']
-    split = row['original_split']
-    id = row['image_id']
+    #split = row['original_split']
+    id = str(row['image_id'])
     save_dir = os.path.join(output_dir, str(identity))
     os.makedirs(save_dir, exist_ok = True)
 
@@ -42,27 +42,30 @@ def process_image(row, output_dir, use_mantiuk):
     if use_mantiuk:
         image = mantiuk_tone_mapping(image)
     
-    masked_image = background_removal(image)
-
+    if remove_background:
+        masked_image = background_removal(image)
+    else:
+        masked_image = image
     cv2.imwrite(os.path.join(save_dir, f'{id}.jpg'), masked_image)
 
     return save_dir
 
 
-def preprocess_dataset(df, output_dir, use_mantiuk = True):
+def preprocess_dataset(df, output_dir, dataset_name, use_mantiuk = True, remove_background = True):
     """
     Preprocess the dataset by applying Mantiuk tone mapping
     and background removal using SAM and ISNet."""
     
-    
-    args = [(row, output_dir, use_mantiuk) for _, row in df.iterrows()]
+    args = [(row, output_dir, use_mantiuk, dataset_name, remove_background) for _, row in df.iterrows()]
     
     # Process sequentially instead of using multiprocessing
     processed_paths = []
+    index = 0
     for arg in args:
         processed_path = process_image(*arg)
         processed_paths.append(processed_path)
-        
+        print(f"Processed image {index}/{len(args)}")
+        index += 1
     df['processed_path'] = processed_paths
     return df
         
