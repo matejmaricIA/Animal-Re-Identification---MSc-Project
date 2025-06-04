@@ -60,10 +60,11 @@ Rezultati treniranja bit će spremljeni u definirane direktorije u projektu.
 
 Za izvođenje predikcija na novim slikama koristite naredbu:
 ```bash
-python main.py --predict --image_location /path/to/dir
+python main.py --predict --ds ATRW --image_location /path/to/dir
 ```
 
 - **`--predict`**: Omogućuje način rada za predikciju.
+- **`--ds`**: Dataset korišten za treniranje na kojem je bazirana baza podataka.
 - **`--image_location`**: Specificira direktorij sa slikama za analizu.
 
 Tijekom predikcije:
@@ -75,12 +76,12 @@ Tijekom predikcije:
 
 ## **Struktura podataka**
 
-- **Dataset**: `./data/ATRW/`
-- **Segmentirani podaci**: `./data/segmented_dataset/`
+- **Dataset**: `./data/<IME_DATASETA>/`
+- **Segmentirani podaci**: `./data/<IME_DATASETA>/segmented_dataset/`
 - **Trenirani modeli i značajke**:
-  - PCA model: `./data/pca_model.pkl`
-  - GMM model: `./data/gmm_model.pkl`
-  - Fisher vektori: `./data/fisher_vectors.pkl`
+  - PCA model: `./data/<IME_DATASETA>/pca_model.pkl`
+  - GMM model: `./data/<IME_DATASETA>/gmm_model.pkl`
+  - Fisher vektori: `./data/<IME_DATASETA>/fisher_vectors.pkl`
 
 ---
 

@@ -18,7 +18,7 @@ import numpy as np
 
 def save_stuff(pca, gmm, fisher_vectors, paths = (PCA_PATH, GMM_PATH, FISHER_VECTORS)):
     with open(paths[0], "wb") as f:
-        pickle.dump(pca_model, f)
+        pickle.dump(pca, f)
 
     with open(paths[1], "wb") as f:
         pickle.dump(gmm, f)
@@ -48,10 +48,16 @@ if __name__ == '__main__':
     #parser.add_argument('--preprocess', action= 'stroe_true')
 
     args = parser.parse_args()
-    
-    if args.train and not args.ds:
-        print("Please specify the dataset to train on using the --ds argument.")
+    dataset_name = args.ds
 
+    if args.train and not dataset_name:
+        print("Please specify the dataset to train on using the --ds argument.")
+        sys.exit(0)
+
+    if args.predict and not dataset_name:
+        print("Please specify the dataset to use for prediction with the --ds argument.")
+        sys.exit(0)
+    
     if args.train:
         dataset_name = args.ds
         print(f"Training mode selected. Using dataset: {args.ds}")
@@ -65,16 +71,15 @@ if __name__ == '__main__':
         dataset = datasets.__dict__[dataset_name](f"./data/{dataset_name}/")
         df = dataset.df
         df['image_id'] = df['image_id'].astype(str)
-        if dataset_name == "ATRW":
-            df = df[df['path'].str.startswith(tuple((dataset_name.lower() + '_reid_train', dataset_name.lower() + '_reid_test')))]
-        if dataset_name == "CZoo":
-            print(df)
 
         if not os.path.isdir(f'./data/{dataset_name}/segmented_dataset/'):
-            if dataset_name != "MacaqueFaces" or dataset_name != "CZoo":
-                processed_df = preprocessing.preprocess_dataset(df, f'./data/{dataset_name}/segmented_dataset/', dataset_name)
-            elif dataset_name == "MacaqueFaces" or dataset_name == "CZoo":
-                processed_df = preprocessing.preprocess_dataset(df, f'./data/{dataset_name}/segmented_dataset/', dataset_name, remove_background = False)
+            remove_bg = not datasets.__dict__[dataset_name].summary.get('cropped', False)
+            processed_df = preprocessing.preprocess_dataset(
+                df,
+                f'./data/{dataset_name}/segmented_dataset/',
+                dataset_name,
+                remove_background=remove_bg
+            )
             processed_df.to_csv(f'./data/{dataset_name}/processed_metadata.csv', index=False)
         
         processed_df = pd.read_csv(f'./data/{dataset_name}/processed_metadata.csv')
@@ -148,14 +153,16 @@ if __name__ == '__main__':
         save_dir = preprocessing.preprocess_inference(paths)
         paths = [os.path.join(save_dir, img) for img in os.listdir(save_dir)]
         extract_features(paths, MODEL_PATH, TMP)
-        pca_model, gmm_model, fisher_vectors = load_stuff(f'./data/{dataset_name}/db/' + 'pca.pkl', f'./data/{dataset_name}/db/' + 'gmm.pkl', f'./data/{dataset_name}/db/' + 'fisher_vectors.pkl')
+        pca_model, gmm_model, fisher_vectors = load_stuff(
+            f'./data/{dataset_name}/db/' + 'pca.pkl',
+            f'./data/{dataset_name}/db/' + 'gmm.pkl',
+            f'./data/{dataset_name}/db/' + 'fisher_vectors.pkl'
+        )
         print("PCA, GMM and Fisher Vectors loaded.")
         descriptors = load_descriptors(TMP + 'descriptors.h5')
-        descriptors_stacked = stack_all_descriptors(descriptors)
-        #descriptors_pca = pca_model.transform(descriptors_stacked)
         pred_fisher_vectors = compute_fisher_vectors(descriptors, pca_model, gmm_model)
 
-        predict(pred_fisher_vectors, fisher_vectors)
+        predict(pred_fisher_vectors, fisher_vectors, dataset_name)
 
 
 
