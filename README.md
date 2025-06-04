@@ -43,11 +43,12 @@ Aplikacija podržava dva glavna načina rada: **treniranje modela** i **inferenc
 
 Za treniranje modela na odabranom datasetu (npr. ATRW), koristite naredbu:
 ```bash
-python main.py --train --ds ATRW
+python main.py --train --ds ATRW --save_eval
 ```
 
 - **`--train`**: Pokreće aplikaciju u načinu treniranja.
 - **`--ds`**: Specificira dataset koji će se koristiti za treniranje (npr. `ATRW`).
+- **`--save_eval`**: Sprema rezultate evaluacije u direktorij `data/evaluations`.
 
 Tijekom treniranja:
 - Podaci će biti podijeljeni u trening i test skupove.

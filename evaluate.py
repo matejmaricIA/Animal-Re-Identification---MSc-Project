@@ -1,5 +1,8 @@
 from sklearn.metrics import accuracy_score, classification_report
 import numpy as np
+import json
+import os
+from constants import EVALUATION_DIR
 
 
 def evaluate_predictions(predictions, ground_truth, top_n=5):
@@ -41,3 +44,12 @@ def evaluate_predictions(predictions, ground_truth, top_n=5):
     print(classification_report(y_true, y_pred))
 
     return results
+
+
+def save_evaluation_results(results, dataset_name, output_dir=EVALUATION_DIR):
+    """Save evaluation metrics to a JSON file under data/evaluations."""
+    os.makedirs(output_dir, exist_ok=True)
+    path = os.path.join(output_dir, f"{dataset_name}_evaluation.json")
+    with open(path, "w") as f:
+        json.dump(results, f, indent=4, default=str)
+    print(f"Saved evaluation results to {path}")

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 1.  Read MegaDetector JSON (detections.json).
 2.  Crop every bbox -> temp folder of JPG crops.
@@ -23,7 +22,7 @@ from PIL import Image
 import pandas as pd
 from tqdm.auto import tqdm
 
-# ─── crop helper ─────────────────────────────────────────────────────
+# crops
 def save_crop(img_path, bbox, dest_dir, stem, idx):
     img = Image.open(img_path).convert("RGB")
     W, H = img.size
@@ -33,7 +32,6 @@ def save_crop(img_path, bbox, dest_dir, stem, idx):
     crop.save(dest_dir / crop_name, "JPEG", quality=90)
     return crop_name  # filename only
 
-# ─── main ────────────────────────────────────────────────────────────
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--images_dir",      required=True, type=Path)
@@ -44,11 +42,11 @@ def main():
     ap.add_argument("--batch_size",      type=int, default=16)
     args = ap.parse_args()
 
-    # 1) load detections
+    # load detections
     dets_json = json.load(args.detections_json.open())
     preds_root = dets_json.get("predictions") or dets_json["images"]
 
-    # 2) tmp dir for crops
+    # tmp dir for crops
     crops_dir = Path(tempfile.mkdtemp(prefix="crops_"))
     mapping = {}  # crop_name -> (frame_rec, det_idx)
 
@@ -60,7 +58,7 @@ def main():
             crop_name = save_crop(img_path, det["bbox"], crops_dir, stem, i)
             mapping[crop_name] = (rec, i)
 
-    # 3) run SpeciesNet CLI once on the crops folder
+    # run SpeciesNet CLI once on the crops folder
     crop_pred_json = Path(tempfile.gettempdir()) / f"crops_pred_{uuid.uuid4().hex}.json"
     cmd = [
         "python", "-m", "speciesnet.scripts.run_model",
@@ -74,7 +72,7 @@ def main():
     subprocess.run(cmd, check=True)
     print("=== CLI done ===\n")
 
-    # 4) load crop predictions
+    # load crop predictions
     crop_preds = json.load(crop_pred_json.open())["predictions"]
     for cp in crop_preds:
         crop_file = Path(cp["filepath"]).name
@@ -87,7 +85,7 @@ def main():
             "scores" : scores
         }
 
-    # 5) inject timestamps
+    # inject timestamps
     meta = pd.read_csv(args.metadata_csv)
     meta["basename"] = meta["filepath"].apply(lambda p: Path(p).name)
     ts_map = dict(zip(meta["basename"], meta["datetime"].astype(str)))
@@ -103,7 +101,7 @@ def main():
     # 7) clean up crops
     shutil.rmtree(crops_dir, ignore_errors=True)
 
-    print(f"✅  Wrote per-box species + timestamps → {args.out_json}")
+    print(f"Wrote per-box species and timestamps to{args.out_json}")
 
 if __name__ == "__main__":
     main()

@@ -8,7 +8,7 @@ from constants import *
 import os
 import pickle
 from predict import classify_test_images, predict
-from evaluate import evaluate_predictions
+from evaluate import evaluate_predictions, save_evaluation_results
 import pandas as pd
 import shutil
 import cv2
@@ -45,6 +45,7 @@ if __name__ == '__main__':
     parser.add_argument('--predict', action = 'store_true')
     parser.add_argument('--ds', type = str, help="Specify the dataset to use (e.g., ATRW, BelugaID, etc.)")
     parser.add_argument('--image_location', type = str)
+    parser.add_argument('--save_eval', action='store_true', help='Save evaluation metrics during training')
     #parser.add_argument('--preprocess', action= 'stroe_true')
 
     args = parser.parse_args()
@@ -124,6 +125,9 @@ if __name__ == '__main__':
 
         predictions = classify_test_images(test_fisher_vectors, train_fisher_vectors, train_labels, 5)
         results = evaluate_predictions(predictions, test_labels)
+        
+        if args.save_eval:
+            save_evaluation_results(results, dataset_name)
 
         database_prompt = input("Do you want to create a database with the full dataset? (yes/no)")
         if database_prompt == "yes":

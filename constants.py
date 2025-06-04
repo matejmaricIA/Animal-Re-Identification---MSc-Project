@@ -37,3 +37,6 @@ DB_PATH = './data/{}/db/'
 
 # Tmp Prediction Path
 TMP = './data/tmp/'
+
+# Evaluation results directory
+EVALUATION_DIR = './data/evaluations/'
