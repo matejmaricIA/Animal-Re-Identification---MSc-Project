@@ -39,8 +39,8 @@ def classify_test_images(test_fisher_vectors, train_fisher_vectors, train_labels
 
     return predictions
 
-def predict(pred_fisher_vectors, db_fisher_vectors, threshold = 0.4):
-    df = pd.read_csv(DATAFRAME_PATH)
+def predict(pred_fisher_vectors, db_fisher_vectors, dataset_name, threshold = 0.4):
+    df = pd.read_csv(DATAFRAME_PATH.format(dataset_name))
     class_labels = dict(zip(df['image_id'], df['identity']))
     db_vectors = np.stack(list(db_fisher_vectors.values()))
     train_image_ids = list(db_fisher_vectors.keys())
