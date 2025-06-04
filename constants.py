@@ -39,4 +39,4 @@ DB_PATH = './data/{}/db/'
 TMP = './data/tmp/'
 
 # Evaluation results directory
-EVALUATION_DIR = './data/evaluations/'
+EVALUATION_DIR = './evaluations/'
