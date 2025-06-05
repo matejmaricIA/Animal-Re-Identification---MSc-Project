@@ -106,6 +106,16 @@ weighted avg       0.83      0.81      0.81       723
 
 ---
 
+Za vizualni prikaz usporedbe rezultata na svim dostupnim datasetovima pokrenite:
+
+```bash
+python -m utils.visualize_evaluations
+```
+
+Skripta će učitati sve *_evaluation.json datoteke u direktoriju `evaluations/` i generirati sliku `evaluation_comparison.png`.
+
+![Pregled rezultata](evaluations/evaluation_comparison.png)
+
 
 
 

@@ -1,0 +1,163 @@
+{
+    "accuracy": 0.46808510638297873,
+    "top_n_accuracy": 0.6855791962174941,
+    "classification_metrics": {
+        "Alex": {
+            "precision": 0.4666666666666667,
+            "recall": 0.5,
+            "f1-score": 0.4827586206896552,
+            "support": 14.0
+        },
+        "Alexandra": {
+            "precision": 0.8,
+            "recall": 0.5333333333333333,
+            "f1-score": 0.64,
+            "support": 15.0
+        },
+        "Annett": {
+            "precision": 0.47058823529411764,
+            "recall": 0.5333333333333333,
+            "f1-score": 0.5,
+            "support": 15.0
+        },
+        "Bangolo": {
+            "precision": 0.5454545454545454,
+            "recall": 0.5454545454545454,
+            "f1-score": 0.5454545454545454,
+            "support": 22.0
+        },
+        "Corrie": {
+            "precision": 0.3157894736842105,
+            "recall": 0.375,
+            "f1-score": 0.34285714285714286,
+            "support": 16.0
+        },
+        "Dorien": {
+            "precision": 0.7894736842105263,
+            "recall": 0.75,
+            "f1-score": 0.7692307692307693,
+            "support": 20.0
+        },
+        "Fifi": {
+            "precision": 0.3333333333333333,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.3333333333333333,
+            "support": 21.0
+        },
+        "Fraukje": {
+            "precision": 0.4,
+            "recall": 0.7692307692307693,
+            "f1-score": 0.5263157894736842,
+            "support": 13.0
+        },
+        "Frodo": {
+            "precision": 0.7,
+            "recall": 0.5,
+            "f1-score": 0.5833333333333334,
+            "support": 14.0
+        },
+        "Gertrudia": {
+            "precision": 0.7,
+            "recall": 0.4117647058823529,
+            "f1-score": 0.5185185185185185,
+            "support": 17.0
+        },
+        "Jahaga": {
+            "precision": 0.625,
+            "recall": 0.5263157894736842,
+            "f1-score": 0.5714285714285714,
+            "support": 19.0
+        },
+        "Kara": {
+            "precision": 0.4782608695652174,
+            "recall": 0.6111111111111112,
+            "f1-score": 0.5365853658536586,
+            "support": 18.0
+        },
+        "Kofi": {
+            "precision": 0.56,
+            "recall": 0.7,
+            "f1-score": 0.6222222222222222,
+            "support": 20.0
+        },
+        "Lobo": {
+            "precision": 0.2777777777777778,
+            "recall": 0.23809523809523808,
+            "f1-score": 0.2564102564102564,
+            "support": 21.0
+        },
+        "Lome": {
+            "precision": 0.21428571428571427,
+            "recall": 0.15,
+            "f1-score": 0.17647058823529413,
+            "support": 20.0
+        },
+        "Natascha": {
+            "precision": 0.45,
+            "recall": 0.45,
+            "f1-score": 0.45,
+            "support": 20.0
+        },
+        "Patrick": {
+            "precision": 0.5625,
+            "recall": 0.5625,
+            "f1-score": 0.5625,
+            "support": 16.0
+        },
+        "Pia": {
+            "precision": 0.2962962962962963,
+            "recall": 0.4,
+            "f1-score": 0.3404255319148936,
+            "support": 20.0
+        },
+        "Riet": {
+            "precision": 0.4117647058823529,
+            "recall": 0.4375,
+            "f1-score": 0.42424242424242425,
+            "support": 16.0
+        },
+        "Robert": {
+            "precision": 0.5555555555555556,
+            "recall": 0.5555555555555556,
+            "f1-score": 0.5555555555555556,
+            "support": 18.0
+        },
+        "Sandra": {
+            "precision": 0.3684210526315789,
+            "recall": 0.5833333333333334,
+            "f1-score": 0.45161290322580644,
+            "support": 12.0
+        },
+        "Swela": {
+            "precision": 0.5,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.5333333333333333,
+            "support": 21.0
+        },
+        "Tai": {
+            "precision": 0.4444444444444444,
+            "recall": 0.21052631578947367,
+            "f1-score": 0.2857142857142857,
+            "support": 19.0
+        },
+        "Ulla": {
+            "precision": 0.2222222222222222,
+            "recall": 0.125,
+            "f1-score": 0.16,
+            "support": 16.0
+        },
+        "accuracy": 0.46808510638297873,
+        "macro avg": {
+            "precision": 0.4786597740543567,
+            "recall": 0.47386733063977643,
+            "f1-score": 0.4653459621261368,
+            "support": 423.0
+        },
+        "weighted avg": {
+            "precision": 0.4765300691459741,
+            "recall": 0.46808510638297873,
+            "f1-score": 0.46248464263441236,
+            "support": 423.0
+        }
+    }
+}

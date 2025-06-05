@@ -2,7 +2,7 @@
 
 
 # Segmentation Model
-MODEL_NAME = 'isnet-genera-use'
+MODEL_NAME = 'isnet-general-use'
 
 # Segmented Dataset Path
 SEGMENTED_DATASET = './data/{}/segmented_dataset/'

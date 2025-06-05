@@ -45,7 +45,9 @@ if __name__ == '__main__':
     parser.add_argument('--predict', action = 'store_true')
     parser.add_argument('--ds', type = str, help="Specify the dataset to use (e.g., ATRW, BelugaID, etc.)")
     parser.add_argument('--image_location', type = str)
-    parser.add_argument('--save_eval', action='store_true', help='Save evaluation metrics during training')
+    parser.add_argument('--save_eval', action='store_true', help='Save evaluation metrics during training', default = True)
+    parser.add_argument('--use_mantiuk', action='store_true', help='Use Mantiuk tone mapping during preprocessing', default = True)
+    parser.add_argument('--remove_background', action='store_true', help='Remove background during preprocessing', default = True)
     #parser.add_argument('--preprocess', action= 'stroe_true')
 
     args = parser.parse_args()
