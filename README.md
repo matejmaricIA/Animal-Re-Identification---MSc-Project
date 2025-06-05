@@ -109,6 +109,9 @@ Pregled rezultata na testiranim skupovima podataka:
 
 ![Pregled rezultata](evaluations/evaluation_comparison.png)
 
+Pregled skupova podataka:
+![Pregled skupova podataka](evaluations/dataset_statistics.png)
+
 
 
 
