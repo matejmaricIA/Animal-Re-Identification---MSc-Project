@@ -38,8 +38,29 @@ def load_evaluations(directory: str = "../evaluations") -> Dict[str, Dict[str, f
             }
     return results
 
+def load_dataset_statistics(directory: str = "../evaluations") -> Dict[str, Dict[str, int]]:
+    """Extract dataset size (samples) and class count from evaluation files."""
+    stats = {}
+    if not os.path.isdir(directory):
+        raise FileNotFoundError(f"Evaluation directory '{directory}' not found")
 
-def plot_comparison(results: Dict[str, Dict[str, float]], output_path: str = None) -> str:
+    for fname in os.listdir(directory):
+        if fname.endswith("_evaluation.json"):
+            dataset = fname.replace("_evaluation.json", "")
+            path = os.path.join(directory, fname)
+            with open(path, "r") as f:
+                data = json.load(f)
+            cm = data.get("classification_metrics", {})
+            classes = [k for k in cm.keys() if k not in ("accuracy", "macro avg", "weighted avg")]
+            num_classes = len(classes)
+            num_samples = int(sum(cm[c]["support"] for c in classes if isinstance(cm[c], dict)))
+            stats[dataset] = {
+                "num_classes": num_classes,
+                "num_samples": num_samples,
+            }
+    return stats
+
+def plot_comparison(results: Dict[str, Dict[str, float]], output_path: str = None, dataset_stats) -> str:
     """Create a bar chart comparing metrics across datasets."""
     if not results:
         raise ValueError("No evaluation results found")
@@ -57,12 +78,24 @@ def plot_comparison(results: Dict[str, Dict[str, float]], output_path: str = Non
     ax.bar(x, top_n, width, label="Top-N Accuracy")
     ax.bar(x + width, f1_scores, width, label="Weighted F1")
 
-    ax.set_ylim(0, 1)
+    ax.set_ylim(0, 1.1)
     ax.set_xticks(x)
     ax.set_xticklabels(datasets, rotation=45, ha="right")
     ax.set_ylabel("Score")
     ax.set_title("Evaluation Metrics by Dataset")
     ax.legend()
+    if dataset_stats:
+        for idx, ds in enumerate(datasets):
+            n_cls = dataset_stats.get(ds, {}).get("num_classes")
+            if n_cls is not None:
+                ax.text(
+                    idx,
+                    1.02,
+                    f"n_classes = {n_cls}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=8,
+                )
     plt.tight_layout()
 
     if output_path is None:
@@ -71,8 +104,44 @@ def plot_comparison(results: Dict[str, Dict[str, float]], output_path: str = Non
     plt.close(fig)
     return output_path
 
+def plot_dataset_statistics(stats: Dict[str, Dict[str, int]], output_path: str = None) -> str:
+    """Create bar charts for dataset size and class count."""
+    if not stats:
+        raise ValueError("No dataset statistics available")
+
+    datasets = list(stats.keys())
+    num_samples = [stats[d]["num_samples"] for d in datasets]
+    num_classes = [stats[d]["num_classes"] for d in datasets]
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+    axes[0].bar(datasets, num_samples)
+    axes[0].set_ylabel("Images")
+    axes[0].set_title("Dataset Size")
+    axes[0].set_xticklabels(datasets, rotation=45, ha="right")
+
+    axes[1].bar(datasets, num_classes, color="orange")
+    axes[1].set_ylabel("Classes")
+    axes[1].set_title("Number of Classes")
+    axes[1].set_xticklabels(datasets, rotation=45, ha="right")
+
+    plt.tight_layout()
+
+    if output_path is None:
+        output_path = os.path.join("../evaluations", "dataset_statistics.png")
+    fig.savefig(output_path)
+    plt.close(fig)
+    return output_path
+
+
 
 if __name__ == "__main__":
     data = load_evaluations()
     out_file = plot_comparison(data)
     print(f"Saved comparison plot to {out_file}")
+    
+    stats = load_dataset_statistics()
+    stats_file = plot_dataset_statistics(stats)
+    print(f"Saved dataset statistics plot to {stats_file}")
+
+    
