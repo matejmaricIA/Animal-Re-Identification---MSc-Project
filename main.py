@@ -85,8 +85,14 @@ if __name__ == '__main__':
             )
             processed_df.to_csv(f'./data/{dataset_name}/processed_metadata.csv', index=False)
         
-        processed_df = pd.read_csv(f'./data/{dataset_name}/processed_metadata.csv')
+        #processed_df = pd.read_csv(f'./data/{dataset_name}/processed_metadata.csv')
+        processed_df = pd.read_csv(
+            f'./data/{dataset_name}/processed_metadata.csv',
+            parse_dates=['date'],
+        )
         processed_df['image_id'] = processed_df['image_id'].astype(str)
+        if 'date' in processed_df.columns:
+            processed_df['date'] = pd.to_datetime(processed_df['date'], errors='coerce')
         splitter = splits.ClosedSetSplit(0.80)
         for idx_train, idx_test in splitter.split(processed_df):
             splits.analyze_split(processed_df, idx_train, idx_test)
