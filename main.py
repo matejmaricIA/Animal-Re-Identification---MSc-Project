@@ -50,10 +50,12 @@ if __name__ == '__main__':
     parser.add_argument('--save_eval', action='store_true', help='Save evaluation metrics during training', default = True)
     parser.add_argument('--use_mantiuk', action='store_true', help='Use Mantiuk tone mapping during preprocessing', default = True)
     parser.add_argument('--remove_background', action='store_true', help='Remove background during preprocessing', default = True)
+    parser.add_argument('--split_type', type=str, choices=['closed_set', 'time_proportion'], default='time_proportion',)
     #parser.add_argument('--preprocess', action= 'stroe_true')
 
     args = parser.parse_args()
     dataset_name = args.ds
+    use_splitter = False
 
     if args.train and not dataset_name:
         print("Please specify the dataset to train on using the --ds argument.")
@@ -88,17 +90,41 @@ if __name__ == '__main__':
             processed_df.to_csv(f'./data/{dataset_name}/processed_metadata.csv', index=False)
         
         #processed_df = pd.read_csv(f'./data/{dataset_name}/processed_metadata.csv')
-        processed_df = pd.read_csv(
-            f'./data/{dataset_name}/processed_metadata.csv',
-            parse_dates=['date'],
-        )
+        csv_path = f'./data/{dataset_name}/processed_metadata.csv'
+        # Some datasets (e.g. ATRW) do not provide a date column. Attempt to
+        # parse it only if present to avoid pandas' `parse_dates` error.
+        processed_df = pd.read_csv(csv_path)
         processed_df['image_id'] = processed_df['image_id'].astype(str)
-        if 'date' in processed_df.columns:
+        
+        if 'original_split' in processed_df.columns:
+            print("Using original split for training and testing.")
+            train_mask = processed_df['original_split'].str.lower() != 'test'
+            test_mask = processed_df['original_split'].str.lower() == 'test'
+            df_train = processed_df[train_mask]
+            df_test = processed_df[test_mask]
+            splits.analyze_split(processed_df, df_train.index.values, df_test.index.values)
+        
+        elif 'date' in processed_df.columns and args.split_type == 'time_proportion':
+            print("Using time-based split for training and testing.")
             processed_df['date'] = pd.to_datetime(processed_df['date'], errors='coerce')
-        splitter = splits.ClosedSetSplit(0.80)
-        for idx_train, idx_test in splitter.split(processed_df):
-            splits.analyze_split(processed_df, idx_train, idx_test)
-            df_train, df_test = processed_df.loc[idx_train], processed_df.loc[idx_test] 
+            splitter = splits.TimeProportionSplit(0.80)
+            use_splitter = True
+        else:
+            print("Using closed-set split for training and testing.")
+            splitter = splits.ClosedSetSplit(0.80)
+            use_splitter = True
+        
+        #splitter = splits.ClosedSetSplit(0.80)
+        
+        # Use a time-aware split to avoid nearly identical frames from
+        # appearing in both the training and testing sets. TimeProportionSplit
+        # assigns a proportion of each individual's observation dates to the
+        # training set and the remainder to the test set.
+        #splitter = splits.TimeProportionSplit(ratio=0.80)
+        if use_splitter:
+            for idx_train, idx_test in splitter.split(processed_df):
+                splits.analyze_split(processed_df, idx_train, idx_test)
+                df_train, df_test = processed_df.loc[idx_train], processed_df.loc[idx_test] 
 
 
         if not os.path.isdir(f"./data/{dataset_name}/feature_descriptors_train/"):
