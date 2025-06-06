@@ -1,5 +1,7 @@
 import argparse
 from wildlife_datasets import datasets, splits
+from patches.elpephants_patch import PatchedELPephants
+datasets.ELPephants = PatchedELPephants
 import preprocessing
 import sys
 from feature_extraction import get_image_paths, extract_features

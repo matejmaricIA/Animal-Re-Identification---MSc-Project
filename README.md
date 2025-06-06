@@ -107,10 +107,10 @@ weighted avg       0.83      0.81      0.81       723
 ---
 Pregled rezultata na testiranim skupovima podataka:
 
-![Pregled rezultata](evaluations/evaluation_comparison.png)
+![Pregled rezultata](evaluations/visualizations/evaluation_comparison.png)
 
 Pregled skupova podataka:
-![Pregled skupova podataka](evaluations/dataset_statistics.png)
+![Pregled skupova podataka](evaluations/visualizations/dataset_statistics.png)
 
 
 
