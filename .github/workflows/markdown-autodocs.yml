@@ -7,8 +7,8 @@ on:
     branches: [ main, dev]
 
 permissions:
-  contents: write  # Required to push changes back to the repository
-  pull-requests: write  # Required to create pull requests if needed
+  contents: write
+  pull-requests: write
 
 jobs:
   update-docs:
@@ -25,5 +25,5 @@ jobs:
           commit_author: "GitHub Actions <actions@github.com>"
           commit_user_email: "actions@github.com"
           commit_message: "docs: Auto-update documentation"
-          output_file_paths: '[../README.md]'  
-          categories: '[code-block]'
+          output_file_paths: '["./README.md"]'
+          categories: '["code-block"]'

@@ -99,7 +99,7 @@ Pregled rezultata na testiranim skupovima podataka:
 Pregled skupova podataka:
 ![Pregled skupova podataka](evaluations/visualizations/dataset_statistics.png)
 
-## Results Table
+### Tablica Rezultata
 
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./evaluations/visualizations/evaluation_table.md) -->
 <!-- MARKDOWN-AUTO-DOCS:END -->
