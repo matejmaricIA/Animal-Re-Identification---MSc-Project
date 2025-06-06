@@ -60,7 +60,11 @@ def load_dataset_statistics(directory: str = "../evaluations") -> Dict[str, Dict
             }
     return stats
 
-def plot_comparison(results: Dict[str, Dict[str, float]], output_path: str = None, dataset_stats) -> str:
+def plot_comparison(
+    results: Dict[str, Dict[str, float]],
+    output_path: str = None,
+    dataset_stats: Dict[str, Dict[str, int]] | None = None,
+) -> str:
     """Create a bar chart comparing metrics across datasets."""
     if not results:
         raise ValueError("No evaluation results found")
@@ -99,13 +103,13 @@ def plot_comparison(results: Dict[str, Dict[str, float]], output_path: str = Non
     plt.tight_layout()
 
     if output_path is None:
-        output_path = os.path.join("../evaluations", "evaluation_comparison.png")
+        output_path = os.path.join("../evaluations/visualizations", "evaluation_comparison.png")
     fig.savefig(output_path)
     plt.close(fig)
     return output_path
 
 def plot_dataset_statistics(stats: Dict[str, Dict[str, int]], output_path: str = None) -> str:
-    """Create bar charts for dataset size and class count."""
+    """Create separate subplots for dataset size and class count."""
     if not stats:
         raise ValueError("No dataset statistics available")
 
@@ -113,22 +117,28 @@ def plot_dataset_statistics(stats: Dict[str, Dict[str, int]], output_path: str =
     num_samples = [stats[d]["num_samples"] for d in datasets]
     num_classes = [stats[d]["num_classes"] for d in datasets]
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    x = np.arange(len(datasets))
 
-    axes[0].bar(datasets, num_samples)
-    axes[0].set_ylabel("Images")
-    axes[0].set_title("Dataset Size")
-    axes[0].set_xticklabels(datasets, rotation=45, ha="right")
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
 
-    axes[1].bar(datasets, num_classes, color="orange")
-    axes[1].set_ylabel("Classes")
-    axes[1].set_title("Number of Classes")
-    axes[1].set_xticklabels(datasets, rotation=45, ha="right")
+    # Plot number of images
+    ax1.bar(x, num_samples, color="tab:blue", alpha=0.7)
+    ax1.set_ylabel("Number of Images")
+    ax1.set_title("Dataset Size")
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(datasets, rotation=45, ha="right")
+
+    # Plot number of classes
+    ax2.bar(x, num_classes, color="tab:orange", alpha=0.7)
+    ax2.set_ylabel("Number of Classes")
+    ax2.set_title("Class Count")
+    ax2.set_xticks(x)
+    ax2.set_xticklabels(datasets, rotation=45, ha="right")
 
     plt.tight_layout()
 
     if output_path is None:
-        output_path = os.path.join("../evaluations", "dataset_statistics.png")
+        output_path = os.path.join("../evaluations/visualizations", "dataset_statistics.png")
     fig.savefig(output_path)
     plt.close(fig)
     return output_path
