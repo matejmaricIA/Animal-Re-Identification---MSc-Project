@@ -2,6 +2,7 @@ import os
 import sys
 import json
 from typing import Dict
+from typing import Dict, List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -143,7 +144,76 @@ def plot_dataset_statistics(stats: Dict[str, Dict[str, int]], output_path: str =
     plt.close(fig)
     return output_path
 
+def _markdown_table(headers: List[str], rows: List[Dict[str, object]]) -> str:
+    """Return a Markdown formatted table string."""
+    header_line = "| " + " | ".join(headers) + " |"
+    separator = "|" + "|".join(["---"] * len(headers)) + "|"
+    body_lines = [
+        "| "
+        + " | ".join("-" if row.get(h) is None else str(row.get(h)) for h in headers)
+        + " |"
+        for row in rows
+    ]
+    return "\n".join([header_line, separator, *body_lines])
 
+
+def _latex_table(headers: List[str], rows: List[Dict[str, object]]) -> str:
+    """Return a LaTeX formatted table string."""
+    alignment = "l" + "r" * (len(headers) - 1)
+    lines = ["\\begin{tabular}{" + " | ".join(list(alignment)) + "}", "\\hline"]
+    lines.append(" {} \\ ".format(" & ".join(headers)))
+    lines.append("\\hline")
+    for row in rows:
+        lines.append(
+            " {} \\".format(
+                " & ".join("-" if row.get(h) is None else str(row.get(h)) for h in headers)
+            )
+        )
+    lines.extend(["\\hline", "\\end{tabular}"])
+    return "\n".join(lines)
+
+
+def generate_results_table(
+    results: Dict[str, Dict[str, float]],
+    dataset_stats: Dict[str, Dict[str, int]] | None = None,
+    markdown_path: str | None = None,
+    latex_path: str | None = None,
+) -> Tuple[str, str]:
+    """Generate Markdown and LaTeX tables summarizing evaluation results."""
+    if not results:
+        raise ValueError("No evaluation results found")
+
+    os.makedirs(os.path.join("../evaluations", "visualizations"), exist_ok=True)
+
+    rows = []
+    for ds, metrics in results.items():
+        row: Dict[str, object] = {
+            "Dataset": ds,
+            "Accuracy": metrics.get("accuracy"),
+            "Top-N Accuracy": metrics.get("top_n_accuracy"),
+            "Weighted F1": metrics.get("f1_score"),
+        }
+        if dataset_stats:
+            stats = dataset_stats.get(ds, {})
+            row["Samples"] = stats.get("num_samples")
+            row["Classes"] = stats.get("num_classes")
+        rows.append(row)
+
+    headers = list(rows[0].keys())
+    markdown_table = _markdown_table(headers, rows)
+    latex_table = _latex_table(headers, rows)
+
+    if markdown_path is None:
+        markdown_path = os.path.join("../evaluations", "visualizations", "evaluation_table.md")
+    if latex_path is None:
+        latex_path = os.path.join("../evaluations", "visualizations", "evaluation_table.tex")
+
+    with open(markdown_path, "w") as f:
+        f.write(markdown_table)
+    with open(latex_path, "w") as f:
+        f.write(latex_table)
+
+    return markdown_path, latex_path
 
 if __name__ == "__main__":
     data = load_evaluations()
@@ -154,4 +224,5 @@ if __name__ == "__main__":
     stats_file = plot_dataset_statistics(stats)
     print(f"Saved dataset statistics plot to {stats_file}")
 
-    
+    md_path, tex_path = generate_results_table(data, stats)
+    print(f"Saved results tables to {md_path} and {tex_path}")
