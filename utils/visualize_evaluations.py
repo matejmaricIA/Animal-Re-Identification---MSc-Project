@@ -7,6 +7,12 @@ from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 
+import subprocess
+
+import pandas as pd
+import seaborn as sns
+
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from constants import EVALUATION_DIR
@@ -144,27 +150,6 @@ def plot_dataset_statistics(stats: Dict[str, Dict[str, int]], output_path: str =
     plt.close(fig)
     return output_path
 
-def _markdown_table(headers: List[str], rows: List[Dict[str, object]]) -> str:
-    """Return a Markdown formatted table string with formatted numbers."""
-    header_line = "| " + " | ".join(headers) + " |"
-    separator = "|" + "|".join([":---:" if h == "Dataset" else "---:" for h in headers]) + "|"
-    
-    body_lines = []
-    for row in rows:
-        formatted_row = []
-        for h in headers:
-            val = row.get(h)
-            if val is None:
-                formatted_row.append("-")
-            elif isinstance(val, float) and h in ["Accuracy", "Top-N Accuracy", "Weighted F1"]:
-                formatted_row.append(f"{val:.3f}")
-            else:
-                formatted_row.append(str(val))
-        body_lines.append("| " + " | ".join(formatted_row) + " |")
-    
-    return "\n".join([header_line, separator, *body_lines])
-
-
 
 def _latex_table(headers: List[str], rows: List[Dict[str, object]]) -> str:
     """Return a LaTeX formatted table string."""
@@ -181,48 +166,56 @@ def _latex_table(headers: List[str], rows: List[Dict[str, object]]) -> str:
     lines.extend(["\\hline", "\\end{tabular}"])
     return "\n".join(lines)
 
+import pandas as pd
+import seaborn as sns
 
-def generate_results_table(
+def generate_table_image(
     results: Dict[str, Dict[str, float]],
     dataset_stats: Dict[str, Dict[str, int]] | None = None,
-    markdown_path: str | None = None,
-    latex_path: str | None = None,
-) -> Tuple[str, str]:
-    """Generate Markdown and LaTeX tables summarizing evaluation results."""
-    if not results:
-        raise ValueError("No evaluation results found")
-
-    os.makedirs(os.path.join("../evaluations", "visualizations"), exist_ok=True)
-
-    rows = []
-    for ds, metrics in results.items():
-        row: Dict[str, object] = {
-            "Dataset": ds,
-            "Accuracy": metrics.get("accuracy"),
-            "Top-N Accuracy": metrics.get("top_n_accuracy"),
-            "Weighted F1": metrics.get("f1_score"),
+    output_path: str = None
+) -> str:
+    """Generate table using pandas styling."""
+    
+    # Create DataFrame
+    df_data = []
+    for dataset, metrics in results.items():
+        row = {
+            'Dataset': dataset,
+            'Accuracy': f"{metrics['accuracy']:.3f}" if metrics['accuracy'] else "—",
+            'Top-N Acc.': f"{metrics['top_n_accuracy']:.3f}" if metrics['top_n_accuracy'] else "—",
+            'F1 Score': f"{metrics['f1_score']:.3f}" if metrics['f1_score'] else "—"
         }
         if dataset_stats:
-            stats = dataset_stats.get(ds, {})
-            row["Samples"] = stats.get("num_samples")
-            row["Classes"] = stats.get("num_classes")
-        rows.append(row)
+            row['Samples'] = dataset_stats[dataset]['num_samples']
+            row['Classes'] = dataset_stats[dataset]['num_classes']
+        df_data.append(row)
+    
+    df = pd.DataFrame(df_data)
+    
+    # Create styled plot
+    fig, ax = plt.subplots(figsize=(10, len(df) * 0.3 + 1))
+    ax.axis('off')
+    
+    # Simple table rendering
+    table_data = []
+    table_data.append(list(df.columns))  # Headers
+    for _, row in df.iterrows():
+        table_data.append(list(row.values))
+    
+    table = ax.table(cellText=table_data[1:], colLabels=table_data[0],
+                    cellLoc='center', loc='center')
+    table.auto_set_font_size(False)
+    table.set_fontsize(9)
+    table.scale(1, 1.5)
+    
+    if output_path is None:
+        output_path = os.path.join("../evaluations/visualizations", "results_table.png")
+    
+    plt.savefig(output_path, dpi=200, bbox_inches='tight')
+    plt.close()
+    
+    return output_path
 
-    headers = list(rows[0].keys())
-    markdown_table = _markdown_table(headers, rows)
-    latex_table = _latex_table(headers, rows)
-
-    if markdown_path is None:
-        markdown_path = os.path.join("../evaluations", "visualizations", "evaluation_table.md")
-    if latex_path is None:
-        latex_path = os.path.join("../evaluations", "visualizations", "evaluation_table.tex")
-
-    with open(markdown_path, "w") as f:
-        f.write(markdown_table)
-    with open(latex_path, "w") as f:
-        f.write(latex_table)
-
-    return markdown_path, latex_path
 
 if __name__ == "__main__":
     data = load_evaluations()
@@ -233,5 +226,5 @@ if __name__ == "__main__":
     stats_file = plot_dataset_statistics(stats)
     print(f"Saved dataset statistics plot to {stats_file}")
 
-    md_path, tex_path = generate_results_table(data, stats)
-    print(f"Saved results tables to {md_path} and {tex_path}")
+    table_img = generate_table_image(data, stats)
+    print(f"Generated table image: {table_img}")
