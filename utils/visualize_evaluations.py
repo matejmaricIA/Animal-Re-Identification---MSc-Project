@@ -145,16 +145,25 @@ def plot_dataset_statistics(stats: Dict[str, Dict[str, int]], output_path: str =
     return output_path
 
 def _markdown_table(headers: List[str], rows: List[Dict[str, object]]) -> str:
-    """Return a Markdown formatted table string."""
+    """Return a Markdown formatted table string with formatted numbers."""
     header_line = "| " + " | ".join(headers) + " |"
-    separator = "|" + "|".join(["---"] * len(headers)) + "|"
-    body_lines = [
-        "| "
-        + " | ".join("-" if row.get(h) is None else str(row.get(h)) for h in headers)
-        + " |"
-        for row in rows
-    ]
+    separator = "|" + "|".join([":---:" if h == "Dataset" else "---:" for h in headers]) + "|"
+    
+    body_lines = []
+    for row in rows:
+        formatted_row = []
+        for h in headers:
+            val = row.get(h)
+            if val is None:
+                formatted_row.append("-")
+            elif isinstance(val, float) and h in ["Accuracy", "Top-N Accuracy", "Weighted F1"]:
+                formatted_row.append(f"{val:.3f}")
+            else:
+                formatted_row.append(str(val))
+        body_lines.append("| " + " | ".join(formatted_row) + " |")
+    
     return "\n".join([header_line, separator, *body_lines])
+
 
 
 def _latex_table(headers: List[str], rows: List[Dict[str, object]]) -> str:
