@@ -31,7 +31,8 @@ def background_removal(image):
 def process_image(row, output_dir, use_mantiuk, dataset_name, remove_background):
     """ Process an image by applying Mantiuk tone mapping and background removal."""
 
-    image_path = os.path.join(f'./data/{dataset_name}', row['path'])
+    #image_path = os.path.join(f'./data/{dataset_name}', row['path'])
+    image_path = os.path.join(f'{WILD_DATASET_PATH}', row['path'])
     identity = row['identity']
     #split = row['original_split']
     id = str(row['image_id'])

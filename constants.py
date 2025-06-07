@@ -40,3 +40,5 @@ TMP = './data/tmp/'
 
 # Evaluation results directory
 EVALUATION_DIR = './evaluations/'
+
+WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
