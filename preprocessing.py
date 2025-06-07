@@ -77,7 +77,10 @@ def preprocess_inference(image_paths, use_mantiuk = True):
         if use_mantiuk:
             image = mantiuk_tone_mapping(image)
         
-        masked_image = background_removal(image)
+        if remove_background:
+            masked_image = background_removal(image)
+        else:
+            masked_image = image
 
         cv2.imwrite(os.path.join(save_dir, f'{os.path.basename(image_path)}'), masked_image)
 

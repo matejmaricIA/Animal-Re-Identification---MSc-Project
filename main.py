@@ -49,8 +49,8 @@ if __name__ == '__main__':
     parser.add_argument('--ds', type = str, help="Specify the dataset to use (e.g., ATRW, BelugaID, etc.)")
     parser.add_argument('--image_location', type = str)
     parser.add_argument('--save_eval', action='store_true', help='Save evaluation metrics during training', default = True)
-    parser.add_argument('--use_mantiuk', action='store_true', help='Use Mantiuk tone mapping during preprocessing', default = True)
-    parser.add_argument('--remove_background', action='store_true', help='Remove background during preprocessing', default = True)
+    parser.add_argument('--use_mantiuk', action='store_true', help='Use Mantiuk tone mapping during preprocessing')
+    parser.add_argument('--remove_background', action='store_true', help='Remove background during preprocessing')
     parser.add_argument('--split_type', type=str, choices=['balanced_split', 'time_proportion'], default='balanced_split',)
     parser.add_argument('--use_original_split', action='store_true', help='Use original split from dataset metadata if available', default=False)
     #parser.add_argument('--preprocess', action= 'stroe_true')
@@ -92,10 +92,12 @@ if __name__ == '__main__':
 
         if not os.path.isdir(f'./data/{dataset_name}/segmented_dataset/'):
             remove_bg = not datasets.__dict__[dataset_name].summary.get('cropped', False)
+            remove_bg = remove_bg and args.remove_background
             processed_df = preprocessing.preprocess_dataset(
                 df,
                 f'./data/{dataset_name}/segmented_dataset/',
                 dataset_name,
+                use_mantiuk=args.use_mantiuk,
                 remove_background=remove_bg
             )
             processed_df.to_csv(f'./data/{dataset_name}/processed_metadata.csv', index=False)
@@ -218,7 +220,11 @@ if __name__ == '__main__':
             sys.exit(0)
         print('Predicting...')
         paths = [os.path.join(args.image_location, img) for img in os.listdir(args.image_location)]
-        save_dir = preprocessing.preprocess_inference(paths)
+        save_dir = preprocessing.preprocess_inference(
+            paths,
+            use_mantiuk=args.use_mantiuk,
+            remove_background=args.remove_background,
+        )
         paths = [os.path.join(save_dir, img) for img in os.listdir(save_dir)]
         extract_features(paths, MODEL_PATH, TMP)
         pca_model, gmm_model, fisher_vectors = load_stuff(
