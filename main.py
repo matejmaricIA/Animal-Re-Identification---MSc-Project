@@ -17,6 +17,7 @@ import cv2
 import sys
 #from visualize import visualize_results
 import numpy as np
+import torch
 
 def save_stuff(pca, gmm, fisher_vectors, paths = (PCA_PATH, GMM_PATH, FISHER_VECTORS)):
     with open(paths[0], "wb") as f:
@@ -41,7 +42,7 @@ def load_stuff(pca_path, gmm_path, fisher_vectors_path):
     return pca, gmm, fisher
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+    #os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     parser = argparse.ArgumentParser()
     parser.add_argument('--train', action = 'store_true')
     parser.add_argument('--predict', action = 'store_true')
@@ -50,12 +51,22 @@ if __name__ == '__main__':
     parser.add_argument('--save_eval', action='store_true', help='Save evaluation metrics during training', default = True)
     parser.add_argument('--use_mantiuk', action='store_true', help='Use Mantiuk tone mapping during preprocessing', default = True)
     parser.add_argument('--remove_background', action='store_true', help='Remove background during preprocessing', default = True)
-    parser.add_argument('--split_type', type=str, choices=['closed_set', 'time_proportion'], default='time_proportion',)
+    parser.add_argument('--split_type', type=str, choices=['balanced_split', 'time_proportion'], default='balanced_split',)
+    parser.add_argument('--use_original_split', action='store_true', help='Use original split from dataset metadata if available', default=False)
     #parser.add_argument('--preprocess', action= 'stroe_true')
 
     args = parser.parse_args()
     dataset_name = args.ds
     use_splitter = False
+    
+    # Check if GPU is available
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
+    print(f"Using device: {device}")
+
+    if use_cuda:
+        print(f"GPU: {torch.cuda.get_device_name(0)}")
+        print(f"Memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB")
 
     if args.train and not dataset_name:
         print("Please specify the dataset to train on using the --ds argument.")
@@ -96,7 +107,7 @@ if __name__ == '__main__':
         processed_df = pd.read_csv(csv_path)
         processed_df['image_id'] = processed_df['image_id'].astype(str)
         
-        if 'original_split' in processed_df.columns:
+        if args.use_original_split and 'original_split' in processed_df.columns:
             print("Using original split for training and testing.")
             train_mask = processed_df['original_split'].str.lower() != 'test'
             test_mask = processed_df['original_split'].str.lower() == 'test'
@@ -110,22 +121,39 @@ if __name__ == '__main__':
             splitter = splits.TimeProportionSplit(0.80)
             use_splitter = True
         else:
-            print("Using closed-set split for training and testing.")
-            splitter = splits.ClosedSetSplit(0.80)
-            use_splitter = True
+            print("Using similarity-aware split to prevent data leakage.")
+            # Create a BalancedSplit with similarity-aware method
+            splitter = splits.BalancedSplit(0.80,
+                'similarity_aware'  # This enables the similarity-aware splitting
+            )
+            
+            # Apply the split
+            for idx_train, idx_test in splitter.split(processed_df):
+                # Use resplit_by_features for similarity-aware splitting
+                idx_train, idx_test = splitter.resplit_by_features(
+                    processed_df, 
+                    idx_train, 
+                    idx_test,
+                    feature_extractor='dinov2'  # Uses DINOv2 features for clustering
+                )
+                
+                splits.analyze_split(processed_df, idx_train, idx_test)
+                df_train, df_test = processed_df.loc[idx_train], processed_df.loc[idx_test]
+                break  # Take first split
         
-        #splitter = splits.ClosedSetSplit(0.80)
-        
-        # Use a time-aware split to avoid nearly identical frames from
-        # appearing in both the training and testing sets. TimeProportionSplit
-        # assigns a proportion of each individual's observation dates to the
-        # training set and the remainder to the test set.
-        #splitter = splits.TimeProportionSplit(ratio=0.80)
         if use_splitter:
             for idx_train, idx_test in splitter.split(processed_df):
                 splits.analyze_split(processed_df, idx_train, idx_test)
                 df_train, df_test = processed_df.loc[idx_train], processed_df.loc[idx_test] 
 
+        train_ids = set(df_train['identity'])
+        test_ids = set(df_test['identity'])
+        common_ids = train_ids.intersection(test_ids)
+        if not common_ids:
+            print(
+                "Warning: training and testing sets have no overlapping identities. "
+                "This split is open-set and standard accuracy will be zero."
+            )
 
         if not os.path.isdir(f"./data/{dataset_name}/feature_descriptors_train/"):
 

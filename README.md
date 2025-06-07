@@ -49,7 +49,10 @@ python main.py --train --ds ATRW --save_eval
 - **`--train`**: Pokreće aplikaciju u načinu treniranja.
 - **`--ds`**: Specificira dataset koji će se koristiti za treniranje (npr. `ATRW`).
 - **`--save_eval`**: Sprema rezultate evaluacije u direktorij `data/evaluations`.
+- **`--use_original_split`**: Koristi izvorni train/test razdjelj dataset-a ako postoji;
+  ako nije zadano, koristi se podjela definirana argumentom `--split_type` (npr. `closed_set`).
 
+  
 Tijekom treniranja:
 - Podaci će biti podijeljeni u trening i test skupove.
 - Modeli **PCA** i **GMM** bit će istrenirani na značajkama.
