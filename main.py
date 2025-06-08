@@ -66,8 +66,8 @@ if __name__ == '__main__':
     parser.add_argument('--save_eval', action='store_true', help='Save evaluation metrics during training', default = True)
     parser.add_argument('--use_mantiuk', action='store_true', help='Use Mantiuk tone mapping during preprocessing')
     parser.add_argument('--remove_background', action='store_true', help='Remove background during preprocessing')
-    parser.add_argument('--split_type', type=str, choices=['balanced_split', 'time_proportion'], default='balanced_split',)
-    parser.add_argument('--use_original_split', action='store_true', help='Use original split from dataset metadata if available', default=False)
+    #parser.add_argument('--split_type', type=str, choices=['balanced_split', 'time_proportion'], default='balanced_split',)
+    #parser.add_argument('--use_original_split', action='store_true', help='Use original split from dataset metadata if available', default=False)
     #parser.add_argument('--preprocess', action= 'stroe_true')
 
     args = parser.parse_args()
@@ -155,7 +155,7 @@ if __name__ == '__main__':
             splits.analyze_split(df, df_train.index, df_test.index)
             
             
-        ds_tag = dataset_name.lower()
+        ds_tag = dataset_name
         base_dir = f"./data/{ds_tag}"
         os.makedirs(base_dir, exist_ok=True)
 
@@ -194,24 +194,20 @@ if __name__ == '__main__':
         metrics = evaluate_predictions(preds, test_labels)
         if args.save_eval:
             save_evaluation_results(metrics, ds_tag)
-            
-        if input("Create a full‑dataset DB? (yes/no) ").strip().lower() == "yes":
+        
+        _input = input("Create a full‑dataset DB? (yes/no) ")
+        _input = 'no'
+        if _input.strip().lower() == "yes":
             extract_features(get_image_paths(df), MODEL_PATH, f"{base_dir}/db/")
             db_dict = load_descriptors(f"{base_dir}/db/descriptors.h5")
             desc = stack_all_descriptors(db_dict)
             pca_db = train_pca(desc)
             gmm_db = train_gmm(pca_db.transform(desc))
             fv_db = compute_fisher_vectors(db_dict, pca_db, gmm_db)
-            save_stuff(
-                pca_db,
-                gmm_db,
-                fv_db,
-                (
-                    f"{base_dir}/db/pca.pkl",
-                    f"{base_dir}/db/gmm.pkl",
-                    f"{base_dir}/db/fisher_vectors.pkl",
-                ),
-            )
+            save_stuff(pca_db, gmm_db, fv_db,
+                (f"{base_dir}/db/pca.pkl",
+                f"{base_dir}/db/gmm.pkl",
+                f"{base_dir}/db/fisher_vectors.pkl"))
             print("Database saved.")
         sys.exit(0)
         
