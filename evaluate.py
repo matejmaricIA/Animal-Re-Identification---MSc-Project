@@ -45,11 +45,37 @@ def evaluate_predictions(predictions, ground_truth, top_n=5):
 
     return results
 
+def save_evaluation_results( results, dataset_name: str, tag: str | None = None, output_dir: str = EVALUATION_DIR) -> str:
+    """Save evaluation metrics to a JSON file under data/evaluations.
 
-def save_evaluation_results(results, dataset_name, output_dir=EVALUATION_DIR):
-    """Save evaluation metrics to a JSON file under data/evaluations."""
-    os.makedirs(output_dir, exist_ok=True)
+    Parameters
+    ----------
+    results : dict
+        Evaluation metrics dictionary.
+    dataset_name : str
+        Name of the dataset/species being evaluated.
+    tag : str | None, optional
+        Configuration tag (e.g. version and preprocessing settings). When
+        provided, results are saved under ``evaluations/<tag>/``.
+    output_dir : str, optional
+        Base output directory, by default ``EVALUATION_DIR``.
+
+    Returns
+    -------
+    str
+        Path to the saved JSON file.
+    """
+
+    if tag:
+        output_dir = os.path.join(output_dir, tag)
+
+    # Ensure base and visualization directories exist
+    vis_dir = os.path.join(output_dir, "visualizations")
+    os.makedirs(vis_dir, exist_ok=True)
+
     path = os.path.join(output_dir, f"{dataset_name}_evaluation.json")
     with open(path, "w") as f:
         json.dump(results, f, indent=4, default=str)
+        
     print(f"Saved evaluation results to {path}")
+    return path

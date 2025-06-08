@@ -49,8 +49,9 @@ python main.py --train --ds ATRW --save_eval
 - **`--train`**: Pokreće aplikaciju u načinu treniranja.
 - **`--ds`**: Specificira dataset koji će se koristiti za treniranje (npr. `ATRW`).
 - **`--save_eval`**: Sprema rezultate evaluacije u direktorij `data/evaluations`.
-- **`--use_original_split`**: Koristi izvorni train/test razdjelj dataset-a ako postoji;
-  ako nije zadano, koristi se podjela definirana argumentom `--split_type` (npr. `closed_set`).
+ **`--version`**: Oznaka verzije metode koja se koristi. U kombinaciji s
+  postavkama uklanjanja pozadine i tone mappinga kreira se "tag" prema kojem se
+  rezultati spremaju u poddirektorij unutar `evaluations/`.
 
   
 Tijekom treniranja:
@@ -97,13 +98,13 @@ Tijekom predikcije:
 
 Pregled rezultata na testiranim skupovima podataka:
 
-![Pregled rezultata](evaluations/visualizations/evaluation_comparison.png)
+![Pregled rezultata](evaluations/version_1_backg_rem_False_tone_mapping_False/visualizations/evaluation_comparison.png)
 
 Pregled skupova podataka:
-![Pregled skupova podataka](evaluations/visualizations/dataset_statistics.png)
+![Pregled skupova podataka](evaluations/version_1_backg_rem_False_tone_mapping_False/visualizations/dataset_statistics.png)
 
 ### Tablica Rezultata
 
-![Rezultati evaluacije](evaluations/visualizations/results_table.png)
+![Rezultati evaluacije](evaluations/version_1_backg_rem_False_tone_mapping_False/visualizations/results_table.png)
 
 Za dodatne informacije ili pomoć, obratite se na [kontakt](mailto:matej.maric99@gmail.com).

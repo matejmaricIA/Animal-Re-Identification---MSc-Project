@@ -15,216 +15,169 @@ import seaborn as sns
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from constants import EVALUATION_DIR
+EVAL_ROOT = "../evaluations"
 
+def select_tag(root):
+    tags = [d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d))]
+    tags.sort()
+    if not tags:
+        raise RuntimeError(f"No tag folders found in {root}")
 
-def load_evaluations(directory: str = "../evaluations") -> Dict[str, Dict[str, float]]:
-    """Load evaluation metrics from all *_evaluation.json files in the directory."""
-    results = {}
+    print("What tag do you wish to visualize?")
+    for i, t in enumerate(tags):
+        print(f"{i}: {t}")
+
+    while True:
+        try:
+            idx = int(input("Enter number: "))
+            if 0 <= idx < len(tags):
+                return tags[idx]
+        except ValueError:
+            pass
+        print("Invalid choice, try again.")
+
+def load_evaluations(tag, root=EVAL_ROOT):
+    """Load evaluation metrics from all *_evaluation.json files within ``directory``.
+
+    The search is performed recursively to allow evaluation files to be organised
+    in subfolders (e.g. configuration tags).
+    """
+
+    directory = os.path.join(root, tag)
     if not os.path.isdir(directory):
-        raise FileNotFoundError(f"Evaluation directory '{directory}' not found")
+        raise FileNotFoundError(f"Folder '{directory}' not found")
 
+    results = {}
     for fname in os.listdir(directory):
         if fname.endswith("_evaluation.json"):
             dataset = fname.replace("_evaluation.json", "")
-            path = os.path.join(directory, fname)
-            with open(path, "r") as f:
+            with open(os.path.join(directory, fname), "r") as f:
                 data = json.load(f)
-            # Extract relevant metrics
-            accuracy = data.get("accuracy")
-            top_n_accuracy = data.get("top_n_accuracy")
-            f1_score = None
+
             cm = data.get("classification_metrics", {})
+            f1_score = None
             if isinstance(cm, dict):
                 weighted = cm.get("weighted avg", {})
                 f1_score = weighted.get("f1-score")
+
             results[dataset] = {
-                "accuracy": accuracy,
-                "top_n_accuracy": top_n_accuracy,
+                "accuracy": data.get("accuracy"),
+                "top_n_accuracy": data.get("top_n_accuracy"),
                 "f1_score": f1_score,
             }
     return results
 
-def load_dataset_statistics(directory: str = "../evaluations") -> Dict[str, Dict[str, int]]:
-    """Extract dataset size (samples) and class count from evaluation files."""
-    stats = {}
+def load_dataset_statistics(tag, root=EVAL_ROOT):
+    directory = os.path.join(root, tag)
     if not os.path.isdir(directory):
-        raise FileNotFoundError(f"Evaluation directory '{directory}' not found")
+        raise FileNotFoundError(f"Folder '{directory}' not found")
 
+    stats = {}
     for fname in os.listdir(directory):
         if fname.endswith("_evaluation.json"):
             dataset = fname.replace("_evaluation.json", "")
-            path = os.path.join(directory, fname)
-            with open(path, "r") as f:
+            with open(os.path.join(directory, fname), "r") as f:
                 data = json.load(f)
             cm = data.get("classification_metrics", {})
             classes = [k for k in cm.keys() if k not in ("accuracy", "macro avg", "weighted avg")]
-            num_classes = len(classes)
-            num_samples = int(sum(cm[c]["support"] for c in classes if isinstance(cm[c], dict)))
             stats[dataset] = {
-                "num_classes": num_classes,
-                "num_samples": num_samples,
+                "num_classes": len(classes),
+                "num_samples": int(sum(cm[c]["support"] for c in classes if isinstance(cm[c], dict))),
             }
     return stats
 
-def plot_comparison(
-    results: Dict[str, Dict[str, float]],
-    output_path: str = None,
-    dataset_stats: Dict[str, Dict[str, int]] | None = None,
-) -> str:
-    """Create a bar chart comparing metrics across datasets."""
+def plot_comparison(results, out_path):
     if not results:
         raise ValueError("No evaluation results found")
 
-    datasets = list(results.keys())
-    accuracies = [results[d]["accuracy"] for d in datasets]
-    top_n = [results[d]["top_n_accuracy"] for d in datasets]
-    f1_scores = [results[d]["f1_score"] for d in datasets]
+    ds = list(results.keys())
+    acc = [results[d]["accuracy"] for d in ds]
+    topn = [results[d]["top_n_accuracy"] for d in ds]
+    f1  = [results[d]["f1_score"] for d in ds]
 
-    x = np.arange(len(datasets))
-    width = 0.25
+    x = np.arange(len(ds))
+    w = 0.25
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.bar(x - width, accuracies, width, label="Accuracy")
-    ax.bar(x, top_n, width, label="Top-N Accuracy")
-    ax.bar(x + width, f1_scores, width, label="Weighted F1")
-
+    ax.bar(x - w, acc,  w, label="Accuracy")
+    ax.bar(x,     topn, w, label="Top-N Acc")
+    ax.bar(x + w, f1,  w, label="Weighted F1")
     ax.set_ylim(0, 1.1)
-    ax.set_xticks(x)
-    ax.set_xticklabels(datasets, rotation=45, ha="right")
+    ax.set_xticks(x, ds, rotation=45, ha="right")
     ax.set_ylabel("Score")
-    ax.set_title("Evaluation Metrics by Dataset")
+    ax.set_title("Evaluation metrics by dataset")
     ax.legend()
-    if dataset_stats:
-        for idx, ds in enumerate(datasets):
-            n_cls = dataset_stats.get(ds, {}).get("num_classes")
-            if n_cls is not None:
-                ax.text(
-                    idx,
-                    1.02,
-                    f"n_classes = {n_cls}",
-                    ha="center",
-                    va="bottom",
-                    fontsize=8,
-                )
     plt.tight_layout()
-
-    if output_path is None:
-        output_path = os.path.join("../evaluations/visualizations", "evaluation_comparison.png")
-    fig.savefig(output_path)
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    fig.savefig(out_path)
     plt.close(fig)
-    return output_path
 
-def plot_dataset_statistics(stats: Dict[str, Dict[str, int]], output_path: str = None) -> str:
-    """Create separate subplots for dataset size and class count."""
+def plot_dataset_statistics(stats, out_path):
     if not stats:
-        raise ValueError("No dataset statistics available")
+        raise ValueError("No dataset stats found")
 
-    datasets = list(stats.keys())
-    num_samples = [stats[d]["num_samples"] for d in datasets]
-    num_classes = [stats[d]["num_classes"] for d in datasets]
-
-    x = np.arange(len(datasets))
+    ds = list(stats.keys())
+    samples = [stats[d]["num_samples"] for d in ds]
+    classes = [stats[d]["num_classes"] for d in ds]
+    x = np.arange(len(ds))
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
 
-    # Plot number of images
-    ax1.bar(x, num_samples, color="tab:blue", alpha=0.7)
-    ax1.set_ylabel("Number of Images")
-    ax1.set_title("Dataset Size")
-    ax1.set_xticks(x)
-    ax1.set_xticklabels(datasets, rotation=45, ha="right")
+    ax1.bar(x, samples, alpha=0.7)
+    ax1.set_ylabel("Images")
+    ax1.set_title("Dataset size")
+    ax1.set_xticks(x, ds, rotation=45, ha="right")
 
-    # Plot number of classes
-    ax2.bar(x, num_classes, color="tab:orange", alpha=0.7)
-    ax2.set_ylabel("Number of Classes")
-    ax2.set_title("Class Count")
-    ax2.set_xticks(x)
-    ax2.set_xticklabels(datasets, rotation=45, ha="right")
+    ax2.bar(x, classes, alpha=0.7, color="tab:orange")
+    ax2.set_ylabel("Classes")
+    ax2.set_title("Class count")
+    ax2.set_xticks(x, ds, rotation=45, ha="right")
 
     plt.tight_layout()
-
-    if output_path is None:
-        output_path = os.path.join("../evaluations/visualizations", "dataset_statistics.png")
-    fig.savefig(output_path)
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    fig.savefig(out_path)
     plt.close(fig)
-    return output_path
 
+def generate_table_image(results, stats, out_path):
+    rows = []
+    for ds, m in results.items():
+        rows.append({
+            "Dataset"    : ds,
+            "Accuracy"   : f"{m['accuracy']:.3f}" if m["accuracy"] else "—",
+            "Top-N Acc." : f"{m['top_n_accuracy']:.3f}" if m["top_n_accuracy"] else "—",
+            "F1 Score"   : f"{m['f1_score']:.3f}" if m["f1_score"] else "—",
+            "Samples"    : stats[ds]["num_samples"],
+            "Classes"    : stats[ds]["num_classes"],
+        })
 
-def _latex_table(headers: List[str], rows: List[Dict[str, object]]) -> str:
-    """Return a LaTeX formatted table string."""
-    alignment = "l" + "r" * (len(headers) - 1)
-    lines = ["\\begin{tabular}{" + " | ".join(list(alignment)) + "}", "\\hline"]
-    lines.append(" {} \\ ".format(" & ".join(headers)))
-    lines.append("\\hline")
-    for row in rows:
-        lines.append(
-            " {} \\".format(
-                " & ".join("-" if row.get(h) is None else str(row.get(h)) for h in headers)
-            )
-        )
-    lines.extend(["\\hline", "\\end{tabular}"])
-    return "\n".join(lines)
-
-import pandas as pd
-import seaborn as sns
-
-def generate_table_image(
-    results: Dict[str, Dict[str, float]],
-    dataset_stats: Dict[str, Dict[str, int]] | None = None,
-    output_path: str = None
-) -> str:
-    """Generate table using pandas styling."""
-    
-    # Create DataFrame
-    df_data = []
-    for dataset, metrics in results.items():
-        row = {
-            'Dataset': dataset,
-            'Accuracy': f"{metrics['accuracy']:.3f}" if metrics['accuracy'] else "—",
-            'Top-N Acc.': f"{metrics['top_n_accuracy']:.3f}" if metrics['top_n_accuracy'] else "—",
-            'F1 Score': f"{metrics['f1_score']:.3f}" if metrics['f1_score'] else "—"
-        }
-        if dataset_stats:
-            row['Samples'] = dataset_stats[dataset]['num_samples']
-            row['Classes'] = dataset_stats[dataset]['num_classes']
-        df_data.append(row)
-    
-    df = pd.DataFrame(df_data)
-    
-    # Create styled plot
+    df = pd.DataFrame(rows)
     fig, ax = plt.subplots(figsize=(10, len(df) * 0.3 + 1))
-    ax.axis('off')
-    
-    # Simple table rendering
-    table_data = []
-    table_data.append(list(df.columns))  # Headers
-    for _, row in df.iterrows():
-        table_data.append(list(row.values))
-    
-    table = ax.table(cellText=table_data[1:], colLabels=table_data[0],
-                    cellLoc='center', loc='center')
-    table.auto_set_font_size(False)
-    table.set_fontsize(9)
-    table.scale(1, 1.5)
-    
-    if output_path is None:
-        output_path = os.path.join("../evaluations/visualizations", "results_table.png")
-    
-    plt.savefig(output_path, dpi=200, bbox_inches='tight')
-    plt.close()
-    
-    return output_path
+    ax.axis("off")
+    tbl = ax.table(
+        cellText=df.values,
+        colLabels=df.columns,
+        cellLoc="center",
+        loc="center"
+    )
+    tbl.auto_set_font_size(False)
+    tbl.set_fontsize(9)
+    tbl.scale(1, 1.5)
 
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    plt.savefig(out_path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
 
 if __name__ == "__main__":
-    data = load_evaluations()
-    out_file = plot_comparison(data)
-    print(f"Saved comparison plot to {out_file}")
-    
-    stats = load_dataset_statistics()
-    stats_file = plot_dataset_statistics(stats)
-    print(f"Saved dataset statistics plot to {stats_file}")
+    tag = select_tag(EVAL_ROOT)
 
-    table_img = generate_table_image(data, stats)
-    print(f"Generated table image: {table_img}")
+    results = load_evaluations(tag)
+    stats   = load_dataset_statistics(tag)
+
+    vis_dir = os.path.join(EVAL_ROOT, tag, "visualizations")
+    os.makedirs(vis_dir, exist_ok=True)
+
+    plot_comparison(results, os.path.join(vis_dir, "evaluation_comparison.png"))
+    plot_dataset_statistics(stats, os.path.join(vis_dir, "dataset_statistics.png"))
+    generate_table_image(results, stats, os.path.join(vis_dir, "results_table.png"))
+
+    print(f"Visualisations saved in {vis_dir}")

@@ -66,13 +66,21 @@ if __name__ == '__main__':
     parser.add_argument('--save_eval', action='store_true', help='Save evaluation metrics during training', default = True)
     parser.add_argument('--use_mantiuk', action='store_true', help='Use Mantiuk tone mapping during preprocessing')
     parser.add_argument('--remove_background', action='store_true', help='Remove background during preprocessing')
+    parser.add_argument('--version', type=str, default='1', help='Identifier for the current method version')
+    parser.add_argument('--split_type', type=str, default='closed', help='Open set or closed set split type')
     #parser.add_argument('--split_type', type=str, choices=['balanced_split', 'time_proportion'], default='balanced_split',)
     #parser.add_argument('--use_original_split', action='store_true', help='Use original split from dataset metadata if available', default=False)
     #parser.add_argument('--preprocess', action= 'stroe_true')
 
     args = parser.parse_args()
     dataset_name = args.ds
-    use_splitter = False
+    #use_splitter = False
+    
+    already_trained = False
+    #split_type = 'closed_split'
+
+    # create a configuration tag for saving evaluation results
+    tag = f"version_{args.version}_backg_rem_{args.remove_background}_tone_mapping_{args.use_mantiuk}_{args.split_type}"
     
     # Check if GPU is available
     use_cuda = torch.cuda.is_available()
@@ -152,8 +160,16 @@ if __name__ == '__main__':
             train_mask = df["split"].str.lower() != "test"
             test_mask = df["split"].str.lower() == "test"
             df_train, df_test = df[train_mask], df[test_mask]
-            splits.analyze_split(df, df_train.index, df_test.index)
             
+            if args.split_type == 'closed':
+                print('Using closed set split.')
+                # After loading the dataset splits
+                train_identities = set(df_train["identity"].unique())
+                test_identities = set(df_test["identity"].unique())
+
+                # Filter test set to only include identities seen in training
+                df_test = df_test[df_test["identity"].isin(train_identities)].copy()
+            splits.analyze_split(df, df_train.index, df_test.index)
             
         ds_tag = dataset_name
         base_dir = f"./data/{ds_tag}"
@@ -164,6 +180,10 @@ if __name__ == '__main__':
             extract_features(get_image_paths(df_train), MODEL_PATH, f"{base_dir}/feature_descriptors_train/")
             extract_features(get_image_paths(df_test), MODEL_PATH, f"{base_dir}/feature_descriptors_test/")
             
+        else:
+            already_trained = True
+            
+            
             
         train_dict = load_descriptors(f"{base_dir}/feature_descriptors_train/descriptors.h5")
         test_dict = load_descriptors(f"{base_dir}/feature_descriptors_test/descriptors.h5")
@@ -171,31 +191,34 @@ if __name__ == '__main__':
         desc_tr = stack_all_descriptors(train_dict)
         desc_te = stack_all_descriptors(test_dict)
         
-        pca = train_pca(desc_tr)
-        gmm = train_gmm(pca.transform(desc_tr))
-        fv_tr = compute_fisher_vectors(train_dict, pca, gmm)
-        fv_te = compute_fisher_vectors(test_dict, pca, gmm)
-        
-        save_stuff(
-            pca,
-            gmm,
-            fv_tr,
-            (
-                PCA_PATH.format(ds_tag),
-                GMM_PATH.format(ds_tag),
-                FISHER_VECTORS.format(ds_tag),
-            ),
-        )
+        if already_trained:
+            print("Using already trained PCA and GMM models.")
+            pca, gmm, fv_tr = load_stuff(
+                f"{base_dir}/pca_model.pkl",
+                f"{base_dir}/gmm_model.pkl",
+                f"{base_dir}/fisher_vectors.pkl"
+            )
+            fv_te = compute_fisher_vectors(test_dict, pca, gmm)
+        else:
+            pca = train_pca(desc_tr)
+            gmm = train_gmm(pca.transform(desc_tr))
+            fv_tr = compute_fisher_vectors(train_dict, pca, gmm)
+            fv_te = compute_fisher_vectors(test_dict, pca, gmm)
+            
+            save_stuff(pca, gmm, fv_tr,
+                (PCA_PATH.format(ds_tag), GMM_PATH.format(ds_tag), FISHER_VECTORS.format(ds_tag)))
         
         train_labels = dict(zip(df_train["image_id"], df_train["identity"]))
         test_labels = dict(zip(df_test["image_id"], df_test["identity"]))
         
         preds = classify_test_images(fv_te, fv_tr, train_labels, 5)
         metrics = evaluate_predictions(preds, test_labels)
-        if args.save_eval:
-            save_evaluation_results(metrics, ds_tag)
         
-        _input = input("Create a full‑dataset DB? (yes/no) ")
+        if args.save_eval:
+            #save_evaluation_results(metrics, ds_tag)
+            save_evaluation_results(metrics, ds_tag, tag=tag)
+        
+        #_input = input("Create a full‑dataset DB? (yes/no) ")
         _input = 'no'
         if _input.strip().lower() == "yes":
             extract_features(get_image_paths(df), MODEL_PATH, f"{base_dir}/db/")
@@ -239,7 +262,3 @@ if __name__ == '__main__':
         fv_query = compute_fisher_vectors(query_desc, pca, gmm)
         predict(fv_query, fv_db, ds_tag)
         shutil.rmtree(TMP)
-
-        
-        
-    
