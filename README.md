@@ -98,13 +98,13 @@ Tijekom predikcije:
 
 Pregled rezultata na testiranim skupovima podataka:
 
-![Pregled rezultata](evaluations/version_1_backg_rem_False_tone_mapping_False/visualizations/evaluation_comparison.png)
+![Pregled rezultata](evaluations/version_1_backg_rem_False_tone_mapping_False_closed/visualizations/evaluation_comparison.png)
 
 Pregled skupova podataka:
-![Pregled skupova podataka](evaluations/version_1_backg_rem_False_tone_mapping_False/visualizations/dataset_statistics.png)
+![Pregled skupova podataka](evaluations/version_1_backg_rem_False_tone_mapping_False_closed/visualizations/dataset_statistics.png)
 
 ### Tablica Rezultata
 
-![Rezultati evaluacije](evaluations/version_1_backg_rem_False_tone_mapping_False/visualizations/results_table.png)
+![Rezultati evaluacije](evaluations/version_1_backg_rem_False_tone_mapping_False_closed/visualizations/results_table.png)
 
 Za dodatne informacije ili pomoć, obratite se na [kontakt](mailto:matej.maric99@gmail.com).
