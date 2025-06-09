@@ -239,7 +239,7 @@ if __name__ == '__main__':
             print("--image_location is required for prediction mode.")
             sys.exit(1)
 
-        ds_tag = dataset_name.lower()
+        ds_tag = dataset_name
         base_dir = f"./data/{ds_tag}"
 
         query_paths = [os.path.join(args.image_location, p) for p in os.listdir(args.image_location)]

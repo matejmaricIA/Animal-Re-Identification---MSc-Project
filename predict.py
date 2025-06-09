@@ -26,7 +26,7 @@ def classify_test_images(test_fisher_vectors, train_fisher_vectors, train_labels
 
         # Get top-N class labels and similarities
         top_n_matches = [(similarities[i], train_class_labels[i]) for i in top_indices]
-        print(top_n_matches)
+        #print(top_n_matches)
 
         # Predicted class is the class of the most similar train image
         predicted_class = top_n_matches[0][1]

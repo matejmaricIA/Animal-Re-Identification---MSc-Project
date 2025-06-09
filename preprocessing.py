@@ -5,6 +5,7 @@ import numpy as np
 from rembg import remove, new_session
 import argparse
 from constants import *
+from tqdm import tqdm
 
 session = new_session(MODEL_NAME)
 
@@ -61,12 +62,12 @@ def preprocess_dataset(df, output_dir, dataset_name, use_mantiuk = True, remove_
     
     # Process sequentially instead of using multiprocessing
     processed_paths = []
-    index = 0
-    for arg in args:
+    #index = 0
+    for arg in tqdm(args, desc = "Preprocessing images", unit = "image"):
         processed_path = process_image(*arg)
         processed_paths.append(processed_path)
-        print(f"Processed image {index}/{len(args)}")
-        index += 1
+        #print(f"Processed image {index}/{len(args)}")
+        #index += 1
     df['processed_path'] = processed_paths
     return df
         
