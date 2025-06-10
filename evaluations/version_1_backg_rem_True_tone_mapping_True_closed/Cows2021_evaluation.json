@@ -1,0 +1,1021 @@
+{
+    "accuracy": 0.4626364399664148,
+    "top_n_accuracy": 0.6675062972292192,
+    "classification_metrics": {
+        "Cows2021_0": {
+            "precision": 1.0,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.9090909090909091,
+            "support": 6.0
+        },
+        "Cows2021_1": {
+            "precision": 0.07692307692307693,
+            "recall": 0.2,
+            "f1-score": 0.1111111111111111,
+            "support": 5.0
+        },
+        "Cows2021_10": {
+            "precision": 0.8888888888888888,
+            "recall": 0.8,
+            "f1-score": 0.8421052631578947,
+            "support": 10.0
+        },
+        "Cows2021_100": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "Cows2021_101": {
+            "precision": 0.25,
+            "recall": 0.07142857142857142,
+            "f1-score": 0.1111111111111111,
+            "support": 14.0
+        },
+        "Cows2021_102": {
+            "precision": 0.3333333333333333,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.3333333333333333,
+            "support": 9.0
+        },
+        "Cows2021_103": {
+            "precision": 1.0,
+            "recall": 0.9,
+            "f1-score": 0.9473684210526315,
+            "support": 10.0
+        },
+        "Cows2021_104": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "Cows2021_106": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 3.0
+        },
+        "Cows2021_107": {
+            "precision": 0.4,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.2857142857142857,
+            "support": 9.0
+        },
+        "Cows2021_108": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Cows2021_109": {
+            "precision": 0.15384615384615385,
+            "recall": 0.4,
+            "f1-score": 0.2222222222222222,
+            "support": 5.0
+        },
+        "Cows2021_11": {
+            "precision": 0.625,
+            "recall": 0.625,
+            "f1-score": 0.625,
+            "support": 8.0
+        },
+        "Cows2021_110": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "Cows2021_111": {
+            "precision": 0.3333333333333333,
+            "recall": 0.25,
+            "f1-score": 0.2857142857142857,
+            "support": 4.0
+        },
+        "Cows2021_113": {
+            "precision": 0.42857142857142855,
+            "recall": 0.75,
+            "f1-score": 0.5454545454545454,
+            "support": 4.0
+        },
+        "Cows2021_114": {
+            "precision": 0.5555555555555556,
+            "recall": 0.5555555555555556,
+            "f1-score": 0.5555555555555556,
+            "support": 9.0
+        },
+        "Cows2021_115": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "Cows2021_116": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.8571428571428571,
+            "support": 4.0
+        },
+        "Cows2021_117": {
+            "precision": 0.3333333333333333,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.4444444444444444,
+            "support": 3.0
+        },
+        "Cows2021_118": {
+            "precision": 0.4166666666666667,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.5263157894736842,
+            "support": 7.0
+        },
+        "Cows2021_119": {
+            "precision": 0.5,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.5882352941176471,
+            "support": 7.0
+        },
+        "Cows2021_12": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "Cows2021_120": {
+            "precision": 0.5,
+            "recall": 0.625,
+            "f1-score": 0.5555555555555556,
+            "support": 8.0
+        },
+        "Cows2021_122": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 3.0
+        },
+        "Cows2021_123": {
+            "precision": 0.3333333333333333,
+            "recall": 0.2,
+            "f1-score": 0.25,
+            "support": 5.0
+        },
+        "Cows2021_124": {
+            "precision": 0.8,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.7272727272727273,
+            "support": 6.0
+        },
+        "Cows2021_125": {
+            "precision": 0.5,
+            "recall": 0.29411764705882354,
+            "f1-score": 0.37037037037037035,
+            "support": 17.0
+        },
+        "Cows2021_126": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 4.0
+        },
+        "Cows2021_127": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "Cows2021_128": {
+            "precision": 0.75,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.7058823529411765,
+            "support": 9.0
+        },
+        "Cows2021_129": {
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1-score": 0.4,
+            "support": 4.0
+        },
+        "Cows2021_13": {
+            "precision": 0.5833333333333334,
+            "recall": 1.0,
+            "f1-score": 0.7368421052631579,
+            "support": 7.0
+        },
+        "Cows2021_130": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Cows2021_131": {
+            "precision": 0.7272727272727273,
+            "recall": 0.7272727272727273,
+            "f1-score": 0.7272727272727273,
+            "support": 11.0
+        },
+        "Cows2021_132": {
+            "precision": 0.6,
+            "recall": 0.24,
+            "f1-score": 0.34285714285714286,
+            "support": 25.0
+        },
+        "Cows2021_133": {
+            "precision": 0.4,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.47058823529411764,
+            "support": 7.0
+        },
+        "Cows2021_134": {
+            "precision": 1.0,
+            "recall": 0.4666666666666667,
+            "f1-score": 0.6363636363636364,
+            "support": 15.0
+        },
+        "Cows2021_135": {
+            "precision": 0.5714285714285714,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.5714285714285714,
+            "support": 7.0
+        },
+        "Cows2021_136": {
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1-score": 0.75,
+            "support": 6.0
+        },
+        "Cows2021_137": {
+            "precision": 0.14285714285714285,
+            "recall": 0.2,
+            "f1-score": 0.16666666666666666,
+            "support": 5.0
+        },
+        "Cows2021_138": {
+            "precision": 0.5,
+            "recall": 0.625,
+            "f1-score": 0.5555555555555556,
+            "support": 8.0
+        },
+        "Cows2021_139": {
+            "precision": 0.25,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.26666666666666666,
+            "support": 7.0
+        },
+        "Cows2021_14": {
+            "precision": 0.5,
+            "recall": 0.45454545454545453,
+            "f1-score": 0.47619047619047616,
+            "support": 11.0
+        },
+        "Cows2021_140": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "Cows2021_141": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
+            "support": 8.0
+        },
+        "Cows2021_143": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Cows2021_144": {
+            "precision": 0.9166666666666666,
+            "recall": 0.8461538461538461,
+            "f1-score": 0.88,
+            "support": 13.0
+        },
+        "Cows2021_145": {
+            "precision": 0.3076923076923077,
+            "recall": 0.2,
+            "f1-score": 0.24242424242424243,
+            "support": 20.0
+        },
+        "Cows2021_146": {
+            "precision": 0.3,
+            "recall": 0.6,
+            "f1-score": 0.4,
+            "support": 5.0
+        },
+        "Cows2021_147": {
+            "precision": 0.5,
+            "recall": 0.2,
+            "f1-score": 0.2857142857142857,
+            "support": 5.0
+        },
+        "Cows2021_148": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "Cows2021_15": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Cows2021_150": {
+            "precision": 0.7142857142857143,
+            "recall": 0.45454545454545453,
+            "f1-score": 0.5555555555555556,
+            "support": 11.0
+        },
+        "Cows2021_151": {
+            "precision": 0.1,
+            "recall": 0.125,
+            "f1-score": 0.1111111111111111,
+            "support": 8.0
+        },
+        "Cows2021_152": {
+            "precision": 0.6,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.5,
+            "support": 7.0
+        },
+        "Cows2021_153": {
+            "precision": 0.5384615384615384,
+            "recall": 0.21212121212121213,
+            "f1-score": 0.30434782608695654,
+            "support": 33.0
+        },
+        "Cows2021_154": {
+            "precision": 0.7777777777777778,
+            "recall": 0.6363636363636364,
+            "f1-score": 0.7,
+            "support": 11.0
+        },
+        "Cows2021_155": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Cows2021_156": {
+            "precision": 0.125,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.13333333333333333,
+            "support": 7.0
+        },
+        "Cows2021_157": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Cows2021_158": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "Cows2021_159": {
+            "precision": 0.5384615384615384,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.6363636363636364,
+            "support": 9.0
+        },
+        "Cows2021_16": {
+            "precision": 0.9230769230769231,
+            "recall": 0.8,
+            "f1-score": 0.8571428571428571,
+            "support": 15.0
+        },
+        "Cows2021_160": {
+            "precision": 1.0,
+            "recall": 0.2,
+            "f1-score": 0.3333333333333333,
+            "support": 5.0
+        },
+        "Cows2021_161": {
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
+            "support": 9.0
+        },
+        "Cows2021_162": {
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
+            "support": 3.0
+        },
+        "Cows2021_163": {
+            "precision": 0.8,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.6666666666666666,
+            "support": 7.0
+        },
+        "Cows2021_165": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Cows2021_166": {
+            "precision": 0.75,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.46153846153846156,
+            "support": 9.0
+        },
+        "Cows2021_167": {
+            "precision": 0.25,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.36363636363636365,
+            "support": 3.0
+        },
+        "Cows2021_168": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 6.0
+        },
+        "Cows2021_169": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Cows2021_17": {
+            "precision": 0.7692307692307693,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.7407407407407407,
+            "support": 14.0
+        },
+        "Cows2021_171": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Cows2021_172": {
+            "precision": 0.5,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.64,
+            "support": 9.0
+        },
+        "Cows2021_174": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "Cows2021_175": {
+            "precision": 0.55,
+            "recall": 0.5,
+            "f1-score": 0.5238095238095238,
+            "support": 22.0
+        },
+        "Cows2021_176": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 6.0
+        },
+        "Cows2021_177": {
+            "precision": 0.2,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.18181818181818182,
+            "support": 6.0
+        },
+        "Cows2021_178": {
+            "precision": 0.5,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5714285714285714,
+            "support": 3.0
+        },
+        "Cows2021_18": {
+            "precision": 0.5714285714285714,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.5714285714285714,
+            "support": 7.0
+        },
+        "Cows2021_180": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "Cows2021_181": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "Cows2021_19": {
+            "precision": 0.25,
+            "recall": 0.4,
+            "f1-score": 0.3076923076923077,
+            "support": 5.0
+        },
+        "Cows2021_2": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "Cows2021_20": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Cows2021_21": {
+            "precision": 0.3333333333333333,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.3333333333333333,
+            "support": 3.0
+        },
+        "Cows2021_22": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "Cows2021_23": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 4.0
+        },
+        "Cows2021_24": {
+            "precision": 0.42857142857142855,
+            "recall": 0.6,
+            "f1-score": 0.5,
+            "support": 5.0
+        },
+        "Cows2021_25": {
+            "precision": 0.85,
+            "recall": 0.5862068965517241,
+            "f1-score": 0.6938775510204082,
+            "support": 29.0
+        },
+        "Cows2021_26": {
+            "precision": 0.5,
+            "recall": 0.6,
+            "f1-score": 0.5454545454545454,
+            "support": 5.0
+        },
+        "Cows2021_27": {
+            "precision": 0.8,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.7272727272727273,
+            "support": 6.0
+        },
+        "Cows2021_28": {
+            "precision": 0.7272727272727273,
+            "recall": 0.6153846153846154,
+            "f1-score": 0.6666666666666666,
+            "support": 26.0
+        },
+        "Cows2021_29": {
+            "precision": 0.2857142857142857,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.4,
+            "support": 6.0
+        },
+        "Cows2021_3": {
+            "precision": 0.25,
+            "recall": 0.25,
+            "f1-score": 0.25,
+            "support": 4.0
+        },
+        "Cows2021_30": {
+            "precision": 0.6,
+            "recall": 0.5,
+            "f1-score": 0.5454545454545454,
+            "support": 6.0
+        },
+        "Cows2021_31": {
+            "precision": 0.25,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.23529411764705882,
+            "support": 9.0
+        },
+        "Cows2021_32": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "Cows2021_33": {
+            "precision": 0.5,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.46153846153846156,
+            "support": 7.0
+        },
+        "Cows2021_34": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 6.0
+        },
+        "Cows2021_35": {
+            "precision": 0.6923076923076923,
+            "recall": 0.8181818181818182,
+            "f1-score": 0.75,
+            "support": 11.0
+        },
+        "Cows2021_36": {
+            "precision": 0.75,
+            "recall": 0.6,
+            "f1-score": 0.6666666666666666,
+            "support": 5.0
+        },
+        "Cows2021_37": {
+            "precision": 0.35714285714285715,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.5,
+            "support": 6.0
+        },
+        "Cows2021_38": {
+            "precision": 0.5,
+            "recall": 0.4444444444444444,
+            "f1-score": 0.47058823529411764,
+            "support": 9.0
+        },
+        "Cows2021_39": {
+            "precision": 0.5,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.5882352941176471,
+            "support": 7.0
+        },
+        "Cows2021_4": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "Cows2021_40": {
+            "precision": 0.5555555555555556,
+            "recall": 1.0,
+            "f1-score": 0.7142857142857143,
+            "support": 5.0
+        },
+        "Cows2021_41": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Cows2021_42": {
+            "precision": 0.4,
+            "recall": 0.8,
+            "f1-score": 0.5333333333333333,
+            "support": 5.0
+        },
+        "Cows2021_43": {
+            "precision": 0.5,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5714285714285714,
+            "support": 6.0
+        },
+        "Cows2021_44": {
+            "precision": 0.3333333333333333,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.3333333333333333,
+            "support": 3.0
+        },
+        "Cows2021_46": {
+            "precision": 0.6363636363636364,
+            "recall": 0.875,
+            "f1-score": 0.7368421052631579,
+            "support": 8.0
+        },
+        "Cows2021_47": {
+            "precision": 0.6,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.7058823529411765,
+            "support": 7.0
+        },
+        "Cows2021_48": {
+            "precision": 0.5,
+            "recall": 0.375,
+            "f1-score": 0.42857142857142855,
+            "support": 8.0
+        },
+        "Cows2021_49": {
+            "precision": 0.07692307692307693,
+            "recall": 0.125,
+            "f1-score": 0.09523809523809523,
+            "support": 8.0
+        },
+        "Cows2021_5": {
+            "precision": 0.6,
+            "recall": 0.6,
+            "f1-score": 0.6,
+            "support": 5.0
+        },
+        "Cows2021_50": {
+            "precision": 0.2727272727272727,
+            "recall": 0.21428571428571427,
+            "f1-score": 0.24,
+            "support": 14.0
+        },
+        "Cows2021_51": {
+            "precision": 0.8333333333333334,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.7692307692307693,
+            "support": 7.0
+        },
+        "Cows2021_52": {
+            "precision": 1.0,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.7272727272727273,
+            "support": 7.0
+        },
+        "Cows2021_53": {
+            "precision": 0.42105263157894735,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.5714285714285714,
+            "support": 9.0
+        },
+        "Cows2021_55": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "Cows2021_56": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "Cows2021_57": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "Cows2021_58": {
+            "precision": 0.7142857142857143,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.7142857142857143,
+            "support": 7.0
+        },
+        "Cows2021_6": {
+            "precision": 0.25,
+            "recall": 0.2,
+            "f1-score": 0.2222222222222222,
+            "support": 5.0
+        },
+        "Cows2021_60": {
+            "precision": 0.4444444444444444,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5333333333333333,
+            "support": 6.0
+        },
+        "Cows2021_61": {
+            "precision": 0.26666666666666666,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.27586206896551724,
+            "support": 14.0
+        },
+        "Cows2021_62": {
+            "precision": 0.5,
+            "recall": 0.3076923076923077,
+            "f1-score": 0.38095238095238093,
+            "support": 13.0
+        },
+        "Cows2021_63": {
+            "precision": 0.6666666666666666,
+            "recall": 0.4,
+            "f1-score": 0.5,
+            "support": 5.0
+        },
+        "Cows2021_64": {
+            "precision": 0.4,
+            "recall": 0.4,
+            "f1-score": 0.4,
+            "support": 5.0
+        },
+        "Cows2021_65": {
+            "precision": 0.4666666666666667,
+            "recall": 0.5833333333333334,
+            "f1-score": 0.5185185185185185,
+            "support": 12.0
+        },
+        "Cows2021_66": {
+            "precision": 1.0,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.8333333333333334,
+            "support": 7.0
+        },
+        "Cows2021_67": {
+            "precision": 0.25,
+            "recall": 0.25,
+            "f1-score": 0.25,
+            "support": 4.0
+        },
+        "Cows2021_68": {
+            "precision": 0.3333333333333333,
+            "recall": 0.2,
+            "f1-score": 0.25,
+            "support": 5.0
+        },
+        "Cows2021_7": {
+            "precision": 1.0,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.8333333333333334,
+            "support": 7.0
+        },
+        "Cows2021_70": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Cows2021_71": {
+            "precision": 0.25,
+            "recall": 0.25,
+            "f1-score": 0.25,
+            "support": 4.0
+        },
+        "Cows2021_72": {
+            "precision": 0.5,
+            "recall": 0.4,
+            "f1-score": 0.4444444444444444,
+            "support": 5.0
+        },
+        "Cows2021_74": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 14.0
+        },
+        "Cows2021_75": {
+            "precision": 0.45454545454545453,
+            "recall": 0.625,
+            "f1-score": 0.5263157894736842,
+            "support": 8.0
+        },
+        "Cows2021_76": {
+            "precision": 0.16666666666666666,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.24,
+            "support": 7.0
+        },
+        "Cows2021_77": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0
+        },
+        "Cows2021_78": {
+            "precision": 0.2222222222222222,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.19047619047619047,
+            "support": 12.0
+        },
+        "Cows2021_79": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 4.0
+        },
+        "Cows2021_8": {
+            "precision": 0.375,
+            "recall": 0.375,
+            "f1-score": 0.375,
+            "support": 8.0
+        },
+        "Cows2021_80": {
+            "precision": 0.29411764705882354,
+            "recall": 0.35714285714285715,
+            "f1-score": 0.3225806451612903,
+            "support": 14.0
+        },
+        "Cows2021_81": {
+            "precision": 0.8181818181818182,
+            "recall": 1.0,
+            "f1-score": 0.9,
+            "support": 9.0
+        },
+        "Cows2021_82": {
+            "precision": 0.5,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.625,
+            "support": 6.0
+        },
+        "Cows2021_83": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 6.0
+        },
+        "Cows2021_84": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Cows2021_85": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 8.0
+        },
+        "Cows2021_86": {
+            "precision": 0.5,
+            "recall": 0.4,
+            "f1-score": 0.4444444444444444,
+            "support": 5.0
+        },
+        "Cows2021_87": {
+            "precision": 0.3333333333333333,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.42105263157894735,
+            "support": 7.0
+        },
+        "Cows2021_88": {
+            "precision": 0.5,
+            "recall": 0.36363636363636365,
+            "f1-score": 0.42105263157894735,
+            "support": 11.0
+        },
+        "Cows2021_89": {
+            "precision": 0.42857142857142855,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.42857142857142855,
+            "support": 7.0
+        },
+        "Cows2021_9": {
+            "precision": 0.6,
+            "recall": 0.6923076923076923,
+            "f1-score": 0.6428571428571429,
+            "support": 13.0
+        },
+        "Cows2021_90": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "Cows2021_91": {
+            "precision": 0.16666666666666666,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.2222222222222222,
+            "support": 3.0
+        },
+        "Cows2021_92": {
+            "precision": 0.5,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.4,
+            "support": 12.0
+        },
+        "Cows2021_94": {
+            "precision": 0.5,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.46153846153846156,
+            "support": 7.0
+        },
+        "Cows2021_95": {
+            "precision": 0.2857142857142857,
+            "recall": 0.4,
+            "f1-score": 0.3333333333333333,
+            "support": 5.0
+        },
+        "Cows2021_96": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Cows2021_97": {
+            "precision": 1.0,
+            "recall": 0.4444444444444444,
+            "f1-score": 0.6153846153846154,
+            "support": 9.0
+        },
+        "Cows2021_98": {
+            "precision": 0.375,
+            "recall": 0.75,
+            "f1-score": 0.5,
+            "support": 4.0
+        },
+        "Cows2021_99": {
+            "precision": 0.6666666666666666,
+            "recall": 0.4,
+            "f1-score": 0.5,
+            "support": 5.0
+        },
+        "accuracy": 0.4626364399664148,
+        "macro avg": {
+            "precision": 0.45030822074814586,
+            "recall": 0.43044695079596884,
+            "f1-score": 0.4174704205612021,
+            "support": 1191.0
+        },
+        "weighted avg": {
+            "precision": 0.508779211811045,
+            "recall": 0.4626364399664148,
+            "f1-score": 0.4621542158707588,
+            "support": 1191.0
+        }
+    }
+}
