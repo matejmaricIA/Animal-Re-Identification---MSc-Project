@@ -42,3 +42,7 @@ TMP = './data/tmp/'
 EVALUATION_DIR = './evaluations/'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
+
+
+# Keynet, Hardnet, Affnet
+PATCH_SIZE = 32

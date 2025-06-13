@@ -68,19 +68,21 @@ if __name__ == '__main__':
     parser.add_argument('--remove_background', action='store_true', help='Remove background during preprocessing')
     parser.add_argument('--version', type=str, default='1', help='Identifier for the current method version')
     parser.add_argument('--split_type', type=str, default='closed', help='Open set or closed set split type')
+    parser.add_argument('--method', type = str, default = 'disk', help='Feature extraction method to use')
     #parser.add_argument('--split_type', type=str, choices=['balanced_split', 'time_proportion'], default='balanced_split',)
     #parser.add_argument('--use_original_split', action='store_true', help='Use original split from dataset metadata if available', default=False)
     #parser.add_argument('--preprocess', action= 'stroe_true')
 
     args = parser.parse_args()
     dataset_name = args.ds
+    method = args.method
     #use_splitter = False
     
     already_trained = False
     #split_type = 'closed_split'
 
     # create a configuration tag for saving evaluation results
-    tag = f"version_{args.version}_backg_rem_{args.remove_background}_tone_mapping_{args.use_mantiuk}_{args.split_type}"
+    tag = f"v_{args.version}_bkg_rem_{args.remove_background}_tm_{args.use_mantiuk}_{args.split_type}_{method}"
     
     # Check if GPU is available
     use_cuda = torch.cuda.is_available()
@@ -176,10 +178,14 @@ if __name__ == '__main__':
         os.makedirs(base_dir, exist_ok=True)
 
         # ── Feature extraction ──
-        if not os.path.isdir(f"{base_dir}/feature_descriptors_train/"):
-            extract_features(get_image_paths(df_train), MODEL_PATH, f"{base_dir}/feature_descriptors_train/")
-            extract_features(get_image_paths(df_test), MODEL_PATH, f"{base_dir}/feature_descriptors_test/")
-            
+        if not os.path.isdir(f"{base_dir}/feature_descriptors_train_{method}/"):
+            if method == 'disk':
+                extract_features(get_image_paths(df_train), MODEL_PATH, f"{base_dir}/feature_descriptors_train_{method}/")
+                extract_features(get_image_paths(df_test), MODEL_PATH, f"{base_dir}/feature_descriptors_test_{method}/")
+            elif method == 'keynet_hardnet':
+                extract_features_keynet_hardnet(get_image_paths(df_train), f"{base_dir}/feature_descriptors_train_{method}/")
+                extract_features_keynet_hardnet(get_image_paths(df_test), f"{base_dir}/feature_descriptors_test_{method}/")
+
         else:
             already_trained = True
             
