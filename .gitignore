@@ -75,3 +75,4 @@ utils/*.png
 data/
 test_images/
 notebooks/crop_test_results/
+models/

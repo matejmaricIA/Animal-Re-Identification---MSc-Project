@@ -82,7 +82,7 @@ if __name__ == '__main__':
     #split_type = 'closed_split'
 
     # create a configuration tag for saving evaluation results
-    tag = f"v_{args.version}_bkg_rem_{args.remove_background}_tm_{args.use_mantiuk}_{args.split_type}_{method}"
+    tag = f"v_{args.version}_tm_{args.use_mantiuk}_{args.split_type}_{method}_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}"
     
     # Check if GPU is available
     use_cuda = torch.cuda.is_available()
