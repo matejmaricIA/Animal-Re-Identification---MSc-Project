@@ -200,9 +200,9 @@ if __name__ == '__main__':
         if already_trained:
             print("Using already trained PCA and GMM models.")
             pca, gmm, fv_tr = load_stuff(
-                f"{base_dir}/pca_model.pkl",
-                f"{base_dir}/gmm_model.pkl",
-                f"{base_dir}/fisher_vectors.pkl"
+                f"{base_dir}/pca_model_{method}.pkl",
+                f"{base_dir}/gmm_model_{method}.pkl",
+                f"{base_dir}/fisher_vectors_{method}.pkl"
             )
             fv_te = compute_fisher_vectors(test_dict, pca, gmm)
         else:
@@ -212,7 +212,7 @@ if __name__ == '__main__':
             fv_te = compute_fisher_vectors(test_dict, pca, gmm)
             
             save_stuff(pca, gmm, fv_tr,
-                (PCA_PATH.format(ds_tag), GMM_PATH.format(ds_tag), FISHER_VECTORS.format(ds_tag)))
+                (PCA_PATH.format(ds_tag, method), GMM_PATH.format(ds_tag, method), FISHER_VECTORS.format(ds_tag, method)))
         
         train_labels = dict(zip(df_train["image_id"], df_train["identity"]))
         test_labels = dict(zip(df_test["image_id"], df_test["identity"]))

@@ -28,9 +28,9 @@ N_COMPONENTS_GMM = 2
 N_COMPONENTS_PCA = 64 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
-PCA_PATH = './data/{}/pca_model.pkl'
-GMM_PATH = './data/{}/gmm_model.pkl'
-FISHER_VECTORS = './data/{}/fisher_vectors.pkl'
+PCA_PATH = './data/{}/pca_model_{}.pkl'
+GMM_PATH = './data/{}/gmm_model_{}.pkl'
+FISHER_VECTORS = './data/{}/fisher_vectors_{}.pkl'
 
 # Database Path
 DB_PATH = './data/{}/db/'
