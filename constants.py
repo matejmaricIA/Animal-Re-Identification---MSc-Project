@@ -24,8 +24,8 @@ SAVE_TRAIN_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_train/'
 SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
 
 # PCA and GMM Components
-N_COMPONENTS_GMM = 2
-N_COMPONENTS_PCA = 96 # Ovo promijenio zadnje da testiram.
+N_COMPONENTS_GMM = 32
+N_COMPONENTS_PCA = 64 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
 PCA_PATH = './data/{}/pca_model_{}.pkl'
