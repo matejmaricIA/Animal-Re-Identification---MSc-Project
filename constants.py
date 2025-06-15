@@ -25,7 +25,7 @@ SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
 
 # PCA and GMM Components
 N_COMPONENTS_GMM = 2
-N_COMPONENTS_PCA = 64 # Ovo promijenio zadnje da testiram.
+N_COMPONENTS_PCA = 96 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
 PCA_PATH = './data/{}/pca_model_{}.pkl'
@@ -46,3 +46,22 @@ WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 
 # Keynet, Hardnet, Affnet
 PATCH_SIZE = 32
+
+# Geometric Verification Constants
+RATIO_THRESHOLD = 0.8           # Lowe's ratio test threshold for feature matching
+INLIER_THRESHOLD = 0.5        # RANSAC inlier threshold for animal re-identification
+MIN_MATCHES = 4                 # Minimum number of matches required for RANSAC
+MIN_INLIERS = 10                 # Minimum number of inliers for reliable geometric verification
+INSUFFICIENT_MATCHES_PENALTY = 10.0  # Penalty multiplier for insufficient matches
+POOR_GEOMETRY_PENALTY = 5.0     # Penalty multiplier for poor geometric consistency
+FISHER_DISTANCE_MIN_CLAMP = 0.01     # Minimum clamp value for Fisher distance
+FISHER_DISTANCE_MAX_CLAMP = 1.0      # Maximum clamp value for Fisher distance
+NORMALIZED_THRESHOLD_DIVISOR = 100.0 # Divisor for normalizing RANSAC threshold
+
+# Geometric Verification Scaling Constants
+MAX_INLIERS_FOR_SCALING = 20      # Cap inliers at this value for exponential formula
+LOG_SCALING_FACTOR = 1.0          # Scaling factor for logarithmic approach
+LINEAR_COMBINATION_ALPHA = 0.7    # Weight for Fisher distance in linear combination
+SIGMOID_STEEPNESS = 0.1           # Controls sigmoid curve steepness
+SIGMOID_MIDPOINT = 20             # Midpoint for sigmoid scaling
+MAX_REASONABLE_INLIERS = 50       # Expected maximum inliers for normalization

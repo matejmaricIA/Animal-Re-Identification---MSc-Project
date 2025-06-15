@@ -5,12 +5,12 @@ from patches.elpephants_patch import PatchedELPephants
 datasets.ELPephants = PatchedELPephants
 import preprocessing
 import sys
-from feature_extraction import get_image_paths, extract_features
-from feature_aggregation import load_descriptors, stack_all_descriptors, train_pca, train_gmm, compute_fisher_vectors
+from feature_extraction import get_image_paths, extract_features, extract_features_keynet_hardnet
+from feature_aggregation import load_descriptors, stack_all_descriptors, train_pca, train_gmm, compute_fisher_vectors, load_keypoints
 from constants import *
 import os
 import pickle
-from predict import classify_test_images, predict
+from predict import classify_test_images, predict, classify_test_images_with_geometric_verification
 from evaluate import evaluate_predictions, save_evaluation_results
 import pandas as pd
 import shutil
@@ -70,6 +70,8 @@ if __name__ == '__main__':
     parser.add_argument('--version', type=str, default='1', help='Identifier for the current method version')
     parser.add_argument('--split_type', type=str, default='closed', help='Open set or closed set split type')
     parser.add_argument('--method', type = str, default = 'disk', help='Feature extraction method to use')
+    parser.add_argument('--use_geometric_verification', action='store_true', help='Use geometric verification during prediction', default=False)
+    #parser.add_argument('--use_dve', action='store_true', help='Use DVE features for prediction', default=False)
     #parser.add_argument('--split_type', type=str, choices=['balanced_split', 'time_proportion'], default='balanced_split',)
     #parser.add_argument('--use_original_split', action='store_true', help='Use original split from dataset metadata if available', default=False)
     #parser.add_argument('--preprocess', action= 'stroe_true')
@@ -83,7 +85,7 @@ if __name__ == '__main__':
     #split_type = 'closed_split'
 
     # create a configuration tag for saving evaluation results
-    tag = f"v_{args.version}_tm_{args.use_mantiuk}_{args.split_type}_{method}_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}"
+    tag = f"v_{args.version}_tm_{args.use_mantiuk}_{args.split_type}_{method}_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}_gv_{args.use_geometric_verification}"
     
     # Check if GPU is available
     use_cuda = torch.cuda.is_available()
@@ -145,6 +147,8 @@ if __name__ == '__main__':
             os.makedirs(sub_dir, exist_ok=True)
             csv_path = f"{sub_dir}/processed_metadata.csv"
             if not os.path.exists(csv_path):
+                if dataset_name.lower() in ["SealID", "StripeSpotter", "SeaTurtleID", "SeaStarReID2023", "NDD20"]:
+                    args.remove_background = False
                 df = preprocessing.preprocess_dataset(
                     df_raw.copy(),
                     f"{sub_dir}/segmented_dataset/",
@@ -192,8 +196,11 @@ if __name__ == '__main__':
             
             
             
-        train_dict = load_descriptors(f"{base_dir}/feature_descriptors_train/descriptors.h5")
-        test_dict = load_descriptors(f"{base_dir}/feature_descriptors_test/descriptors.h5")
+        train_dict = load_descriptors(f"{base_dir}/feature_descriptors_train_{method}/descriptors.h5")
+        test_dict = load_descriptors(f"{base_dir}/feature_descriptors_test_{method}/descriptors.h5")
+        
+        train_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_train_{method}/keypoints.h5")
+        test_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_test_{method}/keypoints.h5")
         
         desc_tr = stack_all_descriptors(train_dict)
         desc_te = stack_all_descriptors(test_dict)
@@ -218,7 +225,16 @@ if __name__ == '__main__':
         train_labels = dict(zip(df_train["image_id"], df_train["identity"]))
         test_labels = dict(zip(df_test["image_id"], df_test["identity"]))
         
-        preds = classify_test_images(fv_te, fv_tr, train_labels, 5)
+        if args.use_geometric_verification:
+            print("Running training evaluation with geometric verification...")
+            preds = classify_test_images_with_geometric_verification(
+                fv_te, fv_tr, test_keypoints, train_keypoints,
+                test_dict, train_dict, train_labels, 5
+            )
+        else:
+            print("Running standard training evaluation...")
+            preds = classify_test_images(fv_te, fv_tr, train_labels, 5)
+        
         metrics = evaluate_predictions(preds, test_labels)
         
         if use_cuda:

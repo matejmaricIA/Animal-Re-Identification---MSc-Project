@@ -16,6 +16,17 @@ def load_descriptors(descriptors_file):
     print(f"Loaded dataset with {len(data)} images.")
     return data
 
+def load_keypoints(keypoints_file):
+    data = {}
+    
+    with h5py.File(keypoints_file, 'r') as f:
+        for key in f.keys():
+            keypoints = np.array(f[key])
+            data[key] = keypoints
+                
+        print(f"Loaded keypoints for {len(data)} images from {keypoints_file}")
+        return data
+
 def stack_all_descriptors(descriptors):
     all_descriptors = np.vstack(list(descriptors.values()))
     return all_descriptors
