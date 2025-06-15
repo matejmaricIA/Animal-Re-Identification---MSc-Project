@@ -19,6 +19,7 @@ import sys
 #from visualize import visualize_results
 import numpy as np
 import torch
+import time
 
 def save_stuff(pca, gmm, fisher_vectors, paths = (PCA_PATH, GMM_PATH, FISHER_VECTORS)):
     with open(paths[0], "wb") as f:
@@ -118,7 +119,7 @@ if __name__ == '__main__':
         df_raw = load_dataset(dataset_name)
         df_raw["image_id"] = df_raw["image_id"].astype(str)
         
-        
+        start_eval_time = time.time()
         # ── Pre‑processing (tone map / background removal) ──
         if dataset_name.lower() == "full":
             processed_frames = []
@@ -219,6 +220,12 @@ if __name__ == '__main__':
         
         preds = classify_test_images(fv_te, fv_tr, train_labels, 5)
         metrics = evaluate_predictions(preds, test_labels)
+        
+        if use_cuda:
+            torch.cuda.synchronize()
+            
+        runtime_sec = time.time() - start_eval_time
+        metrics["eval_runtime_sec"] = runtime_sec
         
         if args.save_eval:
             #save_evaluation_results(metrics, ds_tag)

@@ -4,5 +4,5 @@ params=("ATRW" "CZoo" "CowDataset" "Cows2021" "DogFaceNet" "GiraffeZebraID" "Gir
 
 for p in "${params[@]}"; do
     echo "Running script with parameter: $p"
-    python main.py --ds "$p" --train --remove_background --use_mantiuk
+    python main.py --ds "$p" --train --remove_background --method keynet_hardnet
 done
