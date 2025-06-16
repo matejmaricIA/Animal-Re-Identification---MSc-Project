@@ -210,13 +210,13 @@ if __name__ == '__main__':
         desc_tr = stack_all_descriptors(train_dict)
         desc_te = stack_all_descriptors(test_dict)
         
-        if already_trained:
+        pca_path = f"{base_dir}/pca_model_{method}.pkl"
+        gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
+        fv_path  = f"{base_dir}/fisher_vectors_{method}.pkl"
+        
+        if already_trained and os.path.exists(pca_path) and os.path.exists(gmm_path) and os.path.exists(fv_path)::
             print("Using already trained PCA and GMM models.")
-            pca, gmm, fv_tr = load_stuff(
-                f"{base_dir}/pca_model_{method}.pkl",
-                f"{base_dir}/gmm_model_{method}.pkl",
-                f"{base_dir}/fisher_vectors_{method}.pkl"
-            )
+            pca, gmm, fv_tr = load_stuff(pca_path, gmm_path, fv_pa
             fv_te = compute_fisher_vectors(test_dict, pca, gmm)
         else:
             pca = train_pca(desc_tr)
