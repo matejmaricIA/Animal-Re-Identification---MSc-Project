@@ -1,0 +1,350 @@
+{
+    "accuracy": 0.4119601328903654,
+    "top_n_accuracy": 0.6212624584717608,
+    "classification_metrics": {
+        "SealID_1": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "SealID_10": {
+            "precision": 0.38461538461538464,
+            "recall": 0.5,
+            "f1-score": 0.43478260869565216,
+            "support": 10.0
+        },
+        "SealID_100": {
+            "precision": 0.35294117647058826,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.46153846153846156,
+            "support": 9.0
+        },
+        "SealID_101": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SealID_104": {
+            "precision": 0.5,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.46153846153846156,
+            "support": 7.0
+        },
+        "SealID_109": {
+            "precision": 0.3333333333333333,
+            "recall": 0.25,
+            "f1-score": 0.2857142857142857,
+            "support": 4.0
+        },
+        "SealID_114": {
+            "precision": 0.5,
+            "recall": 0.25,
+            "f1-score": 0.3333333333333333,
+            "support": 4.0
+        },
+        "SealID_115": {
+            "precision": 0.3333333333333333,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.2,
+            "support": 7.0
+        },
+        "SealID_116": {
+            "precision": 0.3076923076923077,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.4,
+            "support": 7.0
+        },
+        "SealID_125": {
+            "precision": 0.42857142857142855,
+            "recall": 0.3,
+            "f1-score": 0.35294117647058826,
+            "support": 10.0
+        },
+        "SealID_127": {
+            "precision": 0.5,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.4,
+            "support": 3.0
+        },
+        "SealID_130": {
+            "precision": 0.7333333333333333,
+            "recall": 0.8461538461538461,
+            "f1-score": 0.7857142857142857,
+            "support": 13.0
+        },
+        "SealID_137": {
+            "precision": 0.2,
+            "recall": 0.25,
+            "f1-score": 0.2222222222222222,
+            "support": 4.0
+        },
+        "SealID_14": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "SealID_141": {
+            "precision": 0.25,
+            "recall": 0.5,
+            "f1-score": 0.3333333333333333,
+            "support": 2.0
+        },
+        "SealID_147": {
+            "precision": 0.4,
+            "recall": 0.5,
+            "f1-score": 0.4444444444444444,
+            "support": 4.0
+        },
+        "SealID_149": {
+            "precision": 0.25,
+            "recall": 0.2,
+            "f1-score": 0.2222222222222222,
+            "support": 5.0
+        },
+        "SealID_151": {
+            "precision": 0.25,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.2857142857142857,
+            "support": 3.0
+        },
+        "SealID_160": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "SealID_161": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SealID_164": {
+            "precision": 0.42857142857142855,
+            "recall": 0.375,
+            "f1-score": 0.4,
+            "support": 8.0
+        },
+        "SealID_168": {
+            "precision": 0.3,
+            "recall": 0.3,
+            "f1-score": 0.3,
+            "support": 10.0
+        },
+        "SealID_170": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 4.0
+        },
+        "SealID_174": {
+            "precision": 0.5,
+            "recall": 0.25,
+            "f1-score": 0.3333333333333333,
+            "support": 4.0
+        },
+        "SealID_176": {
+            "precision": 0.3333333333333333,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.3333333333333333,
+            "support": 6.0
+        },
+        "SealID_187": {
+            "precision": 0.25,
+            "recall": 0.4,
+            "f1-score": 0.3076923076923077,
+            "support": 5.0
+        },
+        "SealID_188": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SealID_21": {
+            "precision": 0.5555555555555556,
+            "recall": 0.4166666666666667,
+            "f1-score": 0.47619047619047616,
+            "support": 12.0
+        },
+        "SealID_211": {
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
+            "support": 3.0
+        },
+        "SealID_213": {
+            "precision": 0.3333333333333333,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.3333333333333333,
+            "support": 3.0
+        },
+        "SealID_219": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SealID_22": {
+            "precision": 0.2,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.18181818181818182,
+            "support": 6.0
+        },
+        "SealID_223": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "SealID_23": {
+            "precision": 0.75,
+            "recall": 0.6,
+            "f1-score": 0.6666666666666666,
+            "support": 5.0
+        },
+        "SealID_230": {
+            "precision": 0.5,
+            "recall": 0.2,
+            "f1-score": 0.2857142857142857,
+            "support": 5.0
+        },
+        "SealID_26": {
+            "precision": 1.0,
+            "recall": 0.4444444444444444,
+            "f1-score": 0.6153846153846154,
+            "support": 9.0
+        },
+        "SealID_28": {
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "f1-score": 0.4,
+            "support": 4.0
+        },
+        "SealID_3": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SealID_34": {
+            "precision": 0.64,
+            "recall": 0.7619047619047619,
+            "f1-score": 0.6956521739130435,
+            "support": 21.0
+        },
+        "SealID_359": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "SealID_38": {
+            "precision": 0.2,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.25,
+            "support": 3.0
+        },
+        "SealID_44": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "SealID_45": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "SealID_51": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "SealID_61": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "SealID_76": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "SealID_80": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SealID_81": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SealID_82": {
+            "precision": 0.45454545454545453,
+            "recall": 0.5,
+            "f1-score": 0.47619047619047616,
+            "support": 10.0
+        },
+        "SealID_87": {
+            "precision": 0.4,
+            "recall": 0.4,
+            "f1-score": 0.4,
+            "support": 5.0
+        },
+        "SealID_88": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "SealID_91": {
+            "precision": 0.5,
+            "recall": 0.6923076923076923,
+            "f1-score": 0.5806451612903226,
+            "support": 13.0
+        },
+        "SealID_93": {
+            "precision": 0.5,
+            "recall": 0.45454545454545453,
+            "f1-score": 0.47619047619047616,
+            "support": 11.0
+        },
+        "SealID_96": {
+            "precision": 0.5,
+            "recall": 0.5833333333333334,
+            "f1-score": 0.5384615384615384,
+            "support": 12.0
+        },
+        "SealID_97": {
+            "precision": 0.14285714285714285,
+            "recall": 0.2,
+            "f1-score": 0.16666666666666666,
+            "support": 5.0
+        },
+        "accuracy": 0.4119601328903654,
+        "macro avg": {
+            "precision": 0.331127573555381,
+            "recall": 0.3178887274341819,
+            "f1-score": 0.3092261602506782,
+            "support": 301.0
+        },
+        "weighted avg": {
+            "precision": 0.4119285600075125,
+            "recall": 0.4119601328903654,
+            "f1-score": 0.39745258222430946,
+            "support": 301.0
+        }
+    },
+    "eval_runtime_sec": 102.32030296325684
+}

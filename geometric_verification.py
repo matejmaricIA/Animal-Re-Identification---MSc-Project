@@ -122,12 +122,21 @@ def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, m
     
     try:
         # Find homography using RANSAC
+        #H, mask = cv2.findHomography(
+        #    kp1_norm.reshape(-1, 1, 2),
+        #    kp2_norm.reshape(-1, 1, 2),
+        #    cv2.RANSAC,
+        #    ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR
+        #)
         H, mask = cv2.findHomography(
-            kp1_norm.reshape(-1, 1, 2),
-            kp2_norm.reshape(-1, 1, 2),
-            cv2.RANSAC,
-            ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR
+            kp1_norm.reshape(-1,1,2),
+            kp2_norm.reshape(-1,1,2),
+            cv2.USAC_MAGSAC,
+            ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR,
+            maxIters=10000,          
+            confidence=0.999           
         )
+        
         
         if H is not None and mask is not None:
             n_inliers = np.sum(mask.ravel())

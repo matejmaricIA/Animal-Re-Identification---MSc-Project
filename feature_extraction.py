@@ -37,7 +37,7 @@ def extract_features(image_paths, model_path, output_dir):
     dataset = detect.SceneDataset(image_paths, crop_size = (640, 640))
     state_dict = torch.load(model_path, map_location = 'cpu')
     weights = state_dict['extractor']
-    model = DISK(window = 8, desc_dim=128)
+    model = DISK(window = 8, desc_dim=128)  
     model.load_state_dict(weights)
     model = model.to(torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
 
@@ -128,7 +128,7 @@ def extract_features_multiscale_disk(image_paths, model_path, output_dir, scales
                 combined_descriptors = np.vstack(desc_list)
                 
                 # Optional: Limit features to prevent memory issues
-                max_features = 5000
+                max_features = 15000
                 if len(combined_descriptors) > max_features:
                     indices = np.random.choice(len(combined_descriptors), max_features, replace=False)
                     combined_descriptors = combined_descriptors[indices]
