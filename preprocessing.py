@@ -71,7 +71,7 @@ def preprocess_dataset(df, output_dir, dataset_name, use_mantiuk = True, remove_
     df['processed_path'] = processed_paths
     return df
         
-def preprocess_inference(image_paths, use_mantiuk = True):
+def preprocess_inference(image_paths, use_mantiuk=False, remove_background=False):
     save_dir = os.path.join(TMP, 'segmented')
     os.makedirs(save_dir, exist_ok = True)
     for image_path in image_paths:
