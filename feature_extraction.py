@@ -21,6 +21,21 @@ import kornia as K
 
 from constants import MODEL_PATH, DATAFRAME_PATH, DEVICE, SAVE_TEST_DESCRIPTORS_PATH, SAVE_TRAIN_DESCRIPTORS_PATH, PATCH_SIZE, MULTISCALE_SCALES
 
+class ImageDataset(torch.utils.data.Dataset):
+        def __init__(self, paths):
+            self.paths = paths
+
+        def __len__(self):
+            return len(self.paths)
+
+        def __getitem__(self, index):
+            path = self.paths[index]
+            img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+            if img is None:
+                raise FileNotFoundError(path)
+            tens = torch.from_numpy(img).float().unsqueeze(0) / 255.0
+            return Path(path).stem, tens
+
 
 def get_image_paths(df):
     img_locations = (df['processed_path'] + "/" + df['image_id'].apply(str) + '.jpg').tolist()
@@ -102,6 +117,66 @@ def extract_features_keynet_hardnet(image_paths,
 
     print(f"KeyNet+AffNet+HardNet features saved to {desc_h5_path}")
     print(f"KeyNet+AffNet+HardNet keypoints saved to {kp_h5_path}")
+    
+
+def extract_features_keynet_hardnet_faster(
+    image_paths,
+    output_dir,
+    num_features: int = 5000,
+    batch_size: int = 4,
+    num_workers: int = 4,
+    use_half: bool = True,
+):
+    """Extract KeyNet+AffNet+HardNet features.
+
+    A small dataloader is used to load images in parallel which reduces
+    overhead when a large number of files is processed.
+    """
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    lfeat = KeyNetAffNetHardNet(num_features=num_features).to(device).eval()
+
+    if use_half:
+        lfeat = lfeat.half()
+        
+    dataset = ImageDataset(image_paths)
+
+    loader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=True,
+        collate_fn=lambda x: x,  # return list of tuples
+    )
+        
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    desc_h5_path = Path(output_dir) / "descriptors.h5"
+    kp_h5_path = Path(output_dir) / "keypoints.h5"
+    
+    dtype = torch.float16 if use_half else torch.float32
+    
+    with h5py.File(desc_h5_path, "w") as desc_h5, h5py.File(kp_h5_path, "w") as kp_h5:
+        for batch in tqdm.tqdm(loader, desc="KeyNetAffNetHardNet"):
+            for img_id, tens in batch:
+                tens = tens.to(device, dtype=dtype)
+                
+                with torch.inference_mode():
+                    lafs, _, descs = lfeat(tens.unsqueeze(0))
+                    
+                desc_np = descs.squeeze(0).cpu().numpy().astype(np.float32)
+                if desc_np.shape[0] == 0:
+                    continue
+                keypoints_np = lafs[0, :, :, 2].cpu().numpy().astype(np.float32)
+                
+                desc_h5.create_dataset(img_id, data=desc_np, compression="gzip")
+                kp_h5.create_dataset(img_id, data=keypoints_np, compression="gzip")
+                
+                del tens, lafs, descs
+                torch.cuda.empty_cache()
+                
+    print(f"KeyNet+AffNet+HardNet features saved to {desc_h5_path}")
+    print(f"KeyNet+AffNet+HardNet keypoints saved to {kp_h5_path}")
+    
 
 
 if __name__ == "__main__":

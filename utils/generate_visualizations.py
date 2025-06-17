@@ -17,6 +17,12 @@ import pandas as pd
 EVAL_ROOT = "../evaluations"
 VIS_ROOT = os.path.join(EVAL_ROOT, "visualizations")
 
+def _format_method(method: str | None) -> str:
+    if method is None:
+        return "—"
+    # Break long method strings by replacing '_' with('\n') => multi‑line cell
+    return method.replace("_", "\n")
+
 
 def select_tags(root: str) -> List[str]:
     """Interactively let the user select *multiple* folders under *root*.
@@ -203,9 +209,9 @@ def generate_table_image(results: dict, stats: dict, out_path: str) -> None:
             "Samples"      : stats[ds]["num_samples"],
             "Classes"      : stats[ds]["num_classes"],
             "Train time [s]": f"{m['train_time']:.1f}"      if m["train_time"] is not None else "—",
-            "Method"        : m["method"],
+            "Method"        : _format_method(m["method"]),
             "GMM"          : m["gmm_components"],
-            "Geometric Verification": m["gv_used"],
+            "GV": m["gv_used"],
             "LightGlue"    : m["lg_used"],
         })
 
@@ -213,7 +219,12 @@ def generate_table_image(results: dict, stats: dict, out_path: str) -> None:
     
     df = df.sort_values(by="Accuracy", ascending=False, na_position="last")
     
-    fig, ax = plt.subplots(figsize=(12, len(df) * 0.35 + 1))
+    #fig, ax = plt.subplots(figsize=(12, len(df) * 0.35 + 1))
+    #ax.axis("off")
+    
+    nrows = len(df)
+    fig_width = max(9, 1.0 + 0.6 * len(df.columns))  # heuristic to keep within bounds
+    fig, ax = plt.subplots(figsize=(fig_width, nrows * 0.33 + 1))
     ax.axis("off")
     tbl = ax.table(
         cellText=df.values,
@@ -222,8 +233,14 @@ def generate_table_image(results: dict, stats: dict, out_path: str) -> None:
         loc="center",
     )
     tbl.auto_set_font_size(False)
-    tbl.set_fontsize(8)
-    tbl.scale(1, 1.6)
+    tbl.set_fontsize(7)
+    tbl.scale(1, 1.5)
+    
+    dataset:col = df.columns.get_loc("Dataset")
+    for (row, col), cell in tbl.get_celld().items():
+        if col == dataset:                      
+            cell.set_width(cell.get_width() * 1.4)
+    
 
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     plt.savefig(out_path, dpi=200, bbox_inches="tight")
