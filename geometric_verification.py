@@ -13,6 +13,13 @@ from constants import (
     NORMALIZED_THRESHOLD_DIVISOR, MAX_INLIERS_FOR_SCALING
 )
 
+try:
+    from lightglue import LightGlue
+    import torch
+    _LIGHTGLUE_AVAILABLE = True
+except Exception:
+    _LIGHTGLUE_AVAILABLE = False
+
 def load_keypoints(keypoints_file):
     """Load keypoints from HDF5 file"""
     data = {}
@@ -72,6 +79,32 @@ def match_features_by_descriptors(desc1, desc2, kp1, kp2, ratio_threshold=RATIO_
     
     return matches, np.array(matched_kp1), np.array(matched_kp2)
 
+def match_features_lightglue(desc1, desc2, kp1, kp2):
+    """Match features using LightGlue if available."""
+    if not _LIGHTGLUE_AVAILABLE:
+        return [], np.empty((0, 2)), np.empty((0, 2))
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    matcher = LightGlue(features='disk').to(device).eval()
+    with torch.inference_mode():
+        data = {
+            'image0': {
+                'keypoints': torch.from_numpy(kp1).float().unsqueeze(0).to(device),
+                'descriptors': torch.from_numpy(desc1).float().unsqueeze(0).to(device),
+            },
+            'image1': {
+                'keypoints': torch.from_numpy(kp2).float().unsqueeze(0).to(device),
+                'descriptors': torch.from_numpy(desc2).float().unsqueeze(0).to(device),
+            },
+        }
+        out = matcher(data)
+        if len(out['matches']) == 0:
+            return [], np.empty((0, 2)), np.empty((0, 2))
+        matches_arr = out['matches'][0].cpu().numpy()
+        matched_kp1 = kp1[matches_arr[:, 0]] if len(matches_arr) else np.empty((0, 2))
+        matched_kp2 = kp2[matches_arr[:, 1]] if len(matches_arr) else np.empty((0, 2))
+        return matches_arr, matched_kp1, matched_kp2
+
 def geometric_verification_ransac_debug(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, 
                                        min_matches=MIN_MATCHES):
     """Debug version to see what's happening"""
@@ -122,20 +155,20 @@ def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, m
     
     try:
         # Find homography using RANSAC
-        #H, mask = cv2.findHomography(
-        #    kp1_norm.reshape(-1, 1, 2),
-        #    kp2_norm.reshape(-1, 1, 2),
-        #    cv2.RANSAC,
-        #    ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR
-        #)
         H, mask = cv2.findHomography(
-            kp1_norm.reshape(-1,1,2),
-            kp2_norm.reshape(-1,1,2),
-            cv2.USAC_MAGSAC,
-            ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR,
-            maxIters=10000,          
-            confidence=0.999           
+            kp1_norm.reshape(-1, 1, 2),
+            kp2_norm.reshape(-1, 1, 2),
+            cv2.RANSAC,
+            ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR
         )
+        #H, mask = cv2.findHomography(
+        #    kp1_norm.reshape(-1,1,2),
+        #    kp2_norm.reshape(-1,1,2),
+        #    cv2.USAC_MAGSAC,
+        #    ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR,
+        #    maxIters=10000,          
+        #    confidence=0.999           
+        #)
         
         
         if H is not None and mask is not None:
@@ -147,14 +180,25 @@ def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, m
     except cv2.error:
         return 0, None
     
-def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp, 
-                                fisher_distance, min_inliers=MIN_INLIERS):
+def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
+                                fisher_distance, min_inliers=MIN_INLIERS,
+                                use_lightglue=False):
     """Compute geometric similarity and combine with Fisher distance"""
     
     # Match features
-    matches, matched_kp1, matched_kp2 = match_features_by_descriptors(
-        query_desc, db_desc, query_kp, db_kp
-    )
+    #matches, matched_kp1, matched_kp2 = match_features_by_descriptors(
+    #    query_desc, db_desc, query_kp, db_kp
+    #)
+    
+    if use_lightglue and _LIGHTGLUE_AVAILABLE:
+        
+        matches, matched_kp1, matched_kp2 = match_features_lightglue(
+            query_desc, db_desc, query_kp, db_kp
+        )
+    else:
+        matches, matched_kp1, matched_kp2 = match_features_by_descriptors(
+            query_desc, db_desc, query_kp, db_kp
+        )
     
     if len(matches) < min_inliers:
         # Heavy penalty for insufficient matches
@@ -175,7 +219,7 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
     normalized_inliers = min(n_inliers / 50.0, 1.0)  # Assume max 50 reasonable inliers
     
     # Combine: 60% Fisher distance + 40% geometric penalty
-    alpha = 0.6
+    alpha = 0.4
     final_distance = alpha * fisher_distance + (1 - alpha) * (1 - normalized_inliers)
     
     # Apply reranking formula: d_C = (d_L)^n

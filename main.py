@@ -5,7 +5,7 @@ from patches.elpephants_patch import PatchedELPephants
 datasets.ELPephants = PatchedELPephants
 import preprocessing
 import sys
-from feature_extraction import get_image_paths, extract_features, extract_features_keynet_hardnet, extract_features_multiscale_disk
+from feature_extraction import get_image_paths, extract_features, extract_features_keynet_hardnet
 from feature_aggregation import load_descriptors, stack_all_descriptors, train_pca, train_gmm, compute_fisher_vectors, load_keypoints
 from constants import *
 import os
@@ -71,10 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('--split_type', type=str, default='closed', help='Open set or closed set split type')
     parser.add_argument('--method', type = str, default = 'disk', help='Feature extraction method to use')
     parser.add_argument('--use_geometric_verification', action='store_true', help='Use geometric verification during prediction', default=False)
-    #parser.add_argument('--use_dve', action='store_true', help='Use DVE features for prediction', default=False)
-    #parser.add_argument('--split_type', type=str, choices=['balanced_split', 'time_proportion'], default='balanced_split',)
-    #parser.add_argument('--use_original_split', action='store_true', help='Use original split from dataset metadata if available', default=False)
-    #parser.add_argument('--preprocess', action= 'stroe_true')
+    parser.add_argument('--use_lightglue', action ='store_true', help='Use LightGlue for feature matching when performing geometric verification', default=False)
 
     args = parser.parse_args()
     dataset_name = args.ds
@@ -85,7 +82,7 @@ if __name__ == '__main__':
     #split_type = 'closed_split'
 
     # create a configuration tag for saving evaluation results
-    tag = f"v_{args.version}_tm_{args.use_mantiuk}_{args.split_type}_{method}_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}_gv_{args.use_geometric_verification}"
+    tag = f"rmbkg_{args.remove_background}_tm_{args.use_mantiuk}_{args.split_type}_{method}_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}_gv_{args.use_geometric_verification}_lg_{args.use_lightglue}"
     
     # Check if GPU is available
     use_cuda = torch.cuda.is_available()
@@ -181,7 +178,7 @@ if __name__ == '__main__':
         ds_tag = dataset_name
         base_dir = f"./data/{ds_tag}"
         os.makedirs(base_dir, exist_ok=True)
-
+        
         # ── Feature extraction ──
         if not os.path.isdir(f"{base_dir}/feature_descriptors_train_{method}/"):
             if method == 'disk':
@@ -214,9 +211,9 @@ if __name__ == '__main__':
         gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
         fv_path  = f"{base_dir}/fisher_vectors_{method}.pkl"
         
-        if already_trained and os.path.exists(pca_path) and os.path.exists(gmm_path) and os.path.exists(fv_path)::
+        if already_trained and os.path.exists(pca_path) and os.path.exists(gmm_path) and os.path.exists(fv_path):
             print("Using already trained PCA and GMM models.")
-            pca, gmm, fv_tr = load_stuff(pca_path, gmm_path, fv_pa
+            pca, gmm, fv_tr = load_stuff(pca_path, gmm_path, fv_path)
             fv_te = compute_fisher_vectors(test_dict, pca, gmm)
         else:
             pca = train_pca(desc_tr)
@@ -234,7 +231,7 @@ if __name__ == '__main__':
             print("Running training evaluation with geometric verification...")
             preds = classify_test_images_with_geometric_verification(
                 fv_te, fv_tr, test_keypoints, train_keypoints,
-                test_dict, train_dict, train_labels, 5
+                test_dict, train_dict, train_labels, 5, use_lightglue=args.use_lightglue
             )
         else:
             print("Running standard training evaluation...")

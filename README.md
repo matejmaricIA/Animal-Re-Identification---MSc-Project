@@ -52,6 +52,7 @@ python main.py --train --ds ATRW --save_eval
  **`--version`**: Oznaka verzije metode koja se koristi. U kombinaciji s
   postavkama uklanjanja pozadine i tone mappinga kreira se "tag" prema kojem se
   rezultati spremaju u poddirektorij unutar `evaluations/`.
+  - **`--use_lightglue`**: Koristi LightGlue matcher kod geometrijske verifikacije.
 
   
 Tijekom treniranja:

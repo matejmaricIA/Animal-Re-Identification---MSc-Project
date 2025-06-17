@@ -50,119 +50,6 @@ def extract_features(image_paths, model_path, output_dir):
     #finally:
     print("DISK feature extraction complete.")
     
-def extract_features_multiscale_disk(image_paths, model_path, output_dir, scales=[0.5, 1.0, 1.5]):
-    """
-    Extract DISK features at multiple scales using different crop sizes.
-    Much simpler than manual scaling!
-    """
-    sys.path.append('./disk/')
-    from disk import DISK
-    import detect
-    import h5py
-    import tempfile
-    import shutil
-    
-    # Calculate crop sizes for each scale
-    base_crop_size = 640  # Your working base size
-    crop_sizes = []
-    temp_dirs = []
-    
-    for scale in scales:
-        crop_size = int(base_crop_size * scale)
-        # Ensure it's a multiple of 16 for U-Net
-        #crop_size = ((crop_size + 15) // 16) * 16
-        crop_sizes.append((crop_size, crop_size))
-        
-        # Create temp directory for this scale
-        temp_dir = tempfile.mkdtemp()
-        temp_dirs.append(temp_dir)
-        
-        print(f"Extracting features at scale {scale} with crop_size {crop_size}x{crop_size}")
-        
-        # Use your existing function with different crop size
-        dataset = detect.SceneDataset(image_paths, crop_size=(crop_size, crop_size))
-        state_dict = torch.load(model_path, map_location='cpu')
-        weights = state_dict['extractor']
-        model = DISK(window=8, desc_dim=64) # Reducing desc_dim to 64 for memory efficiency
-        model.load_state_dict(weights) 
-        model = model.to(torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
-        
-        detect.extract(dataset, temp_dir, model)
-    
-    # Combine features from all scales
-    os.makedirs(output_dir, exist_ok=True)
-    desc_h5_path = os.path.join(output_dir, "descriptors.h5")
-    kp_h5_path = os.path.join(output_dir, "keypoints.h5")  
-    
-    with h5py.File(desc_h5_path, "w") as desc_h5, h5py.File(kp_h5_path, "w") as kp_h5:
-        # Group features by image
-        image_features = {}
-        image_keypoints = {}
-        
-        for i, temp_dir in enumerate(temp_dirs):
-            scale_desc_path = os.path.join(temp_dir, "descriptors.h5")
-            scale_kp_path = os.path.join(temp_dir, "keypoints.h5") 
-            
-            if os.path.exists(scale_desc_path):
-                with h5py.File(scale_desc_path, "r") as scale_h5:
-                    for img_id in scale_h5.keys():
-                        descriptors = scale_h5[img_id][:]
-                        
-                        if img_id not in image_features:
-                            image_features[img_id] = []
-                        image_features[img_id].append(descriptors)
-                        
-                
-                if os.path.exists(scale_kp_path):
-                    with h5py.File(scale_kp_path, "r") as kp_scale_h5:
-                        for img_id in kp_scale_h5.keys():
-                            keypoints = kp_scale_h5[img_id][:]
-                            
-                            if img_id not in image_keypoints:
-                                image_keypoints[img_id] = []
-                            image_keypoints[img_id].append(keypoints)
-        
-        # Save combined features
-        for img_id, desc_list in image_features.items():
-            if desc_list:
-                combined_descriptors = np.vstack(desc_list)
-                
-                # Optional: Limit features to prevent memory issues
-                max_features = 15000
-                if len(combined_descriptors) > max_features:
-                    indices = np.random.choice(len(combined_descriptors), max_features, replace=False)
-                    combined_descriptors = combined_descriptors[indices]
-                    
-                    
-                    if img_id in image_keypoints and image_keypoints[img_id]:
-                        combined_keypoints = np.vstack(image_keypoints[img_id])
-                        combined_keypoints = combined_keypoints[indices]
-                    else:
-                        combined_keypoints = None
-                else:
-                    # NO LIMITING NEEDED
-                    if img_id in image_keypoints and image_keypoints[img_id]:
-                        combined_keypoints = np.vstack(image_keypoints[img_id])
-                    else:
-                        combined_keypoints = None
-                
-                desc_h5.create_dataset(img_id, data=combined_descriptors, compression="gzip")
-                
-                # SAVE KEYPOINTS TOO
-                if combined_keypoints is not None:
-                    kp_h5.create_dataset(img_id, data=combined_keypoints, compression="gzip")
-    
-    # Cleanup
-    for temp_dir in temp_dirs:
-        shutil.rmtree(temp_dir, ignore_errors=True)
-    
-    print(f"Multi-scale DISK feature extraction complete.")
-    print(f"Descriptors saved to {desc_h5_path}")
-    print(f"Keypoints saved to {kp_h5_path}") 
-
-    
-
-
 def extract_features_keynet_hardnet(image_paths,
                                     output_dir,
                                     num_features= 5000,
@@ -199,7 +86,7 @@ def extract_features_keynet_hardnet(image_paths,
             
             desc_np = descs.squeeze(0).cpu().numpy().astype(np.float32)  # (N,128)
             if desc_np.shape[0] == 0:
-                # zero keypoints; mirror behaviour of DISK extractor (skip image)
+                # zero keypoints
                 continue
             
             # Extract keypoint coordinates from LAFs
