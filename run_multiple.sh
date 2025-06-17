@@ -4,5 +4,5 @@ params=("ATRW" "CowDataset" "IPanda50" "NyalaData" "SealID" "BelugaID" "HyenaID2
 
 for p in "${params[@]}"; do
     echo "Running script with parameter: $p"
-    python main.py --ds "$p" --train --method keynet_hardnet --use_geometric_verification --use_lightglue
+    python main.py --ds "$p" --train --method keynet_hardnet --use_geometric_verification
 done
