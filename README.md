@@ -106,6 +106,6 @@ Pregled skupova podataka:
 
 ### Tablica Rezultata
 
-![Rezultati evaluacije](evaluations/rmbkg_False_tm_False_closed_keynet_hardnet_PCA_64_GMM_128_gv_True_lg_False/results_table.png)
+![Rezultati evaluacije](evaluations/rmbkg_False_tm_False_closed_keynet_hardnet_PCA_64_GMM_128_gv_True_lg_False/visualizations/results_table.png)
 
 Za dodatne informacije ili pomoć, obratite se na [kontakt](mailto:matej.maric99@gmail.com).
