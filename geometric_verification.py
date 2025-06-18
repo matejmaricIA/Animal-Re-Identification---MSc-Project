@@ -21,6 +21,20 @@ try:
     _LIGHTGLUE_AVAILABLE = True
 except Exception:
     _LIGHTGLUE_AVAILABLE = False
+    
+# Fallbacks    
+_FD_MIN, _FD_90, _I90 = 0.0, 1.0, 50 
+
+def set_dataset_calibration(fd_min, fd_90, I90):
+    """Called once per dataset by calibration.py"""
+    global _FD_MIN, _FD_90, _I90
+    _FD_MIN, _FD_90, _I90 = fd_min, fd_90, I90
+
+def _scale_fd(fd):
+    return np.clip((fd - _FD_MIN) / (_FD_90 - _FD_MIN + 1e-9), 0, 1)
+
+def _norm_inliers(n):
+    return min(n / _I90, 1.0)
 
 def load_keypoints(keypoints_file):
     """Load keypoints from HDF5 file"""
@@ -87,7 +101,8 @@ def match_features_lightglue(desc1, desc2, kp1, kp2):
         return [], np.empty((0, 2)), np.empty((0, 2))
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    matcher = get_lightglue(features)
+    matcher = get_lightglue(features='disk')
+    
     with torch.inference_mode():
         data = {
             'image0': {
@@ -201,11 +216,13 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
         matches, matched_kp1, matched_kp2 = match_features_by_descriptors(
             query_desc, db_desc, query_kp, db_kp
         )
+        
+    fisher_scaled = _scale_fd(fisher_distance)
     
     if len(matches) < min_inliers:
         # Heavy penalty for insufficient matches
-        return fisher_distance * INSUFFICIENT_MATCHES_PENALTY, 0
-    
+        return fisher_scaled * INSUFFICIENT_MATCHES_PENALTY, 0
+
     
     # Geometric verification
     n_inliers, homography = geometric_verification_ransac(
@@ -217,12 +234,15 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
         return fisher_distance * POOR_GEOMETRY_PENALTY, n_inliers
     
     
+    geo_score = 1 - _norm_inliers(n_inliers)   # 0 → perfect, 1 → bad
+    
     # Normalize inliers to reasonable range (0-1)
-    normalized_inliers = min(n_inliers / 50.0, 1.0)  # Assume max 50 reasonable inliers
+    #normalized_inliers = min(n_inliers / 50.0, 1.0)  # Assume max 50 reasonable inliers
     
     # Combine: 40% Fisher distance + 60% geometric penalty
-    alpha = 0.4
-    final_distance = alpha * fisher_distance + (1 - alpha) * (1 - normalized_inliers)
+    alpha = 0.35
+    #final_distance = alpha * fisher_distance + (1 - alpha) * (1 - normalized_inliers)
+    final_distance = alpha * fisher_scaled + (1 - alpha) * geo_score
     
     # Apply reranking formula: d_C = (d_L)^n
     # Ensure fisher_distance is in [0,1] range

@@ -12,6 +12,7 @@ import os
 import pickle
 from predict import classify_test_images, predict, classify_test_images_with_geometric_verification
 from evaluate import evaluate_predictions, save_evaluation_results
+from calibration import calibrate
 import pandas as pd
 import shutil
 import cv2
@@ -20,6 +21,7 @@ import sys
 import numpy as np
 import torch
 import time
+
 
 def save_stuff(pca, gmm, fisher_vectors, paths = (PCA_PATH, GMM_PATH, FISHER_VECTORS)):
     with open(paths[0], "wb") as f:
@@ -42,6 +44,8 @@ def load_stuff(pca_path, gmm_path, fisher_vectors_path):
         fisher = pickle.load(file)
 
     return pca, gmm, fisher
+
+
 
 def load_dataset(subset, root = WILD_DATASET_PATH):
         """Return a dataframe ready for the pipeline."""
@@ -211,12 +215,32 @@ if __name__ == '__main__':
             print("Using already trained PCA and GMM models.")
             pca, gmm, fv_tr = load_stuff(pca_path, gmm_path, fv_path)
             fv_te = compute_fisher_vectors(test_dict, pca, gmm)
+            print("Fisher vectors computed for test set.")
+            
+            params = calibrate(
+                dataset_tag = dataset_name,
+                fisher_vecs = fv_tr,
+                descriptors = train_dict,
+                keypoints = train_keypoints,
+            )
+            print("Dataset-specific GV params: ", params)
+            
         else:
             pca = train_pca(desc_tr)
             gmm = train_gmm(pca.transform(desc_tr))
             fv_tr = compute_fisher_vectors(train_dict, pca, gmm)
             fv_te = compute_fisher_vectors(test_dict, pca, gmm)
+            print("Fisher vectors computed for training and test sets.")
             
+            # Calibrate the dataset
+            params = calibrate(
+                dataset_tag = dataset_name,
+                fisher_vecs = fv_tr,
+                descriptors = train_dict,
+                keypoints = train_keypoints,
+            )
+            print("Dataset-specific GV params: ", params)
+
             save_stuff(pca, gmm, fv_tr,
                 (PCA_PATH.format(ds_tag, method), GMM_PATH.format(ds_tag, method), FISHER_VECTORS.format(ds_tag, method)))
         

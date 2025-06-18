@@ -24,8 +24,8 @@ SAVE_TRAIN_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_train/'
 SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
 
 # PCA and GMM Components
-N_COMPONENTS_GMM = 128 # Preko 128 ne ide!
-N_COMPONENTS_PCA = 64 # Ovo promijenio zadnje da testiram.
+N_COMPONENTS_GMM = 256 # Preko 128 ne ide!
+N_COMPONENTS_PCA = 96 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
 PCA_PATH = './data/{}/pca_model_{}.pkl'
@@ -72,4 +72,4 @@ MAX_FEATURES_PER_SCALE = 1000  # Limit features to control memory usage
 ENABLE_MULTISCALE = True  # Toggle for easy comparison with single-scale
 
 
-MAX_GMM_DESCRIPTORS = 100000
+MAX_GMM_DESCRIPTORS = 200000
