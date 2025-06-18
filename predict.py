@@ -5,6 +5,7 @@ import pandas as pd
 from geometric_verification import load_keypoints, compute_geometric_similarity
 import time
 from tqdm import tqdm
+from utils import distance_utils
 
 def classify_test_images_with_geometric_verification(
     test_fisher_vectors, train_fisher_vectors, 
@@ -72,7 +73,8 @@ def classify_test_images_with_geometric_verification(
             # Only verify geometric consistency for top candidates
             for j, idx in enumerate(top_indices):
                 train_image_id = train_image_ids[idx]
-                fisher_distance = 1.0 - similarities[idx]
+                #fisher_distance = 1.0 - similarities[idx]
+                fisher_distance = distance_utils.fisher_distance(test_fisher_vector, train_vectors[idx])
                 
                 train_kp = train_keypoints.get(train_image_id, np.array([]))
                 train_desc = train_descriptors.get(train_image_id, np.array([]))

@@ -12,6 +12,7 @@ from constants import (
     FISHER_DISTANCE_MAX_CLAMP,
     NORMALIZED_THRESHOLD_DIVISOR, MAX_INLIERS_FOR_SCALING
 )
+from utils.distance_utils import fisher_distance
 
 from lightglue_singleton import get_lightglue
 
@@ -31,7 +32,7 @@ def set_dataset_calibration(fd_min, fd_90, I90):
     _FD_MIN, _FD_90, _I90 = fd_min, fd_90, I90
 
 def _scale_fd(fd):
-    return np.clip((fd - _FD_MIN) / (_FD_90 - _FD_MIN + 1e-9), 0, 1)
+    return np.clip((fd - _FD_MIN) / (_FD_90 - _FD_MIN + 1e-9), 0.0, 1.0)
 
 def _norm_inliers(n):
     return min(n / _I90, 1.0)
@@ -221,7 +222,8 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
     
     if len(matches) < min_inliers:
         # Heavy penalty for insufficient matches
-        return fisher_scaled * INSUFFICIENT_MATCHES_PENALTY, 0
+        #return fisher_scaled * INSUFFICIENT_MATCHES_PENALTY, 0
+        return fisher_scaled + 1.0, 0 
 
     
     # Geometric verification
@@ -231,7 +233,8 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
     
     if n_inliers < min_inliers:
         # Heavy penalty for poor geometric consistency
-        return fisher_distance * POOR_GEOMETRY_PENALTY, n_inliers
+        #return fisher_distance * POOR_GEOMETRY_PENALTY, 
+        return fisher_scaled + 0.5, n_inliers
     
     
     geo_score = 1 - _norm_inliers(n_inliers)   # 0 → perfect, 1 → bad

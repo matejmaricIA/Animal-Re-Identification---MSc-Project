@@ -10,77 +10,84 @@ from geometric_verification import (
 from tqdm import tqdm
 import time
 import random
+import faiss
+from utils.distance_utils import fisher_distance
+
+_FAISS_INDEX   = None
+
+def _build_faiss_index(vecs):
+    dim = vecs.shape[1]
+    cpu = faiss.IndexFlatL2(dim)
+    if faiss.get_num_gpus() > 0:
+        gpu = faiss.index_cpu_to_all_gpus(cpu)
+        print(f"[calibrate] FAISS GPU index built on {faiss.get_num_gpus()} GPU(s)")
+        idx = gpu
+    else:
+        print("[calibrate] FAISS CPU index built")
+        idx = cpu
+    idx.add(vecs.astype("float32", copy=False))
+    return idx
+
 def _knn(vecs, query, k):
     """
-    Return indices, distances of the k nearest neighbours of `query`
-    inside `vecs`.  Tries FAISS first, then scikit-learn, then a NumPy
-    fallback that allocates only (N, ) memory.
+    Return (indices, distances) of the k nearest neighbours of `query`.
+
+    The first time it is called it will build whichever backend is
+    available and cache it; subsequent calls are cheap.
     """
-    try:
-        import faiss
-        index = faiss.IndexFlatL2(vecs.shape[1])
-        index.add(vecs.astype('float32', copy=False))
-        d, i = index.search(query.astype('float32', copy=False), k)
-        return i[0], d[0]
-    except ModuleNotFoundError:
-        pass
+    global _FAISS_INDEX
 
-    try:
-        from sklearn.neighbors import NearestNeighbors
-        nn = NearestNeighbors(n_neighbors=k, algorithm='auto', metric='euclidean')
-        nn.fit(vecs)
-        d, i = nn.kneighbors(query, return_distance=True)
-        return i[0], d[0]
-    except ModuleNotFoundError:
-        pass
+    if _FAISS_INDEX is None:
+        _FAISS_INDEX = _build_faiss_index(vecs)
 
-    # pure-NumPy fallback (O(ND) per query, but tiny memory)
-    dist = np.linalg.norm(vecs - query, axis=1)
-    idx  = np.argpartition(dist, k)[:k]
-    return idx, dist[idx]
+
+    if _FAISS_INDEX is not None:
+        D, I = _FAISS_INDEX.search(query.astype("float32", copy=False), k)
+        return I[0], D[0]
+
+
+
 
 def _sample_pairs(fv, k_pos=5, k_neg=5, far_frac=0.8, echo=None):
-    """
-    Generator yielding (id1, id2, fd) tuples on the fly.
-    If `echo` is a callable, it is invoked with the current image index.
-    """
     img_ids = list(fv.keys())
-    vecs    = np.stack([fv[i] for i in img_ids])   # (N, D)
+    vecs    = np.stack([fv[i] for i in img_ids])          # (N, D)
     N       = len(img_ids)
 
     for idx, img_id in enumerate(img_ids):
-        if echo and idx % 50 == 0:          # adjustable granularity
+        if echo and idx % 50 == 0:
             echo(idx, N)
 
-        query = vecs[idx : idx + 1]         # shape (1, D)
+        query = vecs[idx : idx + 1]
 
-        # ---------- k_pos nearest neighbours ----------
-        nn_idx, nn_dist = _knn(vecs, query, k_pos + 1)  # +1 to skip self
-        for j_idx, d in zip(nn_idx[1:], nn_dist[1:]):
-            if j_idx <= idx:                # keep pairs unique
+        nn_idx, _ = _knn(vecs, query, k_pos + 1)          # nearest
+        for j_idx in nn_idx[1:]:
+            if j_idx <= idx:
                 continue
-            yield img_ids[idx], img_ids[j_idx], float(d)
+            fd = fisher_distance(query[0], vecs[j_idx])
+            yield img_ids[idx], img_ids[j_idx], fd
 
-        # ---------- k_neg far random neighbours ----------
         need_neg = k_neg
         attempts = 0
-        while need_neg and attempts < 20 * k_neg:
+        while need_neg:
             j_idx = np.random.randint(N)
             if j_idx == idx or j_idx < idx:
                 attempts += 1
+                if attempts > 50:  # avoid infinite loop
+                    print(f"[calibrate] WARNING: too many attempts for {img_id} (idx={idx})")
+                    break
                 continue
-            d = np.linalg.norm(query - vecs[j_idx])
-            if d < nn_dist.max():           # not far enough
-                attempts += 1
+            fd = fisher_distance(query[0], vecs[j_idx])
+            if fd < 0.5 and attempts < 20:
+                attempts += 1# not really “far”
                 continue
-            yield img_ids[idx], img_ids[j_idx], float(d)
+            yield img_ids[idx], img_ids[j_idx], fd
             need_neg -= 1
             attempts += 1
         
 def calibrate(dataset_tag, fisher_vecs,
               descriptors, keypoints,
               cache_dir="./calibration_cache",
-              k_pos=5, k_neg=5, percentile=90, max_images=500, max_pairs = 10000):
+              k_pos=5, k_neg=5, percentile=90, max_images=2500, max_pairs = 10000):
     """
     One-shot, label-free calibration with live progress.
 
@@ -98,7 +105,7 @@ def calibrate(dataset_tag, fisher_vecs,
         return params
 
     img_count = len(fisher_vecs)
-        img_ids_full = list(fisher_vecs.keys())
+    img_ids_full = list(fisher_vecs.keys())
     if len(img_ids_full) > max_images:
         img_ids = random.sample(img_ids_full, max_images)
         print(f"[calibrate] down-sampled images: {len(img_ids_full)} → {max_images}")
@@ -132,11 +139,9 @@ def calibrate(dataset_tag, fisher_vecs,
         bar.close()
 
     df = pd.DataFrame(rows, columns=["fd", "matches", "inliers"])
-    fd_min, fd_90 = df.fd.min(), np.percentile(df.fd, percentile)
-    fd_scaled = (df.fd - fd_min) / (fd_90 - fd_min + 1e-9)
-    I90 = np.percentile(df.inliers[fd_scaled < 0.5], percentile) or 1
-
-    params = dict(fd_min=float(fd_min), fd_90=float(fd_90), I90=int(I90))
+    fd_05, fd_95 = np.percentile(df.fd, [5, 95])       # two-tail
+    I90 = np.percentile(df.inliers[df.inliers > 0], 90) or 1
+    params = dict(fd_min=float(fd_05), fd_90=float(fd_95), I90=int(I90))
     with cache_file.open("w") as f:
         json.dump(params, f, indent=2)
     set_dataset_calibration(**params)
