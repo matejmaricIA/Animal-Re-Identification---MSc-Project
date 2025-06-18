@@ -13,6 +13,8 @@ from constants import (
     NORMALIZED_THRESHOLD_DIVISOR, MAX_INLIERS_FOR_SCALING
 )
 
+from lightglue_singleton import get_lightglue
+
 try:
     from lightglue import LightGlue
     import torch
@@ -85,7 +87,7 @@ def match_features_lightglue(desc1, desc2, kp1, kp2):
         return [], np.empty((0, 2)), np.empty((0, 2))
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    matcher = LightGlue(features='disk').to(device).eval()
+    matcher = get_lightglue(features)
     with torch.inference_mode():
         data = {
             'image0': {
@@ -218,7 +220,7 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
     # Normalize inliers to reasonable range (0-1)
     normalized_inliers = min(n_inliers / 50.0, 1.0)  # Assume max 50 reasonable inliers
     
-    # Combine: 60% Fisher distance + 40% geometric penalty
+    # Combine: 40% Fisher distance + 60% geometric penalty
     alpha = 0.4
     final_distance = alpha * fisher_distance + (1 - alpha) * (1 - normalized_inliers)
     

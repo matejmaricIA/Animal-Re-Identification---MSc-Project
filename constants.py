@@ -24,7 +24,7 @@ SAVE_TRAIN_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_train/'
 SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
 
 # PCA and GMM Components
-N_COMPONENTS_GMM = 64 # Preko 128 ne ide!
+N_COMPONENTS_GMM = 128 # Preko 128 ne ide!
 N_COMPONENTS_PCA = 64 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
@@ -70,3 +70,6 @@ MAX_REASONABLE_INLIERS = 50       # Expected maximum inliers for normalization
 MULTISCALE_SCALES = [0.5, 1.0, 1.5]
 MAX_FEATURES_PER_SCALE = 1000  # Limit features to control memory usage
 ENABLE_MULTISCALE = True  # Toggle for easy comparison with single-scale
+
+
+MAX_GMM_DESCRIPTORS = 100000

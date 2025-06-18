@@ -1,0 +1,308 @@
+{
+    "accuracy": 0.6453900709219859,
+    "top_n_accuracy": 0.806484295845998,
+    "classification_metrics": {
+        "IPanda50_00_aibang": {
+            "precision": 0.5714285714285714,
+            "recall": 0.5,
+            "f1-score": 0.5333333333333333,
+            "support": 40.0
+        },
+        "IPanda50_01_aoliao": {
+            "precision": 0.5833333333333334,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.6666666666666666,
+            "support": 9.0
+        },
+        "IPanda50_03_bingdian": {
+            "precision": 1.0,
+            "recall": 0.9285714285714286,
+            "f1-score": 0.9629629629629629,
+            "support": 14.0
+        },
+        "IPanda50_04_chengdui": {
+            "precision": 0.5384615384615384,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.6363636363636364,
+            "support": 9.0
+        },
+        "IPanda50_05_chengjiu": {
+            "precision": 0.7272727272727273,
+            "recall": 0.5333333333333333,
+            "f1-score": 0.6153846153846154,
+            "support": 15.0
+        },
+        "IPanda50_06_chengshi": {
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1-score": 0.6666666666666666,
+            "support": 12.0
+        },
+        "IPanda50_07_chengshuang": {
+            "precision": 0.7,
+            "recall": 0.875,
+            "f1-score": 0.7777777777777778,
+            "support": 8.0
+        },
+        "IPanda50_08_fulai": {
+            "precision": 0.5789473684210527,
+            "recall": 0.9166666666666666,
+            "f1-score": 0.7096774193548387,
+            "support": 12.0
+        },
+        "IPanda50_09_fushun": {
+            "precision": 0.9166666666666666,
+            "recall": 0.88,
+            "f1-score": 0.8979591836734694,
+            "support": 25.0
+        },
+        "IPanda50_10_hexing": {
+            "precision": 0.6410256410256411,
+            "recall": 0.6756756756756757,
+            "f1-score": 0.6578947368421053,
+            "support": 37.0
+        },
+        "IPanda50_11_jiaoao": {
+            "precision": 0.75,
+            "recall": 0.5,
+            "f1-score": 0.6,
+            "support": 12.0
+        },
+        "IPanda50_12_jingjing": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
+            "support": 8.0
+        },
+        "IPanda50_13_jingliang": {
+            "precision": 0.6666666666666666,
+            "recall": 0.6818181818181818,
+            "f1-score": 0.6741573033707865,
+            "support": 44.0
+        },
+        "IPanda50_14_maodou": {
+            "precision": 0.7586206896551724,
+            "recall": 0.88,
+            "f1-score": 0.8148148148148148,
+            "support": 25.0
+        },
+        "IPanda50_15_maosun": {
+            "precision": 0.6923076923076923,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6792452830188679,
+            "support": 27.0
+        },
+        "IPanda50_16_maotao": {
+            "precision": 0.9285714285714286,
+            "recall": 0.7647058823529411,
+            "f1-score": 0.8387096774193549,
+            "support": 17.0
+        },
+        "IPanda50_17_meibang": {
+            "precision": 0.6428571428571429,
+            "recall": 0.9310344827586207,
+            "f1-score": 0.7605633802816901,
+            "support": 29.0
+        },
+        "IPanda50_18_miaomiao": {
+            "precision": 0.5,
+            "recall": 0.625,
+            "f1-score": 0.5555555555555556,
+            "support": 8.0
+        },
+        "IPanda50_19_nannan": {
+            "precision": 0.4888888888888889,
+            "recall": 0.5365853658536586,
+            "f1-score": 0.5116279069767442,
+            "support": 41.0
+        },
+        "IPanda50_20_nike": {
+            "precision": 0.631578947368421,
+            "recall": 0.75,
+            "f1-score": 0.6857142857142857,
+            "support": 16.0
+        },
+        "IPanda50_21_nina": {
+            "precision": 0.4166666666666667,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.37037037037037035,
+            "support": 15.0
+        },
+        "IPanda50_23_qiubang": {
+            "precision": 0.75,
+            "recall": 0.6,
+            "f1-score": 0.6666666666666666,
+            "support": 20.0
+        },
+        "IPanda50_24_qixi": {
+            "precision": 0.4,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.47058823529411764,
+            "support": 7.0
+        },
+        "IPanda50_25_qiyi": {
+            "precision": 0.9,
+            "recall": 0.75,
+            "f1-score": 0.8181818181818182,
+            "support": 12.0
+        },
+        "IPanda50_26_qiyuan": {
+            "precision": 0.6551724137931034,
+            "recall": 0.5135135135135135,
+            "f1-score": 0.5757575757575758,
+            "support": 37.0
+        },
+        "IPanda50_27_rourou": {
+            "precision": 0.782608695652174,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.8181818181818182,
+            "support": 21.0
+        },
+        "IPanda50_28_sa": {
+            "precision": 0.59375,
+            "recall": 0.475,
+            "f1-score": 0.5277777777777778,
+            "support": 40.0
+        },
+        "IPanda50_29_shuangxiong": {
+            "precision": 1.0,
+            "recall": 0.5555555555555556,
+            "f1-score": 0.7142857142857143,
+            "support": 9.0
+        },
+        "IPanda50_30_shuqing": {
+            "precision": 0.5909090909090909,
+            "recall": 0.52,
+            "f1-score": 0.5531914893617021,
+            "support": 25.0
+        },
+        "IPanda50_31_shurong": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 14.0
+        },
+        "IPanda50_32_susu": {
+            "precision": 0.627906976744186,
+            "recall": 0.7714285714285715,
+            "f1-score": 0.6923076923076923,
+            "support": 35.0
+        },
+        "IPanda50_33_wuyi": {
+            "precision": 0.6206896551724138,
+            "recall": 0.5806451612903226,
+            "f1-score": 0.6,
+            "support": 31.0
+        },
+        "IPanda50_34_xiaoqiao": {
+            "precision": 0.5,
+            "recall": 0.6,
+            "f1-score": 0.5454545454545454,
+            "support": 10.0
+        },
+        "IPanda50_35_xilan": {
+            "precision": 0.6904761904761905,
+            "recall": 0.8055555555555556,
+            "f1-score": 0.7435897435897436,
+            "support": 36.0
+        },
+        "IPanda50_36_xingda": {
+            "precision": 0.7391304347826086,
+            "recall": 0.6071428571428571,
+            "f1-score": 0.6666666666666666,
+            "support": 28.0
+        },
+        "IPanda50_37_xinger": {
+            "precision": 0.7368421052631579,
+            "recall": 0.56,
+            "f1-score": 0.6363636363636364,
+            "support": 25.0
+        },
+        "IPanda50_38_xingfan": {
+            "precision": 0.7777777777777778,
+            "recall": 0.7,
+            "f1-score": 0.7368421052631579,
+            "support": 10.0
+        },
+        "IPanda50_39_xinghui": {
+            "precision": 0.7272727272727273,
+            "recall": 0.6153846153846154,
+            "f1-score": 0.6666666666666666,
+            "support": 13.0
+        },
+        "IPanda50_40_xingrong": {
+            "precision": 0.45454545454545453,
+            "recall": 0.35714285714285715,
+            "f1-score": 0.4,
+            "support": 14.0
+        },
+        "IPanda50_41_xingxiao": {
+            "precision": 0.53125,
+            "recall": 0.7083333333333334,
+            "f1-score": 0.6071428571428571,
+            "support": 24.0
+        },
+        "IPanda50_42_xingyi": {
+            "precision": 0.4,
+            "recall": 0.4444444444444444,
+            "f1-score": 0.42105263157894735,
+            "support": 9.0
+        },
+        "IPanda50_43_yaxing": {
+            "precision": 0.5454545454545454,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6,
+            "support": 9.0
+        },
+        "IPanda50_44_yayi": {
+            "precision": 0.5,
+            "recall": 0.36666666666666664,
+            "f1-score": 0.4230769230769231,
+            "support": 30.0
+        },
+        "IPanda50_45_yayun": {
+            "precision": 0.6666666666666666,
+            "recall": 0.7692307692307693,
+            "f1-score": 0.7142857142857143,
+            "support": 13.0
+        },
+        "IPanda50_46_yazhu": {
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
+            "support": 15.0
+        },
+        "IPanda50_47_yingying": {
+            "precision": 0.4838709677419355,
+            "recall": 0.39473684210526316,
+            "f1-score": 0.43478260869565216,
+            "support": 38.0
+        },
+        "IPanda50_48_yongbang": {
+            "precision": 0.78125,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.8064516129032258,
+            "support": 30.0
+        },
+        "IPanda50_49_yuanrun": {
+            "precision": 0.625,
+            "recall": 0.5555555555555556,
+            "f1-score": 0.5882352941176471,
+            "support": 9.0
+        },
+        "accuracy": 0.6453900709219859,
+        "macro avg": {
+            "precision": 0.6537611320522981,
+            "recall": 0.6589483534619591,
+            "f1-score": 0.6478864776192576,
+            "support": 987.0
+        },
+        "weighted avg": {
+            "precision": 0.6498743495569312,
+            "recall": 0.6453900709219859,
+            "f1-score": 0.6408941893215914,
+            "support": 987.0
+        }
+    },
+    "eval_runtime_sec": 726.6904113292694
+}
