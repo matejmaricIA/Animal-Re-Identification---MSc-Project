@@ -118,9 +118,12 @@ def compute_fisher_vector(reduced_stacked_descs, gmm):
 def compute_fisher_vectors(image_descriptors, pca, gmm):
     fisher_vectors = {}
 
+    fv_len = 2 * gmm.n_components * pca.n_components_ #testing
+
     for image_id, descriptors in image_descriptors.items():
         if descriptors.shape[0] == 0:
             print(f"Skipping image {image_id}: no descriptors found")
+            fisher_vectors[image_id] = np.zeros(fv_len, dtype=np.float32)
             continue
         
         # Apply PCA

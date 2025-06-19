@@ -96,13 +96,13 @@ def match_features_by_descriptors(desc1, desc2, kp1, kp2, ratio_threshold=RATIO_
     
     return matches, np.array(matched_kp1), np.array(matched_kp2)
 
-def match_features_lightglue(desc1, desc2, kp1, kp2):
+def match_features_lightglue(desc1, desc2, kp1, kp2, method='disk'):
     """Match features using LightGlue if available."""
     if not _LIGHTGLUE_AVAILABLE:
         return [], np.empty((0, 2)), np.empty((0, 2))
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    matcher = get_lightglue(features='disk')
+    matcher = get_lightglue(features=method)
     
     with torch.inference_mode():
         data = {
@@ -200,7 +200,7 @@ def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, m
     
 def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
                                 fisher_distance, min_inliers=MIN_INLIERS,
-                                use_lightglue=False):
+                                use_lightglue=False, method = 'disk'):
     """Compute geometric similarity and combine with Fisher distance"""
     
     # Match features
@@ -211,12 +211,12 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
     if use_lightglue and _LIGHTGLUE_AVAILABLE:
         
         matches, matched_kp1, matched_kp2 = match_features_lightglue(
-            query_desc, db_desc, query_kp, db_kp
+            query_desc, db_desc, query_kp, db_kp, method = method
         )
     else:
         matches, matched_kp1, matched_kp2 = match_features_by_descriptors(
             query_desc, db_desc, query_kp, db_kp
-        )
+        )   
         
     fisher_scaled = _scale_fd(fisher_distance)
     
@@ -225,7 +225,6 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
         #return fisher_scaled * INSUFFICIENT_MATCHES_PENALTY, 0
         return 1.0, 0 
 
-    
     # Geometric verification
     n_inliers, homography = geometric_verification_ransac(
         matched_kp1, matched_kp2

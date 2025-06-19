@@ -86,7 +86,7 @@ if __name__ == '__main__':
     #split_type = 'closed_split'
 
     # create a configuration tag for saving evaluation results
-    tag = f"rmbkg_{args.remove_background}_tm_{args.use_mantiuk}_{args.split_type}_{method}_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}_gv_{args.use_geometric_verification}_lg_{args.use_lightglue}"
+    tag = f"rmbkg_{args.remove_background}_tm_{args.use_mantiuk}_{args.split_type}_{method}_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}_gv_{args.use_geometric_verification}_lg_{args.use_lightglue}_v{args.version}"
     
     # Check if GPU is available
     use_cuda = torch.cuda.is_available()
@@ -251,7 +251,7 @@ if __name__ == '__main__':
             print("Running training evaluation with geometric verification...")
             preds = classify_test_images_with_geometric_verification(
                 fv_te, fv_tr, test_keypoints, train_keypoints,
-                test_dict, train_dict, train_labels, 5, use_lightglue=args.use_lightglue
+                test_dict, train_dict, train_labels, 5, use_lightglue=args.use_lightglue, method = args.method
             )
         else:
             print("Running standard training evaluation...")

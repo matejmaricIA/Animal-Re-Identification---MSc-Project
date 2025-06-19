@@ -11,13 +11,15 @@ def classify_test_images_with_geometric_verification(
     test_fisher_vectors, train_fisher_vectors, 
     test_keypoints, train_keypoints,
     test_descriptors, train_descriptors,
-    train_labels, top_n=5, geometric_candidates=20, use_lightglue=False):
+    train_labels, top_n=5, geometric_candidates=20, use_lightglue=False, method = 'disk'):
     """Efficient geometric verification with two-stage filtering"""
     
     predictions = {}
     train_vectors = np.stack(list(train_fisher_vectors.values()))
     train_image_ids = list(train_fisher_vectors.keys())
     train_class_labels = np.array([train_labels[image_id] for image_id in train_image_ids])
+
+    train_vectors_normalized = train_vectors / np.linalg.norm(train_vectors, axis=1, keepdims=True)
     
     total_test_images = len(test_fisher_vectors)
     print(f"\n=== Starting Geometric Verification ===")
@@ -47,7 +49,7 @@ def classify_test_images_with_geometric_verification(
         # Stage 1: Fisher Vector similarity (fast)
         stage1_start = time.time()
         test_fisher_vector = test_fisher_vector / np.linalg.norm(test_fisher_vector)
-        train_vectors_normalized = train_vectors / np.linalg.norm(train_vectors, axis=1, keepdims=True)
+        #train_vectors_normalized = train_vectors / np.linalg.norm(train_vectors, axis=1, keepdims=True)
         similarities = np.dot(train_vectors_normalized, test_fisher_vector)
         
         # Get top candidates based on Fisher similarity
@@ -84,7 +86,7 @@ def classify_test_images_with_geometric_verification(
                     print(f"    Verifying candidate {j+1}/{len(top_indices)}: {train_image_id}")
                 
                 final_distance, n_inliers = compute_geometric_similarity(
-                    query_desc, query_kp, train_desc, train_kp, fisher_distance, use_lightglue=use_lightglue
+                    query_desc, query_kp, train_desc, train_kp, fisher_distance, use_lightglue=use_lightglue, method = method
                 )
                 
                 total_geometric_verifications += 1
