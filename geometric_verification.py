@@ -223,7 +223,7 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
     if len(matches) < min_inliers:
         # Heavy penalty for insufficient matches
         #return fisher_scaled * INSUFFICIENT_MATCHES_PENALTY, 0
-        return fisher_scaled + 1.0, 0 
+        return 1.0, 0 
 
     
     # Geometric verification
@@ -234,7 +234,7 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
     if n_inliers < min_inliers:
         # Heavy penalty for poor geometric consistency
         #return fisher_distance * POOR_GEOMETRY_PENALTY, 
-        return fisher_scaled + 0.5, n_inliers
+        return min(1.0, fisher_scaled + 0.5), n_inliers
     
     
     geo_score = 1 - _norm_inliers(n_inliers)   # 0 → perfect, 1 → bad

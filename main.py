@@ -217,13 +217,13 @@ if __name__ == '__main__':
             fv_te = compute_fisher_vectors(test_dict, pca, gmm)
             print("Fisher vectors computed for test set.")
             
-            params = calibrate(
-                dataset_tag = dataset_name,
-                fisher_vecs = fv_tr,
-                descriptors = train_dict,
-                keypoints = train_keypoints,
-            )
-            print("Dataset-specific GV params: ", params)
+            #params = calibrate(
+            #    dataset_tag = dataset_name,
+            #    fisher_vecs = fv_tr,
+            #    descriptors = train_dict,
+            #    keypoints = train_keypoints,
+            #)
+            #print("Dataset-specific GV params: ", params)
             
         else:
             pca = train_pca(desc_tr)
@@ -233,13 +233,13 @@ if __name__ == '__main__':
             print("Fisher vectors computed for training and test sets.")
             
             # Calibrate the dataset
-            params = calibrate(
-                dataset_tag = dataset_name,
-                fisher_vecs = fv_tr,
-                descriptors = train_dict,
-                keypoints = train_keypoints,
-            )
-            print("Dataset-specific GV params: ", params)
+            #params = calibrate(
+            #    dataset_tag = dataset_name,
+            #    fisher_vecs = fv_tr,
+            #    descriptors = train_dict,
+            #    keypoints = train_keypoints,
+            #)
+            #print("Dataset-specific GV params: ", params)
 
             save_stuff(pca, gmm, fv_tr,
                 (PCA_PATH.format(ds_tag, method), GMM_PATH.format(ds_tag, method), FISHER_VECTORS.format(ds_tag, method)))
