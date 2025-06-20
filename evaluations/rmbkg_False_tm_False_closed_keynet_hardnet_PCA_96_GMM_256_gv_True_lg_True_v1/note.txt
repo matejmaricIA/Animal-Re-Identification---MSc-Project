@@ -1,0 +1,1 @@
+Changed the way fisher vectors are calculated

@@ -103,6 +103,9 @@ def match_features_lightglue(desc1, desc2, kp1, kp2, method='disk'):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     matcher = get_lightglue(features=method)
+
+    # Does this head expect scale & orientation?
+    #need_so = (method == 'doghardnet')
     
     with torch.inference_mode():
         data = {
@@ -115,6 +118,10 @@ def match_features_lightglue(desc1, desc2, kp1, kp2, method='disk'):
                 'descriptors': torch.from_numpy(desc2).float().unsqueeze(0).to(device),
             },
         }
+        #if need_so:                                   # fill with safe defaults
+        #    for tag, kpts in (('0', kpts0), ('1', kpts1)):
+        #        data[f'image{tag}']['scales'] = torch.ones (1, len(kpts), device=device)
+        #        data[f'image{tag}']['oris']   = torch.zeros(1, len(kpts), device=device)
         out = matcher(data)
         if len(out['matches']) == 0:
             return [], np.empty((0, 2)), np.empty((0, 2))

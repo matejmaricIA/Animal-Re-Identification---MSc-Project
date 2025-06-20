@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+import shutil, glob
+
 # Root directory that contains the experiment folders (one folder per run)
 EVAL_ROOT = "../evaluations"
 VIS_ROOT = os.path.join(EVAL_ROOT, "visualizations")
@@ -67,6 +69,32 @@ _CONFIG_GMM = re.compile(r"GMM_(\d+)")
 _CONFIG_GV = re.compile(r"gv_(True|False)")
 _CONFIG_LG = re.compile(r"lg_(True|False)")
 _CONFIG_METHOD = re.compile(r"closed_([^_]+(?:_[^_]+)*)_PCA")
+
+def _archive_old_table(vis_root, fname = "results_table.png"):
+    """If *fname* already exists in *vis_root*, move it to
+    vis_root/progression/ as results_table_0001.png, …0002.png, etc."""
+    src = os.path.join(vis_root, fname)
+    if not os.path.isfile(src):
+        return                              # nothing to archive
+
+    prog_dir = os.path.join(vis_root, "progression")
+    os.makedirs(prog_dir, exist_ok=True)
+
+    # find the highest existing counter
+    existing = glob.glob(os.path.join(prog_dir, "results_table_*.png"))
+    next_idx = (
+        max(
+            int(os.path.splitext(os.path.basename(f))[0].split("_")[-1])
+            for f in existing
+            if re.fullmatch(r"results_table_\d{4}\.png", os.path.basename(f))
+        )
+        + 1
+        if existing
+        else 1
+    )
+
+    dst = os.path.join(prog_dir, f"results_table_{next_idx:04d}.png")
+    shutil.copy2(src, dst)                 
 
 
 def _parse_folder_config(tag: str) -> dict:
@@ -198,7 +226,10 @@ def plot_dataset_statistics(stats: dict, out_path: str) -> None:
     plt.close(fig)
 
 
-def generate_table_image(results: dict, stats: dict, out_path: str) -> None:
+def generate_table_image(results, stats, out_path):
+
+    _archive_old_table(os.path.dirname(out_path))
+
     rows = []
     for ds, m in results.items():
         rows.append({

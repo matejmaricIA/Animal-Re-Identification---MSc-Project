@@ -1,25 +1,25 @@
-# **Master's Project Animal Re-Identification Application**
+# **Master's Thesis Deep Learning-based Animal Re-Identification for Non-invasive Wildlife Monitoring and Conservation**
 
 
 ---
 
-## **Instalacija**
+## **Set up**
 
-Za postavljanje aplikacije na vašem računalu, slijedite sljedeće korake:
+To set up the project on your computer, follow these steps:
 
 1. Klonirajte Git repozitorij s uključenim podmodulima:
    ```bash
    git clone --recursive-submodules https://github.com/matejmaricIA/Animal-Re-Identification---MSc-Project.git
    ```
-2. Ažurirajte podmodule:
+2. Update the submodules:
    ```bash
    git submodule update --init --recursive
    ```
-3. Kreirajte virtualno okruženje za Python:
+3. Create a Python virtual environment:
    ```bash
    python3 -m venv venv
    ```
-4. Aktivirajte virtualno okruženje:
+4. Activate the virtual environment:
    - **Linux/MacOS**:
      ```bash
      source venv/bin/activate
@@ -28,66 +28,62 @@ Za postavljanje aplikacije na vašem računalu, slijedite sljedeće korake:
      ```bash
      venv\Scripts\activate
      ```
-5. Instalirajte potrebne biblioteke:
+5. Install the required libraries:
    ```bash
    pip install -r requirements.txt
    ```
 
 ---
 
-## **Korištenje aplikacije**
+## **Using the project**
 
-Aplikacija podržava dva glavna načina rada: **treniranje modela** i **inferenciju (predikciju)**.
+The project supports two primary modes: **model training** and **inference (prediction)**. Training is mostly used for testing purposes on the wildlifereid-10k datasets, inference is used for creating a database from a dataset of images and approximating the number of unique individuals.
 
-### **1. Treniranje modela**
+### **1. Model training**
 
-Za treniranje modela na odabranom datasetu (npr. ATRW), koristite naredbu:
+Train a model on a chosen dataset (e.g. ATRW) with:
 ```bash
-python main.py --train --ds ATRW --save_eval
+python main.py --train --ds ATRW --use_geometric_verification --use_lightglue --method keynet_hardnet --save_eval
 ```
 
-- **`--train`**: Pokreće aplikaciju u načinu treniranja.
-- **`--ds`**: Specificira dataset koji će se koristiti za treniranje (npr. `ATRW`).
-- **`--save_eval`**: Sprema rezultate evaluacije u direktorij `data/evaluations`.
- **`--version`**: Oznaka verzije metode koja se koristi. U kombinaciji s
-  postavkama uklanjanja pozadine i tone mappinga kreira se "tag" prema kojem se
-  rezultati spremaju u poddirektorij unutar `evaluations/`.
-  - **`--use_lightglue`**: Koristi LightGlue matcher kod geometrijske verifikacije.
+- **`--train`**: Launches training mode.
+- **`--ds`**: Selects the dataset to train (e.g. ATRW).
+- **`--save_eval`**: Saves evaluation results to `./data/evaluations`.
+ **`--version`**:  version tag of the method in use. Together with background-removal and tone-mapping settings it forms a “tag” used to store results in a sub-directory of evaluations/. Optional argument and not important for the training itself.
+- **`--use_lightglue`**: Uses the LightGlue matcher during geometric verification.
 
   
-Tijekom treniranja:
-- Podaci će biti podijeljeni u trening i test skupove.
-- Modeli **PCA** i **GMM** bit će istrenirani na značajkama.
-- Evaluacija će prikazati točnost i top-N točnost na testnom skupu.
+During training:
+- Data are split into train and test sets.
+- **PCA** and **GMM** models are fitted to the features.
+- Evaluation reports accuracy and top-N accuracy on the test set.
 
-Rezultati treniranja bit će spremljeni u definirane direktorije u projektu.
+All results are saved to the project's predefined directories.
 
-### **2. Inferencija (predikcija)**
+### **2. Inference (Prediction)**
 
-Za izvođenje predikcija na novim slikama koristite naredbu:
+Run predictions on new images with:
 ```bash
 python main.py --predict --ds ATRW --image_location /path/to/dir
 ```
 
-- **`--predict`**: Omogućuje način rada za predikciju.
-- **`--ds`**: Dataset korišten za treniranje na kojem je bazirana baza podataka.
-- **`--image_location`**: Specificira direktorij sa slikama za analizu.
+- **`--predict`**: Enables prediction mode.
+- **`--ds`**: Dataset whose trained models will be used as the reference database. (obsolete)
+- **`--image_location`**: Directory containing the images to analyse.
 
-Tijekom predikcije:
-- Pozadina slika bit će uklonjena, a slike će biti obrađene.
-- Generirat će se Fisher vektori za svaku sliku.
-- Predikcije će uključivati predviđenu klasu i top-N podudaranja.
+During inference:
+- TO DO
 
 ---
 
-## **Struktura podataka**
+## **Data Structure**
 
-- **Dataset**: `./data/<IME_DATASETA>/`
-- **Segmentirani podaci**: `./data/<IME_DATASETA>/segmented_dataset/`
+- **Dataset**: `./data/<DATASET_NAME>/`
+- **Segmented data**: `./data/<DATASET_NAME>/segmented_dataset/`
 - **Trenirani modeli i značajke**:
-  - PCA model: `./data/<IME_DATASETA>/pca_model.pkl`
-  - GMM model: `./data/<IME_DATASETA>/gmm_model.pkl`
-  - Fisher vektori: `./data/<IME_DATASETA>/fisher_vectors.pkl`
+  - PCA model: `./data/<DATASET_NAME>/pca_model.pkl`
+  - GMM model: `./data/<DATASET_NAME>/gmm_model.pkl`
+  - Fisher vectors: `./data/<DATASET_NAME>/fisher_vectors.pkl`
 
 ---
 

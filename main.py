@@ -248,10 +248,14 @@ if __name__ == '__main__':
         test_labels = dict(zip(df_test["image_id"], df_test["identity"]))
         
         if args.use_geometric_verification:
+            if args.method == 'keynet_hardnet':
+                method = 'disk'
+            else:
+                method = 'disk'
             print("Running training evaluation with geometric verification...")
             preds = classify_test_images_with_geometric_verification(
                 fv_te, fv_tr, test_keypoints, train_keypoints,
-                test_dict, train_dict, train_labels, 5, use_lightglue=args.use_lightglue, method = args.method
+                test_dict, train_dict, train_labels, 5, use_lightglue=args.use_lightglue, method = method
             )
         else:
             print("Running standard training evaluation...")
