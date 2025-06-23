@@ -21,6 +21,7 @@ import sys
 import numpy as np
 import torch
 import time
+from nested_importance_sampling import nested_importance_sampling
 
 
 def save_stuff(pca, gmm, fisher_vectors, paths = (PCA_PATH, GMM_PATH, FISHER_VECTORS)):
@@ -65,6 +66,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--train', action = 'store_true')
     parser.add_argument('--predict', action = 'store_true')
+    parser.add_argument('--count', action = 'store_true', help='Estimate the population size using Nested Importance Sampling')
     parser.add_argument('--ds', type = str, help="Specify the dataset to use (e.g., ATRW, BelugaID, etc.), full to train on the full dataset.",
                         default = 'full')
     parser.add_argument('--image_location', type = str)
@@ -72,10 +74,11 @@ if __name__ == '__main__':
     parser.add_argument('--use_mantiuk', action='store_true', help='Use Mantiuk tone mapping during preprocessing')
     parser.add_argument('--remove_background', action='store_true', help='Remove background during preprocessing')
     parser.add_argument('--version', type=str, default='1', help='Identifier for the current method version')
-    parser.add_argument('--split_type', type=str, default='closed', help='Open set or closed set split type')
     parser.add_argument('--method', type = str, default = 'disk', help='Feature extraction method to use')
     parser.add_argument('--use_geometric_verification', action='store_true', help='Use geometric verification during prediction', default=False)
     parser.add_argument('--use_lightglue', action ='store_true', help='Use LightGlue for feature matching when performing geometric verification', default=False)
+    parser.add_argument('--num_vertices', type=int, default=100, help='Vertices sampled in Nested-IS')
+    parser.add_argument('--num_neighbors', type=int, default=10, help='Neighbors sampled per vertex in Nested-IS')
 
     args = parser.parse_args()
     dataset_name = args.ds
@@ -86,7 +89,7 @@ if __name__ == '__main__':
     #split_type = 'closed_split'
 
     # create a configuration tag for saving evaluation results
-    tag = f"rmbkg_{args.remove_background}_tm_{args.use_mantiuk}_{args.split_type}_{method}_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}_gv_{args.use_geometric_verification}_lg_{args.use_lightglue}_v{args.version}"
+    tag = f"rmbkg_{args.remove_background}_tm_{args.use_mantiuk}_{method}_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}_gv_{args.use_geometric_verification}_lg_{args.use_lightglue}_v{args.version}"
     
     # Check if GPU is available
     use_cuda = torch.cuda.is_available()
@@ -321,3 +324,51 @@ if __name__ == '__main__':
         fv_query = compute_fisher_vectors(query_desc, pca, gmm)
         predict(fv_query, fv_db, ds_tag)
         shutil.rmtree(TMP)
+        
+    if args.count:
+        ds_tag = dataset_name
+        base_dir = f"./data/{ds_tag}"
+        
+        df_raw = load_dataset(dataset_name)
+        df_raw["image_id"] = df_raw["image_id"].astype(str)
+
+        csv_path = f"{base_dir}/processed_metadata.csv"
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+        else:
+            os.makedirs(base_dir, exist_ok=True)
+            df = preprocessing.preprocess_dataset(
+                df_raw.copy(),
+                f"{base_dir}/segmented_dataset/",
+                dataset_name,
+                use_mantiuk=args.use_mantiuk,
+                remove_background=args.remove_background,
+            )
+            df.to_csv(csv_path, index=False)
+
+        feat_dir = f"{base_dir}/feature_descriptors_{method}/"
+        if not os.path.isdir(feat_dir):
+            extract_features(get_image_paths(df), MODEL_PATH, feat_dir)
+
+        descriptors = load_descriptors(os.path.join(feat_dir, "descriptors.h5"))
+
+        pca_path = f"{base_dir}/pca_model_{method}.pkl"
+        gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
+        fv_path = f"{base_dir}/fisher_vectors_{method}.pkl"
+        if os.path.exists(fv_path):
+            pca, gmm, fisher_vectors = load_stuff(pca_path, gmm_path, fv_path)
+        else:
+            desc_stack = stack_all_descriptors(descriptors, max_samples=MAX_GMM_DESCRIPTORS)
+            pca = train_pca(desc_stack)
+            gmm = train_gmm(pca.transform(desc_stack))
+            fisher_vectors = compute_fisher_vectors(descriptors, pca, gmm)
+            save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))
+
+        labels = dict(zip(df["image_id"], df["identity"]))
+        estimate, se = nested_importance_sampling(
+            fisher_vectors,
+            labels,
+            n_vertices=args.num_vertices,
+            n_neighbors=args.num_neighbors,
+        )
+        print(f"Estimated individuals: {estimate:.2f} \u00b1 {se:.2f}")

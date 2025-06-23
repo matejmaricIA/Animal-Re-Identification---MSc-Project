@@ -76,6 +76,18 @@ During inference:
 
 ---
 
+### **3. Counting Individuals**
+
+Estimate the number of unique individuals in a dataset using the Nested Importance Sampling approach:
+
+```bash
+python main.py --count --ds ATRW --num_vertices 150 --num_neighbors 20
+```
+
+- **`--count`**: Enables population size estimation.
+- **`--num_vertices`**: Number of sampled vertices.
+- **`--num_neighbors`**: Number of neighbours per vertex.
+
 ## **Data Structure**
 
 - **Dataset**: `./data/<DATASET_NAME>/`
