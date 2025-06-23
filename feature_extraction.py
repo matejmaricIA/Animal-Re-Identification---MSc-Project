@@ -21,6 +21,15 @@ import kornia as K
 
 from constants import MODEL_PATH, DATAFRAME_PATH, DEVICE, SAVE_TEST_DESCRIPTORS_PATH, SAVE_TRAIN_DESCRIPTORS_PATH, PATCH_SIZE, MULTISCALE_SCALES
 
+try:
+    from lightglue import SuperPoint, DISK, ALIKED, DoGHardNet, SIFT
+    from lightglue.utils import load_image
+    _LIGHTGLUE_AVAILABLE = True
+
+except Exception:
+    _LIGHTGLUE_AVAILABLE = False
+
+
 class ImageDataset(torch.utils.data.Dataset):
         def __init__(self, paths):
             self.paths = paths
@@ -122,10 +131,10 @@ def extract_features_keynet_hardnet(image_paths,
 def extract_features_keynet_hardnet_faster(
     image_paths,
     output_dir,
-    num_features: int = 5000,
-    batch_size: int = 4,
-    num_workers: int = 4,
-    use_half: bool = True,
+    num_features = 4500,
+    batch_size = 4,
+    num_workers = 8,
+    use_half = True,
 ):
     """Extract KeyNet+AffNet+HardNet features.
 
@@ -176,6 +185,74 @@ def extract_features_keynet_hardnet_faster(
                 
     print(f"KeyNet+AffNet+HardNet features saved to {desc_h5_path}")
     print(f"KeyNet+AffNet+HardNet keypoints saved to {kp_h5_path}")
+
+def extract_features_lightglue(
+    image_paths,
+    output_dir,
+    feature_type = "aliked",
+    max_keypoints = 4096,
+):
+    """Extract features using the LightGlue extractors.
+
+    Parameters
+    ----------
+    image_paths : list[str]
+        Paths to input images.
+    output_dir : str or Path
+        Directory where descriptor and keypoint files will be written.
+    feature_type : str
+        One of ``superpoint``, ``disk``, ``aliked``, ``doghardnet`` or ``sift``.
+    max_keypoints : int
+        Maximum number of keypoints per image.
+    """
+
+    if not _LIGHTGLUE_AVAILABLE:
+        raise RuntimeError("LightGlue is not installed")
+
+    extractors = {
+        "superpoint": SuperPoint,
+        "disk": DISK,
+        "aliked": ALIKED,
+        "doghardnet": DoGHardNet,
+        "sift": SIFT,
+    }
+    feature_type = feature_type.lower()
+    if feature_type not in extractors:
+        raise ValueError(f"Unsupported feature_type: {feature_type}")
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    Extractor = extractors[feature_type]
+    extractor = Extractor(max_num_keypoints=max_keypoints).to(device).eval()
+
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    desc_h5_path = Path(output_dir) / "descriptors.h5"
+    kp_h5_path = Path(output_dir) / "keypoints.h5"
+
+    with h5py.File(desc_h5_path, "w") as desc_h5, h5py.File(kp_h5_path, "w") as kp_h5:
+        for img_path in tqdm.tqdm(image_paths, desc=f"{feature_type} features"):
+            img_id = Path(img_path).stem
+            image = load_image(img_path).to(device)
+            with torch.inference_mode():
+                feats = extractor.extract(image)
+
+            desc = feats["descriptors"]
+
+            if desc.shape[0] in (128, 256) and desc.shape[1] > desc.shape[0]:
+                desc = desc.t().contiguous()             
+            
+            desc_np = desc.cpu().numpy().astype(np.float32)
+
+            #desc_np = feats["descriptors"].T.cpu().numpy().astype(np.float32)
+            kp_np   = feats["keypoints"].cpu().numpy().astype(np.float32)
+
+            desc_h5.create_dataset(img_id, data=desc_np, compression="gzip")
+            kp_h5.create_dataset(img_id, data=kp_np, compression="gzip")
+
+            torch.cuda.empty_cache()
+
+    print(f"{feature_type} features saved to {desc_h5_path}")
+    print(f"{feature_type} keypoints saved to {kp_h5_path}")
+
     
 
 

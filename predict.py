@@ -28,7 +28,7 @@ def classify_test_images_with_geometric_verification(
     print(f"Geometric candidates per query: {geometric_candidates}")
     print(f"=" * 50)
     
-    # Track overall statistics
+    # Track overall statistics  
     total_geometric_verifications = 0
     total_inliers_found = 0
     images_with_keypoints = 0

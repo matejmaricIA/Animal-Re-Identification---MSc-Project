@@ -5,7 +5,7 @@ from patches.elpephants_patch import PatchedELPephants
 datasets.ELPephants = PatchedELPephants
 import preprocessing
 import sys
-from feature_extraction import get_image_paths, extract_features, extract_features_keynet_hardnet, extract_features_keynet_hardnet_faster
+from feature_extraction import get_image_paths, extract_features, extract_features_keynet_hardnet, extract_features_keynet_hardnet_faster, extract_features_lightglue
 from feature_aggregation import load_descriptors, stack_all_descriptors, train_pca, train_gmm, compute_fisher_vectors, load_keypoints
 from constants import *
 import os
@@ -190,8 +190,12 @@ if __name__ == '__main__':
                 extract_features(get_image_paths(df_test), MODEL_PATH, f"{base_dir}/feature_descriptors_test_{method}/")
                 
             elif method == 'keynet_hardnet':
-                extract_features_keynet_hardnet(get_image_paths(df_train), f"{base_dir}/feature_descriptors_train_{method}/")
-                extract_features_keynet_hardnet(get_image_paths(df_test), f"{base_dir}/feature_descriptors_test_{method}/")
+                extract_features_keynet_hardnet_faster(get_image_paths(df_train), f"{base_dir}/feature_descriptors_train_{method}/")
+                extract_features_keynet_hardnet_faster(get_image_paths(df_test), f"{base_dir}/feature_descriptors_test_{method}/")
+
+            elif method == 'lightglue':
+                extract_features_lightglue(get_image_paths(df_train), f"{base_dir}/feature_descriptors_train_{method}/")
+                extract_features_lightglue(get_image_paths(df_test), f"{base_dir}/feature_descriptors_test_{method}/")
 
         else:
             already_trained = True
