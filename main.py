@@ -22,44 +22,9 @@ import numpy as np
 import torch
 import time
 from nested_importance_sampling import nested_importance_sampling
+from utility_functions import load_dataset, save_stuff, load_stuff, save_count_results
 
 
-def save_stuff(pca, gmm, fisher_vectors, paths = (PCA_PATH, GMM_PATH, FISHER_VECTORS)):
-    with open(paths[0], "wb") as f:
-        pickle.dump(pca, f)
-
-    with open(paths[1], "wb") as f:
-        pickle.dump(gmm, f)
-
-    with open(paths[2], "wb") as f:
-        pickle.dump(fisher_vectors, f)
-
-def load_stuff(pca_path, gmm_path, fisher_vectors_path):
-    with open(pca_path, 'rb') as file:
-        pca = pickle.load(file)
-
-    with open(gmm_path, 'rb') as file:
-        gmm = pickle.load(file)
-
-    with open(fisher_vectors_path, 'rb') as file:
-        fisher = pickle.load(file)
-
-    return pca, gmm, fisher
-
-
-
-def load_dataset(subset, root = WILD_DATASET_PATH):
-        """Return a dataframe ready for the pipeline."""
-        print(root)
-        ds = WildlifeReID10k(root, check_files=False)
-        df = ds.metadata.copy()
-        if subset != 'full':
-            print(f"Filtering to subset: {subset}")
-            df = df[df["dataset"].str.lower() == subset.lower()].copy()
-            if df.empty:
-                print(f"Subset '{subset}' not found.")
-                sys.exit(1)
-        return df
 
 if __name__ == '__main__':
     #os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -79,6 +44,9 @@ if __name__ == '__main__':
     parser.add_argument('--use_lightglue', action ='store_true', help='Use LightGlue for feature matching when performing geometric verification', default=False)
     parser.add_argument('--num_vertices', type=int, default=100, help='Vertices sampled in Nested-IS')
     parser.add_argument('--num_neighbors', type=int, default=10, help='Neighbors sampled per vertex in Nested-IS')
+    parser.add_argument('--save_count', action='store_true', help='Save population estimation results to XLSX')
+    parser.add_argument('--label_error_rate', type=float, default=0.0,
+                        help='Fraction of pair labelings to flip during counting')
 
     args = parser.parse_args()
     dataset_name = args.ds
@@ -367,7 +335,7 @@ if __name__ == '__main__':
             save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))
 
         labels = dict(zip(df["image_id"], df["identity"]))
-        estimate, se = nested_importance_sampling(
+        estimate, se, sampled_pairs = nested_importance_sampling(
             fisher_vectors,
             labels,
             keypoints=keypoints,
@@ -380,5 +348,21 @@ if __name__ == '__main__':
             tau=0.9,
             tolerance=2.0,
             neighbor_ratio=7.0,
+            label_error_rate=args.label_error_rate,
         )
         print(f"Estimated individuals: {estimate:.2f} \u00b1 {se:.2f}")
+        if args.save_count:
+            row = {
+                "Dataset": dataset_name,
+                "Method": method,
+                "N": int(df["identity"].nunique()),
+                "M": int(len(df)),
+                "Sampled Pairs": int(sampled_pairs),
+                "Tau": np.nan,
+                "Tolerance": np.nan,
+                "Neighbor Ratio": args.num_neighbors / max(len(df) - 1, 1),
+                "Error Rate": args.label_error_rate,
+                "Result": float(estimate),
+                "Ground Truth": int(df["identity"].nunique()),
+            }
+            save_count_results(row)
