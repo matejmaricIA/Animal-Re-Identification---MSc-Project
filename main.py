@@ -328,7 +328,7 @@ if __name__ == '__main__':
     if args.count:
         ds_tag = dataset_name
         base_dir = f"./data/{ds_tag}"
-        
+
         df_raw = load_dataset(dataset_name)
         df_raw["image_id"] = df_raw["image_id"].astype(str)
 
@@ -347,10 +347,12 @@ if __name__ == '__main__':
             df.to_csv(csv_path, index=False)
 
         feat_dir = f"{base_dir}/feature_descriptors_{method}/"
-        if not os.path.isdir(feat_dir):
+        if not os.path.isdir(feat_dir) and method == 'disk':
             extract_features(get_image_paths(df), MODEL_PATH, feat_dir)
-
+        elif not os.path.isdir(feat_dir) and method == 'keynet_hardnet':
+            extract_features_keynet_hardnet_faster(get_image_paths(df), feat_dir)
         descriptors = load_descriptors(os.path.join(feat_dir, "descriptors.h5"))
+        keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
 
         pca_path = f"{base_dir}/pca_model_{method}.pkl"
         gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
@@ -368,7 +370,15 @@ if __name__ == '__main__':
         estimate, se = nested_importance_sampling(
             fisher_vectors,
             labels,
+            keypoints=keypoints,
+            descriptors=descriptors,
+            use_geometric=args.use_geometric_verification,
+            use_lightglue=args.use_lightglue,
+            method='disk',
             n_vertices=args.num_vertices,
             n_neighbors=args.num_neighbors,
+            tau=0.9,
+            tolerance=2.0,
+            neighbor_ratio=7.0,
         )
         print(f"Estimated individuals: {estimate:.2f} \u00b1 {se:.2f}")
