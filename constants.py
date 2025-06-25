@@ -5,16 +5,18 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Segmentation Model
 ISNET_MODEL_NAME = 'isnet-general-use'
-SEGMENTATION_MODEL_TYPE = 'sam2'
+SEGMENTATION_MODEL_TYPE = 'combined'
+SAM_ISNET_IOU_THETA = 0.3  # IoU threshold for SAM with ISNet
 
 SAM_MODEL_TYPE = 'vit_h'  # Options: vit_b, vit_l, vit_h
 SAM_CHECKPOINT_PATH = os.path.join(ROOT_DIR, 'models', 'sam_vit_h_4b8939.pth')  # Path to the SAM model checkpoint
 
-SAM2_MODEL_NAME = 'sam2.1_hiera_small.pt'             # sam2_t/s/m/b/l  – pick one
+SAM2_MODEL_NAME = 'sam2.1_hiera_small.pt'             
+SAM2_CFG  = "configs/sam2.1/sam2.1_hiera_s.yaml"
 SAM2_CHECKPOINT_PATH = os.path.join(ROOT_DIR, 'models', SAM2_MODEL_NAME)
 
 # Segmented Dataset Path
-SEGMENTED_DATASET = os.path.join(ROOT_DIR, 'data', '{}', 'segmented_dataset')
+SEGMENTED_DATASET = os.path.join(ROOT_DIR, 'data', '{}', 'segmented_dataset_unsegmented')
 
 # Model Paths (Disk)
 MODEL_PATH = os.path.join(ROOT_DIR, 'disk', 'depth-save.pth')
@@ -83,4 +85,4 @@ MAX_FEATURES_PER_SCALE = 1000  # Limit features to control memory usage
 ENABLE_MULTISCALE = True  # Toggle for easy comparison with single-scale
 
 
-MAX_GMM_DESCRIPTORS = 200000
+MAX_GMM_DESCRIPTORS = 1600000

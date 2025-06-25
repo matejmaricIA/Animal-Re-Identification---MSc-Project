@@ -60,11 +60,13 @@ def stack_all_descriptors(descriptors, max_samples=None):
         if n > 0:
             idx = rng.choice(len(arr), size=n, replace=False)
             samples.append(arr[idx])
+    
 
     stacked = np.vstack(samples)
     if stacked.shape[0] > max_samples:
         idx = rng.choice(stacked.shape[0], size=max_samples, replace=False)
         stacked = stacked[idx]
+    print(f"Number of total descriptors: {stacked.shape}")
     return stacked
 
 def train_pca(stacked_descriptors, n_components = N_COMPONENTS_PCA):

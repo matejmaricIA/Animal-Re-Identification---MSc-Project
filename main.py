@@ -335,7 +335,7 @@ if __name__ == '__main__':
             save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))
 
         labels = dict(zip(df["image_id"], df["identity"]))
-        estimate, se = nested_importance_sampling(
+        estimate, se, stats = nested_importance_sampling(
             fisher_vectors,
             labels,
             keypoints=keypoints,
@@ -346,8 +346,10 @@ if __name__ == '__main__':
             n_vertices=args.num_vertices,
             n_neighbors=args.num_neighbors,
             label_error_rate=args.label_error_rate,
+            return_stats = True
         )
         print(f"Estimated individuals: {estimate:.2f} \u00b1 {se:.2f}")
+        print(stats)
         if args.save_count:
             row = {
                 "Dataset": dataset_name,

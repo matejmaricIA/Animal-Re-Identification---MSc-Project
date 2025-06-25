@@ -7,16 +7,74 @@ import argparse
 from constants import *
 from tqdm import tqdm
 
-if SEGMENTATION_MODEL_TYPE == 'isnet':
+
+if SEGMENTATION_MODEL_TYPE in ('isnet', 'combined'):
     session = new_session(ISNET_MODEL_NAME)
-elif SEGMENTATION_MODEL_TYPE == 'sam':
+if SEGMENTATION_MODEL_TYPE in ('sam', 'combined'):
     from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
     import torch
-    device = 'cuda' if DEVICE.upper() == 'GPU' and torch.cuda.is_available() else 'cpu'
-    _sam = sam_model_registry[SAM_MODEL_TYPE](checkpoint=SAM_CHECKPOINT_PATH).to(device)
+    _DEVICE = 'cuda' if DEVICE.upper() == 'GPU' and torch.cuda.is_available() else 'cpu'
+    _sam = sam_model_registry[SAM_MODEL_TYPE](checkpoint=SAM_CHECKPOINT_PATH).to(_DEVICE)
     mask_generator = SamAutomaticMaskGenerator(_sam)
+elif SEGMENTATION_MODEL_TYPE == 'sam2':
+    import torch
+    from sam2.build_sam import build_sam2
+    from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator   # ← NEW
+
+    _DEVICE = "cuda" if (DEVICE.upper() == "GPU" and torch.cuda.is_available()) else "cpu"
+
+    _sam2_core = build_sam2(
+        SAM2_CFG,
+        SAM2_CHECKPOINT_PATH,
+        device=_DEVICE,
+        dtype=torch.bfloat16,      # or .half() / .float()
+    )
+
+    # one automatic-mask generator you’ll reuse for every image
+    amg = SAM2AutomaticMaskGenerator(_sam2_core, points_per_side=64) 
+    #print(sam2_predictor)
 else:
     session = None
+
+def _binary_mask(img):          # expects uint8 [H,W] where FG=255
+    return (img > 0).astype(np.uint8)
+
+def _iou(mask_a, mask_b):
+    inter = np.logical_and(mask_a, mask_b).sum()
+    union = np.logical_or (mask_a, mask_b).sum()
+    return 0.0 if union == 0 else inter / union
+
+def _combined_isnet_sam(image):
+    """Return FG-masked image using Eq.(1) from the paper."""
+    # 1) ISNet mask (single full-image mask, good recall)
+    _, buf = cv2.imencode('.png', image)
+    isnet_rgba = remove(image, session=session)
+    if not isinstance(isnet_rgba, np.ndarray):
+        isnet_rgba = cv2.cvtColor(np.array(isnet_rgba), cv2.COLOR_RGBA2BGRA)
+    mask_isnet = _binary_mask(isnet_rgba[:, :, 3])           # alpha → binary
+
+    # 2) SAM masks (many accurate proposals)
+    sam_proposals = mask_generator.generate(image)
+    if not sam_proposals:        # SAM failed → fall back to ISNet
+        return cv2.bitwise_and(image, image, mask=mask_isnet * 255)
+
+    # 3) keep proposals that overlap enough with ISNet
+    kept = []
+    for m in sam_proposals:
+        mask = _binary_mask(m["segmentation"])
+        if _iou(mask, mask_isnet) >= SAM_ISNET_IOU_THETA:
+            kept.append(mask)
+
+    # 4) union the kept masks, or fall back if nothing passed Θ
+    if kept:
+        merged = np.zeros_like(mask_isnet, dtype=np.uint8)
+        for m in kept:
+            merged = np.logical_or(merged, m)
+        final_mask = merged.astype(np.uint8)
+    else:
+        final_mask = mask_isnet
+
+    return cv2.bitwise_and(image, image, mask=final_mask * 255)
 
 def mantiuk_tone_mapping(image):
     
@@ -45,14 +103,23 @@ def background_removal(image):
         mask = largest['segmentation'].astype(np.uint8) * 255
         return cv2.bitwise_and(image, image, mask=mask)
     elif SEGMENTATION_MODEL_TYPE == 'sam2':
-        from sam2 import Sam2
-        sam2 = Sam2(SAM2_CHECKPOINT_PATH)
-        masks = sam2.predict(image)
-        if not masks:
+        # -- SAM-2 AMG expects RGB numpy --
+        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # get a list of dicts; each has 'segmentation', 'area', ...
+        masks = amg.generate(rgb)
+
+        if not masks:                       # no mask found
             return image
-        largest_mask = max(masks, key=lambda m: m['area'])
-        mask = largest_mask['segmentation'].astype(np.uint8) * 255
+
+        largest = max(masks, key=lambda m: m['area'])
+        mask    = largest['segmentation'].astype(np.uint8) * 255
+
         return cv2.bitwise_and(image, image, mask=mask)
+
+    elif SEGMENTATION_MODEL_TYPE == 'combined':
+        return _combined_isnet_sam(image)
+
     else:
         print(f"Unsupported segmentation model type: {SEGMENTATION_MODEL_TYPE}")
         return image
