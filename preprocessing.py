@@ -7,7 +7,16 @@ import argparse
 from constants import *
 from tqdm import tqdm
 
-session = new_session(MODEL_NAME)
+if SEGMENTATION_MODEL_TYPE == 'isnet':
+    session = new_session(ISNET_MODEL_NAME)
+elif SEGMENTATION_MODEL_TYPE == 'sam':
+    from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
+    import torch
+    device = 'cuda' if DEVICE.upper() == 'GPU' and torch.cuda.is_available() else 'cpu'
+    _sam = sam_model_registry[SAM_MODEL_TYPE](checkpoint=SAM_CHECKPOINT_PATH).to(device)
+    mask_generator = SamAutomaticMaskGenerator(_sam)
+else:
+    session = None
 
 def mantiuk_tone_mapping(image):
     
@@ -22,13 +31,31 @@ def mantiuk_tone_mapping(image):
     return mantiuk_image
 
 def background_removal(image):
-    _, buffer = cv2.imencode('.png', image)
-    background_removed = remove(buffer.tobytes(), session = session)
-
-    processed_image = cv2.imdecode(np.frombuffer(background_removed, np.uint8), cv2.IMREAD_UNCHANGED)
-
-    return processed_image
-
+    """Apply background removal using the configured segmentation model."""
+    if SEGMENTATION_MODEL_TYPE == 'isnet':
+        _, buffer = cv2.imencode('.png', image)
+        background_removed = remove(buffer.tobytes(), session=session)
+        processed_image = cv2.imdecode(np.frombuffer(background_removed, np.uint8), cv2.IMREAD_UNCHANGED)
+        return processed_image
+    elif SEGMENTATION_MODEL_TYPE == 'sam':
+        masks = mask_generator.generate(image)
+        if not masks:
+            return image
+        largest = max(masks, key=lambda m: m['area'])
+        mask = largest['segmentation'].astype(np.uint8) * 255
+        return cv2.bitwise_and(image, image, mask=mask)
+    elif SEGMENTATION_MODEL_TYPE == 'sam2':
+        from sam2 import Sam2
+        sam2 = Sam2(SAM2_CHECKPOINT_PATH)
+        masks = sam2.predict(image)
+        if not masks:
+            return image
+        largest_mask = max(masks, key=lambda m: m['area'])
+        mask = largest_mask['segmentation'].astype(np.uint8) * 255
+        return cv2.bitwise_and(image, image, mask=mask)
+    else:
+        print(f"Unsupported segmentation model type: {SEGMENTATION_MODEL_TYPE}")
+        return image
 def process_image(row, output_dir, use_mantiuk, dataset_name, remove_background):
     """ Process an image by applying Mantiuk tone mapping and background removal."""
 

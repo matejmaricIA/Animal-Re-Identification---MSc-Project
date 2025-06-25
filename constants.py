@@ -1,18 +1,27 @@
+import os
 # Change this, due to recent changes in code, this is largely deprecated.
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Segmentation Model
-MODEL_NAME = 'isnet-general-use'
+ISNET_MODEL_NAME = 'isnet-general-use'
+SEGMENTATION_MODEL_TYPE = 'sam2'
+
+SAM_MODEL_TYPE = 'vit_h'  # Options: vit_b, vit_l, vit_h
+SAM_CHECKPOINT_PATH = os.path.join(ROOT_DIR, 'models', 'sam_vit_h_4b8939.pth')  # Path to the SAM model checkpoint
+
+SAM2_MODEL_NAME = 'sam2.1_hiera_small.pt'             # sam2_t/s/m/b/l  – pick one
+SAM2_CHECKPOINT_PATH = os.path.join(ROOT_DIR, 'models', SAM2_MODEL_NAME)
 
 # Segmented Dataset Path
-SEGMENTED_DATASET = './data/{}/segmented_dataset/'
+SEGMENTED_DATASET = os.path.join(ROOT_DIR, 'data', '{}', 'segmented_dataset')
 
 # Model Paths (Disk)
-MODEL_PATH = './disk/depth-save.pth'
-#MODEL_PATH = './disk/epipolar-save.pth'
+MODEL_PATH = os.path.join(ROOT_DIR, 'disk', 'depth-save.pth')
+#MODEL_PATH = os.path.join(ROOT_DIR, 'disk', 'epipolar-save.pth')
 
 # Dataframe Paths
-DATAFRAME_PATH = './data/{}/processed_metadata.csv'
+DATAFRAME_PATH = os.path.join(ROOT_DIR, 'data', '{}', 'processed_metadata.csv')
 
 # Use Device
 DEVICE = 'GPU'

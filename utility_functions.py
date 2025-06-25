@@ -2,7 +2,7 @@ import os
 import sys
 import pickle
 import pandas as pd
-from wildlife_reid_10k import WildlifeReID10k
+from wildlife_datasets.datasets import WildlifeReID10k
 from constants import (
     PCA_PATH, GMM_PATH, FISHER_VECTORS, COUNT_RESULTS_XLSX, WILD_DATASET_PATH
 )

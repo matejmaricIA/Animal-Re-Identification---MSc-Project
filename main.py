@@ -12,7 +12,7 @@ import os
 import pickle
 from predict import classify_test_images, predict, classify_test_images_with_geometric_verification
 from evaluate import evaluate_predictions, save_evaluation_results
-from calibration import calibrate
+#from calibration import calibrate
 import pandas as pd
 import shutil
 import cv2
@@ -335,7 +335,7 @@ if __name__ == '__main__':
             save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))
 
         labels = dict(zip(df["image_id"], df["identity"]))
-        estimate, se, sampled_pairs = nested_importance_sampling(
+        estimate, se = nested_importance_sampling(
             fisher_vectors,
             labels,
             keypoints=keypoints,
@@ -345,9 +345,6 @@ if __name__ == '__main__':
             method='disk',
             n_vertices=args.num_vertices,
             n_neighbors=args.num_neighbors,
-            tau=0.9,
-            tolerance=2.0,
-            neighbor_ratio=7.0,
             label_error_rate=args.label_error_rate,
         )
         print(f"Estimated individuals: {estimate:.2f} \u00b1 {se:.2f}")

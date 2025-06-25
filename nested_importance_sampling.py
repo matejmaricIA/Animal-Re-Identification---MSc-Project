@@ -29,6 +29,7 @@ def nested_importance_sampling(
     gv_threshold: float = 0.5,
     n_vertices: int = 100,
     n_neighbors: int = 10,
+    label_error_rate = 0.0
 ) -> Tuple[float, float]:
     image_ids = list(fisher_vectors.keys())
     vectors = [fisher_vectors[i] for i in image_ids]
@@ -58,6 +59,7 @@ def nested_importance_sampling(
                 kp_u = keypoints.get(u_id)
                 kp_v = keypoints.get(v_id)
                 if desc_u is None or desc_v is None or kp_u is None or kp_v is None:
+                    print(f"Missing data for {u_id} or {v_id}, skipping geometric verification.")
                     match = labels.get(u_id) == labels.get(v_id)
                 else:
                     fd = fisher_distance(fisher_vectors[u_id], fisher_vectors[v_id])
@@ -77,7 +79,7 @@ def nested_importance_sampling(
         denom = q[neighbors]
         denom[denom == 0] = 1e-9
         d_u = np.sum(feedback / denom) / n_neighbors
-        print(np.mean(feedback))
+        #print(np.mean(feedback))
         population_estimates.append((1.0 / Q[u_idx]) * (1.0 / (1.0 + d_u)))
 
     estimates = np.array(population_estimates)
