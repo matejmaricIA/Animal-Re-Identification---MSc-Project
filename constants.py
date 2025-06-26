@@ -52,7 +52,7 @@ TMP = './data/tmp/'
 # Evaluation results directory
 EVALUATION_DIR = './evaluations/'
 # XLSX file for saving population counting results
-COUNT_RESULTS_XLSX = './evaluations/population/population_counting_results.xlsx'
+COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 

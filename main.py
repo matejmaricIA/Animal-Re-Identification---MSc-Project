@@ -47,6 +47,8 @@ if __name__ == '__main__':
     parser.add_argument('--save_count', action='store_true', help='Save population estimation results to XLSX')
     parser.add_argument('--label_error_rate', type=float, default=0.0,
                         help='Fraction of pair labelings to flip during counting')
+    parser.add_argument('--gv_threshold', type=float, default=0.75,
+                        help='Geometric verification distance threshold')
 
     args = parser.parse_args()
     dataset_name = args.ds
@@ -294,6 +296,7 @@ if __name__ == '__main__':
         shutil.rmtree(TMP)
         
     if args.count:
+        start_time = time.time()
         ds_tag = dataset_name
         base_dir = f"./data/{ds_tag}"
 
@@ -343,25 +346,34 @@ if __name__ == '__main__':
             use_geometric=args.use_geometric_verification,
             use_lightglue=args.use_lightglue,
             method='disk',
+            gv_threshold = args.gv_threshold,
             n_vertices=args.num_vertices,
             n_neighbors=args.num_neighbors,
             label_error_rate=args.label_error_rate,
             return_stats = True
         )
+        runtime = time.time() - start_time
         print(f"Estimated individuals: {estimate:.2f} \u00b1 {se:.2f}")
         print(stats)
         if args.save_count:
             row = {
                 "Dataset": dataset_name,
                 "Method": method,
-                "N": int(df["identity"].nunique()),
-                "M": int(len(df)),
-                "Sampled Pairs": int(sampled_pairs),
-                "Tau": np.nan,
-                "Tolerance": np.nan,
-                "Neighbor Ratio": args.num_neighbors / max(len(df) - 1, 1),
+                "Num Vertices": args.num_vertices,
+                "Num Neighbors": args.num_neighbors,
+                "Total Pairs": int(stats.get("total_pairs", 0)),
+                "GV Attempts": int(stats.get("gv_attempts", 0)),
+                "GV Passes": int(stats.get("gv_passes", 0)),
+                "Label Queries": int(stats.get("label_queries", 0)),
+                "Matches": int(stats.get("matches", 0)),
+                "Remove Background": args.remove_background,
+                "GMM Components": N_COMPONENTS_GMM,
+                "MAX GMM Descriptors": MAX_GMM_DESCRIPTORS,
+                "GV Threshold": args.gv_threshold,
                 "Error Rate": args.label_error_rate,
-                "Result": float(estimate),
+                "Result": round(float(estimate), 2),
+                "Std Error": round(float(se), 2),
+                "Runtime (minutes)": round(float(runtime) / 60, 2) ,
                 "Ground Truth": int(df["identity"].nunique()),
             }
             save_count_results(row)
