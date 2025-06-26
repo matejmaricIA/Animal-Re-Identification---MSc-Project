@@ -103,8 +103,12 @@ def compute_fisher_vector(reduced_stacked_descs, gmm):
         prob_k = responsibilities[:, k]  # Shape: (N,)
         diff = reduced_stacked_descs - means[k]  # Shape: (N, D)
 
-        fisher_mean[k] = np.sum(prob_k[:, np.newaxis] * diff / np.sqrt(covariances[k]), axis=0)
-        fisher_var[k] = np.sum(prob_k[:, np.newaxis] * (diff ** 2 - covariances[k]) / (2 * covariances[k] ** 1.5), axis=0)
+        # Looking back on how the implementation of fisher vectors should be done I think that this is wrong... Must investigate furhter.
+        #fisher_mean[k] = np.sum(prob_k[:, np.newaxis] * diff / np.sqrt(covariances[k]), axis=0)
+        #fisher_var[k] = np.sum(prob_k[:, np.newaxis] * (diff ** 2 - covariances[k]) / (2 * covariances[k] ** 1.5), axis=0)
+
+        fisher_mean[k] = (1.0 / (N * np.sqrt(weights[k]))) * np.sum(prob_k[:, np.newaxis] * diff / np.sqrt(covariances[k]), axis=0)
+        fisher_var[k] = (1.0 / (N * np.sqrt(2 * weights[k]))) * np.sum(prob_k[:, np.newaxis] * (diff ** 2 - covariances[k]) / (2 * covariances[k] ** 1.5), axis=0)
 
     # Flatten and concatenate mean and variance gradients
     fisher_vector = np.concatenate([fisher_mean.flatten(), fisher_var.flatten()])

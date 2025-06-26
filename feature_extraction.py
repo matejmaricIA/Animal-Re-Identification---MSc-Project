@@ -19,16 +19,19 @@ import numpy as np
 from kornia.feature import KeyNetAffNetHardNet
 import kornia as K
 
-from constants import MODEL_PATH, DATAFRAME_PATH, DEVICE, SAVE_TEST_DESCRIPTORS_PATH, SAVE_TRAIN_DESCRIPTORS_PATH, PATCH_SIZE, MULTISCALE_SCALES
+from constants import (MODEL_PATH, DATAFRAME_PATH, DEVICE, SAVE_TEST_DESCRIPTORS_PATH, SAVE_TRAIN_DESCRIPTORS_PATH,
+ PATCH_SIZE, MULTISCALE_SCALES, MAX_FEATURES_PER_SCALE, ENABLE_MULTISCALE)
 
 try:
-    from lightglue import SuperPoint, DISK, ALIKED, DoGHardNet, SIFT
+    import lightglue
+    from lightglue import SuperPoint, ALIKED, DoGHardNet, SIFT
     from lightglue.utils import load_image
     _LIGHTGLUE_AVAILABLE = True
 
 except Exception:
     _LIGHTGLUE_AVAILABLE = False
 
+import torch.nn.functional as F
 
 class ImageDataset(torch.utils.data.Dataset):
         def __init__(self, paths):
@@ -53,7 +56,68 @@ def get_image_paths(df):
     return img_locations
 
 
-def extract_features(image_paths, model_path, output_dir):
+def extract_features(image_paths, model_path, output_dir, max_keypoints=6000):
+    """Extract DISK features with optional multi-scale support."""
+
+    if _LIGHTGLUE_AVAILABLE:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        extractor = lightglue.DISK(max_num_keypoints=max_keypoints).to(device).eval()
+
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
+        desc_h5_path = Path(output_dir) / "descriptors.h5"
+        kp_h5_path = Path(output_dir) / "keypoints.h5"
+
+        with h5py.File(desc_h5_path, "w") as desc_h5, h5py.File(kp_h5_path, "w") as kp_h5:
+            for img_path in tqdm.tqdm(image_paths, desc="DISK features"):
+                img_id = Path(img_path).stem
+                image = load_image(img_path).to(device)
+
+                desc_list = []
+                kp_list = []
+                scales = MULTISCALE_SCALES if ENABLE_MULTISCALE else [1.0]
+                for scale in scales:
+                    if scale != 1.0:
+                        scaled = F.interpolate(image.unsqueeze(0), scale_factor=scale, mode="bilinear", align_corners=False).squeeze(0)
+                    else:
+                        scaled = image
+
+                    with torch.inference_mode():
+                        feats = extractor.extract(scaled)
+
+                    desc = feats["descriptors"]
+                    if desc.shape[0] in (128, 256) and desc.shape[1] > desc.shape[0]:
+                        desc = desc.t().contiguous()
+
+                    kp = feats["keypoints"]
+
+                    desc_np = desc.cpu().numpy().astype(np.float32)
+                    kp_np = kp.cpu().numpy().astype(np.float32)
+                    if scale != 1.0:
+                        kp_np /= scale
+
+                    if desc_np.shape[0] > MAX_FEATURES_PER_SCALE:
+                        desc_np = desc_np[:MAX_FEATURES_PER_SCALE]
+                        kp_np = kp_np[:MAX_FEATURES_PER_SCALE]
+
+                    desc_list.append(desc_np)
+                    kp_list.append(kp_np)
+
+                if not desc_list:
+                    continue
+
+                desc_np = np.concatenate(desc_list, axis=0)
+                kp_np = np.concatenate(kp_list, axis=0)
+
+                desc_h5.create_dataset(img_id, data=desc_np, compression="gzip")
+                kp_h5.create_dataset(img_id, data=kp_np, compression="gzip")
+
+                torch.cuda.empty_cache()
+
+        print(f"DISK features saved to {desc_h5_path}")
+        print(f"DISK keypoints saved to {kp_h5_path}")
+        return
+
+
     sys.path.append('./disk/')
     from disk import DISK
     import detect

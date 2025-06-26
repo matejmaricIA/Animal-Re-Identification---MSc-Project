@@ -51,6 +51,7 @@ if __name__ == '__main__':
                         help='Geometric verification distance threshold')
 
     args = parser.parse_args()
+    args.split_type = 'closed'
     dataset_name = args.ds
     method = args.method
     #use_splitter = False
@@ -359,6 +360,7 @@ if __name__ == '__main__':
             row = {
                 "Dataset": dataset_name,
                 "Method": method,
+                "Mutliscale Enabled": ENABLE_MULTISCALE,
                 "Num Vertices": args.num_vertices,
                 "Num Neighbors": args.num_neighbors,
                 "Total Pairs": int(stats.get("total_pairs", 0)),
@@ -375,5 +377,6 @@ if __name__ == '__main__':
                 "Std Error": round(float(se), 2),
                 "Runtime (minutes)": round(float(runtime) / 60, 2) ,
                 "Ground Truth": int(df["identity"].nunique()),
+                
             }
             save_count_results(row)

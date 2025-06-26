@@ -5,7 +5,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Segmentation Model
 ISNET_MODEL_NAME = 'isnet-general-use'
-SEGMENTATION_MODEL_TYPE = 'combined'
+SEGMENTATION_MODEL_TYPE = 'sam'
 SAM_ISNET_IOU_THETA = 0.3  # IoU threshold for SAM with ISNet
 
 SAM_MODEL_TYPE = 'vit_h'  # Options: vit_b, vit_l, vit_h
@@ -81,8 +81,8 @@ MAX_REASONABLE_INLIERS = 50       # Expected maximum inliers for normalization
 
 # For multi-scaling
 MULTISCALE_SCALES = [0.5, 1.0, 1.5]
-MAX_FEATURES_PER_SCALE = 1000  # Limit features to control memory usage
-ENABLE_MULTISCALE = True  # Toggle for easy comparison with single-scale
+MAX_FEATURES_PER_SCALE = 1500  # Limit features to control memory usage
+ENABLE_MULTISCALE = False  # Toggle for easy comparison with single-scale
 
 
 MAX_GMM_DESCRIPTORS = 1600000
