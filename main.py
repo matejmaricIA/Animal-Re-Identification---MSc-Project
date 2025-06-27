@@ -122,7 +122,7 @@ if __name__ == '__main__':
             os.makedirs(sub_dir, exist_ok=True)
             csv_path = f"{sub_dir}/processed_metadata.csv"
             if not os.path.exists(csv_path):
-                if dataset_name.lower() in ["SealID", "StripeSpotter", "SeaTurtleID", "SeaStarReID2023", "NDD20"]:
+                if dataset_name.lower() in ["BelugaID", "SealID", "StripeSpotter", "SeaTurtleID", "SeaStarReID2023", "NDD20"]:
                     args.remove_background = False
                 df = preprocessing.preprocess_dataset(
                     df_raw.copy(),
@@ -250,6 +250,24 @@ if __name__ == '__main__':
         if args.save_eval:
             #save_evaluation_results(metrics, ds_tag)
             save_evaluation_results(metrics, ds_tag, tag=tag)
+            row = {
+                "Dataset": dataset_name,
+                "Method": method,
+                "Remove Background": args.remove_background,
+                "GMM Components": N_COMPONENTS_GMM,
+                "PCA Components": N_COMPONENTS_PCA,
+                "Alpha (fv sim - gv)": ALPHA,
+                "Geom. Candidates": GEOMETRIC_CANDIDATES,
+                "Min Inliers": MIN_INLIERS,
+                "Inlier Threshold": INLIER_THRESHOLD,
+                "MAX GMM Descriptors": MAX_GMM_DESCRIPTORS,
+                "Multiscale Enabled": ENABLE_MULTISCALE,
+                "Run Time (minutes)": round((float(metrics["eval_runtime_sec"]) / 60), 2),
+                "Accuracy": round(float(metrics["accuracy"]), 4),
+                "Top-5 Accuracy": round(float(metrics["top_n_accuracy"]), 4)
+                
+            }
+            save_count_results(row, EVAL_RESULTS_XLSX)
         
         #_input = input("Create a full‑dataset DB? (yes/no) ")
         _input = 'no'
@@ -266,35 +284,6 @@ if __name__ == '__main__':
                 f"{base_dir}/db/fisher_vectors.pkl"))
             print("Database saved.")
         sys.exit(0)
-        
-    if args.predict:
-        if not args.image_location:
-            print("--image_location is required for prediction mode.")
-            sys.exit(1)
-
-        ds_tag = dataset_name
-        base_dir = f"./data/{ds_tag}"
-
-        query_paths = [os.path.join(args.image_location, p) for p in os.listdir(args.image_location)]
-        tmp_dir = preprocessing.preprocess_inference(
-            query_paths,
-            use_mantiuk=args.use_mantiuk,
-            remove_background=args.remove_background,
-        )
-
-        query_imgs = [os.path.join(tmp_dir, p) for p in os.listdir(tmp_dir)]
-        extract_features(query_imgs, MODEL_PATH, TMP)
-
-        pca, gmm, fv_db = load_stuff(
-            f"{base_dir}/db/pca.pkl",
-            f"{base_dir}/db/gmm.pkl",
-            f"{base_dir}/db/fisher_vectors.pkl",
-        )
-
-        query_desc = load_descriptors(TMP + "descriptors.h5")
-        fv_query = compute_fisher_vectors(query_desc, pca, gmm)
-        predict(fv_query, fv_db, ds_tag)
-        shutil.rmtree(TMP)
         
     if args.count:
         start_time = time.time()

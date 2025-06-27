@@ -11,7 +11,7 @@ def classify_test_images_with_geometric_verification(
     test_fisher_vectors, train_fisher_vectors, 
     test_keypoints, train_keypoints,
     test_descriptors, train_descriptors,
-    train_labels, top_n=5, geometric_candidates=20, use_lightglue=False, method = 'disk'):
+    train_labels, top_n=5, geometric_candidates=GEOMETRIC_CANDIDATES, use_lightglue=False, method = 'disk', alpha = ALPHA, min_inliers = MIN_INLIERS):
     """Efficient geometric verification with two-stage filtering"""
     
     predictions = {}
@@ -86,7 +86,7 @@ def classify_test_images_with_geometric_verification(
                     print(f"    Verifying candidate {j+1}/{len(top_indices)}: {train_image_id}")
                 
                 final_distance, n_inliers = compute_geometric_similarity(
-                    query_desc, query_kp, train_desc, train_kp, fisher_distance, use_lightglue=use_lightglue, method = method
+                    query_desc, query_kp, train_desc, train_kp, fisher_distance, use_lightglue=use_lightglue, method = method, alpha = alpha, min_inliers = min_inliers
                 )
                 
                 total_geometric_verifications += 1

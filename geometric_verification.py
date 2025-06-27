@@ -10,7 +10,8 @@ from constants import (
     POOR_GEOMETRY_PENALTY,
     FISHER_DISTANCE_MIN_CLAMP,
     FISHER_DISTANCE_MAX_CLAMP,
-    NORMALIZED_THRESHOLD_DIVISOR, MAX_INLIERS_FOR_SCALING
+    NORMALIZED_THRESHOLD_DIVISOR, MAX_INLIERS_FOR_SCALING,
+    ALPHA
 )
 from utils.distance_utils import fisher_distance
 
@@ -130,43 +131,6 @@ def match_features_lightglue(desc1, desc2, kp1, kp2, method='disk'):
         matched_kp2 = kp2[matches_arr[:, 1]] if len(matches_arr) else np.empty((0, 2))
         return matches_arr, matched_kp1, matched_kp2
 
-def geometric_verification_ransac_debug(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, 
-                                       min_matches=MIN_MATCHES):
-    """Debug version to see what's happening"""
-    if len(kp1) < min_matches or len(kp2) < min_matches:
-        return 0, None
-    
-    kp1_norm = normalize_coordinates(kp1)
-    kp2_norm = normalize_coordinates(kp2)
-    
-    actual_threshold = inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR
-    print(f"DEBUG: Using RANSAC threshold: {actual_threshold:.6f}")
-    print(f"DEBUG: Input keypoints: {len(kp1)} vs {len(kp2)}")
-    
-    try:
-        H, mask = cv2.findHomography(
-            kp1_norm.reshape(-1, 1, 2),
-            kp2_norm.reshape(-1, 1, 2),
-            cv2.RANSAC,
-            ransacReprojThreshold=actual_threshold
-        )
-        
-        if H is not None and mask is not None:
-            n_inliers = np.sum(mask.ravel())
-            inlier_percentage = (n_inliers / len(kp1)) * 100
-            print(f"DEBUG: Found {n_inliers} inliers ({inlier_percentage:.1f}%)")
-            
-            # Sanity check - if >50% are inliers, something is wrong
-            if inlier_percentage > 50:
-                print(f"WARNING: Suspiciously high inlier percentage!")
-            
-            return n_inliers, H
-        else:
-            return 0, None
-            
-    except cv2.error as e:
-        print(f"DEBUG: RANSAC failed: {e}")
-        return 0, None
 
 
 def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, min_matches=MIN_MATCHES):
@@ -207,7 +171,7 @@ def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, m
     
 def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
                                 fisher_distance, min_inliers=MIN_INLIERS,
-                                use_lightglue=False, method = 'disk'):
+                                use_lightglue=False, method = 'disk', alpha = ALPHA):
     """Compute geometric similarity and combine with Fisher distance"""
     
     # Match features
@@ -249,7 +213,7 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
     #normalized_inliers = min(n_inliers / 50.0, 1.0)  # Assume max 50 reasonable inliers
     
     # Combine: 40% Fisher distance + 60% geometric penalty
-    alpha = 0.35
+    #alpha = 0.35
     #final_distance = alpha * fisher_distance + (1 - alpha) * (1 - normalized_inliers)
     final_distance = alpha * fisher_scaled + (1 - alpha) * geo_score
     

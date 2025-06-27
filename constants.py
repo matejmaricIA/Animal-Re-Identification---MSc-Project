@@ -5,7 +5,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Segmentation Model
 ISNET_MODEL_NAME = 'isnet-general-use'
-SEGMENTATION_MODEL_TYPE = 'sam'
+SEGMENTATION_MODEL_TYPE = 'isnet'
 SAM_ISNET_IOU_THETA = 0.3  # IoU threshold for SAM with ISNet
 
 SAM_MODEL_TYPE = 'vit_h'  # Options: vit_b, vit_l, vit_h
@@ -35,7 +35,7 @@ SAVE_TRAIN_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_train/'
 SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
 
 # PCA and GMM Components
-N_COMPONENTS_GMM = 256 # Preko 128 ne ide!
+N_COMPONENTS_GMM = 2 # Preko 128 ne ide!
 N_COMPONENTS_PCA = 96 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
@@ -50,9 +50,10 @@ DB_PATH = './data/{}/db/'
 TMP = './data/tmp/'
 
 # Evaluation results directory
-EVALUATION_DIR = './evaluations/'
+EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
 COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/classification/classification_results.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 
@@ -70,6 +71,7 @@ POOR_GEOMETRY_PENALTY = 5.0     # Penalty multiplier for poor geometric consiste
 FISHER_DISTANCE_MIN_CLAMP = 0.01     # Minimum clamp value for Fisher distance
 FISHER_DISTANCE_MAX_CLAMP = 1.0      # Maximum clamp value for Fisher distance
 NORMALIZED_THRESHOLD_DIVISOR = 100.0 # Divisor for normalizing RANSAC threshold
+GEOMETRIC_CANDIDATES = 20
 
 # Geometric Verification Scaling Constants
 MAX_INLIERS_FOR_SCALING = 20      # Cap inliers at this value for exponential formula
@@ -80,9 +82,12 @@ SIGMOID_MIDPOINT = 20             # Midpoint for sigmoid scaling
 MAX_REASONABLE_INLIERS = 50       # Expected maximum inliers for normalization
 
 # For multi-scaling
-MULTISCALE_SCALES = [0.5, 1.0, 1.5]
-MAX_FEATURES_PER_SCALE = 1500  # Limit features to control memory usage
+MULTISCALE_SCALES = [0.75, 1.0, 1.25]
+MAX_FEATURES_PER_SCALE = 2000  # Limit features to control memory usage
 ENABLE_MULTISCALE = False  # Toggle for easy comparison with single-scale
 
 
 MAX_GMM_DESCRIPTORS = 1600000
+
+# Tradeoff between geomtric verification and fisher similarity
+ALPHA = 0.35

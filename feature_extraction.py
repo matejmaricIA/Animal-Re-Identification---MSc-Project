@@ -56,7 +56,7 @@ def get_image_paths(df):
     return img_locations
 
 
-def extract_features(image_paths, model_path, output_dir, max_keypoints=6000):
+def extract_features(image_paths, model_path, output_dir, max_keypoints=5000):
     """Extract DISK features with optional multi-scale support."""
 
     if _LIGHTGLUE_AVAILABLE:
@@ -83,24 +83,27 @@ def extract_features(image_paths, model_path, output_dir, max_keypoints=6000):
 
                     with torch.inference_mode():
                         feats = extractor.extract(scaled)
+                        #print(feats.keys())
 
-                    desc = feats["descriptors"]
-                    if desc.shape[0] in (128, 256) and desc.shape[1] > desc.shape[0]:
-                        desc = desc.t().contiguous()
+                        desc = feats["descriptors"]
+                        kp = feats["keypoints"]
+                        if len(desc.shape) == 3:
+                            desc = desc.squeeze(0)
+                            kp = kp.squeeze(0)
 
-                    kp = feats["keypoints"]
+                        
 
-                    desc_np = desc.cpu().numpy().astype(np.float32)
-                    kp_np = kp.cpu().numpy().astype(np.float32)
-                    if scale != 1.0:
-                        kp_np /= scale
+                        desc_np = desc.cpu().numpy().astype(np.float32)
+                        kp_np = kp.cpu().numpy().astype(np.float32)
+                        if scale != 1.0:
+                            kp_np /= scale
 
-                    if desc_np.shape[0] > MAX_FEATURES_PER_SCALE:
-                        desc_np = desc_np[:MAX_FEATURES_PER_SCALE]
-                        kp_np = kp_np[:MAX_FEATURES_PER_SCALE]
+                        if desc_np.shape[0] > MAX_FEATURES_PER_SCALE:
+                            desc_np = desc_np[:MAX_FEATURES_PER_SCALE]
+                            kp_np = kp_np[:MAX_FEATURES_PER_SCALE]
 
-                    desc_list.append(desc_np)
-                    kp_list.append(kp_np)
+                        desc_list.append(desc_np)
+                        kp_list.append(kp_np)
 
                 if not desc_list:
                     continue
