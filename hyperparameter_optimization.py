@@ -1,6 +1,6 @@
 import optuna
 from sklearn.metrics import accuracy_score
-from feature_aggregation import train_pca, train_gmm, compute_fisher_vectors
+from feature_aggregation import train_pca, train_gmm, compute_fisher_vectors, stack_all_descriptors
 from predict import classify_test_images_with_geometric_verification, evaluate_predictions
 
 def objective(trial):
@@ -11,6 +11,17 @@ def objective(trial):
     alpha = trial.suggest_float('alpha', 0.1, 0.9, step=0.05)  # weight between Fisher and geometric verification
     geometric_candidates = trial.suggest_int('geometric_candidates', 5, 50, step = 5)
     inlier_threshold = trial.suggest_float('inlier_threshold', 0.1, 0.9, step = 0.1)
+
+    method = 'disk'
+
+    train_dict = load_descriptors(f"{base_dir}/feature_descriptors_train_{method}/descriptors.h5")
+    test_dict = load_descriptors(f"{base_dir}/feature_descriptors_test_{method}/descriptors.h5")
+    
+    train_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_train_{method}/keypoints.h5")
+    test_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_test_{method}/keypoints.h5")
+    
+    stacked_descriptors_train = stack_all_descriptors(train_dict, max_samples = MAX_GMM_DESCRIPTORS)
+    desc_te = stack_all_descriptors(test_dict, max_samples = MAX_GMM_DESCRIPTORS)
 
     # PCA and GMM training
     pca_model = train_pca(stacked_descriptors_train, n_components=n_pca)
@@ -30,10 +41,21 @@ def objective(trial):
         use_lightglue=True,
         alpha = alpha,
         min_inliers = min_inliers,
-        
+        inlier_threshold = inlier_threshold
+
     )
+    #test_fisher_vectors, train_fisher_vectors, 
+    #test_keypoints, train_keypoints,
+    #test_descriptors, train_descriptors,
+    #train_labels, top_n=5, geometric_candidates=GEOMETRIC_CANDIDATES, use_lightglue=False, method = 'disk', alpha = ALPHA, min_inliers = MIN_INLIERS, inlier_threshold = inlier_threshold
 
     # Evaluate predictions
     accuracy = evaluate_predictions(predictions, true_labels_test)
 
     return accuracy  # Optuna maximizes by default
+
+if __name__ == '__main__':
+    study = optuna.create_study(direction = 'maximize')
+    study.optimize(objective, n_trials = 100)
+
+    print("Best parameters: ", study.best_params)

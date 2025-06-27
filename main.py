@@ -261,6 +261,8 @@ if __name__ == '__main__':
             save_evaluation_results(metrics, ds_tag, tag=tag)
             row = {
                 "Dataset": dataset_name,
+                "Training Examples": len(df_train.index),
+                "Num Classes": df_train['identity'].nunique(),
                 "Method": method,
                 "Remove Background": args.remove_background,
                 "GMM Components": N_COMPONENTS_GMM,
@@ -274,7 +276,8 @@ if __name__ == '__main__':
                 "Multiscale Enabled": ENABLE_MULTISCALE,
                 "Run Time (minutes)": round((float(metrics["eval_runtime_sec"]) / 60), 2),
                 "Accuracy": round(float(metrics["accuracy"]), 4),
-                "Top-5 Accuracy": round(float(metrics["top_n_accuracy"]), 4)
+                "Top-5 Accuracy": round(float(metrics["top_n_accuracy"]), 4),
+                "F-1 Score": round(float(metrics["classification_metrics"]["weighted avg"]["f1-score"]), 4)
                 
             }
             save_count_results(row, EVAL_RESULTS_XLSX)

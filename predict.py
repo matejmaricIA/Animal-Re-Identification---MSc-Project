@@ -11,7 +11,7 @@ def classify_test_images_with_geometric_verification(
     test_fisher_vectors, train_fisher_vectors, 
     test_keypoints, train_keypoints,
     test_descriptors, train_descriptors,
-    train_labels, top_n=5, geometric_candidates=GEOMETRIC_CANDIDATES, use_lightglue=False, method = 'disk', alpha = ALPHA, min_inliers = MIN_INLIERS):
+    train_labels, top_n=5, geometric_candidates=GEOMETRIC_CANDIDATES, use_lightglue=False, method = 'disk', alpha = ALPHA, min_inliers = MIN_INLIERS, inlier_threshold = INLIER_THRESHOLD):
     """Efficient geometric verification with two-stage filtering"""
     
     predictions = {}
