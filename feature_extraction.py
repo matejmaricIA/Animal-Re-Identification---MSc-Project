@@ -49,9 +49,11 @@ class ImageDataset(torch.utils.data.Dataset):
             return Path(path).stem, tens
 
 
-def get_image_paths(df):
+def get_image_paths(df, remove_background = True):
+    if remove_background:
+        img_locations = (df['processed_path_segmented'] + "/" + df['image_id'].apply(str) + '.jpg').tolist()
+        return img_locations
     img_locations = (df['processed_path'] + "/" + df['image_id'].apply(str) + '.jpg').tolist()
-    
     #print(img_locations)
     return img_locations
 

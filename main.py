@@ -41,7 +41,7 @@ if __name__ == '__main__':
     parser.add_argument('--version', type=str, default='1', help='Identifier for the current method version')
     parser.add_argument('--method', type = str, default = 'disk', help='Feature extraction method to use')
     parser.add_argument('--use_geometric_verification', action='store_true', help='Use geometric verification during prediction', default=False)
-    parser.add_argument('--use_lightglue', action ='store_true', help='Use LightGlue for feature matching when performing geometric verification', default=False)
+    parser.add_argument('--use_lightglue', action ='store_true', help='Use LightGlue for feature matching when performing geometric verification', default=True)
     parser.add_argument('--num_vertices', type=int, default=100, help='Vertices sampled in Nested-IS')
     parser.add_argument('--num_neighbors', type=int, default=10, help='Neighbors sampled per vertex in Nested-IS')
     parser.add_argument('--save_count', action='store_true', help='Save population estimation results to XLSX')
@@ -100,33 +100,42 @@ if __name__ == '__main__':
         # ── Pre‑processing (tone map / background removal) ──
         if dataset_name.lower() == "full":
             processed_frames = []
-            for sub_name, sub_df in df_raw.groupby("dataset"):
-                sub_dir = f"./data/{sub_name}"
-                os.makedirs(sub_dir, exist_ok=True)
-                csv_path = f"{sub_dir}/processed_metadata.csv"
-                if not os.path.exists(csv_path):
-                    processed = preprocessing.preprocess_dataset(
-                        sub_df.copy(),
-                        f"{sub_dir}/segmented_dataset/",
-                        sub_name,
-                        use_mantiuk=args.use_mantiuk,
-                        remove_background=args.remove_background,
-                    )
-                    processed.to_csv(csv_path, index=False)
-                else:
-                    processed = pd.read_csv(csv_path)
-                processed_frames.append(processed)
-            df = pd.concat(processed_frames, ignore_index=True)
+        #    for sub_name, sub_df in df_raw.groupby("dataset"):
+        #        sub_dir = f"./data/{sub_name}"
+        #        os.makedirs(sub_dir, exist_ok=True)
+        #        csv_path = f"{sub_dir}/processed_metadata.csv"
+        #        if not os.path.exists(csv_path):
+        #            processed = preprocessing.preprocess_dataset(
+        #                sub_df.copy(),
+        #                f"{sub_dir}/segmented_dataset/",
+        #                sub_name,
+        #                use_mantiuk=args.use_mantiuk,
+        #                remove_background=args.remove_background,
+        #            )
+        #            processed.to_csv(csv_path, index=False)
+        #        else:
+        #            processed = pd.read_csv(csv_path)
+        #        processed_frames.append(processed)
+        #    df = pd.concat(processed_frames, ignore_index=True)
         else:
             sub_dir = f"./data/{dataset_name}"
             os.makedirs(sub_dir, exist_ok=True)
+
+            
+
             csv_path = f"{sub_dir}/processed_metadata.csv"
             if not os.path.exists(csv_path):
+                
                 if dataset_name.lower() in ["BelugaID", "SealID", "StripeSpotter", "SeaTurtleID", "SeaStarReID2023", "NDD20"]:
                     args.remove_background = False
+                
+                # Keep different folders for segmented and unsegmented dataset
+                output_dir_preprocess = 'dataset'
+                if args.remove_background:
+                    output_dir_preprocess = 'segmented_dataset'
                 df = preprocessing.preprocess_dataset(
                     df_raw.copy(),
-                    f"{sub_dir}/segmented_dataset/",
+                    f"{sub_dir}/{output_dir_preprocess}/",
                     dataset_name,
                     use_mantiuk=args.use_mantiuk,
                     remove_background=args.remove_background,
@@ -160,16 +169,16 @@ if __name__ == '__main__':
         # ── Feature extraction ──
         if not os.path.isdir(f"{base_dir}/feature_descriptors_train_{method}/"):
             if method == 'disk':
-                extract_features(get_image_paths(df_train), MODEL_PATH, f"{base_dir}/feature_descriptors_train_{method}/")
-                extract_features(get_image_paths(df_test), MODEL_PATH, f"{base_dir}/feature_descriptors_test_{method}/")
+                extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, f"{base_dir}/feature_descriptors_train_{method}/")
+                extract_features(get_image_paths(df_test, args.remove_background), MODEL_PATH, f"{base_dir}/feature_descriptors_test_{method}/")
                 
             elif method == 'keynet_hardnet':
-                extract_features_keynet_hardnet_faster(get_image_paths(df_train), f"{base_dir}/feature_descriptors_train_{method}/")
-                extract_features_keynet_hardnet_faster(get_image_paths(df_test), f"{base_dir}/feature_descriptors_test_{method}/")
+                extract_features_keynet_hardnet_faster(get_image_paths(df_train, args.remove_background), f"{base_dir}/feature_descriptors_train_{method}/")
+                extract_features_keynet_hardnet_faster(get_image_paths(df_test, args.remove_background), f"{base_dir}/feature_descriptors_test_{method}/")
 
             elif method == 'lightglue':
-                extract_features_lightglue(get_image_paths(df_train), f"{base_dir}/feature_descriptors_train_{method}/")
-                extract_features_lightglue(get_image_paths(df_test), f"{base_dir}/feature_descriptors_test_{method}/")
+                extract_features_lightglue(get_image_paths(df_train, args.remove_background), f"{base_dir}/feature_descriptors_train_{method}/")
+                extract_features_lightglue(get_image_paths(df_test, args.remove_background), f"{base_dir}/feature_descriptors_test_{method}/")
 
         else:
             already_trained = True
@@ -256,6 +265,7 @@ if __name__ == '__main__':
                 "Remove Background": args.remove_background,
                 "GMM Components": N_COMPONENTS_GMM,
                 "PCA Components": N_COMPONENTS_PCA,
+                "Use GV": args.use_geometric_verification,
                 "Alpha (fv sim - gv)": ALPHA,
                 "Geom. Candidates": GEOMETRIC_CANDIDATES,
                 "Min Inliers": MIN_INLIERS,
@@ -272,7 +282,7 @@ if __name__ == '__main__':
         #_input = input("Create a full‑dataset DB? (yes/no) ")
         _input = 'no'
         if _input.strip().lower() == "yes":
-            extract_features(get_image_paths(df), MODEL_PATH, f"{base_dir}/db/")
+            extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, f"{base_dir}/db/")
             db_dict = load_descriptors(f"{base_dir}/db/descriptors.h5")
             desc = stack_all_descriptors(db_dict, max_samples = MAX_GMM_DESCRIPTORS)
             pca_db = train_pca(desc)
@@ -309,9 +319,9 @@ if __name__ == '__main__':
 
         feat_dir = f"{base_dir}/feature_descriptors_{method}/"
         if not os.path.isdir(feat_dir) and method == 'disk':
-            extract_features(get_image_paths(df), MODEL_PATH, feat_dir)
+            extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, feat_dir)
         elif not os.path.isdir(feat_dir) and method == 'keynet_hardnet':
-            extract_features_keynet_hardnet_faster(get_image_paths(df), feat_dir)
+            extract_features_keynet_hardnet_faster(get_image_paths(df, args.remove_background), feat_dir)
         descriptors = load_descriptors(os.path.join(feat_dir, "descriptors.h5"))
         keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
 

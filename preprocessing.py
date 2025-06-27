@@ -154,7 +154,7 @@ def preprocess_dataset(df, output_dir, dataset_name, use_mantiuk = True, remove_
     
     args = [(row, output_dir, use_mantiuk, dataset_name, remove_background) for _, row in df.iterrows()]
     
-    # Process sequentially instead of using multiprocessing
+    # Process sequentially
     processed_paths = []
     #index = 0
     for arg in tqdm(args, desc = "Preprocessing images", unit = "image"):
@@ -162,7 +162,10 @@ def preprocess_dataset(df, output_dir, dataset_name, use_mantiuk = True, remove_
         processed_paths.append(processed_path)
         #print(f"Processed image {index}/{len(args)}")
         #index += 1
-    df['processed_path'] = processed_paths
+    if remove_background:
+        df['processed_path_segmented'] = processed_paths
+    else:
+        df['processed_path'] = processed_paths
     return df
         
 def preprocess_inference(image_paths, use_mantiuk=False, remove_background=False):
