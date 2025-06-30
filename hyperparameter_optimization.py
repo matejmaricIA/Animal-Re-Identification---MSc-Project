@@ -16,7 +16,7 @@ from feature_aggregation import (
 from predict import classify_test_images_with_geometric_verification
 from evaluate import evaluate_predictions
 from utility_functions import load_dataset, save_count_results
-from constants import MAX_GMM_DESCRIPTORS, ENABLE_MULTISCALE, EVAL_RESULTS_XLSX
+from constants import MAX_GMM_DESCRIPTORS, ENABLE_MULTISCALE, EVAL_RESULTS_XLSX, MAX_DESCRIPTORS_PER_IMAGE
 
 def optimise_dataset(dataset: str, trials: int = 50):
     """Run Optuna hyperparameter search on a single dataset."""
@@ -132,7 +132,7 @@ def optimise_dataset(dataset: str, trials: int = 50):
                 "Geom. Candidates": geometric_candidates,
                 "Min Inliers": min_inliers,
                 "Inlier Threshold": inlier_threshold,
-                "MAX GMM Descriptors": MAX_GMM_DESCRIPTORS,
+                "MAX GMM Descriptors (per image)": MAX_DESCRIPTORS_PER_IMAGE,
                 "Multiscale Enabled": ENABLE_MULTISCALE,
                 "Run Time (minutes)": round(metrics["eval_runtime_sec"] / 60, 2),
                 "Accuracy": round(float(metrics["accuracy"]), 4),
@@ -166,4 +166,4 @@ if __name__ == "__main__":
         "StripeSpotter",
         "Giraffes",
     ]
-    optimise_all(DATASETS, trials = 25)
+    optimise_all(DATASETS, trials = 10)

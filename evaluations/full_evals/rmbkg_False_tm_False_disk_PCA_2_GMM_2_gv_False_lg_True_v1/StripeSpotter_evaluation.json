@@ -1,0 +1,272 @@
+{
+    "accuracy": 0.20869565217391303,
+    "top_n_accuracy": 0.43478260869565216,
+    "classification_metrics": {
+        "StripeSpotter_01_036": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "StripeSpotter_01_136": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_01_165": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "StripeSpotter_01_230": {
+            "precision": 0.2,
+            "recall": 0.2,
+            "f1-score": 0.2,
+            "support": 5.0
+        },
+        "StripeSpotter_01_363": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_01_460": {
+            "precision": 0.3333333333333333,
+            "recall": 0.6,
+            "f1-score": 0.42857142857142855,
+            "support": 5.0
+        },
+        "StripeSpotter_01_579": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_01_661": {
+            "precision": 0.4,
+            "recall": 0.25,
+            "f1-score": 0.3076923076923077,
+            "support": 8.0
+        },
+        "StripeSpotter_01_679": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "StripeSpotter_01_737": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "StripeSpotter_01_805": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "StripeSpotter_02_1026": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_02_149": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "StripeSpotter_02_161": {
+            "precision": 0.16666666666666666,
+            "recall": 0.2,
+            "f1-score": 0.18181818181818182,
+            "support": 5.0
+        },
+        "StripeSpotter_02_162": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "StripeSpotter_03_045": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "StripeSpotter_04_008": {
+            "precision": 0.4,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.3333333333333333,
+            "support": 7.0
+        },
+        "StripeSpotter_08_034": {
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "f1-score": 0.4,
+            "support": 2.0
+        },
+        "StripeSpotter_08_078": {
+            "precision": 0.14285714285714285,
+            "recall": 0.5,
+            "f1-score": 0.2222222222222222,
+            "support": 2.0
+        },
+        "StripeSpotter_08_085": {
+            "precision": 0.2857142857142857,
+            "recall": 0.5,
+            "f1-score": 0.36363636363636365,
+            "support": 4.0
+        },
+        "StripeSpotter_08_100": {
+            "precision": 0.3333333333333333,
+            "recall": 0.2,
+            "f1-score": 0.25,
+            "support": 5.0
+        },
+        "StripeSpotter_09_167": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_09_182": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "StripeSpotter_09_185": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_09_200": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "StripeSpotter_09_212": {
+            "precision": 0.25,
+            "recall": 0.2,
+            "f1-score": 0.2222222222222222,
+            "support": 5.0
+        },
+        "StripeSpotter_09_355": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "StripeSpotter_09_364": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_10_002": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "StripeSpotter_10_005": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "StripeSpotter_OP04_225": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "StripeSpotter_OP05_546": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_OP05_625": {
+            "precision": 0.16666666666666666,
+            "recall": 0.2,
+            "f1-score": 0.18181818181818182,
+            "support": 5.0
+        },
+        "StripeSpotter_S09_067": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 3.0
+        },
+        "StripeSpotter_S09_069": {
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "f1-score": 0.4,
+            "support": 4.0
+        },
+        "StripeSpotter_S09_086": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_S09_088": {
+            "precision": 0.16666666666666666,
+            "recall": 0.2,
+            "f1-score": 0.18181818181818182,
+            "support": 5.0
+        },
+        "StripeSpotter_S09_112": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "StripeSpotter_S09_174": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_S09_175": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "StripeSpotter_S09_211": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "StripeSpotter_S09_215": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "accuracy": 0.20869565217391303,
+        "macro avg": {
+            "precision": 0.1669501133786848,
+            "recall": 0.18259637188208616,
+            "f1-score": 0.1628523592809307,
+            "support": 115.0
+        },
+        "weighted avg": {
+            "precision": 0.20879917184265007,
+            "recall": 0.20869565217391303,
+            "f1-score": 0.19558060297190732,
+            "support": 115.0
+        }
+    },
+    "eval_runtime_sec": 56.12513732910156
+}

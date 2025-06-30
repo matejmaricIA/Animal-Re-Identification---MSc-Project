@@ -191,8 +191,8 @@ if __name__ == '__main__':
         train_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_train_{method}/keypoints.h5")
         test_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_test_{method}/keypoints.h5")
         
-        desc_tr = stack_all_descriptors(train_dict, max_samples = MAX_GMM_DESCRIPTORS)
-        desc_te = stack_all_descriptors(test_dict, max_samples = MAX_GMM_DESCRIPTORS)
+        desc_tr = stack_all_descriptors(train_dict)
+        desc_te = stack_all_descriptors(test_dict)
         
         pca_path = f"{base_dir}/pca_model_{method}.pkl"
         gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
@@ -272,7 +272,7 @@ if __name__ == '__main__':
                 "Geom. Candidates": GEOMETRIC_CANDIDATES,
                 "Min Inliers": MIN_INLIERS,
                 "Inlier Threshold": INLIER_THRESHOLD,
-                "MAX GMM Descriptors": MAX_GMM_DESCRIPTORS,
+                "MAX GMM Descriptors (per image)": MAX_DESCRIPTORS_PER_IMAGE,
                 "Multiscale Enabled": ENABLE_MULTISCALE,
                 "Run Time (minutes)": round((float(metrics["eval_runtime_sec"]) / 60), 2),
                 "Accuracy": round(float(metrics["accuracy"]), 4),
@@ -287,7 +287,7 @@ if __name__ == '__main__':
         if _input.strip().lower() == "yes":
             extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, f"{base_dir}/db/")
             db_dict = load_descriptors(f"{base_dir}/db/descriptors.h5")
-            desc = stack_all_descriptors(db_dict, max_samples = MAX_GMM_DESCRIPTORS)
+            desc = stack_all_descriptors(db_dict)
             pca_db = train_pca(desc)
             gmm_db = train_gmm(pca_db.transform(desc))
             fv_db = compute_fisher_vectors(db_dict, pca_db, gmm_db)
@@ -334,7 +334,7 @@ if __name__ == '__main__':
         if os.path.exists(fv_path):
             pca, gmm, fisher_vectors = load_stuff(pca_path, gmm_path, fv_path)
         else:
-            desc_stack = stack_all_descriptors(descriptors, max_samples=MAX_GMM_DESCRIPTORS)
+            desc_stack = stack_all_descriptors(descriptors)
             pca = train_pca(desc_stack)
             gmm = train_gmm(pca.transform(desc_stack))
             fisher_vectors = compute_fisher_vectors(descriptors, pca, gmm)

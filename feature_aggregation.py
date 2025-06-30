@@ -4,7 +4,12 @@ import numpy as np
 import argparse
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
-from constants import N_COMPONENTS_GMM, N_COMPONENTS_PCA, MAX_GMM_DESCRIPTORS
+from constants import (
+    N_COMPONENTS_GMM,
+    N_COMPONENTS_PCA,
+    MAX_GMM_DESCRIPTORS,
+    MAX_DESCRIPTORS_PER_IMAGE,
+)
 
 
 def load_descriptors(descriptors_file):
@@ -27,7 +32,7 @@ def load_keypoints(keypoints_file):
         print(f"Loaded keypoints for {len(data)} images from {keypoints_file}")
         return data
 
-def stack_all_descriptors(descriptors, max_samples=None):
+def stack_all_descriptors(descriptors, max_samples=None, per_image_max = MAX_DESCRIPTORS_PER_IMAGE):
     """Stack descriptors from all images.
 
     If ``max_samples`` is provided, a random subset of descriptors with at most
@@ -35,37 +40,43 @@ def stack_all_descriptors(descriptors, max_samples=None):
     training PCA and GMM on large datasets.
     """
 
-    arrays = [d for d in descriptors.values() if len(d) > 0]
+    #arrays = [d for d in descriptors.values() if len(d) > 0]
+    rng = np.random.default_rng()
+    arrays = []
+    for d in descriptors.values():
+        if len(d) == 0:
+            continue
+        if per_image_max is not None and len(d) > per_image_max:
+            idx = rng.choice(len(d), size=per_image_max, replace=False)
+            arrays.append(d[idx])
+        else:
+            arrays.append(d)
     if not arrays:
         return np.empty((0, 0))
 
     if max_samples is None:
         return np.vstack(arrays)
 
-    rng = np.random.default_rng()
+    #rng = np.random.default_rng()
 
-    lengths = np.array([len(a) for a in arrays])
-    total = lengths.sum()
+    #lengths = np.array([len(a) for a in arrays])
+    #total = lengths.sum()
 
     # If the total number of descriptors is less than the desired sample,
     # fall back to using all descriptors.
-    if total <= max_samples:
-        print('Using all descriptors, total:', total)
-        return np.vstack(arrays)
 
-    samples = []
-    for arr, L in zip(arrays, lengths):
-        n = int(round(L / total * max_samples))
-        n = min(n, len(arr))
-        if n > 0:
-            idx = rng.choice(len(arr), size=n, replace=False)
-            samples.append(arr[idx])
+    stacked = np.vstack(arrays)
+    total = stacked.shape[0]
+    #if total <= max_samples:
+    #    print('Using all descriptors, total:', total)
+    #    return np.vstack(arrays)
+    if not max_samples:
+        print('Using all descriptors, total:', total)
+        return stacked
     
 
-    stacked = np.vstack(samples)
-    if stacked.shape[0] > max_samples:
-        idx = rng.choice(stacked.shape[0], size=max_samples, replace=False)
-        stacked = stacked[idx]
+    idx = rng.choice(total, size=max_samples, replace=False)
+    stacked = stacked[idx]
     print(f"Number of total descriptors: {stacked.shape}")
     return stacked
 
