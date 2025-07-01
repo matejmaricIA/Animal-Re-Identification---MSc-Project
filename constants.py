@@ -5,7 +5,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Segmentation Model
 ISNET_MODEL_NAME = 'isnet-general-use'
-SEGMENTATION_MODEL_TYPE = 'isnet'
+SEGMENTATION_MODEL_TYPE = 'sam'
 SAM_ISNET_IOU_THETA = 0.3  # IoU threshold for SAM with ISNet
 
 SAM_MODEL_TYPE = 'vit_h'  # Options: vit_b, vit_l, vit_h
@@ -87,9 +87,9 @@ MAX_FEATURES_PER_SCALE = 2000  # Limit features to control memory usage
 ENABLE_MULTISCALE = False  # Toggle for easy comparison with single-scale
 
 
-MAX_GMM_DESCRIPTORS = 2000000000
+MAX_GMM_DESCRIPTORS = 2000000
 # Cap descriptors contributed by each image when stacking for PCA/GMM training.
-MAX_DESCRIPTORS_PER_IMAGE = None # None - keep all of the descriptors
+MAX_DESCRIPTORS_PER_IMAGE = 5000
 
 # Tradeoff between geomtric verification and fisher similarity
 ALPHA = 0.35

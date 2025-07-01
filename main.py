@@ -142,7 +142,9 @@ if __name__ == '__main__':
             
 
             csv_path = f"{sub_dir}/processed_metadata.csv"
-            if not os.path.exists(csv_path):
+            dataset_path = f"{sub_dir}/dataset"
+            segmented_dataset_path = f"{sub_dir}/segmented_dataset"
+            if not os.path.exists(csv_path) or ((not os.path.exists(dataset_path) and not args.remove_background) or (not os.path.exists(segmented_dataset_path) and args.remove_background)):
                 
                 if dataset_name.lower() in ["BelugaID", "SealID", "StripeSpotter", "SeaTurtleID", "SeaStarReID2023", "NDD20"]:
                     args.remove_background = False

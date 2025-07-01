@@ -6,7 +6,12 @@ from rembg import remove, new_session
 import argparse
 from constants import *
 from tqdm import tqdm
-
+import cv2, torch, numpy as np, json, os
+from pathlib import Path
+from segment_anything import sam_model_registry, SamPredictor, SamAutomaticMaskGenerator
+from rembg import remove, new_session
+import pandas as pd
+import torch
 
 if SEGMENTATION_MODEL_TYPE in ('isnet', 'combined'):
     session = new_session(ISNET_MODEL_NAME)
@@ -188,4 +193,3 @@ def preprocess_inference(image_paths, use_mantiuk=False, remove_background=False
         
 if __name__ == '__main__':
     print('...')
-    
