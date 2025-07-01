@@ -200,11 +200,21 @@ if __name__ == '__main__':
                 extract_features_lightglue(get_image_paths(df_train, args.remove_background), f"{base_dir}/feature_descriptors_train_{method}/")
                 extract_features_lightglue(get_image_paths(df_test, args.remove_background), f"{base_dir}/feature_descriptors_test_{method}/")
 
+            elif method == 'ensamble':
+                print('Using the ensamble method: disk + keynet-hardnet + lightglue')
+                extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, f"{base_dir}/feature_descriptors_train_disk/")
+                extract_features(get_image_paths(df_test, args.remove_background), MODEL_PATH, f"{base_dir}/feature_descriptors_test_disk/")
+                extract_features_keynet_hardnet_faster(get_image_paths(df_train, args.remove_background), f"{base_dir}/feature_descriptors_train_keynet_hardnet/")
+                extract_features_keynet_hardnet_faster(get_image_paths(df_test, args.remove_background), f"{base_dir}/feature_descriptors_test_keynet_hardnet/")
+                extract_features_lightglue(get_image_paths(df_train, args.remove_background), f"{base_dir}/feature_descriptors_train_lightglue/")
+                extract_features_lightglue(get_image_paths(df_test, args.remove_background), f"{base_dir}/feature_descriptors_test_lightglue/")
+
+
         else:
             already_trained = True
             
-            
-            
+        if method == 'ensamble':
+            methods = ['disk', 'keynet_hardnet', 'lightglue']
         train_dict = load_descriptors(f"{base_dir}/feature_descriptors_train_{method}/descriptors.h5")
         test_dict = load_descriptors(f"{base_dir}/feature_descriptors_test_{method}/descriptors.h5")
         

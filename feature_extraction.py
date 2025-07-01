@@ -20,7 +20,7 @@ from kornia.feature import KeyNetAffNetHardNet
 import kornia as K
 
 from constants import (MODEL_PATH, DATAFRAME_PATH, DEVICE, SAVE_TEST_DESCRIPTORS_PATH, SAVE_TRAIN_DESCRIPTORS_PATH,
- PATCH_SIZE, MULTISCALE_SCALES, MAX_FEATURES_PER_SCALE, ENABLE_MULTISCALE)
+ PATCH_SIZE, MULTISCALE_SCALES, MAX_FEATURES_PER_SCALE, ENABLE_MULTISCALE, MAX_KEYPOINTS)
 
 try:
     import lightglue
@@ -58,7 +58,7 @@ def get_image_paths(df, remove_background = True):
     return img_locations
 
 
-def extract_features(image_paths, model_path, output_dir, max_keypoints=5000):
+def extract_features(image_paths, model_path, output_dir, max_keypoints=MAX_KEYPOINTS):
     """Extract DISK features with optional multi-scale support."""
 
     if _LIGHTGLUE_AVAILABLE:
@@ -145,7 +145,7 @@ def extract_features(image_paths, model_path, output_dir, max_keypoints=5000):
     
 def extract_features_keynet_hardnet(image_paths,
                                     output_dir,
-                                    num_features= 5000,
+                                    num_features= MAX_KEYPOINTS,
                                     batch_size = 1,
                                     use_half = True):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -200,7 +200,7 @@ def extract_features_keynet_hardnet(image_paths,
 def extract_features_keynet_hardnet_faster(
     image_paths,
     output_dir,
-    num_features = 4500,
+    num_features = MAX_KEYPOINTS,
     batch_size = 4,
     num_workers = 8,
     use_half = True,
@@ -259,7 +259,7 @@ def extract_features_lightglue(
     image_paths,
     output_dir,
     feature_type = "aliked",
-    max_keypoints = 4096,
+    max_keypoints = MAX_KEYPOINTS,
 ):
     """Extract features using the LightGlue extractors.
 
@@ -280,7 +280,7 @@ def extract_features_lightglue(
 
     extractors = {
         "superpoint": SuperPoint,
-        "disk": DISK,
+        #"disk": DISK,
         "aliked": ALIKED,
         "doghardnet": DoGHardNet,
         "sift": SIFT,
@@ -305,12 +305,13 @@ def extract_features_lightglue(
                 feats = extractor.extract(image)
 
             desc = feats["descriptors"]
-
-            if desc.shape[0] in (128, 256) and desc.shape[1] > desc.shape[0]:
-                desc = desc.t().contiguous()             
+            #desc = np.squeeze(array, axis = 0)
+            #print(desc.shape)
+            #if desc.shape[0] in (128, 256) and desc.shape[1] > desc.shape[0]:
+            #    desc = desc.t().contiguous()             
             
-            desc_np = desc.cpu().numpy().astype(np.float32)
-
+            #desc_np = desc.cpu().numpy().astype(np.float32)
+            desc_np = desc.squeeze(0).cpu().numpy().astype(np.float32)
             #desc_np = feats["descriptors"].T.cpu().numpy().astype(np.float32)
             kp_np   = feats["keypoints"].cpu().numpy().astype(np.float32)
 

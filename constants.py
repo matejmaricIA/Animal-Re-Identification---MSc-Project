@@ -35,7 +35,7 @@ SAVE_TRAIN_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_train/'
 SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
 
 # PCA and GMM Components
-N_COMPONENTS_GMM = 2 # Preko 128 ne ide!
+N_COMPONENTS_GMM = 256 # Preko 128 ne ide!
 N_COMPONENTS_PCA = 128 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
@@ -53,7 +53,7 @@ TMP = './data/tmp/'
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
 COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results.xlsx'
-EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_color_test.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_max_keypoints_test.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 
@@ -93,3 +93,6 @@ MAX_DESCRIPTORS_PER_IMAGE = 5000
 
 # Tradeoff between geomtric verification and fisher similarity
 ALPHA = 0.35
+
+#Max number of extracted keypoints
+MAX_KEYPOINTS = 512
