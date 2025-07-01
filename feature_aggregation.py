@@ -70,7 +70,7 @@ def stack_all_descriptors(descriptors, max_samples=None, per_image_max = MAX_DES
     #if total <= max_samples:
     #    print('Using all descriptors, total:', total)
     #    return np.vstack(arrays)
-    if not max_samples:
+    if not max_samples or max_samples > total:
         print('Using all descriptors, total:', total)
         return stacked
     

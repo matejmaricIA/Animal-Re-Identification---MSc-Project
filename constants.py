@@ -36,7 +36,7 @@ SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
 
 # PCA and GMM Components
 N_COMPONENTS_GMM = 2 # Preko 128 ne ide!
-N_COMPONENTS_PCA = 2 # Ovo promijenio zadnje da testiram.
+N_COMPONENTS_PCA = 128 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
 PCA_PATH = './data/{}/pca_model_{}.pkl'
@@ -53,7 +53,7 @@ TMP = './data/tmp/'
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
 COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results.xlsx'
-EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_updated_max_descriptors.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_color_test.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 
@@ -87,9 +87,9 @@ MAX_FEATURES_PER_SCALE = 2000  # Limit features to control memory usage
 ENABLE_MULTISCALE = False  # Toggle for easy comparison with single-scale
 
 
-MAX_GMM_DESCRIPTORS = 1600000
+MAX_GMM_DESCRIPTORS = 2000000000
 # Cap descriptors contributed by each image when stacking for PCA/GMM training.
-MAX_DESCRIPTORS_PER_IMAGE = 3000
+MAX_DESCRIPTORS_PER_IMAGE = None # None - keep all of the descriptors
 
 # Tradeoff between geomtric verification and fisher similarity
 ALPHA = 0.35

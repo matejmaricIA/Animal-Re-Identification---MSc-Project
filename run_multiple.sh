@@ -4,5 +4,6 @@ params=("ATRW" "CowDataset" "IPanda50" "NyalaData" "SealID" "BelugaID" "HyenaID2
 
 for p in "${params[@]}"; do
     echo "Running script with parameter: $p"
-    python main.py --ds "$p" --train --method disk
+    python main.py --ds "$p" --train --method disk --save_eval --use_color
+    python main.py --ds "$p" --train --method disk --save_eval
 done

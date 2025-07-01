@@ -6,7 +6,19 @@ datasets.ELPephants = PatchedELPephants
 import preprocessing
 import sys
 from feature_extraction import get_image_paths, extract_features, extract_features_keynet_hardnet, extract_features_keynet_hardnet_faster, extract_features_lightglue
-from feature_aggregation import load_descriptors, stack_all_descriptors, train_pca, train_gmm, compute_fisher_vectors, load_keypoints
+from feature_aggregation import (
+    load_descriptors,
+    stack_all_descriptors,
+    train_pca,
+    train_gmm,
+    compute_fisher_vectors,
+    load_keypoints,
+)
+from color_descriptors import (
+    compute_color_descriptors,
+    standardize as standardize_colors,
+    normalize_hsv,
+)
 from constants import *
 import os
 import pickle
@@ -42,6 +54,7 @@ if __name__ == '__main__':
     parser.add_argument('--method', type = str, default = 'disk', help='Feature extraction method to use')
     parser.add_argument('--use_geometric_verification', action='store_true', help='Use geometric verification during prediction', default=False)
     parser.add_argument('--use_lightglue', action ='store_true', help='Use LightGlue for feature matching when performing geometric verification', default=True)
+    parser.add_argument('--use_color', action='store_true', help='Use colour descriptors (HSV histogram and Lab moments)')
     parser.add_argument('--num_vertices', type=int, default=100, help='Vertices sampled in Nested-IS')
     parser.add_argument('--num_neighbors', type=int, default=10, help='Neighbors sampled per vertex in Nested-IS')
     parser.add_argument('--save_count', action='store_true', help='Save population estimation results to XLSX')
@@ -60,7 +73,12 @@ if __name__ == '__main__':
     #split_type = 'closed_split'
 
     # create a configuration tag for saving evaluation results
-    tag = f"rmbkg_{args.remove_background}_tm_{args.use_mantiuk}_{method}_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}_gv_{args.use_geometric_verification}_lg_{args.use_lightglue}_v{args.version}"
+    tag = (
+        f"rmbkg_{args.remove_background}_tm_{args.use_mantiuk}_{method}"
+        f"_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}"
+        f"_gv_{args.use_geometric_verification}_lg_{args.use_lightglue}"
+        f"_color_{args.use_color}_v{args.version}"
+    )
     
     # Check if GPU is available
     use_cuda = torch.cuda.is_available()
@@ -230,6 +248,23 @@ if __name__ == '__main__':
 
             save_stuff(pca, gmm, fv_tr,
                 (PCA_PATH.format(ds_tag, method), GMM_PATH.format(ds_tag, method), FISHER_VECTORS.format(ds_tag, method)))
+
+        if args.use_color:
+            print("Extracting colour descriptors...")
+            train_paths = get_image_paths(df_train, args.remove_background)
+            test_paths = get_image_paths(df_test, args.remove_background)
+            color_tr = compute_color_descriptors(train_paths)
+            color_te = compute_color_descriptors(test_paths)
+            color_tr, mean_c, std_c = standardize_colors(color_tr)
+            color_te, _, _ = standardize_colors(color_te, mean_c, std_c)
+            color_tr = normalize_hsv(color_tr)
+            color_te = normalize_hsv(color_te)
+            for k in fv_tr.keys():
+                if k in color_tr:
+                    fv_tr[k] = np.concatenate([fv_tr[k], color_tr[k]])
+            for k in fv_te.keys():
+                if k in color_te:
+                    fv_te[k] = np.concatenate([fv_te[k], color_te[k]])
         
         train_labels = dict(zip(df_train["image_id"], df_train["identity"]))
         test_labels = dict(zip(df_test["image_id"], df_test["identity"]))
@@ -265,6 +300,7 @@ if __name__ == '__main__':
                 "Num Classes": df_train['identity'].nunique(),
                 "Method": method,
                 "Remove Background": args.remove_background,
+                "Use Color": args.use_color,
                 "GMM Components": N_COMPONENTS_GMM,
                 "PCA Components": N_COMPONENTS_PCA,
                 "Use GV": args.use_geometric_verification,
@@ -371,6 +407,7 @@ if __name__ == '__main__':
                 "Label Queries": int(stats.get("label_queries", 0)),
                 "Matches": int(stats.get("matches", 0)),
                 "Remove Background": args.remove_background,
+                "Use Color": args.use_color,
                 "GMM Components": N_COMPONENTS_GMM,
                 "MAX GMM Descriptors": MAX_GMM_DESCRIPTORS,
                 "GV Threshold": args.gv_threshold,
