@@ -16,6 +16,7 @@ from constants import (
 from utils.distance_utils import fisher_distance
 
 from lightglue_singleton import get_lightglue
+import sys
 
 try:
     from lightglue import LightGlue
@@ -45,6 +46,24 @@ def load_keypoints(keypoints_file):
         for key in f.keys():
             data[key] = np.array(f[key])
     return data
+
+def _ensure_xy(kp: np.ndarray) -> np.ndarray:
+    """Return kp as (N,2) float32 regardless of what we loaded from disk."""
+    kp = np.asarray(kp)
+
+    # 1) drop any singleton dimensions that snuck in (e.g. (1,N,2) → (N,2))
+    kp = kp.squeeze()
+
+    # 2) if we still have >2 dims (e.g. (N,2,2)) flatten everything but the last
+    if kp.ndim == 3:
+        kp = kp.reshape(-1, kp.shape[-1])
+
+    # 3) Some extractors store extra info (scale, ori, score...) – keep x & y only
+    if kp.shape[1] > 2:
+        kp = kp[:, :2]
+
+    return kp.astype(np.float32)
+    
 
 def normalize_coordinates(coords):
     """Normalize coordinates to zero mean and max distance 1"""
@@ -105,24 +124,39 @@ def match_features_lightglue(desc1, desc2, kp1, kp2, method='disk'):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     matcher = get_lightglue(features=method)
 
+    kp1 = _ensure_xy(kp1)
+    kp2 = _ensure_xy(kp2)
+
+    kpts0 = torch.from_numpy(kp1).float().unsqueeze(0).to(device)
+    desc0 = torch.from_numpy(desc1).float().unsqueeze(0).to(device)
+    kpts1 = torch.from_numpy(kp2).float().unsqueeze(0).to(device)
+    desc1 = torch.from_numpy(desc2).float().unsqueeze(0).to(device)
+
     # Does this head expect scale & orientation?
     #need_so = (method == 'doghardnet')
     
     with torch.inference_mode():
+        #data = {
+        #    'image0': {
+        #        'keypoints': torch.from_numpy(kp1).float().unsqueeze(0).to(device),
+        #        'descriptors': torch.from_numpy(desc1).float().unsqueeze(0).to(device),
+        #    },
+        #    'image1': {
+        #        'keypoints': torch.from_numpy(kp2).float().unsqueeze(0).to(device),
+        #        'descriptors': torch.from_numpy(desc2).float().unsqueeze(0).to(device),
+        #    },
+        #}
         data = {
-            'image0': {
-                'keypoints': torch.from_numpy(kp1).float().unsqueeze(0).to(device),
-                'descriptors': torch.from_numpy(desc1).float().unsqueeze(0).to(device),
-            },
-            'image1': {
-                'keypoints': torch.from_numpy(kp2).float().unsqueeze(0).to(device),
-                'descriptors': torch.from_numpy(desc2).float().unsqueeze(0).to(device),
-            },
-        }
+        'image0': {'keypoints': kpts0, 'descriptors': desc0},
+        'image1': {'keypoints': kpts1, 'descriptors': desc1},
+    }
         #if need_so:                                   # fill with safe defaults
         #    for tag, kpts in (('0', kpts0), ('1', kpts1)):
         #        data[f'image{tag}']['scales'] = torch.ones (1, len(kpts), device=device)
         #        data[f'image{tag}']['oris']   = torch.zeros(1, len(kpts), device=device)
+        #print(data)
+        #sys.exit()
+
         out = matcher(data)
         if len(out['matches']) == 0:
             return [], np.empty((0, 2)), np.empty((0, 2))

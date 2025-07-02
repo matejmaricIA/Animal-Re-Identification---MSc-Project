@@ -331,7 +331,7 @@ if __name__ == '__main__':
                 "Dataset": dataset_name,
                 "Training Examples": len(df_train.index),
                 "Num Classes": df_train['identity'].nunique(),
-                "Method": method,
+                "Method": args.method,
                 "Remove Background": args.remove_background,
                 "Use Color": args.use_color,
                 "GMM Components": N_COMPONENTS_GMM,
