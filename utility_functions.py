@@ -60,3 +60,25 @@ def load_dataset(subset, root = WILD_DATASET_PATH):
                 print(f"Subset '{subset}' not found.")
                 sys.exit(1)
         return df
+
+
+def combine_fisher_vectors(fv_list, weights):
+    """Combine multiple Fisher vector dictionaries with given weights."""
+    if len(fv_list) != len(weights):
+        raise ValueError("Number of Fisher vector sets must match weights")
+
+    combined = {}
+    keys = fv_list[0].keys()
+    for k in keys:
+        vec = None
+        for fv, w in zip(fv_list, weights):
+            if k not in fv:
+                continue
+            v = fv[k]
+            if vec is None:
+                vec = w * v
+            else:
+                vec += w * v
+        if vec is not None:
+            combined[k] = vec
+    return combined

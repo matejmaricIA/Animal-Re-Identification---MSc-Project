@@ -96,3 +96,7 @@ ALPHA = 0.35
 
 #Max number of extracted keypoints
 MAX_KEYPOINTS = 512
+
+# Default weights for combining Fisher vectors from multiple feature
+# extraction methods when using the ``ensamble`` option.
+ENSEMBLE_WEIGHTS = [1/3, 1/3, 1/3]
