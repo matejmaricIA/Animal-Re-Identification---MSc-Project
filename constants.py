@@ -35,7 +35,7 @@ SAVE_TRAIN_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_train/'
 SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
 
 # PCA and GMM Components
-N_COMPONENTS_GMM = 16 # Preko 128 ne ide!
+N_COMPONENTS_GMM = 256 # Preko 128 ne ide!
 N_COMPONENTS_PCA = 128 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
@@ -89,13 +89,13 @@ ENABLE_MULTISCALE = False  # Toggle for easy comparison with single-scale
 
 MAX_GMM_DESCRIPTORS = 2000000
 # Cap descriptors contributed by each image when stacking for PCA/GMM training.
-MAX_DESCRIPTORS_PER_IMAGE = 5000
+MAX_DESCRIPTORS_PER_IMAGE = 3000
 
 # Tradeoff between geomtric verification and fisher similarity
 ALPHA = 0.35
 
 #Max number of extracted keypoints
-MAX_KEYPOINTS = 5000
+MAX_KEYPOINTS = 2500
 
 # Default weights for combining Fisher vectors from multiple feature
 # extraction methods when using the ``ensamble`` option.

@@ -32,7 +32,7 @@ def load_keypoints(keypoints_file):
         print(f"Loaded keypoints for {len(data)} images from {keypoints_file}")
         return data
 
-def stack_all_descriptors(descriptors, max_samples=None, per_image_max = MAX_DESCRIPTORS_PER_IMAGE):
+def stack_all_descriptors(descriptors, max_samples=MAX_GMM_DESCRIPTORS, per_image_max = MAX_DESCRIPTORS_PER_IMAGE):
     """Stack descriptors from all images.
 
     If ``max_samples`` is provided, a random subset of descriptors with at most

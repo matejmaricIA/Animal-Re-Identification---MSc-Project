@@ -8,3 +8,4 @@ for p in "${params[@]}"; do
     python main.py --ds "$p" --train --method keynet_hardnet --save_eval --use_geometric_verification --use_lightglue
     python main.py --ds "$p" --train --method lightglue --save_eval --use_geometric_verification --use_lightglue
 done
+
