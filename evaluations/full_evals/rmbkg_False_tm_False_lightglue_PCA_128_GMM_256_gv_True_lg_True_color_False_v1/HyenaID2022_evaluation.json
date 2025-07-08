@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.5273109243697479,
-    "top_n_accuracy": 0.6491596638655462,
+    "accuracy": 0.5357142857142857,
+    "top_n_accuracy": 0.6533613445378151,
     "classification_metrics": {
         "HyenaID2022_02e5fbda-3d57-4b0a-be41-2b151ac1ff30": {
             "precision": 0.7777777777777778,
@@ -111,9 +111,9 @@
             "support": 1.0
         },
         "HyenaID2022_12a16fc6-0581-4276-9dc4-ffe7d8c13617": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "HyenaID2022_143bf01f-d0f1-4ec9-bedd-ad0aa26e0cc2": {
@@ -171,9 +171,9 @@
             "support": 1.0
         },
         "HyenaID2022_1ec97520-1eae-4b9e-9f5c-1f181a8daf3a": {
-            "precision": 0.3333333333333333,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.3333333333333333,
+            "precision": 0.5,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5714285714285714,
             "support": 3.0
         },
         "HyenaID2022_1ff8ad98-b860-4de4-ba7d-9c0177c44bab": {
@@ -219,9 +219,9 @@
             "support": 3.0
         },
         "HyenaID2022_238a48f4-e86d-42d8-a18a-ae526e48f5c4": {
-            "precision": 0.5714285714285714,
+            "precision": 0.6666666666666666,
             "recall": 0.8,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.7272727272727273,
             "support": 5.0
         },
         "HyenaID2022_23950465-b1cb-4e7e-a861-b18ce82aac55": {
@@ -381,9 +381,9 @@
             "support": 1.0
         },
         "HyenaID2022_4004afe6-b476-475e-867c-8d3b17e378c6": {
-            "precision": 0.875,
-            "recall": 0.7,
-            "f1-score": 0.7777777777777778,
+            "precision": 0.8888888888888888,
+            "recall": 0.8,
+            "f1-score": 0.8421052631578947,
             "support": 10.0
         },
         "HyenaID2022_400b4d96-c51c-4184-8f66-7f95319e45f3": {
@@ -477,9 +477,9 @@
             "support": 2.0
         },
         "HyenaID2022_51029c66-ec8d-4601-afb1-6c0164c303b4": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "HyenaID2022_525405f2-808c-4ab9-9364-f7fd9d076f6b": {
@@ -1155,9 +1155,9 @@
             "support": 1.0
         },
         "HyenaID2022_c755133f-a088-47fb-be84-0c36422a9901": {
-            "precision": 0.42857142857142855,
+            "precision": 0.5,
             "recall": 0.6,
-            "f1-score": 0.5,
+            "f1-score": 0.5454545454545454,
             "support": 5.0
         },
         "HyenaID2022_c7fc642b-3a46-4bda-ac76-abcbffdf2260": {
@@ -1371,9 +1371,9 @@
             "support": 1.0
         },
         "HyenaID2022_ecda2205-db0b-4160-a40f-b6825fb43770": {
-            "precision": 0.3333333333333333,
+            "precision": 0.4,
             "recall": 0.6666666666666666,
-            "f1-score": 0.4444444444444444,
+            "f1-score": 0.5,
             "support": 3.0
         },
         "HyenaID2022_ed4a92c6-3d4e-40e0-b055-3175620123c1": {
@@ -1383,9 +1383,9 @@
             "support": 1.0
         },
         "HyenaID2022_eeed33f6-863c-49df-a1e3-1f711738b244": {
-            "precision": 0.8,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.8888888888888888,
+            "f1-score": 0.8,
             "support": 4.0
         },
         "HyenaID2022_ef582f4d-8d4e-4962-aeb4-3fd48824c85f": {
@@ -1484,19 +1484,19 @@
             "f1-score": 0.6666666666666666,
             "support": 14.0
         },
-        "accuracy": 0.5273109243697479,
+        "accuracy": 0.5357142857142857,
         "macro avg": {
-            "precision": 0.3564169748380275,
-            "recall": 0.4009394114657272,
-            "f1-score": 0.3619613973388682,
+            "precision": 0.36092664645296224,
+            "recall": 0.4087666719245666,
+            "f1-score": 0.3675288062303768,
             "support": 476.0
         },
         "weighted avg": {
-            "precision": 0.5013881310099797,
-            "recall": 0.5273109243697479,
-            "f1-score": 0.49869759366793476,
+            "precision": 0.5065818751743121,
+            "recall": 0.5357142857142857,
+            "f1-score": 0.5054181287719285,
             "support": 476.0
         }
     },
-    "eval_runtime_sec": 128.7550687789917
+    "eval_runtime_sec": 312.2089412212372
 }

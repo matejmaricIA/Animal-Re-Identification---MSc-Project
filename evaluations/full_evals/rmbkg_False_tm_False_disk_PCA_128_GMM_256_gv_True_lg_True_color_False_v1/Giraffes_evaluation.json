@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.22137404580152673,
-    "top_n_accuracy": 0.22646310432569974,
+    "accuracy": 0.33587786259541985,
+    "top_n_accuracy": 0.3511450381679389,
     "classification_metrics": {
         "Giraffes_cluster1.01": {
             "precision": 0.0,
@@ -39,15 +39,15 @@
             "support": 0.0
         },
         "Giraffes_cluster1069": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "f1-score": 0.3333333333333333,
             "support": 1.0
         },
         "Giraffes_cluster107": {
-            "precision": 0.25,
+            "precision": 0.2,
             "recall": 1.0,
-            "f1-score": 0.4,
+            "f1-score": 0.3333333333333333,
             "support": 1.0
         },
         "Giraffes_cluster1124": {
@@ -69,9 +69,9 @@
             "support": 0.0
         },
         "Giraffes_cluster1158": {
-            "precision": 0.6666666666666666,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.625,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.7142857142857143,
             "support": 6.0
         },
         "Giraffes_cluster1159": {
@@ -117,9 +117,9 @@
             "support": 0.0
         },
         "Giraffes_cluster1218": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.3333333333333333,
             "support": 3.0
         },
         "Giraffes_cluster122": {
@@ -165,9 +165,9 @@
             "support": 3.0
         },
         "Giraffes_cluster1261": {
-            "precision": 0.6,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 0.75,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "Giraffes_cluster1266": {
@@ -207,9 +207,9 @@
             "support": 0.0
         },
         "Giraffes_cluster139": {
-            "precision": 0.5,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.4,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "Giraffes_cluster14": {
@@ -225,15 +225,15 @@
             "support": 7.0
         },
         "Giraffes_cluster142.01": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
             "support": 3.0
         },
         "Giraffes_cluster142.02": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
             "support": 3.0
         },
         "Giraffes_cluster147.02": {
@@ -243,9 +243,9 @@
             "support": 1.0
         },
         "Giraffes_cluster157": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1-score": 0.4,
             "support": 4.0
         },
         "Giraffes_cluster170": {
@@ -261,15 +261,15 @@
             "support": 2.0
         },
         "Giraffes_cluster189": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.125,
+            "recall": 1.0,
+            "f1-score": 0.2222222222222222,
             "support": 1.0
         },
         "Giraffes_cluster19": {
-            "precision": 0.2,
+            "precision": 0.21428571428571427,
             "recall": 0.75,
-            "f1-score": 0.3157894736842105,
+            "f1-score": 0.3333333333333333,
             "support": 4.0
         },
         "Giraffes_cluster190": {
@@ -285,9 +285,9 @@
             "support": 4.0
         },
         "Giraffes_cluster198": {
-            "precision": 0.75,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "Giraffes_cluster2": {
@@ -321,9 +321,9 @@
             "support": 4.0
         },
         "Giraffes_cluster218": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "Giraffes_cluster220": {
@@ -351,27 +351,27 @@
             "support": 0.0
         },
         "Giraffes_cluster227": {
-            "precision": 0.25,
-            "recall": 0.2,
-            "f1-score": 0.2222222222222222,
+            "precision": 0.5,
+            "recall": 0.4,
+            "f1-score": 0.4444444444444444,
             "support": 5.0
         },
         "Giraffes_cluster232": {
-            "precision": 0.5,
-            "recall": 0.16666666666666666,
-            "f1-score": 0.25,
+            "precision": 0.6666666666666666,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.4444444444444444,
             "support": 6.0
         },
         "Giraffes_cluster237.01": {
             "precision": 1.0,
-            "recall": 0.6,
-            "f1-score": 0.75,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
             "support": 5.0
         },
         "Giraffes_cluster243": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.25,
+            "f1-score": 0.3333333333333333,
             "support": 4.0
         },
         "Giraffes_cluster249": {
@@ -387,9 +387,9 @@
             "support": 2.0
         },
         "Giraffes_cluster254": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "Giraffes_cluster255": {
@@ -399,9 +399,9 @@
             "support": 6.0
         },
         "Giraffes_cluster261": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "Giraffes_cluster262": {
@@ -459,9 +459,9 @@
             "support": 4.0
         },
         "Giraffes_cluster30.01": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.2,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.18181818181818182,
             "support": 6.0
         },
         "Giraffes_cluster309": {
@@ -478,26 +478,26 @@
         },
         "Giraffes_cluster329": {
             "precision": 1.0,
-            "recall": 0.8888888888888888,
-            "f1-score": 0.9411764705882353,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 9.0
         },
         "Giraffes_cluster339": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "Giraffes_cluster34": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.25,
+            "recall": 0.5,
+            "f1-score": 0.3333333333333333,
             "support": 2.0
         },
         "Giraffes_cluster341": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "Giraffes_cluster351": {
@@ -519,9 +519,9 @@
             "support": 4.0
         },
         "Giraffes_cluster358": {
-            "precision": 0.15384615384615385,
+            "precision": 0.16666666666666666,
             "recall": 1.0,
-            "f1-score": 0.26666666666666666,
+            "f1-score": 0.2857142857142857,
             "support": 2.0
         },
         "Giraffes_cluster36": {
@@ -543,9 +543,9 @@
             "support": 2.0
         },
         "Giraffes_cluster405": {
-            "precision": 0.5,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.4,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "Giraffes_cluster41": {
@@ -561,9 +561,9 @@
             "support": 2.0
         },
         "Giraffes_cluster414.01": {
-            "precision": 0.8,
-            "recall": 0.5,
-            "f1-score": 0.6153846153846154,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.8571428571428571,
             "support": 8.0
         },
         "Giraffes_cluster415": {
@@ -579,15 +579,15 @@
             "support": 0.0
         },
         "Giraffes_cluster419": {
-            "precision": 0.75,
-            "recall": 0.75,
-            "f1-score": 0.75,
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
             "support": 4.0
         },
         "Giraffes_cluster42.01": {
             "precision": 1.0,
-            "recall": 0.16666666666666666,
-            "f1-score": 0.2857142857142857,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
             "support": 6.0
         },
         "Giraffes_cluster42.02": {
@@ -597,15 +597,15 @@
             "support": 0.0
         },
         "Giraffes_cluster424": {
-            "precision": 0.2,
+            "precision": 0.25,
             "recall": 1.0,
-            "f1-score": 0.3333333333333333,
+            "f1-score": 0.4,
             "support": 1.0
         },
         "Giraffes_cluster43.01": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.14285714285714285,
+            "recall": 0.5,
+            "f1-score": 0.2222222222222222,
             "support": 2.0
         },
         "Giraffes_cluster430": {
@@ -621,9 +621,9 @@
             "support": 1.0
         },
         "Giraffes_cluster461": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.4,
             "support": 3.0
         },
         "Giraffes_cluster466": {
@@ -651,15 +651,15 @@
             "support": 0.0
         },
         "Giraffes_cluster49.01": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.4,
             "support": 3.0
         },
         "Giraffes_cluster49.02": {
-            "precision": 0.3333333333333333,
-            "recall": 0.16666666666666666,
-            "f1-score": 0.2222222222222222,
+            "precision": 0.6666666666666666,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.4444444444444444,
             "support": 6.0
         },
         "Giraffes_cluster519": {
@@ -670,8 +670,8 @@
         },
         "Giraffes_cluster529": {
             "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "Giraffes_cluster539": {
@@ -688,8 +688,8 @@
         },
         "Giraffes_cluster56": {
             "precision": 1.0,
-            "recall": 0.25,
-            "f1-score": 0.4,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 4.0
         },
         "Giraffes_cluster567": {
@@ -699,9 +699,9 @@
             "support": 2.0
         },
         "Giraffes_cluster637": {
-            "precision": 0.23076923076923078,
+            "precision": 0.2727272727272727,
             "recall": 1.0,
-            "f1-score": 0.375,
+            "f1-score": 0.42857142857142855,
             "support": 3.0
         },
         "Giraffes_cluster638.01": {
@@ -735,27 +735,27 @@
             "support": 3.0
         },
         "Giraffes_cluster70": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "Giraffes_cluster72": {
-            "precision": 0.2,
+            "precision": 0.5,
             "recall": 0.3333333333333333,
-            "f1-score": 0.25,
+            "f1-score": 0.4,
             "support": 3.0
         },
         "Giraffes_cluster73": {
-            "precision": 0.3333333333333333,
-            "recall": 0.25,
-            "f1-score": 0.2857142857142857,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 4.0
         },
         "Giraffes_cluster74": {
-            "precision": 0.08333333333333333,
-            "recall": 0.5,
-            "f1-score": 0.14285714285714285,
+            "precision": 0.18181818181818182,
+            "recall": 1.0,
+            "f1-score": 0.3076923076923077,
             "support": 2.0
         },
         "Giraffes_cluster76": {
@@ -794,17 +794,17 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "Giraffes_cluster82": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "Giraffes_cluster834": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 2.0
+        },
+        "Giraffes_cluster843": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "Giraffes_cluster85": {
             "precision": 0.0,
@@ -813,9 +813,9 @@
             "support": 2.0
         },
         "Giraffes_cluster852": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 4.0
         },
         "Giraffes_cluster853": {
@@ -825,16 +825,10 @@
             "support": 1.0
         },
         "Giraffes_cluster858": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
-        },
-        "Giraffes_cluster865": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "Giraffes_cluster866": {
             "precision": 1.0,
@@ -879,9 +873,9 @@
             "support": 1.0
         },
         "Giraffes_cluster883": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.2,
+            "f1-score": 0.2857142857142857,
             "support": 5.0
         },
         "Giraffes_cluster885": {
@@ -909,9 +903,9 @@
             "support": 0.0
         },
         "Giraffes_cluster9.02": {
-            "precision": 0.75,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "Giraffes_cluster9.03": {
@@ -933,36 +927,30 @@
             "support": 0.0
         },
         "Giraffes_cluster927": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.2857142857142857,
             "support": 6.0
         },
-        "Giraffes_cluster950": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "Giraffes_cluster98": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 0.25,
+            "f1-score": 0.2857142857142857,
             "support": 4.0
         },
-        "accuracy": 0.22137404580152673,
+        "accuracy": 0.33587786259541985,
         "macro avg": {
-            "precision": 0.1667199888718876,
-            "recall": 0.19830219007434197,
-            "f1-score": 0.15944676363857693,
+            "precision": 0.26817626817626816,
+            "recall": 0.29674908424908425,
+            "f1-score": 0.24872193333731793,
             "support": 393.0
         },
         "weighted avg": {
-            "precision": 0.22624500181752089,
-            "recall": 0.22137404580152673,
-            "f1-score": 0.19945090077732525,
+            "precision": 0.3650058380974412,
+            "recall": 0.33587786259541985,
+            "f1-score": 0.31613540544838253,
             "support": 393.0
         }
     },
-    "eval_runtime_sec": 175.94869327545166
+    "eval_runtime_sec": 351.8506944179535
 }

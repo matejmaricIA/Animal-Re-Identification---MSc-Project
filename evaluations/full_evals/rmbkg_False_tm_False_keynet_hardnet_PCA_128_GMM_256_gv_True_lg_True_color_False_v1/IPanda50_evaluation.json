@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.7467071935157041,
-    "top_n_accuracy": 0.867274569402229,
+    "accuracy": 0.7477203647416414,
+    "top_n_accuracy": 0.8682877406281662,
     "classification_metrics": {
         "IPanda50_00_aibang": {
             "precision": 0.8064516129032258,
@@ -9,9 +9,9 @@
             "support": 40.0
         },
         "IPanda50_01_aoliao": {
-            "precision": 0.6428571428571429,
+            "precision": 0.6923076923076923,
             "recall": 1.0,
-            "f1-score": 0.782608695652174,
+            "f1-score": 0.8181818181818182,
             "support": 9.0
         },
         "IPanda50_03_bingdian": {
@@ -111,9 +111,9 @@
             "support": 8.0
         },
         "IPanda50_19_nannan": {
-            "precision": 0.7352941176470589,
-            "recall": 0.6097560975609756,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.7428571428571429,
+            "recall": 0.6341463414634146,
+            "f1-score": 0.6842105263157895,
             "support": 41.0
         },
         "IPanda50_20_nike": {
@@ -290,19 +290,19 @@
             "f1-score": 0.7058823529411765,
             "support": 9.0
         },
-        "accuracy": 0.7467071935157041,
+        "accuracy": 0.7477203647416414,
         "macro avg": {
-            "precision": 0.7567110414384848,
-            "recall": 0.7633983853267762,
-            "f1-score": 0.7528333357281763,
+            "precision": 0.7578988242439147,
+            "recall": 0.763906515408077,
+            "f1-score": 0.7539399395235673,
             "support": 987.0
         },
         "weighted avg": {
-            "precision": 0.7576773298441642,
-            "recall": 0.7467071935157041,
-            "f1-score": 0.7458930779078704,
+            "precision": 0.7584424149289347,
+            "recall": 0.7477203647416414,
+            "f1-score": 0.7469462251706676,
             "support": 987.0
         }
     },
-    "eval_runtime_sec": 250.11731028556824
+    "eval_runtime_sec": 663.2312939167023
 }

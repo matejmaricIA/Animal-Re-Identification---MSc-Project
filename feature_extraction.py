@@ -34,8 +34,27 @@ except Exception:
 import torch.nn.functional as F
 
 class ImageDataset(torch.utils.data.Dataset):
-        def __init__(self, paths):
+        def __init__(self, paths, max_size=None):
             self.paths = paths
+            self.max_size = max_size
+
+        def __len__(self):
+            return len(self.paths)
+
+        def __getitem__(self, index):
+            path = self.paths[index]
+            img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+            if img is None:
+                raise FileNotFoundError(path)
+            if self.max_size is not None:
+                h, w = img.shape[:2]
+                max_dim = max(h, w)
+                if max_dim > self.max_size:
+                    scale = self.max_size / float(max_dim)
+                    new_size = (int(w * scale), int(h * scale))
+                    img = cv2.resize(img, new_size, interpolation=cv2.INTER_AREA)
+            tens = torch.from_numpy(img).float().unsqueeze(0) / 255.0
+            return Path(path).stem, tens
 
         def __len__(self):
             return len(self.paths)
@@ -201,9 +220,263 @@ def extract_features_keynet_hardnet_faster(
     image_paths,
     output_dir,
     num_features = MAX_KEYPOINTS,
-    batch_size = 4,
+    batch_size = 1,
+    num_workers = 0,
+    use_half = True,
+    image_max_size = 640,
+    memory_debug = True,
+    skip_on_oom = True,
+    save_failed_list = True,
+    cpu_fallback = False  # New: Try CPU for failed images
+):
+    """Extract KeyNet+AffNet+HardNet features with robust error handling.
+
+    A small dataloader is used to load images in parallel which reduces
+    overhead when a large number of files is processed.
+    
+    Changes for better memory management and error handling:
+    - Reduced num_workers to 0 by default
+    - Added explicit garbage collection
+    - Added memory monitoring option
+    - More aggressive cleanup of variables
+    - Comprehensive error handling with skip functionality
+    - Optional CPU fallback for failed images
+    - Failed images logging and saving
+    """
+    import gc
+    import json
+    from datetime import datetime
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    lfeat = KeyNetAffNetHardNet(num_features=num_features).to(device).eval()
+
+    if use_half and device.type == "cuda":
+        lfeat = lfeat.half()
+        
+    dataset = ImageDataset(image_paths)
+
+    loader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=True,
+        collate_fn=lambda x: x,
+    )
+        
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    desc_h5_path = Path(output_dir) / "descriptors.h5"
+    kp_h5_path = Path(output_dir) / "keypoints.h5"
+    failed_images_path = Path(output_dir) / "failed_images.json"
+    
+    dtype = torch.float16 if use_half and device.type == "cuda" else torch.float32
+    
+    # Track statistics
+    failed_images = []
+    processed_count = 0
+    skipped_count = 0
+    
+    # Optional: Print initial memory usage
+    if memory_debug and torch.cuda.is_available():
+        print(f"Initial GPU memory: {torch.cuda.memory_allocated() / 1024**2:.2f} MB")
+        print(f"Device: {device}, dtype: {dtype}, half precision: {use_half}")
+    
+    # CPU fallback model (only create if needed)
+    cpu_model = None
+    
+    with h5py.File(desc_h5_path, "w") as desc_h5, h5py.File(kp_h5_path, "w") as kp_h5:
+        for batch_idx, batch in enumerate(tqdm.tqdm(loader, desc="KeyNetAffNetHardNet")):
+            for img_id, tens in batch:
+                # Initialize variables for cleanup
+                tens_gpu = None
+                lafs = None
+                descs = None
+                desc_np = None
+                keypoints_np = None
+                
+                try:
+                    # Move tensor to device
+                    tens_gpu = tens.to(device, dtype=dtype)
+                    
+                    # Perform inference
+                    with torch.inference_mode():
+                        lafs, _, descs = lfeat(tens_gpu.unsqueeze(0))
+                    
+                    # Convert to numpy immediately and move to CPU
+                    desc_np = descs.squeeze(0).cpu().numpy().astype(np.float32)
+                    keypoints_np = lafs[0, :, :, 2].cpu().numpy().astype(np.float32)
+                    
+                    # Skip if no keypoints detected
+                    if desc_np.shape[0] == 0:
+                        if memory_debug:
+                            print(f"No keypoints detected for {img_id}")
+                        skipped_count += 1
+                    else:
+                        # Save to HDF5
+                        desc_h5.create_dataset(img_id, data=desc_np, compression="gzip")
+                        kp_h5.create_dataset(img_id, data=keypoints_np, compression="gzip")
+                        processed_count += 1
+                    
+                except torch.cuda.OutOfMemoryError as e:
+                    error_msg = f"CUDA OOM: {str(e)}"
+                    if memory_debug:
+                        print(f"CUDA OOM error for {img_id}: {error_msg}")
+                    
+                    # Try CPU fallback if enabled
+                    if cpu_fallback and skip_on_oom:
+                        try:
+                            if memory_debug:
+                                print(f"Attempting CPU fallback for {img_id}")
+                            
+                            # Create CPU model if not exists
+                            if cpu_model is None:
+                                cpu_model = KeyNetAffNetHardNet(num_features=num_features).to("cpu").eval()
+                            
+                            # Process on CPU
+                            tens_cpu = tens.to("cpu", dtype=torch.float32)
+                            with torch.inference_mode():
+                                lafs_cpu, _, descs_cpu = cpu_model(tens_cpu.unsqueeze(0))
+                            
+                            desc_np = descs_cpu.squeeze(0).cpu().numpy().astype(np.float32)
+                            keypoints_np = lafs_cpu[0, :, :, 2].cpu().numpy().astype(np.float32)
+                            
+                            if desc_np.shape[0] > 0:
+                                desc_h5.create_dataset(img_id, data=desc_np, compression="gzip")
+                                kp_h5.create_dataset(img_id, data=keypoints_np, compression="gzip")
+                                processed_count += 1
+                                if memory_debug:
+                                    print(f"Successfully processed {img_id} on CPU")
+                            else:
+                                skipped_count += 1
+                                
+                        except Exception as cpu_e:
+                            failed_images.append({
+                                "image_id": img_id,
+                                "error_type": "CUDA_OOM_CPU_FALLBACK_FAILED",
+                                "error_message": f"GPU: {error_msg}, CPU: {str(cpu_e)}",
+                                "timestamp": datetime.now().isoformat()
+                            })
+                            if memory_debug:
+                                print(f"CPU fallback also failed for {img_id}: {str(cpu_e)}")
+                    else:
+                        if skip_on_oom:
+                            failed_images.append({
+                                "image_id": img_id,
+                                "error_type": "CUDA_OOM",
+                                "error_message": error_msg,
+                                "timestamp": datetime.now().isoformat()
+                            })
+                        else:
+                            raise e
+                    
+                    # Force memory cleanup after OOM
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                    gc.collect()
+                    
+                except RuntimeError as e:
+                    error_msg = f"Runtime error: {str(e)}"
+                    if memory_debug:
+                        print(f"Runtime error for {img_id}: {error_msg}")
+                    
+                    if skip_on_oom:
+                        failed_images.append({
+                            "image_id": img_id,
+                            "error_type": "RUNTIME_ERROR",
+                            "error_message": error_msg,
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    else:
+                        raise e
+                        
+                except Exception as e:
+                    error_msg = f"Unexpected error: {str(e)}"
+                    if memory_debug:
+                        print(f"Unexpected error for {img_id}: {error_msg}")
+                    
+                    if skip_on_oom:
+                        failed_images.append({
+                            "image_id": img_id,
+                            "error_type": "UNEXPECTED_ERROR",
+                            "error_message": error_msg,
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    else:
+                        raise e
+                
+                finally:
+                    # Aggressive cleanup - safely delete variables
+                    variables_to_delete = ['tens_gpu', 'lafs', 'descs', 'desc_np', 'keypoints_np']
+                    for var_name in variables_to_delete:
+                        if var_name in locals() and locals()[var_name] is not None:
+                            del locals()[var_name]
+                    
+                    # Memory cleanup
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                    gc.collect()
+                
+                # Optional: Monitor memory usage periodically
+                if memory_debug and torch.cuda.is_available() and batch_idx % 20 == 0:
+                    print(f"Batch {batch_idx} - GPU memory: {torch.cuda.memory_allocated() / 1024**2:.2f} MB")
+                    print(f"Processed: {processed_count}, Skipped: {skipped_count}, Failed: {len(failed_images)}")
+            
+            # Additional cleanup after each batch
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            gc.collect()
+    
+    # Final cleanup
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    gc.collect()
+    
+    # Save failed images list
+    if save_failed_list and failed_images:
+        with open(failed_images_path, 'w') as f:
+            json.dump(failed_images, f, indent=2)
+        print(f"Failed images list saved to {failed_images_path}")
+    
+    # Print final statistics
+    total_attempted = processed_count + skipped_count + len(failed_images)
+    print(f"\n=== Feature Extraction Summary ===")
+    print(f"Total images attempted: {total_attempted}")
+    print(f"Successfully processed: {processed_count}")
+    print(f"Skipped (no keypoints): {skipped_count}")
+    print(f"Failed (errors): {len(failed_images)}")
+    print(f"Success rate: {(processed_count/total_attempted)*100:.1f}%")
+    
+    if failed_images:
+        print(f"\nFailed images breakdown:")
+        error_types = {}
+        for fail in failed_images:
+            error_type = fail['error_type']
+            error_types[error_type] = error_types.get(error_type, 0) + 1
+        
+        for error_type, count in error_types.items():
+            print(f"  {error_type}: {count} images")
+    
+    # Optional: Print final memory usage
+    if memory_debug and torch.cuda.is_available():
+        print(f"Final GPU memory: {torch.cuda.memory_allocated() / 1024**2:.2f} MB")
+                
+    print(f"\nKeyNet+AffNet+HardNet features saved to {desc_h5_path}")
+    print(f"KeyNet+AffNet+HardNet keypoints saved to {kp_h5_path}")
+    
+    #return {
+    #    'processed': processed_count,
+    #    'skipped': skipped_count,
+    #    'failed': len(failed_images),
+    #    'failed_list': failed_images
+    #}
+
+def extract_features_keynet_hardnet_faster_deprecated(
+    image_paths,
+    output_dir,
+    num_features = MAX_KEYPOINTS,
+    batch_size = 1,
     num_workers = 8,
     use_half = True,
+    image_max_size = 640
 ):
     """Extract KeyNet+AffNet+HardNet features.
 
@@ -242,8 +515,10 @@ def extract_features_keynet_hardnet_faster(
                     lafs, _, descs = lfeat(tens.unsqueeze(0))
                     
                 desc_np = descs.squeeze(0).cpu().numpy().astype(np.float32)
+                
                 if desc_np.shape[0] == 0:
                     continue
+
                 keypoints_np = lafs[0, :, :, 2].cpu().numpy().astype(np.float32)
                 
                 desc_h5.create_dataset(img_id, data=desc_np, compression="gzip")

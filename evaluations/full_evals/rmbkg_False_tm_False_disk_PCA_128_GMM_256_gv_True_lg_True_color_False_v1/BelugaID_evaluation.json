@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.04840032813781788,
-    "top_n_accuracy": 0.07301066447908121,
+    "accuracy": 0.05824446267432322,
+    "top_n_accuracy": 0.08531583264971287,
     "classification_metrics": {
         "BelugaID_whale000": {
             "precision": 0.0,
@@ -21,9 +21,9 @@
             "support": 1.0
         },
         "BelugaID_whale003": {
-            "precision": 0.1111111111111111,
+            "precision": 0.1,
             "recall": 0.2,
-            "f1-score": 0.14285714285714285,
+            "f1-score": 0.13333333333333333,
             "support": 5.0
         },
         "BelugaID_whale004": {
@@ -63,9 +63,9 @@
             "support": 17.0
         },
         "BelugaID_whale010": {
-            "precision": 0.4166666666666667,
-            "recall": 0.16129032258064516,
-            "f1-score": 0.23255813953488372,
+            "precision": 0.46153846153846156,
+            "recall": 0.1935483870967742,
+            "f1-score": 0.2727272727272727,
             "support": 31.0
         },
         "BelugaID_whale011": {
@@ -93,9 +93,9 @@
             "support": 3.0
         },
         "BelugaID_whale015": {
-            "precision": 0.2857142857142857,
-            "recall": 0.029411764705882353,
-            "f1-score": 0.05333333333333334,
+            "precision": 0.4444444444444444,
+            "recall": 0.058823529411764705,
+            "f1-score": 0.1038961038961039,
             "support": 68.0
         },
         "BelugaID_whale016": {
@@ -182,6 +182,12 @@
             "f1-score": 0.0,
             "support": 0.0
         },
+        "BelugaID_whale031": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale032": {
             "precision": 0.0,
             "recall": 0.0,
@@ -207,9 +213,9 @@
             "support": 26.0
         },
         "BelugaID_whale037": {
-            "precision": 0.25,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.4,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "BelugaID_whale039": {
@@ -339,9 +345,9 @@
             "support": 1.0
         },
         "BelugaID_whale064": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 0.25,
-            "f1-score": 0.3333333333333333,
+            "f1-score": 0.2857142857142857,
             "support": 4.0
         },
         "BelugaID_whale065": {
@@ -351,9 +357,9 @@
             "support": 2.0
         },
         "BelugaID_whale066": {
-            "precision": 0.631578947368421,
+            "precision": 0.5454545454545454,
             "recall": 0.3,
-            "f1-score": 0.4067796610169492,
+            "f1-score": 0.3870967741935484,
             "support": 40.0
         },
         "BelugaID_whale068": {
@@ -363,9 +369,9 @@
             "support": 3.0
         },
         "BelugaID_whale069": {
-            "precision": 0.09090909090909091,
+            "precision": 0.07692307692307693,
             "recall": 1.0,
-            "f1-score": 0.16666666666666666,
+            "f1-score": 0.14285714285714285,
             "support": 1.0
         },
         "BelugaID_whale070": {
@@ -399,9 +405,9 @@
             "support": 0.0
         },
         "BelugaID_whale075": {
-            "precision": 0.2,
+            "precision": 0.1,
             "recall": 0.04,
-            "f1-score": 0.06666666666666667,
+            "f1-score": 0.05714285714285714,
             "support": 25.0
         },
         "BelugaID_whale077": {
@@ -423,9 +429,9 @@
             "support": 1.0
         },
         "BelugaID_whale081": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "BelugaID_whale082": {
@@ -477,9 +483,9 @@
             "support": 0.0
         },
         "BelugaID_whale093": {
-            "precision": 0.23076923076923078,
+            "precision": 0.2,
             "recall": 0.11538461538461539,
-            "f1-score": 0.15384615384615385,
+            "f1-score": 0.14634146341463414,
             "support": 26.0
         },
         "BelugaID_whale094": {
@@ -555,9 +561,9 @@
             "support": 3.0
         },
         "BelugaID_whale107": {
-            "precision": 0.07142857142857142,
+            "precision": 0.07692307692307693,
             "recall": 1.0,
-            "f1-score": 0.13333333333333333,
+            "f1-score": 0.14285714285714285,
             "support": 1.0
         },
         "BelugaID_whale108": {
@@ -607,6 +613,12 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
+        },
+        "BelugaID_whale117": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "BelugaID_whale118": {
             "precision": 0.3,
@@ -674,6 +686,12 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "BelugaID_whale131": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale132": {
             "precision": 0.0,
             "recall": 0.0,
@@ -681,9 +699,9 @@
             "support": 10.0
         },
         "BelugaID_whale133": {
-            "precision": 0.4,
-            "recall": 0.15384615384615385,
-            "f1-score": 0.2222222222222222,
+            "precision": 0.16666666666666666,
+            "recall": 0.07692307692307693,
+            "f1-score": 0.10526315789473684,
             "support": 13.0
         },
         "BelugaID_whale134": {
@@ -716,6 +734,12 @@
             "f1-score": 0.0,
             "support": 0.0
         },
+        "BelugaID_whale140": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale141": {
             "precision": 0.0,
             "recall": 0.0,
@@ -729,9 +753,9 @@
             "support": 3.0
         },
         "BelugaID_whale143": {
-            "precision": 0.08333333333333333,
+            "precision": 0.1,
             "recall": 0.5,
-            "f1-score": 0.14285714285714285,
+            "f1-score": 0.16666666666666666,
             "support": 2.0
         },
         "BelugaID_whale144": {
@@ -764,12 +788,6 @@
             "f1-score": 0.0,
             "support": 13.0
         },
-        "BelugaID_whale150": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "BelugaID_whale151": {
             "precision": 0.0,
             "recall": 0.0,
@@ -777,9 +795,9 @@
             "support": 0.0
         },
         "BelugaID_whale152": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.25,
+            "recall": 0.25,
+            "f1-score": 0.25,
             "support": 4.0
         },
         "BelugaID_whale153": {
@@ -789,9 +807,9 @@
             "support": 2.0
         },
         "BelugaID_whale155": {
-            "precision": 0.125,
-            "recall": 0.25,
-            "f1-score": 0.16666666666666666,
+            "precision": 0.1875,
+            "recall": 0.375,
+            "f1-score": 0.25,
             "support": 8.0
         },
         "BelugaID_whale157": {
@@ -825,9 +843,9 @@
             "support": 2.0
         },
         "BelugaID_whale162": {
-            "precision": 0.14285714285714285,
+            "precision": 0.125,
             "recall": 0.5,
-            "f1-score": 0.2222222222222222,
+            "f1-score": 0.2,
             "support": 2.0
         },
         "BelugaID_whale163": {
@@ -879,15 +897,15 @@
             "support": 1.0
         },
         "BelugaID_whale174": {
-            "precision": 0.1,
+            "precision": 0.07142857142857142,
             "recall": 1.0,
-            "f1-score": 0.18181818181818182,
+            "f1-score": 0.13333333333333333,
             "support": 1.0
         },
         "BelugaID_whale175": {
-            "precision": 0.5,
-            "recall": 0.25,
-            "f1-score": 0.3333333333333333,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 4.0
         },
         "BelugaID_whale176": {
@@ -895,6 +913,12 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 2.0
+        },
+        "BelugaID_whale178": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "BelugaID_whale179": {
             "precision": 0.0,
@@ -944,17 +968,17 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "BelugaID_whale190": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale191": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 4.0
-        },
-        "BelugaID_whale192": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "BelugaID_whale193": {
             "precision": 0.0,
@@ -975,9 +999,9 @@
             "support": 13.0
         },
         "BelugaID_whale196": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "BelugaID_whale197": {
@@ -1029,9 +1053,9 @@
             "support": 0.0
         },
         "BelugaID_whale208": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "BelugaID_whale210": {
@@ -1041,9 +1065,9 @@
             "support": 20.0
         },
         "BelugaID_whale212": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "BelugaID_whale213": {
@@ -1113,9 +1137,9 @@
             "support": 0.0
         },
         "BelugaID_whale229": {
-            "precision": 0.3333333333333333,
-            "recall": 0.5,
-            "f1-score": 0.4,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "BelugaID_whale230": {
@@ -1123,12 +1147,6 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 2.0
-        },
-        "BelugaID_whale231": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "BelugaID_whale232": {
             "precision": 0.0,
@@ -1165,12 +1183,6 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
-        },
-        "BelugaID_whale241": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "BelugaID_whale242": {
             "precision": 0.25,
@@ -1274,7 +1286,7 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "BelugaID_whale262": {
+        "BelugaID_whale263": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -1347,9 +1359,9 @@
             "support": 1.0
         },
         "BelugaID_whale281": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.4444444444444444,
             "support": 3.0
         },
         "BelugaID_whale282": {
@@ -1363,6 +1375,12 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 3.0
+        },
+        "BelugaID_whale285": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "BelugaID_whale286": {
             "precision": 0.0,
@@ -1461,9 +1479,9 @@
             "support": 0.0
         },
         "BelugaID_whale307": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.08333333333333333,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.13333333333333333,
             "support": 3.0
         },
         "BelugaID_whale308": {
@@ -1496,6 +1514,12 @@
             "f1-score": 0.0,
             "support": 0.0
         },
+        "BelugaID_whale314": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale315": {
             "precision": 0.0,
             "recall": 0.0,
@@ -1508,17 +1532,17 @@
             "f1-score": 0.0,
             "support": 2.0
         },
-        "BelugaID_whale317": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "BelugaID_whale318": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 8.0
+        },
+        "BelugaID_whale319": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "BelugaID_whale320": {
             "precision": 0.0,
@@ -1545,6 +1569,12 @@
             "support": 0.0
         },
         "BelugaID_whale325": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "BelugaID_whale326": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -1598,7 +1628,7 @@
             "f1-score": 0.0,
             "support": 2.0
         },
-        "BelugaID_whale338": {
+        "BelugaID_whale340": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -1611,12 +1641,6 @@
             "support": 1.0
         },
         "BelugaID_whale343": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
-        "BelugaID_whale344": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -1641,9 +1665,9 @@
             "support": 2.0
         },
         "BelugaID_whale349": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 0.2,
+            "f1-score": 0.25,
             "support": 5.0
         },
         "BelugaID_whale351": {
@@ -1755,9 +1779,9 @@
             "support": 1.0
         },
         "BelugaID_whale372": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "BelugaID_whale373": {
@@ -1857,9 +1881,9 @@
             "support": 0.0
         },
         "BelugaID_whale403": {
-            "precision": 0.5,
+            "precision": 0.25,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.4,
             "support": 1.0
         },
         "BelugaID_whale404": {
@@ -1934,7 +1958,19 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "BelugaID_whale421": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale422": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "BelugaID_whale424": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -2006,17 +2042,17 @@
             "f1-score": 0.0,
             "support": 2.0
         },
-        "BelugaID_whale442": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "BelugaID_whale443": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
+        },
+        "BelugaID_whale444": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "BelugaID_whale446": {
             "precision": 0.0,
@@ -2036,12 +2072,6 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "BelugaID_whale449": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "BelugaID_whale451": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2049,9 +2079,9 @@
             "support": 0.0
         },
         "BelugaID_whale453": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 0.4,
-            "f1-score": 0.4444444444444444,
+            "f1-score": 0.5,
             "support": 5.0
         },
         "BelugaID_whale454": {
@@ -2150,12 +2180,6 @@
             "f1-score": 0.0,
             "support": 0.0
         },
-        "BelugaID_whale477": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "BelugaID_whale478": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2167,6 +2191,12 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
+        },
+        "BelugaID_whale480": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "BelugaID_whale481": {
             "precision": 0.0,
@@ -2198,12 +2228,6 @@
             "f1-score": 0.0,
             "support": 0.0
         },
-        "BelugaID_whale488": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "BelugaID_whale491": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2217,12 +2241,6 @@
             "support": 0.0
         },
         "BelugaID_whale493": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
-        "BelugaID_whale494": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -2264,6 +2282,18 @@
             "f1-score": 0.0,
             "support": 8.0
         },
+        "BelugaID_whale503": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "BelugaID_whale504": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale505": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2301,12 +2331,18 @@
             "support": 1.0
         },
         "BelugaID_whale511": {
-            "precision": 0.125,
+            "precision": 0.1111111111111111,
             "recall": 0.5,
-            "f1-score": 0.2,
+            "f1-score": 0.18181818181818182,
             "support": 2.0
         },
         "BelugaID_whale513": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "BelugaID_whale514": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -2475,9 +2511,9 @@
             "support": 0.0
         },
         "BelugaID_whale571": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 0.25,
-            "f1-score": 0.3333333333333333,
+            "f1-score": 0.2857142857142857,
             "support": 4.0
         },
         "BelugaID_whale572": {
@@ -2558,6 +2594,12 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "BelugaID_whale590": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale591": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2575,12 +2617,6 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
-        },
-        "BelugaID_whale600": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "BelugaID_whale601": {
             "precision": 0.0,
@@ -2654,12 +2690,6 @@
             "f1-score": 0.0,
             "support": 0.0
         },
-        "BelugaID_whale623": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "BelugaID_whale624": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2695,6 +2725,12 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 2.0
+        },
+        "BelugaID_whale641": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "BelugaID_whale642": {
             "precision": 0.0,
@@ -2744,6 +2780,12 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "BelugaID_whale656": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale657": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2762,11 +2804,23 @@
             "f1-score": 0.0,
             "support": 2.0
         },
+        "BelugaID_whale662": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale664": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 2.0
+        },
+        "BelugaID_whale665": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "BelugaID_whale666": {
             "precision": 0.0,
@@ -2781,6 +2835,12 @@
             "support": 0.0
         },
         "BelugaID_whale671": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "BelugaID_whale673": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -2804,6 +2864,12 @@
             "f1-score": 0.0,
             "support": 0.0
         },
+        "BelugaID_whale679": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale680": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2821,18 +2887,6 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
-        },
-        "BelugaID_whale688": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
-        "BelugaID_whale689": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "BelugaID_whale691": {
             "precision": 0.0,
@@ -2900,23 +2954,11 @@
             "f1-score": 0.0,
             "support": 0.0
         },
-        "BelugaID_whale711": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "BelugaID_whale713": {
             "precision": 1.0,
             "recall": 0.5,
             "f1-score": 0.6666666666666666,
             "support": 2.0
-        },
-        "BelugaID_whale714": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "BelugaID_whale715": {
             "precision": 0.0,
@@ -2953,6 +2995,12 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
+        },
+        "BelugaID_whale729": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "BelugaID_whale732": {
             "precision": 0.0,
@@ -3002,6 +3050,12 @@
             "f1-score": 0.0,
             "support": 0.0
         },
+        "BelugaID_whale749": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "BelugaID_whale750": {
             "precision": 0.0,
             "recall": 0.0,
@@ -3044,12 +3098,6 @@
             "f1-score": 0.0,
             "support": 0.0
         },
-        "BelugaID_whale770": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "BelugaID_whale772": {
             "precision": 0.0,
             "recall": 0.0,
@@ -3061,6 +3109,12 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
+        },
+        "BelugaID_whale775": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "BelugaID_whale776": {
             "precision": 0.0,
@@ -3086,19 +3140,19 @@
             "f1-score": 0.0,
             "support": 0.0
         },
-        "accuracy": 0.04840032813781788,
+        "accuracy": 0.05824446267432322,
         "macro avg": {
-            "precision": 0.026065567535975075,
-            "recall": 0.030794755418460554,
-            "f1-score": 0.02219042766658223,
+            "precision": 0.03024281062043968,
+            "recall": 0.04041730599882917,
+            "f1-score": 0.02799645816917506,
             "support": 1219.0
         },
         "weighted avg": {
-            "precision": 0.09093136737236733,
-            "recall": 0.04840032813781788,
-            "f1-score": 0.053471520978064443,
+            "precision": 0.09731659280469782,
+            "recall": 0.05824446267432322,
+            "f1-score": 0.060564021209377907,
             "support": 1219.0
         }
     },
-    "eval_runtime_sec": 677.5176980495453
+    "eval_runtime_sec": 1119.6318082809448
 }

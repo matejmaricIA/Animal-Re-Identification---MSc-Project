@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.13872832369942195,
-    "top_n_accuracy": 0.2976878612716763,
+    "accuracy": 0.14450867052023122,
+    "top_n_accuracy": 0.3063583815028902,
     "classification_metrics": {
         "NyalaData_1": {
             "precision": 0.0,
@@ -405,9 +405,9 @@
             "support": 2.0
         },
         "NyalaData_167": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "NyalaData_168": {
@@ -699,9 +699,9 @@
             "support": 1.0
         },
         "NyalaData_220": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "NyalaData_221": {
@@ -1011,9 +1011,9 @@
             "support": 2.0
         },
         "NyalaData_40": {
-            "precision": 0.3333333333333333,
+            "precision": 0.5,
             "recall": 0.3333333333333333,
-            "f1-score": 0.3333333333333333,
+            "f1-score": 0.4,
             "support": 3.0
         },
         "NyalaData_41": {
@@ -1364,19 +1364,19 @@
             "f1-score": 1.0,
             "support": 1.0
         },
-        "accuracy": 0.13872832369942195,
+        "accuracy": 0.14450867052023122,
         "macro avg": {
-            "precision": 0.12732326410740508,
-            "recall": 0.16534508076358295,
-            "f1-score": 0.1371232780924411,
+            "precision": 0.1346654080134256,
+            "recall": 0.17415565345080763,
+            "f1-score": 0.14475910775470247,
             "support": 346.0
         },
         "weighted avg": {
-            "precision": 0.1099642169006331,
-            "recall": 0.13872832369942195,
-            "f1-score": 0.11674006789613726,
+            "precision": 0.11574456372144235,
+            "recall": 0.14450867052023122,
+            "f1-score": 0.1221350582622259,
             "support": 346.0
         }
     },
-    "eval_runtime_sec": 97.67672348022461
+    "eval_runtime_sec": 229.83377265930176
 }

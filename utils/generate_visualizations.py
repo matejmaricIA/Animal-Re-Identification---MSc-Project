@@ -16,7 +16,7 @@ import pandas as pd
 import shutil, glob
 
 # Root directory that contains the experiment folders (one folder per run)
-EVAL_ROOT = "../evaluations"
+EVAL_ROOT = "../evaluations/full_evals"
 VIS_ROOT = os.path.join(EVAL_ROOT, "visualizations")
 
 def _format_method(method: str | None) -> str:

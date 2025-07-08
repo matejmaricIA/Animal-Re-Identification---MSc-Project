@@ -52,8 +52,8 @@ TMP = './data/tmp/'
 # Evaluation results directory
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
-COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results.xlsx'
-EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_ensamble_test.xlsx'
+COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results_ensamble.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_ensamble_test_2.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 
@@ -71,7 +71,7 @@ POOR_GEOMETRY_PENALTY = 5.0     # Penalty multiplier for poor geometric consiste
 FISHER_DISTANCE_MIN_CLAMP = 0.01     # Minimum clamp value for Fisher distance
 FISHER_DISTANCE_MAX_CLAMP = 1.0      # Maximum clamp value for Fisher distance
 NORMALIZED_THRESHOLD_DIVISOR = 100.0 # Divisor for normalizing RANSAC threshold
-GEOMETRIC_CANDIDATES = 20
+GEOMETRIC_CANDIDATES = 50
 
 # Geometric Verification Scaling Constants
 MAX_INLIERS_FOR_SCALING = 20      # Cap inliers at this value for exponential formula
@@ -87,15 +87,15 @@ MAX_FEATURES_PER_SCALE = 2000  # Limit features to control memory usage
 ENABLE_MULTISCALE = False  # Toggle for easy comparison with single-scale
 
 
-MAX_GMM_DESCRIPTORS = 2000000
+MAX_GMM_DESCRIPTORS = 2000000000
 # Cap descriptors contributed by each image when stacking for PCA/GMM training.
-MAX_DESCRIPTORS_PER_IMAGE = 3000
+MAX_DESCRIPTORS_PER_IMAGE = 5000
 
 # Tradeoff between geomtric verification and fisher similarity
 ALPHA = 0.35
 
 #Max number of extracted keypoints
-MAX_KEYPOINTS = 2500
+MAX_KEYPOINTS = 5000
 
 # Default weights for combining Fisher vectors from multiple feature
 # extraction methods when using the ``ensamble`` option.

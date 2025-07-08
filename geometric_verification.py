@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from scipy.spatial.distance import cdist
+import h5py
 from constants import (
     RATIO_THRESHOLD, 
     INLIER_THRESHOLD, 
@@ -51,16 +52,28 @@ def _ensure_xy(kp: np.ndarray) -> np.ndarray:
     """Return kp as (N,2) float32 regardless of what we loaded from disk."""
     kp = np.asarray(kp)
 
-    # 1) drop any singleton dimensions that snuck in (e.g. (1,N,2) → (N,2))
+    if kp.size == 0:
+        return np.empty((0, 2), dtype=np.float32)
+
+    # 1) drop any singleton dimensions (e.g. ``(1, N, 2)`` -> ``(N, 2)``)
     kp = kp.squeeze()
 
-    # 2) if we still have >2 dims (e.g. (N,2,2)) flatten everything but the last
-    if kp.ndim == 3:
+    # 2) handle 1‑D arrays representing a single keypoint
+    if kp.ndim == 1:
+        if kp.shape[0] >= 2:
+            kp = kp.reshape(-1, 2)
+        else:
+            return np.empty((0, 2), dtype=np.float32)
+
+    # 3) flatten arrays with extra trailing dimensions (e.g. ``(N, 2, 2)``)
+    elif kp.ndim > 2:
         kp = kp.reshape(-1, kp.shape[-1])
 
-    # 3) Some extractors store extra info (scale, ori, score...) – keep x & y only
+    # 4) keep only ``x`` and ``y`` columns if more are present
     if kp.shape[1] > 2:
         kp = kp[:, :2]
+    elif kp.shape[1] < 2:
+        return np.empty((0, 2), dtype=np.float32)
 
     return kp.astype(np.float32)
     

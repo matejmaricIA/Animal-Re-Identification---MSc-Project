@@ -4,5 +4,5 @@ params=("ATRW" "CowDataset" "IPanda50" "NyalaData" "SealID" "BelugaID" "HyenaID2
 
 for p in "${params[@]}"; do
     echo "Running count pipeline for dataset: $p"
-    python main.py --ds "$p" --count --num_vertices 250 --num_neighbors 250 --use_geometric_verification --use_lightglue --remove_background --save_count
+    python main.py --ds "$p" --count --num_vertices 50 --num_neighbors 50 --use_geometric_verification --use_lightglue --save_count --method ensamble
 done

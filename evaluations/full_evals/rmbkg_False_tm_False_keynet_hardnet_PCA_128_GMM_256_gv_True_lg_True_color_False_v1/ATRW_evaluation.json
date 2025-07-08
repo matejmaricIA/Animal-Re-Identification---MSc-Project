@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.8953341740226987,
-    "top_n_accuracy": 0.9457755359394704,
+    "accuracy": 0.8965952080706179,
+    "top_n_accuracy": 0.9470365699873896,
     "classification_metrics": {
         "ATRW_0": {
             "precision": 1.0,
@@ -39,9 +39,9 @@
             "support": 5.0
         },
         "ATRW_105": {
-            "precision": 0.7142857142857143,
+            "precision": 0.625,
             "recall": 1.0,
-            "f1-score": 0.8333333333333334,
+            "f1-score": 0.7692307692307693,
             "support": 5.0
         },
         "ATRW_106": {
@@ -111,9 +111,9 @@
             "support": 3.0
         },
         "ATRW_124": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "ATRW_126": {
@@ -627,9 +627,9 @@
             "support": 4.0
         },
         "ATRW_246": {
-            "precision": 0.7777777777777778,
+            "precision": 0.875,
             "recall": 1.0,
-            "f1-score": 0.875,
+            "f1-score": 0.9333333333333333,
             "support": 7.0
         },
         "ATRW_247": {
@@ -718,8 +718,8 @@
         },
         "ATRW_268": {
             "precision": 1.0,
-            "recall": 0.75,
-            "f1-score": 0.8571428571428571,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 4.0
         },
         "ATRW_27": {
@@ -1046,19 +1046,19 @@
             "f1-score": 1.0,
             "support": 6.0
         },
-        "accuracy": 0.8953341740226987,
+        "accuracy": 0.8965952080706179,
         "macro avg": {
-            "precision": 0.9195713713595339,
-            "recall": 0.9191273962150444,
-            "f1-score": 0.9070459034556958,
+            "precision": 0.9215326922863719,
+            "recall": 0.9205641778242397,
+            "f1-score": 0.9089831903067759,
             "support": 793.0
         },
         "weighted avg": {
-            "precision": 0.9118788049486402,
-            "recall": 0.8953341740226987,
-            "f1-score": 0.8851924997554239,
+            "precision": 0.9130147364124402,
+            "recall": 0.8965952080706179,
+            "f1-score": 0.8865282489158892,
             "support": 793.0
         }
     },
-    "eval_runtime_sec": 224.49548077583313
+    "eval_runtime_sec": 489.4009256362915
 }

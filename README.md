@@ -107,13 +107,13 @@ python main.py --count --ds ATRW --num_vertices 150 --num_neighbors 20
 
 Pregled rezultata na testiranim skupovima podataka:
 
-![Pregled rezultata](evaluations/visualizations/evaluation_comparison.png)
+![Pregled rezultata](evaluations/full_evals/visualizations/evaluation_comparison.png)
 
 Pregled skupova podataka:
-![Pregled skupova podataka](evaluations/visualizations/dataset_statistics.png)
+![Pregled skupova podataka](evaluations/full_evals/visualizations/dataset_statistics.png)
 
 ### Tablica Rezultata
 
-![Rezultati evaluacije](evaluations/visualizations/results_table.png)
+![Rezultati evaluacije](evaluations/full_evals/visualizations/results_table.png)
 
 Za dodatne informacije ili pomoć, obratite se na [kontakt](mailto:matej.maric99@gmail.com).
