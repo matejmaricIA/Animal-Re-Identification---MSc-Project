@@ -31,6 +31,7 @@ def nested_importance_sampling(
     n_neighbors: int = 10,
     label_error_rate: float = 0.0,
     return_stats: bool = False,
+    automated_mode: bool = False,
 ) -> Union[Tuple[float, float], Tuple[float, float, Dict[str, Any]]]:
     """Nested Importance Sampling with *gated* human‑(label) feedback and
     **built‑in bookkeeping** for debugging / ablation studies.
@@ -40,7 +41,7 @@ def nested_importance_sampling(
     fisher_vectors : Dict[str, np.ndarray]
         Image‑id → Fisher vector.
     labels : Dict[str, int]
-        Image‑id → ground‑truth individual ID.
+        Image‑id → ground‑truth individual ID (ignored if automated_mode=True).
     keypoints / descriptors : Dicts or ``None``
         Required for geometric verification.
     use_geometric : bool, default=True
@@ -58,6 +59,9 @@ def nested_importance_sampling(
             * ``gv_passes``     – pairs that passed the GV gate
             * ``label_queries`` – how many times we actually looked at a label
             * ``matches``       – how many of those queries were positive (same ID)
+    automated_mode : bool, default=False
+        If True, uses only geometric verification without human labels.
+        Faster but potentially less accurate than human-in-the-loop mode.
 
     Returns
     -------
@@ -67,9 +71,8 @@ def nested_importance_sampling(
         See *return_stats* description.
     """
 
-    # --------------------------------------------------------------------- #
-    # 1.   Build similarity graph & vertex proposal distribution            #
-    # --------------------------------------------------------------------- #
+
+    # 1. Build similarity graph & vertex proposal distribution
     image_ids = list(fisher_vectors.keys())
     vectors = [fisher_vectors[i] for i in image_ids]
     sim = cosine_similarity_matrix(vectors)
@@ -81,32 +84,26 @@ def nested_importance_sampling(
     rng = np.random.default_rng()
     population_estimates = []
 
-    # ------------------------------------------------------------------ #
-    #  ‑‑ Book‑keeping variables                                         #
-    # ------------------------------------------------------------------ #
     total_pairs: int = 0
     gv_attempts: int = 0
     gv_passes: int = 0
     label_queries: int = 0
     positive_matches: int = 0
 
-    # ------------------------------------------------------------------ #
     # 2.   Outer vertex loop                                             #
-    # ------------------------------------------------------------------ #
     outer_vertices = rng.choice(len(image_ids), size=min(n_vertices, len(image_ids)), replace=False, p=Q)
     for u_idx in outer_vertices:
         q = sim[u_idx].copy()
         if q.sum() == 0.0:
             q = np.ones_like(q)
+        q[q == 0.0] = 1e-9
         q /= q.sum()
 
         neighbors = rng.choice(len(image_ids), size=min(n_neighbors, len(image_ids)), replace=False, p=q)
 
         fb_list = []
 
-        # -------------------------------------------------------------- #
-        # 3.   Inner neighbour loop with GV gate                        #
-        # -------------------------------------------------------------- #
+        # 3. Inner neighbour loop with GV gate  
         for v_idx in neighbors:
             total_pairs += 1
 
@@ -133,23 +130,44 @@ def nested_importance_sampling(
                     gv_pass = (dist < gv_threshold) and (n_inliers >= MIN_INLIERS)
                     if gv_pass:
                         gv_passes += 1
-                        # ask the human (label) only now
-                        label_queries += 1
-                        match = 1 if labels.get(u_id) == labels.get(v_id) else 0
-                        if match:
-                            positive_matches += 1
-                        # simulate annotation mistake
-                        if label_error_rate > 0.0 and rng.random() < label_error_rate:
-                            match = 1 - match
+                        
+                        if automated_mode:
+                            # Pure geometric verification with confidence weighting
+                            confidence = min(1.0, n_inliers / 20.0)  # Normalize inliers to confidence
+                            geometric_quality = 1.0 - dist  # Higher quality = lower distance
+                            
+                            # Combine geometric confidence with Fisher similarity
+                            overall_confidence = 0.6 * geometric_quality + 0.4 * confidence
+                            
+                            # Use probabilistic matching instead of hard binary
+                            match = overall_confidence if overall_confidence > 0.5 else 0
+                            if match > 0:
+                                positive_matches += 1
+                        else:
+                            # ask the human (label) only now
+                            label_queries += 1
+                            match = 1 if labels.get(u_id) == labels.get(v_id) else 0
+                            if match:
+                                positive_matches += 1
+                            # simulate annotation mistake
+                            if label_error_rate > 0.0 and rng.random() < label_error_rate:
+                                match = 1 - match
                 # else: skip GV → match stays 0
             else:
                 # Legacy path: direct label query, no gate
-                label_queries += 1
-                match = 1 if labels.get(u_id) == labels.get(v_id) else 0
-                if match:
-                    positive_matches += 1
-                if label_error_rate > 0.0 and rng.random() < label_error_rate:
-                    match = 1 - match
+                if automated_mode:
+                    # In automated mode without GV, fall back to Fisher vector similarity
+                    fd = fisher_distance(fisher_vectors[u_id], fisher_vectors[v_id])
+                    match = 1 if fd < gv_threshold else 0  # Use similarity threshold
+                    if match:
+                        positive_matches += 1
+                else:
+                    label_queries += 1
+                    match = 1 if labels.get(u_id) == labels.get(v_id) else 0
+                    if match:
+                        positive_matches += 1
+                    if label_error_rate > 0.0 and rng.random() < label_error_rate:
+                        match = 1 - match
 
             fb_list.append(match)
 

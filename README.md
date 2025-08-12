@@ -87,6 +87,25 @@ python main.py --count --ds ATRW --num_vertices 150 --num_neighbors 20
 - **`--count`**: Enables population size estimation.
 - **`--num_vertices`**: Number of sampled vertices.
 - **`--num_neighbors`**: Number of neighbours per vertex.
+- **`--automated_mode`**: Use fully automated counting without human labels (faster but potentially less accurate).
+
+#### Automated vs Human-in-the-Loop Modes
+
+**Human-in-the-Loop Mode (default)**:
+```bash
+python main.py --count --ds ATRW --use_geometric_verification --use_lightglue
+```
+- Uses geometric verification to filter pairs
+- Queries ground truth labels only for geometrically consistent pairs
+- More accurate but requires labeled data
+
+**Fully Automated Mode**:
+```bash
+python main.py --count --ds ATRW --use_geometric_verification --use_lightglue --automated_mode
+```
+- Uses only geometric verification without any labels
+- Faster execution and works with unlabeled data
+- Assumes geometric consistency = same individual
 
 ## **Data Structure**
 

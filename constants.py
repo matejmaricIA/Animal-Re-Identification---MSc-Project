@@ -52,7 +52,7 @@ TMP = './data/tmp/'
 # Evaluation results directory
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
-COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results_ensamble.xlsx'
+COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results_ensamble_automated.xlsx'
 EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_ensamble_test_2.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
@@ -65,7 +65,7 @@ PATCH_SIZE = 32
 RATIO_THRESHOLD = 0.8           # Lowe's ratio test threshold for feature matching
 INLIER_THRESHOLD = 0.5        # RANSAC inlier threshold for animal re-identification
 MIN_MATCHES = 4                 # Minimum number of matches required for RANSAC
-MIN_INLIERS = 10                 # Minimum number of inliers for reliable geometric verification
+MIN_INLIERS = 5                 # Minimum number of inliers for reliable geometric verification
 INSUFFICIENT_MATCHES_PENALTY = 10.0  # Penalty multiplier for insufficient matches
 POOR_GEOMETRY_PENALTY = 5.0     # Penalty multiplier for poor geometric consistency
 FISHER_DISTANCE_MIN_CLAMP = 0.01     # Minimum clamp value for Fisher distance
@@ -87,7 +87,7 @@ MAX_FEATURES_PER_SCALE = 2000  # Limit features to control memory usage
 ENABLE_MULTISCALE = False  # Toggle for easy comparison with single-scale
 
 
-MAX_GMM_DESCRIPTORS = 2000000000
+MAX_GMM_DESCRIPTORS = 7000000000
 # Cap descriptors contributed by each image when stacking for PCA/GMM training.
 MAX_DESCRIPTORS_PER_IMAGE = 5000
 

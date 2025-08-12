@@ -68,6 +68,8 @@ if __name__ == '__main__':
                         help='Fraction of pair labelings to flip during counting')
     parser.add_argument('--gv_threshold', type=float, default=0.75,
                         help='Geometric verification distance threshold')
+    parser.add_argument('--automated_mode', action='store_true', default=False,
+                        help='Use fully automated counting without human labels (faster but potentially less accurate)')
 
     args = parser.parse_args()
     args.split_type = 'closed'
@@ -441,7 +443,7 @@ if __name__ == '__main__':
                 fisher_vectors = compute_fisher_vectors(descriptors, pca, gmm)
                 save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))
 
-        labels = dict(zip(df["image_id"], df["identity"]))
+        labels = dict(zip(df["image_id"], df["identity"])) if not args.automated_mode else {}
         estimate, se, stats = nested_importance_sampling(
             fisher_vectors,
             labels,
@@ -454,7 +456,8 @@ if __name__ == '__main__':
             n_vertices=args.num_vertices,
             n_neighbors=args.num_neighbors,
             label_error_rate=args.label_error_rate,
-            return_stats = True
+            return_stats = True,
+            automated_mode=args.automated_mode
         )
         runtime = time.time() - start_time
         print(f"Estimated individuals: {estimate:.2f} \u00b1 {se:.2f}")
@@ -477,6 +480,7 @@ if __name__ == '__main__':
                 "MAX GMM Descriptors": MAX_GMM_DESCRIPTORS,
                 "GV Threshold": args.gv_threshold,
                 "Error Rate": args.label_error_rate,
+                "Automated Mode": args.automated_mode,
                 "Result": round(float(estimate), 2),
                 "Std Error": round(float(se), 2),
                 "Runtime (minutes)": round(float(runtime) / 60, 2) ,
