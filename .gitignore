@@ -77,3 +77,5 @@ test_images/
 notebooks/crop_test_results/
 models/
 Output/
+segmentation_test_results/
+utils/yolo_output/

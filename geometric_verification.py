@@ -12,7 +12,8 @@ from constants import (
     FISHER_DISTANCE_MIN_CLAMP,
     FISHER_DISTANCE_MAX_CLAMP,
     NORMALIZED_THRESHOLD_DIVISOR, MAX_INLIERS_FOR_SCALING,
-    ALPHA
+    ALPHA,
+    GV_METHOD
 )
 from utils.distance_utils import fisher_distance
 
@@ -180,7 +181,7 @@ def match_features_lightglue(desc1, desc2, kp1, kp2, method='disk'):
 
 
 
-def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, min_matches=MIN_MATCHES):
+def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, min_matches=MIN_MATCHES, gv_method = 'RANSAC'):
     """Apply RANSAC for geometric verification"""
     if len(kp1) < min_matches or len(kp2) < min_matches:
         return 0, None
@@ -190,21 +191,23 @@ def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, m
     kp2_norm = normalize_coordinates(kp2)
     
     try:
-        # Find homography using RANSAC
-        H, mask = cv2.findHomography(
-            kp1_norm.reshape(-1, 1, 2),
-            kp2_norm.reshape(-1, 1, 2),
-            cv2.RANSAC,
-            ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR
-        )
-        #H, mask = cv2.findHomography(
-        #    kp1_norm.reshape(-1,1,2),
-        #    kp2_norm.reshape(-1,1,2),
-        #    cv2.USAC_MAGSAC,
-        #    ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR,
-        #    maxIters=10000,          
-        #    confidence=0.999           
-        #)
+        # Choose method based on configuration
+        if gv_method == "MAGSAC":
+            H, mask = cv2.findHomography(
+                kp1_norm.reshape(-1, 1, 2),
+                kp2_norm.reshape(-1, 1, 2),
+                cv2.USAC_MAGSAC,
+                ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR,
+                maxIters=10000,          
+                confidence=0.999           
+            )
+        else:  # Default to RANSAC
+            H, mask = cv2.findHomography(
+                kp1_norm.reshape(-1, 1, 2),
+                kp2_norm.reshape(-1, 1, 2),
+                cv2.RANSAC,
+                ransacReprojThreshold=inlier_threshold / NORMALIZED_THRESHOLD_DIVISOR
+            )
         
         
         if H is not None and mask is not None:

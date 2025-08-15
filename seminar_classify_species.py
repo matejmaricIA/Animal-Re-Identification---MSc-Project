@@ -24,7 +24,7 @@ from tqdm.auto import tqdm
 
 # crops
 def save_crop(img_path, bbox, dest_dir, stem, idx):
-    img = Image.open(img_path).convert("RGB")
+    img = Image.open(Path('./') / img_path).convert("RGB")
     W, H = img.size
     x, y, w, h = map(float, bbox)
     crop = img.crop((x*W, y*H, (x+w)*W, (y+h)*H))

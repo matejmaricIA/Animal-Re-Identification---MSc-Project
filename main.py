@@ -3,6 +3,7 @@ from wildlife_datasets import datasets, splits
 from wildlife_datasets.datasets import WildlifeReID10k
 from patches.elpephants_patch import PatchedELPephants
 datasets.ELPephants = PatchedELPephants
+from segmentation import segment_dataset, has_segmenter
 import preprocessing
 import sys
 from feature_extraction import get_image_paths, extract_features, extract_features_keynet_hardnet, extract_features_keynet_hardnet_faster, extract_features_lightglue
@@ -19,6 +20,12 @@ from color_descriptors import (
     standardize as standardize_colors,
     normalize_hsv,
 )
+
+from shape_descriptors import (
+    compute_shape_descriptors,
+    standardize as standardize_shapes,
+)
+
 from constants import *
 import os
 import pickle
@@ -34,14 +41,17 @@ import numpy as np
 import torch
 import time
 from nested_importance_sampling import nested_importance_sampling
+from enhanced_population_estimation import enhanced_population_estimation, assess_confidence_level
 from utility_functions import (
     load_dataset,
     save_stuff,
     load_stuff,
     save_count_results,
     combine_fisher_vectors,
+    save_count_results_wrapper
 )
 
+from global_embedding import extract_global_embeddings
 
 
 if __name__ == '__main__':
@@ -70,12 +80,21 @@ if __name__ == '__main__':
                         help='Geometric verification distance threshold')
     parser.add_argument('--automated_mode', action='store_true', default=False,
                         help='Use fully automated counting without human labels (faster but potentially less accurate)')
+    parser.add_argument('--gv_method', type=str, default='RANSAC', choices=['RANSAC', 'MAGSAC'],
+                        help='Geometric verification method to use (RANSAC or MAGSAC)')
+    parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN/Transformer embeddings')
+    parser.add_argument('--use_shape', action='store_true', help='Use shape descriptors based on animal contours')
+
 
     args = parser.parse_args()
     args.split_type = 'closed'
     dataset_name = args.ds
     method = args.method
     #use_splitter = False
+    
+    # Set the geometric verification method
+    #import constants
+    gv_method = args.gv_method
     
     already_trained = False
     #split_type = 'closed_split'
@@ -154,20 +173,27 @@ if __name__ == '__main__':
             segmented_dataset_path = f"{sub_dir}/segmented_dataset"
             if not os.path.exists(csv_path) or ((not os.path.exists(dataset_path) and not args.remove_background) or (not os.path.exists(segmented_dataset_path) and args.remove_background)):
                 
-                if dataset_name.lower() in ["BelugaID", "SealID", "StripeSpotter", "SeaTurtleID", "SeaStarReID2023", "NDD20"]:
-                    args.remove_background = False
                 
-                # Keep different folders for segmented and unsegmented dataset
-                output_dir_preprocess = 'dataset'
-                if args.remove_background:
-                    output_dir_preprocess = 'segmented_dataset'
-                df = preprocessing.preprocess_dataset(
-                    df_raw.copy(),
-                    f"{sub_dir}/{output_dir_preprocess}/",
-                    dataset_name,
-                    use_mantiuk=args.use_mantiuk,
-                    remove_background=args.remove_background,
-                )
+                if has_segmenter(dataset_name):
+                    df = segment_dataset(
+                        df_raw.copy(),
+                        f"{sub_dir}/segmented_dataset/",
+                        dataset_name,
+                        use_mantiuk=args.use_mantiuk,
+                    )
+                    args.remove_background = True
+                else:
+                    # Keep different folders for segmented and unsegmented dataset
+                    output_dir_preprocess = 'dataset'
+                    if args.remove_background:
+                        output_dir_preprocess = 'segmented_dataset'
+                    df = preprocessing.preprocess_dataset(
+                        df_raw.copy(),
+                        f"{sub_dir}/{output_dir_preprocess}/",
+                        dataset_name,
+                        use_mantiuk=args.use_mantiuk,
+                        remove_background=args.remove_background,
+                    )
                 df.to_csv(csv_path, index=False)
             else:
                 df = pd.read_csv(csv_path)
@@ -301,8 +327,47 @@ if __name__ == '__main__':
                 if k in color_te:
                     fv_te[k] = np.concatenate([fv_te[k], color_te[k]])
         
+        if args.use_global_embedding:
+            print("Extracting global embeddings...")
+            train_paths = dict(zip(df_train["image_id"].astype(str), get_image_paths(df_train, args.remove_background)))
+            test_paths = dict(zip(df_test["image_id"].astype(str), get_image_paths(df_test, args.remove_background)))
+            emb_tr_path = f"{base_dir}/global_embeddings_train.pkl"
+            emb_te_path = f"{base_dir}/global_embeddings_test.pkl"
+            if os.path.exists(emb_tr_path) and os.path.exists(emb_te_path):
+                with open(emb_tr_path, "rb") as f:
+                    emb_tr = pickle.load(f)
+                with open(emb_te_path, "rb") as f:
+                    emb_te = pickle.load(f)
+            else:
+                emb_tr = extract_global_embeddings(train_paths)
+                emb_te = extract_global_embeddings(test_paths)
+                with open(emb_tr_path, "wb") as f:
+                    pickle.dump(emb_tr, f)
+                with open(emb_te_path, "wb") as f:
+                    pickle.dump(emb_te, f)
+            for k in fv_tr.keys():
+                if k in emb_tr:
+                    fv_tr[k] = np.concatenate([fv_tr[k], emb_tr[k]])
+            for k in fv_te.keys():
+                if k in emb_te:
+                    fv_te[k] = np.concatenate([fv_te[k], emb_te[k]])
+        
         train_labels = dict(zip(df_train["image_id"], df_train["identity"]))
         test_labels = dict(zip(df_test["image_id"], df_test["identity"]))
+        if args.use_shape:
+            print("Extracting shape descriptors...")
+            train_paths = get_image_paths(df_train, args.remove_background)
+            test_paths = get_image_paths(df_test, args.remove_background)
+            shape_tr = compute_shape_descriptors(train_paths)
+            shape_te = compute_shape_descriptors(test_paths)
+            shape_tr, mean_s, std_s = standardize_shapes(shape_tr)
+            shape_te, _, _ = standardize_shapes(shape_te, mean_s, std_s)
+            with open(SHAPE_TRAIN_PATH.format(ds_tag), 'wb') as f:
+                pickle.dump(shape_tr, f)
+            with open(SHAPE_TEST_PATH.format(ds_tag), 'wb') as f:
+                pickle.dump(shape_te, f)
+        else:
+            shape_tr, shape_te = None, None
         
         if args.use_geometric_verification:
             if args.method == 'keynet_hardnet':
@@ -311,12 +376,16 @@ if __name__ == '__main__':
                 method = 'disk'
             print("Running training evaluation with geometric verification...")
             preds = classify_test_images_with_geometric_verification(
-                fv_te, fv_tr, test_keypoints, train_keypoints,
-                test_dict, train_dict, train_labels, 5, use_lightglue=args.use_lightglue, method = method
+                test_dict, train_dict, train_labels, 5,
+                use_lightglue=args.use_lightglue, method=method,
+                test_shapes=shape_te, train_shapes=shape_tr
             )
         else:
             print("Running standard training evaluation...")
-            preds = classify_test_images(fv_te, fv_tr, train_labels, 5)
+            preds = classify_test_images(
+                fv_te, fv_tr, train_labels, 5,
+                test_shapes=shape_te, train_shapes=shape_tr
+            )
         
         metrics = evaluate_predictions(preds, test_labels)
         
@@ -336,9 +405,12 @@ if __name__ == '__main__':
                 "Method": args.method,
                 "Remove Background": args.remove_background,
                 "Use Color": args.use_color,
+                "Use Shape": args.use_shape,
+                "Use Global Embedding": args.use_global_embedding,
                 "GMM Components": N_COMPONENTS_GMM,
                 "PCA Components": N_COMPONENTS_PCA,
                 "Use GV": args.use_geometric_verification,
+                "GV Method": gv_method if args.use_geometric_verification else "N/A",
                 "Alpha (fv sim - gv)": ALPHA,
                 "Geom. Candidates": GEOMETRIC_CANDIDATES,
                 "Min Inliers": MIN_INLIERS,
@@ -351,7 +423,7 @@ if __name__ == '__main__':
                 "F-1 Score": round(float(metrics["classification_metrics"]["weighted avg"]["f1-score"]), 4)
                 
             }
-            save_count_results(row, EVAL_RESULTS_XLSX)
+            save_count_results_wrapper(row, EVAL_RESULTS_XLSX)
         
         #_input = input("Create a full‑dataset DB? (yes/no) ")
         _input = 'no'
@@ -370,6 +442,9 @@ if __name__ == '__main__':
         sys.exit(0)
         
     if args.count:
+        print(f"Using geometric verification method: {gv_method}")
+    
+
         start_time = time.time()
         ds_tag = dataset_name
         base_dir = f"./data/{ds_tag}"
@@ -380,11 +455,27 @@ if __name__ == '__main__':
         csv_path = f"{base_dir}/processed_metadata.csv"
         if os.path.exists(csv_path):
             df = pd.read_csv(csv_path)
+            # Check if the metadata has the required columns for counting
+            required_cols = ['processed_path', 'processed_path_segmented'] if args.remove_background else ['processed_path']
+            missing_cols = [col for col in required_cols if col not in df.columns]
+            
+            if missing_cols:
+                # Need to preprocess to create the missing columns
+                output_dir_preprocess = 'segmented_dataset' if args.remove_background else 'dataset'
+                df = preprocessing.preprocess_dataset(
+                    df_raw.copy(),
+                    f"{base_dir}/{output_dir_preprocess}/",
+                    dataset_name,
+                    use_mantiuk=args.use_mantiuk,
+                    remove_background=args.remove_background,
+                )
+                df.to_csv(csv_path, index=False)
         else:
             os.makedirs(base_dir, exist_ok=True)
+            output_dir_preprocess = 'segmented_dataset' if args.remove_background else 'dataset'
             df = preprocessing.preprocess_dataset(
                 df_raw.copy(),
-                f"{base_dir}/segmented_dataset/",
+                f"{base_dir}/{output_dir_preprocess}/",
                 dataset_name,
                 use_mantiuk=args.use_mantiuk,
                 remove_background=args.remove_background,
@@ -443,22 +534,88 @@ if __name__ == '__main__':
                 fisher_vectors = compute_fisher_vectors(descriptors, pca, gmm)
                 save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))
 
+        # Add global embeddings if requested
+        if args.use_global_embedding:
+            print("Extracting global embeddings for population counting...")
+            image_paths = dict(zip(df["image_id"].astype(str), get_image_paths(df, args.remove_background)))
+            emb_path = f"{base_dir}/global_embeddings_count.pkl"
+            
+            if os.path.exists(emb_path):
+                print("Loading cached global embeddings...")
+                with open(emb_path, "rb") as f:
+                    global_embeddings = pickle.load(f)
+            else:
+                print("Computing global embeddings...")
+                global_embeddings = extract_global_embeddings(image_paths)
+                with open(emb_path, "wb") as f:
+                    pickle.dump(global_embeddings, f)
+            
+            # Concatenate global embeddings with Fisher vectors
+            print("Integrating global embeddings with Fisher vectors...")
+            for k in fisher_vectors.keys():
+                if k in global_embeddings:
+                    fisher_vectors[k] = np.concatenate([fisher_vectors[k], global_embeddings[k]])
+            print(f"Enhanced Fisher vectors now have {fisher_vectors[list(fisher_vectors.keys())[0]].shape[0]} dimensions")
+
         labels = dict(zip(df["image_id"], df["identity"])) if not args.automated_mode else {}
-        estimate, se, stats = nested_importance_sampling(
-            fisher_vectors,
-            labels,
-            keypoints=keypoints,
-            descriptors=descriptors,
-            use_geometric=args.use_geometric_verification,
-            use_lightglue=args.use_lightglue,
-            method='disk',
-            gv_threshold = args.gv_threshold,
-            n_vertices=args.num_vertices,
-            n_neighbors=args.num_neighbors,
-            label_error_rate=args.label_error_rate,
-            return_stats = True,
-            automated_mode=args.automated_mode
-        )
+        
+        if args.enhanced_estimation:
+            print(f"🎯 Using Enhanced Population Estimation")
+            if args.use_ensemble:
+                print(f"Multi-threshold ensemble mode")
+            else:
+                print(f"Single threshold with confidence assessment")
+            
+            enhanced_results = enhanced_population_estimation(
+                fisher_vectors=fisher_vectors,
+                labels=labels,
+                keypoints=keypoints,
+                descriptors=descriptors,
+                use_ensemble=args.use_ensemble,
+                single_threshold=args.gv_threshold,
+                # Pass through other parameters
+                use_geometric=args.use_geometric_verification,
+                use_lightglue=args.use_lightglue,
+                method='disk',
+                n_vertices=args.num_vertices,
+                n_neighbors=args.num_neighbors,
+                label_error_rate=args.label_error_rate,
+                automated_mode=args.automated_mode
+            )
+            
+            if args.use_ensemble:
+                estimate = enhanced_results['ensemble_estimate']
+                se = enhanced_results['ensemble_std']
+                stats = enhanced_results['best_individual']['stats']
+                confidence = enhanced_results['best_individual']['confidence']
+                print(f"Enhanced Results: {estimate:.2f} ± {se:.2f} (ensemble)")
+                print(f"Recommendation: {enhanced_results['recommendation']}")
+            else:
+                estimate = enhanced_results['estimate']
+                se = enhanced_results['std_error']
+                stats = enhanced_results['stats']
+                confidence = enhanced_results['confidence']
+                print(f"Enhanced Results: {estimate:.2f} ± {se:.2f} ({confidence})")
+        else:
+            print(f"Using Standard Population Estimation")
+            estimate, se, stats = nested_importance_sampling(
+                fisher_vectors,
+                labels,
+                keypoints=keypoints,
+                descriptors=descriptors,
+                use_geometric=args.use_geometric_verification,
+                use_lightglue=args.use_lightglue,
+                method='disk',
+                gv_threshold = args.gv_threshold,
+                n_vertices=args.num_vertices,
+                n_neighbors=args.num_neighbors,
+                label_error_rate=args.label_error_rate,
+                return_stats = True,
+                automated_mode=args.automated_mode
+            )
+            # Add confidence assessment even for standard mode
+            confidence, reason = assess_confidence_level(stats)
+            print(f"Confidence Assessment: {confidence} - {reason}")
         runtime = time.time() - start_time
         print(f"Estimated individuals: {estimate:.2f} \u00b1 {se:.2f}")
         print(stats)
@@ -476,11 +633,17 @@ if __name__ == '__main__':
                 "Matches": int(stats.get("matches", 0)),
                 "Remove Background": args.remove_background,
                 "Use Color": args.use_color,
+                "Use Shape": args.use_shape,
+                "Use Global Embedding": args.use_global_embedding,
                 "GMM Components": N_COMPONENTS_GMM,
                 "MAX GMM Descriptors": MAX_GMM_DESCRIPTORS,
                 "GV Threshold": args.gv_threshold,
+                "GV Method": gv_method if args.use_geometric_verification else "N/A",
                 "Error Rate": args.label_error_rate,
                 "Automated Mode": args.automated_mode,
+                "Enhanced Estimation": args.enhanced_estimation,
+                "Use Ensemble": args.use_ensemble if args.enhanced_estimation else False,
+                "Confidence Level": confidence if 'confidence' in locals() else "N/A",
                 "Result": round(float(estimate), 2),
                 "Std Error": round(float(se), 2),
                 "Runtime (minutes)": round(float(runtime) / 60, 2) ,

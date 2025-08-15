@@ -52,10 +52,17 @@ TMP = './data/tmp/'
 # Evaluation results directory
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
-COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results_ensamble_automated.xlsx'
-EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_ensamble_test_2.xlsx'
+COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results_ensamble_global_embedding.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_global_embedding.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
+
+# Shape descriptor storage paths
+SHAPE_TRAIN_PATH = './data/{}/shape_descriptors_train.pkl'
+SHAPE_TEST_PATH = './data/{}/shape_descriptors_test.pkl'
+
+# Weight for shape descriptor contribution
+SHAPE_WEIGHT = 0.2
 
 
 # Keynet, Hardnet, Affnet
@@ -65,13 +72,16 @@ PATCH_SIZE = 32
 RATIO_THRESHOLD = 0.8           # Lowe's ratio test threshold for feature matching
 INLIER_THRESHOLD = 0.5        # RANSAC inlier threshold for animal re-identification
 MIN_MATCHES = 4                 # Minimum number of matches required for RANSAC
-MIN_INLIERS = 5                 # Minimum number of inliers for reliable geometric verification
+MIN_INLIERS = 10                 # Minimum number of inliers for reliable geometric verification
 INSUFFICIENT_MATCHES_PENALTY = 10.0  # Penalty multiplier for insufficient matches
 POOR_GEOMETRY_PENALTY = 5.0     # Penalty multiplier for poor geometric consistency
 FISHER_DISTANCE_MIN_CLAMP = 0.01     # Minimum clamp value for Fisher distance
 FISHER_DISTANCE_MAX_CLAMP = 1.0      # Maximum clamp value for Fisher distance
 NORMALIZED_THRESHOLD_DIVISOR = 100.0 # Divisor for normalizing RANSAC threshold
 GEOMETRIC_CANDIDATES = 50
+
+# Geometric Verification Method Selection
+GV_METHOD = "RANSAC"  # Options: "RANSAC" or "MAGSAC"
 
 # Geometric Verification Scaling Constants
 MAX_INLIERS_FOR_SCALING = 20      # Cap inliers at this value for exponential formula

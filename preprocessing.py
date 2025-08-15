@@ -12,6 +12,7 @@ from segment_anything import sam_model_registry, SamPredictor, SamAutomaticMaskG
 from rembg import remove, new_session
 import pandas as pd
 import torch
+from segmentation import segment_image
 
 if SEGMENTATION_MODEL_TYPE in ('isnet', 'combined'):
     session = new_session(ISNET_MODEL_NAME)
@@ -93,7 +94,11 @@ def mantiuk_tone_mapping(image):
     
     return mantiuk_image
 
-def background_removal(image):
+def background_removal(image, dataset_name=None):
+    """Apply background removal using dataset-specific or configured model."""
+    custom = segment_image(dataset_name, image) if dataset_name else None
+    if custom is not None:
+        return custom
     """Apply background removal using the configured segmentation model."""
     if SEGMENTATION_MODEL_TYPE == 'isnet':
         _, buffer = cv2.imencode('.png', image)
@@ -131,10 +136,17 @@ def background_removal(image):
 def process_image(row, output_dir, use_mantiuk, dataset_name, remove_background):
     """ Process an image by applying Mantiuk tone mapping and background removal."""
 
-    #image_path = os.path.join(f'./data/{dataset_name}', row['path'])
-    image_path = os.path.join(f'{WILD_DATASET_PATH}', row['path'])
+    # Check if this is a manual dataset (wild_boar, roe_deer) or WildlifeReID10k dataset
+    manual_datasets = ['wild_boar', 'roe_deer']
+    
+    if dataset_name.lower() in manual_datasets:
+        # For manual datasets, use local project path
+        image_path = os.path.join('.', row['path'])  # row['path'] already contains the full relative path
+    else:
+        # For WildlifeReID10k datasets, use the standard path
+        image_path = os.path.join(f'{WILD_DATASET_PATH}', row['path'])
+    
     identity = row['identity']
-    #split = row['original_split']
     id = str(row['image_id'])
     save_dir = os.path.join(output_dir, str(identity))
     os.makedirs(save_dir, exist_ok = True)
@@ -144,7 +156,7 @@ def process_image(row, output_dir, use_mantiuk, dataset_name, remove_background)
         image = mantiuk_tone_mapping(image)
     
     if remove_background:
-        masked_image = background_removal(image)
+        masked_image = background_removal(image, dataset_name)
     else:
         masked_image = image
     cv2.imwrite(os.path.join(save_dir, f'{id}.jpg'), masked_image)
@@ -173,7 +185,7 @@ def preprocess_dataset(df, output_dir, dataset_name, use_mantiuk = True, remove_
         df['processed_path'] = processed_paths
     return df
         
-def preprocess_inference(image_paths, use_mantiuk=False, remove_background=False):
+def preprocess_inference(image_paths, use_mantiuk=False, remove_background=False, dataset_name=None):
     save_dir = os.path.join(TMP, 'segmented')
     os.makedirs(save_dir, exist_ok = True)
     for image_path in image_paths:
@@ -182,7 +194,7 @@ def preprocess_inference(image_paths, use_mantiuk=False, remove_background=False
             image = mantiuk_tone_mapping(image)
         
         if remove_background:
-            masked_image = background_removal(image)
+            masked_image = background_removal(image, dataset_name)
         else:
             masked_image = image
 

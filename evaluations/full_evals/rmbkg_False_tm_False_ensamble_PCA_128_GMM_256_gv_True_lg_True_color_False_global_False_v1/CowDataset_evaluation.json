@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.940379403794038,
-    "top_n_accuracy": 0.986449864498645,
+    "accuracy": 0.983739837398374,
+    "top_n_accuracy": 0.997289972899729,
     "classification_metrics": {
         "CowDataset_1": {
             "precision": 1.0,
@@ -9,39 +9,39 @@
             "support": 37.0
         },
         "CowDataset_10": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "CowDataset_11": {
-            "precision": 0.9285714285714286,
-            "recall": 0.8125,
-            "f1-score": 0.8666666666666667,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 16.0
         },
         "CowDataset_13": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.9090909090909091,
+            "f1-score": 0.9523809523809523,
             "support": 11.0
         },
         "CowDataset_2": {
-            "precision": 0.9565217391304348,
-            "recall": 0.88,
-            "f1-score": 0.9166666666666666,
+            "precision": 1.0,
+            "recall": 0.96,
+            "f1-score": 0.9795918367346939,
             "support": 75.0
         },
         "CowDataset_3": {
-            "precision": 0.125,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.2222222222222222,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "CowDataset_4": {
             "precision": 1.0,
-            "recall": 0.9702970297029703,
-            "f1-score": 0.9849246231155779,
+            "recall": 0.9900990099009901,
+            "f1-score": 0.9950248756218906,
             "support": 101.0
         },
         "CowDataset_5": {
@@ -51,42 +51,42 @@
             "support": 48.0
         },
         "CowDataset_6": {
-            "precision": 0.8,
-            "recall": 0.5714285714285714,
-            "f1-score": 0.6666666666666666,
-            "support": 14.0
-        },
-        "CowDataset_7": {
-            "precision": 0.8260869565217391,
-            "recall": 1.0,
-            "f1-score": 0.9047619047619048,
-            "support": 19.0
-        },
-        "CowDataset_8": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
+            "support": 14.0
+        },
+        "CowDataset_7": {
+            "precision": 0.9047619047619048,
+            "recall": 1.0,
+            "f1-score": 0.95,
+            "support": 19.0
+        },
+        "CowDataset_8": {
+            "precision": 0.9761904761904762,
+            "recall": 1.0,
+            "f1-score": 0.9879518072289156,
             "support": 41.0
         },
         "CowDataset_9": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 4.0
         },
-        "accuracy": 0.940379403794038,
+        "accuracy": 0.983739837398374,
         "macro avg": {
-            "precision": 0.8169038992408556,
-            "recall": 0.9344493556498507,
-            "f1-score": 0.8348374250814081,
+            "precision": 0.9206349206349206,
+            "recall": 0.9865297154715472,
+            "f1-score": 0.943424151903637,
             "support": 369.0
         },
         "weighted avg": {
-            "precision": 0.9619248205939617,
-            "recall": 0.940379403794038,
-            "f1-score": 0.9474295090952404,
+            "precision": 0.9874822557749388,
+            "recall": 0.983739837398374,
+            "f1-score": 0.984716851691764,
             "support": 369.0
         }
     },
-    "eval_runtime_sec": 542.8937907218933
+    "eval_runtime_sec": 491.8803119659424
 }

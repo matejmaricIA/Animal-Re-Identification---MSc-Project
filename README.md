@@ -88,6 +88,7 @@ python main.py --count --ds ATRW --num_vertices 150 --num_neighbors 20
 - **`--num_vertices`**: Number of sampled vertices.
 - **`--num_neighbors`**: Number of neighbours per vertex.
 - **`--automated_mode`**: Use fully automated counting without human labels (faster but potentially less accurate).
+- **`--use_global_embedding`**: Include global CNN embeddings (ResNet50) to enhance Fisher vector representations.
 
 #### Automated vs Human-in-the-Loop Modes
 
@@ -106,6 +107,14 @@ python main.py --count --ds ATRW --use_geometric_verification --use_lightglue --
 - Uses only geometric verification without any labels
 - Faster execution and works with unlabeled data
 - Assumes geometric consistency = same individual
+
+**Enhanced Mode with Global Embeddings**:
+```bash
+python main.py --count --ds ATRW --use_geometric_verification --use_lightglue --automated_mode --use_global_embedding
+```
+- Combines Fisher vectors with ResNet50 global image embeddings
+- Potentially more robust individual recognition
+- Slightly longer processing time due to CNN feature extraction
 
 ## **Data Structure**
 

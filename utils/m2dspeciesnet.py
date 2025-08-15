@@ -21,8 +21,8 @@ def main():
 
     
     
-    IN_JSON = Path('../data/camera_trap_dataset_filtered/megadetector_results.json')
-    OUT_JSON = Path('../data/camera_trap_dataset_filtered/detections.json')
+    IN_JSON = Path('../data/MedvednicaDS/megadetector_results.json')
+    OUT_JSON = Path('../data/MedvednicaDS/detections.json')
 
     md = json.load(IN_JSON.open())
 
