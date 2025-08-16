@@ -220,9 +220,14 @@ def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, m
         return 0, None
     
 def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
-                                fisher_distance, min_inliers=MIN_INLIERS,
-                                use_lightglue=False, method = 'disk', alpha = ALPHA):
-    """Compute geometric similarity and combine with Fisher distance"""
+                                feature_distance, min_inliers=MIN_INLIERS,
+                                use_lightglue: bool = False, method: str = 'disk', alpha: float = ALPHA):
+    """Compute geometric similarity and combine it with a base feature distance.
+
+    The ``feature_distance`` argument can be any distance measure where lower
+    values indicate higher similarity.  It was originally designed for Fisher
+    vector distances but generalises to other descriptor combinations as well.
+    """
     
     # Match features
     #matches, matched_kp1, matched_kp2 = match_features_by_descriptors(
@@ -239,7 +244,7 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
             query_desc, db_desc, query_kp, db_kp
         )   
         
-    fisher_scaled = _scale_fd(fisher_distance)
+    fisher_scaled = _scale_fd(feature_distance)
     
     if len(matches) < min_inliers:
         # Heavy penalty for insufficient matches
@@ -253,23 +258,15 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
     
     if n_inliers < min_inliers:
         # Heavy penalty for poor geometric consistency
-        #return fisher_distance * POOR_GEOMETRY_PENALTY, 
+        #return feature_distance * POOR_GEOMETRY_PENALTY,
         return min(1.0, fisher_scaled + 0.5), n_inliers
-    
-    
     geo_score = 1 - _norm_inliers(n_inliers)   # 0 → perfect, 1 → bad
-    
-    # Normalize inliers to reasonable range (0-1)
-    #normalized_inliers = min(n_inliers / 50.0, 1.0)  # Assume max 50 reasonable inliers
-    
-    # Combine: 40% Fisher distance + 60% geometric penalty
-    #alpha = 0.35
-    #final_distance = alpha * fisher_distance + (1 - alpha) * (1 - normalized_inliers)
+
+    # Combine base distance with geometric penalty
     final_distance = alpha * fisher_scaled + (1 - alpha) * geo_score
-    
-    # Apply reranking formula: d_C = (d_L)^n
-    # Ensure fisher_distance is in [0,1] range
-    #fisher_distance_clamped = np.clip(fisher_distance, FISHER_DISTANCE_MIN_CLAMP, FISHER_DISTANCE_MAX_CLAMP)
-    #final_distance = np.power(fisher_distance_clamped, effective_inliers)
-    
+
+    # Optional reranking formula: d_C = (d_L)^n (disabled by default)
+    #feature_distance_clamped = np.clip(feature_distance, FISHER_DISTANCE_MIN_CLAMP, FISHER_DISTANCE_MAX_CLAMP)
+    #final_distance = np.power(feature_distance_clamped, effective_inliers)
+
     return final_distance, n_inliers
