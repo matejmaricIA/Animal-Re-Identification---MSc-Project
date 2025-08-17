@@ -30,6 +30,10 @@ from constants import *
 import os
 import pickle
 from predict import classify_test_images, predict, classify_test_images_with_geometric_verification
+from mixture_optimization.block_normalization import (
+    apply_zscore_and_l2_train_test,
+    fuse_blocks_weighted_concat,
+)
 from evaluate import evaluate_predictions, save_evaluation_results
 #from calibration import calibrate
 import pandas as pd
@@ -83,6 +87,10 @@ if __name__ == '__main__':
                         help='Geometric verification method to use (RANSAC or MAGSAC)')
     parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN/Transformer embeddings')
     parser.add_argument('--use_shape', action='store_true', help='Use shape descriptors based on animal contours')
+    parser.add_argument('--w_fisher', type=float, default=1.0, help='Weight for Fisher vectors during fusion')
+    parser.add_argument('--w_color', type=float, default=1.0, help='Weight for colour descriptors during fusion')
+    parser.add_argument('--w_shape', type=float, default=1.0, help='Weight for shape descriptors during fusion')
+    parser.add_argument('--w_global', type=float, default=1.0, help='Weight for global embeddings during fusion')
 
 
     args = parser.parse_args()
@@ -319,13 +327,9 @@ if __name__ == '__main__':
             color_te, _, _ = standardize_colors(color_te, mean_c, std_c)
             color_tr = normalize_hsv(color_tr)
             color_te = normalize_hsv(color_te)
-            for k in fv_tr.keys():
-                if k in color_tr:
-                    fv_tr[k] = np.concatenate([fv_tr[k], color_tr[k]])
-            for k in fv_te.keys():
-                if k in color_te:
-                    fv_te[k] = np.concatenate([fv_te[k], color_te[k]])
-        
+        else:
+            color_tr, color_te = {}, {}
+
         if args.use_global_embedding:
             print("Extracting global embeddings...")
             train_paths = dict(zip(df_train["image_id"].astype(str), get_image_paths(df_train, args.remove_background)))
@@ -344,13 +348,9 @@ if __name__ == '__main__':
                     pickle.dump(emb_tr, f)
                 with open(emb_te_path, "wb") as f:
                     pickle.dump(emb_te, f)
-            for k in fv_tr.keys():
-                if k in emb_tr:
-                    fv_tr[k] = np.concatenate([fv_tr[k], emb_tr[k]])
-            for k in fv_te.keys():
-                if k in emb_te:
-                    fv_te[k] = np.concatenate([fv_te[k], emb_te[k]])
-        
+        else:
+            emb_tr, emb_te = {}, {}
+
         train_labels = dict(zip(df_train["image_id"], df_train["identity"]))
         test_labels = dict(zip(df_test["image_id"], df_test["identity"]))
         if args.use_shape:
@@ -366,7 +366,37 @@ if __name__ == '__main__':
             with open(SHAPE_TEST_PATH.format(ds_tag), 'wb') as f:
                 pickle.dump(shape_te, f)
         else:
-            shape_tr, shape_te = None, None
+            shape_tr, shape_te = {}, {}
+
+        # Normalise and fuse descriptor blocks
+        train_blocks = {'fisher': fv_tr}
+        test_blocks = {'fisher': fv_te}
+        if args.use_color:
+            train_blocks['color'] = color_tr
+            test_blocks['color'] = color_te
+        if args.use_global_embedding:
+            train_blocks['global'] = emb_tr
+            test_blocks['global'] = emb_te
+        if args.use_shape:
+            train_blocks['shape'] = shape_tr
+            test_blocks['shape'] = shape_te
+
+        norm_train_blocks = {}
+        norm_test_blocks = {}
+        for name in train_blocks.keys():
+            tr_norm, te_norm = apply_zscore_and_l2_train_test(train_blocks[name], test_blocks[name])
+            norm_train_blocks[name] = tr_norm
+            norm_test_blocks[name] = te_norm
+
+        weight_map = {
+            'fisher': args.w_fisher,
+            'color': args.w_color,
+            'shape': args.w_shape,
+            'global': args.w_global,
+        }
+
+        fused_tr = fuse_blocks_weighted_concat(norm_train_blocks, weight_map)
+        fused_te = fuse_blocks_weighted_concat(norm_test_blocks, weight_map)
         
         if args.use_geometric_verification:
             if args.method == 'keynet_hardnet':
@@ -375,17 +405,15 @@ if __name__ == '__main__':
                 method = 'disk'
             print("Running training evaluation with geometric verification...")
             preds = classify_test_images_with_geometric_verification(
-                fv_te, fv_tr,
+                fused_te, fused_tr,
                 test_keypoints, train_keypoints,
                 test_dict, train_dict, train_labels, 5,
                 use_lightglue=args.use_lightglue, method=method,
-                test_shapes=shape_te, train_shapes=shape_tr
             )
         else:
             print("Running standard training evaluation...")
             preds = classify_test_images(
-                fv_te, fv_tr, train_labels, 5,
-                test_shapes=shape_te, train_shapes=shape_tr
+                fused_te, fused_tr, train_labels, 5,
             )
         
         metrics = evaluate_predictions(preds, test_labels)
@@ -535,28 +563,54 @@ if __name__ == '__main__':
                 fisher_vectors = compute_fisher_vectors(descriptors, pca, gmm)
                 save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))
 
-        # Add global embeddings if requested
+        # Gather descriptor blocks
+        blocks = {'fisher': fisher_vectors}
+
+        if args.use_color:
+            print("Extracting colour descriptors for counting...")
+            image_paths = get_image_paths(df, args.remove_background)
+            color = compute_color_descriptors(image_paths)
+            color, _, _ = standardize_colors(color)
+            color = normalize_hsv(color)
+            blocks['color'] = color
+
+        if args.use_shape:
+            print("Extracting shape descriptors for counting...")
+            image_paths = get_image_paths(df, args.remove_background)
+            shape = compute_shape_descriptors(image_paths)
+            shape, _, _ = standardize_shapes(shape)
+            blocks['shape'] = shape
+
         if args.use_global_embedding:
             print("Extracting global embeddings for population counting...")
             image_paths = dict(zip(df["image_id"].astype(str), get_image_paths(df, args.remove_background)))
             emb_path = f"{base_dir}/global_embeddings_count.pkl"
-            
+
             if os.path.exists(emb_path):
                 print("Loading cached global embeddings...")
                 with open(emb_path, "rb") as f:
-                    global_embeddings = pickle.load(f)
+                    emb = pickle.load(f)
             else:
                 print("Computing global embeddings...")
-                global_embeddings = extract_global_embeddings(image_paths)
+                emb = extract_global_embeddings(image_paths)
                 with open(emb_path, "wb") as f:
-                    pickle.dump(global_embeddings, f)
-            
-            # Concatenate global embeddings with Fisher vectors
-            print("Integrating global embeddings with Fisher vectors...")
-            for k in fisher_vectors.keys():
-                if k in global_embeddings:
-                    fisher_vectors[k] = np.concatenate([fisher_vectors[k], global_embeddings[k]])
-            print(f"Enhanced Fisher vectors now have {fisher_vectors[list(fisher_vectors.keys())[0]].shape[0]} dimensions")
+                    pickle.dump(emb, f)
+            blocks['global'] = emb
+
+        # Normalise and fuse blocks
+        norm_blocks = {}
+        for name, blk in blocks.items():
+            norm_blk, _ = apply_zscore_and_l2_train_test(blk, blk)
+            norm_blocks[name] = norm_blk
+
+        weight_map = {
+            'fisher': args.w_fisher,
+            'color': args.w_color,
+            'shape': args.w_shape,
+            'global': args.w_global,
+        }
+
+        fisher_vectors = fuse_blocks_weighted_concat(norm_blocks, weight_map)
 
         labels = dict(zip(df["image_id"], df["identity"])) if not args.automated_mode else {}
         
