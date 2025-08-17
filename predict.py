@@ -182,7 +182,7 @@ def classify_test_images_with_geometric_verification(
 
 
 
-def classify_test_images(test_fisher_vectors, train_fisher_vectors, train_labels, top_n = 5):
+def classify_test_images(test_fisher_vectors, train_fisher_vectors, train_labels, top_n = 5, test_shapes=None, train_shapes=None, shape_weight=SHAPE_WEIGHT):
 
     predictions = {}
 
@@ -191,6 +191,10 @@ def classify_test_images(test_fisher_vectors, train_fisher_vectors, train_labels
     train_image_ids = list(train_fisher_vectors.keys())
     train_class_labels = np.array([train_labels[image_id] for image_id in train_image_ids])
 
+    shape_enabled = test_shapes is not None and train_shapes is not None
+    if shape_enabled:
+        train_shape_mat = np.stack([train_shapes[i] for i in train_image_ids])
+
     for test_image_id, test_fisher_vector in test_fisher_vectors.items():
         # Normalize Fisher Vectors for cosine similarity
         test_fisher_vector = test_fisher_vector / np.linalg.norm(test_fisher_vector)
@@ -198,6 +202,12 @@ def classify_test_images(test_fisher_vectors, train_fisher_vectors, train_labels
 
         # Compute cosine similarity
         similarities = np.dot(train_vectors_normalized, test_fisher_vector)
+
+        if shape_enabled and test_image_id in test_shapes:
+            ts = test_shapes[test_image_id]
+            shape_dists = np.linalg.norm(train_shape_mat - ts, axis=1)
+            shape_sim = 1.0 / (1.0 + shape_dists)
+            similarities = (1 - shape_weight) * similarities + shape_weight * shape_sim
 
         # Sort similarities in descending order
         sorted_indices = np.argsort(similarities)[::-1]

@@ -82,14 +82,14 @@ if __name__ == '__main__':
     parser.add_argument('--gv_threshold', type=float, default=0.75,
                         help='Geometric verification distance threshold')
     parser.add_argument('--automated_mode', action='store_true', default=False,
-                        help='Use fully automated counting without human labels (faster but potentially less accurate)')
+                        help='Use fully automated counting without (fake) human labels')
     parser.add_argument('--gv_method', type=str, default='RANSAC', choices=['RANSAC', 'MAGSAC'],
                         help='Geometric verification method to use (RANSAC or MAGSAC)')
     parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN/Transformer embeddings')
     parser.add_argument('--use_shape', action='store_true', help='Use shape descriptors based on animal contours')
-    parser.add_argument('--w_fisher', type=float, default=1.0, help='Weight for Fisher vectors during fusion')
-    parser.add_argument('--w_color', type=float, default=1.0, help='Weight for colour descriptors during fusion')
-    parser.add_argument('--w_shape', type=float, default=1.0, help='Weight for shape descriptors during fusion')
+    parser.add_argument('--w_fisher', type=float, default=0.0, help='Weight for Fisher vectors during fusion')
+    parser.add_argument('--w_color', type=float, default=0.0, help='Weight for colour descriptors during fusion')
+    parser.add_argument('--w_shape', type=float, default=0.0, help='Weight for shape descriptors during fusion')
     parser.add_argument('--w_global', type=float, default=1.0, help='Weight for global embeddings during fusion')
 
 
