@@ -61,10 +61,6 @@ from shape_descriptors import (
     standardize as standardize_shapes,
 )
 from constants import (
-    SAVE_TRAIN_DESCRIPTORS_PATH,
-    SAVE_TEST_DESCRIPTORS_PATH,
-    SAVE_TRAIN_DESCRIPTORS_FOLDER,
-    SAVE_TEST_DESCRIPTORS_FOLDER,
     MODEL_PATH,
     PCA_PATH,
     GMM_PATH,
@@ -175,7 +171,10 @@ def ensure_feature_files(
     shape descriptors. Existing files are left untouched. When ``method`` is
     ``'ensamble'`` Fisher vectors are computed separately for DISK,
     KeyNet+HardNet and LightGlue features and combined using
-    :data:`constants.ENSEMBLE_WEIGHTS`."""
+    :data:`constants.ENSEMBLE_WEIGHTS`. All local feature descriptors are
+    stored under method-specific folders, mirroring the behaviour in
+    ``main.py``.
+    """
 
     base_dir = os.path.join("./data", dataset)
 
@@ -234,69 +233,47 @@ def ensure_feature_files(
     fv_tr_path = os.path.join(base_dir, "fisher_vectors_train.pkl")
     fv_te_path = os.path.join(base_dir, "fisher_vectors_test.pkl")
     if not (os.path.exists(fv_tr_path) and os.path.exists(fv_te_path)):
-        if method == "ensamble":
-            print('Using ensamble method')
-            methods = ["disk", "keynet_hardnet", "lightglue"]
-            fv_tr_list: List[Dict[str, np.ndarray]] = []
-            fv_te_list: List[Dict[str, np.ndarray]] = []
-            for m in methods:
+        methods = ["disk", "keynet_hardnet", "lightglue"] if method == "ensamble" else [method]
+        fv_tr_list: List[Dict[str, np.ndarray]] = []
+        fv_te_list: List[Dict[str, np.ndarray]] = []
+        for m in methods:
+            desc_tr_dir = os.path.join(base_dir, f"feature_descriptors_train_{m}")
+            desc_te_dir = os.path.join(base_dir, f"feature_descriptors_test_{m}")
+            desc_tr_path = os.path.join(desc_tr_dir, "descriptors.h5")
+            desc_te_path = os.path.join(desc_te_dir, "descriptors.h5")
+            if not (os.path.exists(desc_tr_path) and os.path.exists(desc_te_path)):
                 if m == "disk":
-                    desc_tr_dir = SAVE_TRAIN_DESCRIPTORS_FOLDER.format(dataset)
-                    desc_te_dir = SAVE_TEST_DESCRIPTORS_FOLDER.format(dataset)
-                    desc_tr_path = SAVE_TRAIN_DESCRIPTORS_PATH.format(dataset)
-                    desc_te_path = SAVE_TEST_DESCRIPTORS_PATH.format(dataset)
-                    if not (os.path.exists(desc_tr_path) and os.path.exists(desc_te_path)):
-                        extract_features(train_paths, MODEL_PATH, desc_tr_dir)
-                        extract_features(test_paths, MODEL_PATH, desc_te_dir)
-                else:
-                    desc_tr_dir = os.path.join(base_dir, f"feature_descriptors_train_{m}")
-                    desc_te_dir = os.path.join(base_dir, f"feature_descriptors_test_{m}")
-                    desc_tr_path = os.path.join(desc_tr_dir, "descriptors.h5")
-                    desc_te_path = os.path.join(desc_te_dir, "descriptors.h5")
-                    if not (os.path.exists(desc_tr_path) and os.path.exists(desc_te_path)):
-                        if m == "keynet_hardnet":
-                            extract_features_keynet_hardnet_faster(train_paths, desc_tr_dir)
-                            extract_features_keynet_hardnet_faster(test_paths, desc_te_dir)
-                        elif m == "lightglue":
-                            extract_features_lightglue(train_paths, desc_tr_dir)
-                            extract_features_lightglue(test_paths, desc_te_dir)
+                    extract_features(train_paths, MODEL_PATH, desc_tr_dir)
+                    extract_features(test_paths, MODEL_PATH, desc_te_dir)
+                elif m == "keynet_hardnet":
+                    extract_features_keynet_hardnet_faster(train_paths, desc_tr_dir)
+                    extract_features_keynet_hardnet_faster(test_paths, desc_te_dir)
+                elif m == "lightglue":
+                    extract_features_lightglue(train_paths, desc_tr_dir)
+                    extract_features_lightglue(test_paths, desc_te_dir)
 
-                train_desc_m = load_descriptors(desc_tr_path)
-                test_desc_m = load_descriptors(desc_te_path)
-                stacked = stack_all_descriptors(train_desc_m)
-                pca = train_pca(stacked)
-                gmm = train_gmm(pca.transform(stacked))
-                fv_tr_m = compute_fisher_vectors(train_desc_m, pca, gmm)
-                fv_te_m = compute_fisher_vectors(test_desc_m, pca, gmm)
-                with open(PCA_PATH.format(dataset, m), "wb") as f:
-                    pickle.dump(pca, f)
-                with open(GMM_PATH.format(dataset, m), "wb") as f:
-                    pickle.dump(gmm, f)
-                with open(FISHER_VECTORS.format(dataset, m), "wb") as f:
-                    pickle.dump(fv_tr_m, f)
-                fv_tr_list.append(fv_tr_m)
-                fv_te_list.append(fv_te_m)
+            train_desc_m = load_descriptors(desc_tr_path)
+            test_desc_m = load_descriptors(desc_te_path)
+            stacked = stack_all_descriptors(train_desc_m)
+            pca = train_pca(stacked)
+            gmm = train_gmm(pca.transform(stacked))
+            fv_tr_m = compute_fisher_vectors(train_desc_m, pca, gmm)
+            fv_te_m = compute_fisher_vectors(test_desc_m, pca, gmm)
+            with open(PCA_PATH.format(dataset, m), "wb") as f:
+                pickle.dump(pca, f)
+            with open(GMM_PATH.format(dataset, m), "wb") as f:
+                pickle.dump(gmm, f)
+            with open(FISHER_VECTORS.format(dataset, m), "wb") as f:
+                pickle.dump(fv_tr_m, f)
+            fv_tr_list.append(fv_tr_m)
+            fv_te_list.append(fv_te_m)
 
+        if method == "ensamble":
             fv_tr = combine_fisher_vectors(fv_tr_list, ENSEMBLE_WEIGHTS)
             fv_te = combine_fisher_vectors(fv_te_list, ENSEMBLE_WEIGHTS)
         else:
-            desc_tr_path = SAVE_TRAIN_DESCRIPTORS_PATH.format(dataset)
-            desc_te_path = SAVE_TEST_DESCRIPTORS_PATH.format(dataset)
-            if not (os.path.exists(desc_tr_path) and os.path.exists(desc_te_path)):
-                extract_features(train_paths, MODEL_PATH, SAVE_TRAIN_DESCRIPTORS_FOLDER.format(dataset))
-                extract_features(test_paths, MODEL_PATH, SAVE_TEST_DESCRIPTORS_FOLDER.format(dataset))
-            train_desc = load_descriptors(desc_tr_path)
-            test_desc = load_descriptors(desc_te_path)
-            stacked = stack_all_descriptors(train_desc)
-            pca = train_pca(stacked)
-            reduced = pca.transform(stacked)
-            gmm = train_gmm(reduced)
-            fv_tr = compute_fisher_vectors(train_desc, pca, gmm)
-            fv_te = compute_fisher_vectors(test_desc, pca, gmm)
-            with open(PCA_PATH.format(dataset, "auto"), "wb") as f:
-                pickle.dump(pca, f)
-            with open(GMM_PATH.format(dataset, "auto"), "wb") as f:
-                pickle.dump(gmm, f)
+            fv_tr = fv_tr_list[0]
+            fv_te = fv_te_list[0]
 
         with open(fv_tr_path, "wb") as f:
             pickle.dump(fv_tr, f)
@@ -304,14 +281,23 @@ def ensure_feature_files(
             pickle.dump(fv_te, f)
 
 
-def load_local_features(dataset: str, split: str) -> tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
-    """Load keypoints and local descriptors for geometric verification."""
+def load_local_features(
+    dataset: str, split: str, method: str = "disk"
+) -> tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
+    """Load keypoints and local descriptors for geometric verification.
 
-    if split.lower() == "train":
-        desc_path = SAVE_TRAIN_DESCRIPTORS_PATH.format(dataset)
-    else:
-        desc_path = SAVE_TEST_DESCRIPTORS_PATH.format(dataset)
-    kp_path = desc_path.replace("descriptors.h5", "keypoints.h5")
+    When ``method`` is ``"ensamble"`` the DISK features are used for GV, so we
+    fall back to loading ``feature_descriptors_*_disk``.
+    """
+
+    if method == "ensamble":
+        method = "disk"
+
+    base_dir = os.path.join(
+        "./data", dataset, f"feature_descriptors_{split.lower()}_{method}"
+    )
+    desc_path = os.path.join(base_dir, "descriptors.h5")
+    kp_path = os.path.join(base_dir, "keypoints.h5")
 
     if os.path.exists(desc_path) and os.path.exists(kp_path):
         return load_descriptors(desc_path), load_keypoints(kp_path)
@@ -406,8 +392,8 @@ def optimise_dataset(
     test_features = load_features(base_dir, "test")
 
     if use_gv:
-        train_descs, train_kp = load_local_features(dataset, "train")
-        test_descs, test_kp = load_local_features(dataset, "test")
+        train_descs, train_kp = load_local_features(dataset, "train", method)
+        test_descs, test_kp = load_local_features(dataset, "test", method)
     else:
         train_descs = test_descs = train_kp = test_kp = {}
 
