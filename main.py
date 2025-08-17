@@ -41,7 +41,6 @@ import numpy as np
 import torch
 import time
 from nested_importance_sampling import nested_importance_sampling
-from enhanced_population_estimation import enhanced_population_estimation, assess_confidence_level
 from utility_functions import (
     load_dataset,
     save_stuff,
@@ -376,6 +375,8 @@ if __name__ == '__main__':
                 method = 'disk'
             print("Running training evaluation with geometric verification...")
             preds = classify_test_images_with_geometric_verification(
+                fv_te, fv_tr,
+                test_keypoints, train_keypoints,
                 test_dict, train_dict, train_labels, 5,
                 use_lightglue=args.use_lightglue, method=method,
                 test_shapes=shape_te, train_shapes=shape_tr
