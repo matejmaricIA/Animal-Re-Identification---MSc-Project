@@ -103,7 +103,11 @@ def extract_features(image_paths, model_path, output_dir, max_keypoints=MAX_KEYP
                         scaled = image
 
                     with torch.inference_mode():
-                        feats = extractor.extract(scaled)
+                        try:
+                            feats = extractor.extract(scaled)
+                        except Exception as e:
+                            print(f"Error extracting features for {img_path}: {e}")
+                            continue
                         #print(feats.keys())
 
                         desc = feats["descriptors"]
@@ -227,21 +231,10 @@ def extract_features_keynet_hardnet_faster(
     memory_debug = True,
     skip_on_oom = True,
     save_failed_list = True,
-    cpu_fallback = False  # New: Try CPU for failed images
+    cpu_fallback = False 
 ):
-    """Extract KeyNet+AffNet+HardNet features with robust error handling.
+    """Extract KeyNet+AffNet+HardNet features.
 
-    A small dataloader is used to load images in parallel which reduces
-    overhead when a large number of files is processed.
-    
-    Changes for better memory management and error handling:
-    - Reduced num_workers to 0 by default
-    - Added explicit garbage collection
-    - Added memory monitoring option
-    - More aggressive cleanup of variables
-    - Comprehensive error handling with skip functionality
-    - Optional CPU fallback for failed images
-    - Failed images logging and saving
     """
     import gc
     import json
