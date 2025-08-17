@@ -31,7 +31,10 @@ import pandas as pd
 
 from evaluate import evaluate_predictions
 from predict import classify_test_images
-from mixture_optimization.combine_descriptors import combine_descriptor_dicts
+from mixture_optimization.block_normalization import (
+    apply_zscore_and_l2_train_test,
+    fuse_blocks_weighted_concat,
+)
 from feature_aggregation import (
     load_descriptors,
     load_keypoints,
@@ -134,6 +137,31 @@ def _standardize_generic(
     mat = (mat - mean) / std
     return dict(zip(ids, mat)), mean, std
 
+def suggest_weights(
+    trial: optuna.Trial,
+    descriptor_names: Iterable[str],
+    fisher_min: float | None = None,
+) -> Dict[str, float]:
+    """Draw weights for the descriptors from an Optuna trial.
+
+    Parameters
+    ----------
+    trial:
+        The active Optuna trial used for suggesting weights.
+    descriptor_names:
+        Iterable with the names of descriptors to weight.
+    fisher_min: float, optional
+        If provided and the descriptor is ``"fisher"``, this value is used as
+        the lower bound instead of ``1e-2``.
+    """
+
+    weights: Dict[str, float] = {}
+    for name in descriptor_names:
+        low = 1e-2
+        if name == "fisher" and fisher_min is not None:
+            low = max(low, fisher_min)
+        weights[name] = trial.suggest_float(f"w_{name}", low, 3.0, log=True)
+    return weights
 
 def ensure_feature_files(
     dataset: str,
@@ -388,16 +416,30 @@ def optimise_dataset(
 
     descriptor_names = list(train_features.keys())
 
+    # Normalise each descriptor block once per dataset
+    normalized_train_blocks: Dict[str, Dict[str, np.ndarray]] = {}
+    normalized_test_blocks: Dict[str, Dict[str, np.ndarray]] = {}
+    for name in descriptor_names:
+        tr_block = train_features[name]
+        te_block = test_features.get(name, {})
+        skip = name == "fisher"
+        norm_tr, norm_te = apply_zscore_and_l2_train_test(
+            tr_block, te_block, skip_zscore=skip
+        )
+        normalized_train_blocks[name] = norm_tr
+        normalized_test_blocks[name] = norm_te
+
     def objective(trial: optuna.Trial) -> float:
         # Suggest weight for each descriptor; Fisher gets weight 1 by default
-        weights = {name: 1.0 for name in descriptor_names}
-        for name in descriptor_names:
+        #weights = {name: 1.0 for name in descriptor_names}
+        #for name in descriptor_names:
             #if name == "fisher":
             #    continue
-            weights[name] = trial.suggest_float(f"w_{name}", 0.0, 2.0)
+        #    weights[name] = trial.suggest_float(f"w_{name}", 0.0, 2.0)
 
-        combined_train = combine_descriptor_dicts(train_features, weights)
-        combined_test = combine_descriptor_dicts(test_features, weights)
+        weights = suggest_weights(trial, descriptor_names)
+        combined_train = fuse_blocks_weighted_concat(normalized_train_blocks, weights)
+        combined_test = fuse_blocks_weighted_concat(normalized_test_blocks, weights)
 
         if use_gv and train_descs and test_descs and train_kp and test_kp:
             preds = classify_with_gv(

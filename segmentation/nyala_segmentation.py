@@ -129,9 +129,4 @@ def clean_segmentation_mask(alpha: np.ndarray) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    print("Nyala segmentation module")
-    print("Optimized for:")
-    print("- Brown/tan body with white stripes")  
-    print("- Grassland/savanna environments")
-    print("- Stripe pattern detection")
-    print("- Natural camouflage handling")
+    print('...')

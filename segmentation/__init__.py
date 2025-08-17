@@ -19,7 +19,7 @@ def _threshold_segment(image: np.ndarray) -> np.ndarray:
 # Registry of dataset name -> segmentation function
 _SEGMENTERS: Dict[str, Callable[[np.ndarray], np.ndarray]] = {
     "belugaid": beluga_segment,
-    "atrw": _threshold_segment,
+    "atrw": nyala_segment,
     "ipanda50": ipanda_segment,
     "nyaladata": nyala_segment,
     "hyenaid2022": hyena_segment,
