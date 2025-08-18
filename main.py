@@ -172,27 +172,25 @@ if __name__ == '__main__':
             
 
             csv_path = f"{sub_dir}/processed_metadata.csv"
-            dataset_path = f"{sub_dir}/dataset"
-            segmented_dataset_path = f"{sub_dir}/segmented_dataset"
-            if not os.path.exists(csv_path) or ((not os.path.exists(dataset_path) and not args.remove_background) or (not os.path.exists(segmented_dataset_path) and args.remove_background)):
-                
-                
-                if has_segmenter(dataset_name):
+            output_dir = (
+                f"{sub_dir}/segmented_dataset" if args.remove_background else f"{sub_dir}/dataset"
+            )
+            if not (os.path.exists(csv_path) and os.path.exists(output_dir)):
+                if (
+                    args.remove_background
+                    and has_segmenter(dataset_name)
+                    and not os.path.exists(output_dir)
+                ):
                     df = segment_dataset(
                         df_raw.copy(),
-                        f"{sub_dir}/segmented_dataset/",
+                        f"{output_dir}/",
                         dataset_name,
                         use_mantiuk=args.use_mantiuk,
                     )
-                    args.remove_background = True
                 else:
-                    # Keep different folders for segmented and unsegmented dataset
-                    output_dir_preprocess = 'dataset'
-                    if args.remove_background:
-                        output_dir_preprocess = 'segmented_dataset'
                     df = preprocessing.preprocess_dataset(
                         df_raw.copy(),
-                        f"{sub_dir}/{output_dir_preprocess}/",
+                        f"{output_dir}/",
                         dataset_name,
                         use_mantiuk=args.use_mantiuk,
                         remove_background=args.remove_background,
