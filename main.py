@@ -74,6 +74,8 @@ if __name__ == '__main__':
     parser.add_argument('--gv_method', type=str, default='RANSAC', choices=['RANSAC', 'MAGSAC'],
                         help='Geometric verification method to use (RANSAC or MAGSAC)')
     parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN/Transformer embeddings')
+    parser.add_argument('--use_fisher', action=argparse.BooleanOptionalAction, default=True,
+                        help='Use PCA/GMM/Fisher-vector features')
 
     parser.add_argument(
         '--embedding_model',
@@ -248,25 +250,27 @@ if __name__ == '__main__':
                     test_dict = test_dict_m
                     train_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_train_{m}/keypoints.h5")
                     test_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_test_{m}/keypoints.h5")
-                desc_tr_m = stack_all_descriptors(train_dict_m)
-                pca_path_m = f"{base_dir}/pca_model_{m}.pkl"
-                gmm_path_m = f"{base_dir}/gmm_model_{m}.pkl"
-                fv_path_m  = f"{base_dir}/fisher_vectors_{m}.pkl"
-                if os.path.exists(pca_path_m) and os.path.exists(gmm_path_m) and os.path.exists(fv_path_m):
-                    pca_m, gmm_m, fv_tr_m = load_stuff(pca_path_m, gmm_path_m, fv_path_m)
-                    fv_te_m = compute_fisher_vectors(test_dict_m, pca_m, gmm_m)
-                else:
-                    pca_m = train_pca(desc_tr_m)
-                    gmm_m = train_gmm(pca_m.transform(desc_tr_m))
-                    fv_tr_m = compute_fisher_vectors(train_dict_m, pca_m, gmm_m)
-                    fv_te_m = compute_fisher_vectors(test_dict_m, pca_m, gmm_m)
-                    save_stuff(pca_m, gmm_m, fv_tr_m,
-                        (PCA_PATH.format(ds_tag, m), GMM_PATH.format(ds_tag, m), FISHER_VECTORS.format(ds_tag, m)))
-                fv_tr_list.append(fv_tr_m)
-                fv_te_list.append(fv_te_m)
+                if args.use_fisher:
+                    desc_tr_m = stack_all_descriptors(train_dict_m)
+                    pca_path_m = f"{base_dir}/pca_model_{m}.pkl"
+                    gmm_path_m = f"{base_dir}/gmm_model_{m}.pkl"
+                    fv_path_m  = f"{base_dir}/fisher_vectors_{m}.pkl"
+                    if os.path.exists(pca_path_m) and os.path.exists(gmm_path_m) and os.path.exists(fv_path_m):
+                        pca_m, gmm_m, fv_tr_m = load_stuff(pca_path_m, gmm_path_m, fv_path_m)
+                        fv_te_m = compute_fisher_vectors(test_dict_m, pca_m, gmm_m)
+                    else:
+                        pca_m = train_pca(desc_tr_m)
+                        gmm_m = train_gmm(pca_m.transform(desc_tr_m))
+                        fv_tr_m = compute_fisher_vectors(train_dict_m, pca_m, gmm_m)
+                        fv_te_m = compute_fisher_vectors(test_dict_m, pca_m, gmm_m)
+                        save_stuff(pca_m, gmm_m, fv_tr_m,
+                            (PCA_PATH.format(ds_tag, m), GMM_PATH.format(ds_tag, m), FISHER_VECTORS.format(ds_tag, m)))
+                    fv_tr_list.append(fv_tr_m)
+                    fv_te_list.append(fv_te_m)
 
-            fv_tr = combine_fisher_vectors(fv_tr_list, ENSEMBLE_WEIGHTS)
-            fv_te = combine_fisher_vectors(fv_te_list, ENSEMBLE_WEIGHTS)
+            if args.use_fisher:
+                fv_tr = combine_fisher_vectors(fv_tr_list, ENSEMBLE_WEIGHTS)
+                fv_te = combine_fisher_vectors(fv_te_list, ENSEMBLE_WEIGHTS)
 
         else:
             if not os.path.isdir(f"{base_dir}/feature_descriptors_train_{method}/"):
@@ -284,23 +288,24 @@ if __name__ == '__main__':
             test_dict = load_descriptors(f"{base_dir}/feature_descriptors_test_{method}/descriptors.h5")
             train_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_train_{method}/keypoints.h5")
             test_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_test_{method}/keypoints.h5")
-            desc_tr = stack_all_descriptors(train_dict)
-            pca_path = f"{base_dir}/pca_model_{method}.pkl"
-            gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
-            fv_path  = f"{base_dir}/fisher_vectors_{method}.pkl"
-            if os.path.exists(pca_path) and os.path.exists(gmm_path) and os.path.exists(fv_path):
-                print("Using already trained PCA and GMM models.")
-                pca, gmm, fv_tr = load_stuff(pca_path, gmm_path, fv_path)
-                fv_te = compute_fisher_vectors(test_dict, pca, gmm)
-                print("Fisher vectors computed for test set.")
-            else:
-                pca = train_pca(desc_tr)
-                gmm = train_gmm(pca.transform(desc_tr))
-                fv_tr = compute_fisher_vectors(train_dict, pca, gmm)
-                fv_te = compute_fisher_vectors(test_dict, pca, gmm)
-                print("Fisher vectors computed for training and test sets.")
-                save_stuff(pca, gmm, fv_tr,
-                    (PCA_PATH.format(ds_tag, method), GMM_PATH.format(ds_tag, method), FISHER_VECTORS.format(ds_tag, method)))
+            if args.use_fisher:
+                desc_tr = stack_all_descriptors(train_dict)
+                pca_path = f"{base_dir}/pca_model_{method}.pkl"
+                gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
+                fv_path  = f"{base_dir}/fisher_vectors_{method}.pkl"
+                if os.path.exists(pca_path) and os.path.exists(gmm_path) and os.path.exists(fv_path):
+                    print("Using already trained PCA and GMM models.")
+                    pca, gmm, fv_tr = load_stuff(pca_path, gmm_path, fv_path)
+                    fv_te = compute_fisher_vectors(test_dict, pca, gmm)
+                    print("Fisher vectors computed for test set.")
+                else:
+                    pca = train_pca(desc_tr)
+                    gmm = train_gmm(pca.transform(desc_tr))
+                    fv_tr = compute_fisher_vectors(train_dict, pca, gmm)
+                    fv_te = compute_fisher_vectors(test_dict, pca, gmm)
+                    print("Fisher vectors computed for training and test sets.")
+                    save_stuff(pca, gmm, fv_tr,
+                        (PCA_PATH.format(ds_tag, method), GMM_PATH.format(ds_tag, method), FISHER_VECTORS.format(ds_tag, method)))
             
             #params = calibrate(
             #    dataset_tag = dataset_name,
@@ -335,8 +340,11 @@ if __name__ == '__main__':
         train_labels = dict(zip(df_train["image_id"], df_train["identity"]))
         test_labels = dict(zip(df_test["image_id"], df_test["identity"]))
         # Normalise and fuse descriptor blocks
-        train_blocks = {'fisher': fv_tr}
-        test_blocks = {'fisher': fv_te}
+        train_blocks = {}
+        test_blocks = {}
+        if args.use_fisher:
+            train_blocks['fisher'] = fv_tr
+            test_blocks['fisher'] = fv_te
         if args.use_global_embedding:
             train_blocks['global'] = emb_tr
             test_blocks['global'] = emb_te
@@ -348,10 +356,11 @@ if __name__ == '__main__':
             norm_train_blocks[name] = tr_norm
             norm_test_blocks[name] = te_norm
 
-        weight_map = {
-            'fisher': args.w_fisher,
-            'global': args.w_global,
-        }
+        weight_map = {}
+        if args.use_fisher:
+            weight_map['fisher'] = args.w_fisher
+        if args.use_global_embedding:
+            weight_map['global'] = args.w_global
 
         fused_tr = fuse_blocks_weighted_concat(norm_train_blocks, weight_map)
         fused_te = fuse_blocks_weighted_concat(norm_test_blocks, weight_map)
@@ -412,7 +421,7 @@ if __name__ == '__main__':
         
         #_input = input("Create a full‑dataset DB? (yes/no) ")
         _input = 'no'
-        if _input.strip().lower() == "yes":
+        if _input.strip().lower() == "yes" and args.use_fisher:
             extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, f"{base_dir}/db/")
             db_dict = load_descriptors(f"{base_dir}/db/descriptors.h5")
             desc = stack_all_descriptors(db_dict)
@@ -484,20 +493,22 @@ if __name__ == '__main__':
                 if m == 'disk':
                     descriptors = desc
                     keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
-                pca_path_m = f"{base_dir}/pca_model_{m}.pkl"
-                gmm_path_m = f"{base_dir}/gmm_model_{m}.pkl"
-                fv_path_m = f"{base_dir}/fisher_vectors_{m}.pkl"
-                if os.path.exists(fv_path_m):
-                    pca_m, gmm_m, fv_m = load_stuff(pca_path_m, gmm_path_m, fv_path_m)
-                else:
-                    desc_stack = stack_all_descriptors(desc)
-                    pca_m = train_pca(desc_stack)
-                    gmm_m = train_gmm(pca_m.transform(desc_stack))
-                    fv_m = compute_fisher_vectors(desc, pca_m, gmm_m)
-                    save_stuff(pca_m, gmm_m, fv_m, (pca_path_m, gmm_path_m, fv_path_m))
-                fv_list.append(fv_m)
+                if args.use_fisher:
+                    pca_path_m = f"{base_dir}/pca_model_{m}.pkl"
+                    gmm_path_m = f"{base_dir}/gmm_model_{m}.pkl"
+                    fv_path_m = f"{base_dir}/fisher_vectors_{m}.pkl"
+                    if os.path.exists(fv_path_m):
+                        pca_m, gmm_m, fv_m = load_stuff(pca_path_m, gmm_path_m, fv_path_m)
+                    else:
+                        desc_stack = stack_all_descriptors(desc)
+                        pca_m = train_pca(desc_stack)
+                        gmm_m = train_gmm(pca_m.transform(desc_stack))
+                        fv_m = compute_fisher_vectors(desc, pca_m, gmm_m)
+                        save_stuff(pca_m, gmm_m, fv_m, (pca_path_m, gmm_path_m, fv_path_m))
+                    fv_list.append(fv_m)
 
-            fisher_vectors = combine_fisher_vectors(fv_list, ENSEMBLE_WEIGHTS)
+            if args.use_fisher:
+                fisher_vectors = combine_fisher_vectors(fv_list, ENSEMBLE_WEIGHTS)
         else:
             feat_dir = f"{base_dir}/feature_descriptors_{method}/"
             if not os.path.isdir(feat_dir) and method == 'disk':
@@ -507,20 +518,23 @@ if __name__ == '__main__':
             descriptors = load_descriptors(os.path.join(feat_dir, "descriptors.h5"))
             keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
 
-            pca_path = f"{base_dir}/pca_model_{method}.pkl"
-            gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
-            fv_path = f"{base_dir}/fisher_vectors_{method}.pkl"
-            if os.path.exists(fv_path):
-                pca, gmm, fisher_vectors = load_stuff(pca_path, gmm_path, fv_path)
-            else:
-                desc_stack = stack_all_descriptors(descriptors)
-                pca = train_pca(desc_stack)
-                gmm = train_gmm(pca.transform(desc_stack))
-                fisher_vectors = compute_fisher_vectors(descriptors, pca, gmm)
-                save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))
+            if args.use_fisher:
+                pca_path = f"{base_dir}/pca_model_{method}.pkl"
+                gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
+                fv_path = f"{base_dir}/fisher_vectors_{method}.pkl"
+                if os.path.exists(fv_path):
+                    pca, gmm, fisher_vectors = load_stuff(pca_path, gmm_path, fv_path)
+                else:
+                    desc_stack = stack_all_descriptors(descriptors)
+                    pca = train_pca(desc_stack)
+                    gmm = train_gmm(pca.transform(desc_stack))
+                    fisher_vectors = compute_fisher_vectors(descriptors, pca, gmm)
+                    save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))
 
         # Gather descriptor blocks
-        blocks = {'fisher': fisher_vectors}
+        blocks = {}
+        if args.use_fisher:
+            blocks['fisher'] = fisher_vectors
 
         if args.use_global_embedding:
             print("Extracting global embeddings for population counting...")
@@ -544,10 +558,11 @@ if __name__ == '__main__':
             norm_blk, _ = apply_zscore_and_l2_train_test(blk, blk)
             norm_blocks[name] = norm_blk
 
-        weight_map = {
-            'fisher': args.w_fisher,
-            'global': args.w_global,
-        }
+        weight_map = {}
+        if args.use_fisher:
+            weight_map['fisher'] = args.w_fisher
+        if args.use_global_embedding:
+            weight_map['global'] = args.w_global
 
         fisher_vectors = fuse_blocks_weighted_concat(norm_blocks, weight_map)
 
