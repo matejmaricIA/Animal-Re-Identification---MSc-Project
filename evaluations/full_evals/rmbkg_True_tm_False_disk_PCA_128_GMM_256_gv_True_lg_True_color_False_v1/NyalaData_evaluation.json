@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.20809248554913296,
-    "top_n_accuracy": 0.34104046242774566,
+    "accuracy": 0.2254335260115607,
+    "top_n_accuracy": 0.35260115606936415,
     "classification_metrics": {
         "NyalaData_1": {
             "precision": 0.0,
@@ -21,9 +21,9 @@
             "support": 2.0
         },
         "NyalaData_101": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.25,
+            "recall": 0.5,
+            "f1-score": 0.3333333333333333,
             "support": 2.0
         },
         "NyalaData_102": {
@@ -69,9 +69,9 @@
             "support": 1.0
         },
         "NyalaData_11": {
-            "precision": 0.5,
+            "precision": 0.25,
             "recall": 0.2,
-            "f1-score": 0.2857142857142857,
+            "f1-score": 0.2222222222222222,
             "support": 5.0
         },
         "NyalaData_110": {
@@ -81,9 +81,9 @@
             "support": 1.0
         },
         "NyalaData_111": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 0.6666666666666666,
-            "f1-score": 0.5714285714285714,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "NyalaData_112": {
@@ -99,21 +99,21 @@
             "support": 1.0
         },
         "NyalaData_114": {
-            "precision": 0.16666666666666666,
+            "precision": 0.2,
             "recall": 0.3333333333333333,
-            "f1-score": 0.2222222222222222,
+            "f1-score": 0.25,
             "support": 3.0
         },
         "NyalaData_115": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "f1-score": 0.4,
             "support": 2.0
         },
         "NyalaData_116": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.4,
             "support": 2.0
         },
         "NyalaData_117": {
@@ -135,9 +135,9 @@
             "support": 1.0
         },
         "NyalaData_12": {
-            "precision": 0.3333333333333333,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "NyalaData_120": {
@@ -183,9 +183,9 @@
             "support": 1.0
         },
         "NyalaData_127": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.4,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "NyalaData_128": {
@@ -297,9 +297,9 @@
             "support": 1.0
         },
         "NyalaData_149": {
-            "precision": 0.5,
-            "recall": 0.6,
-            "f1-score": 0.5454545454545454,
+            "precision": 0.4444444444444444,
+            "recall": 0.8,
+            "f1-score": 0.5714285714285714,
             "support": 5.0
         },
         "NyalaData_15": {
@@ -345,9 +345,9 @@
             "support": 1.0
         },
         "NyalaData_156": {
-            "precision": 0.2857142857142857,
+            "precision": 0.25,
             "recall": 1.0,
-            "f1-score": 0.4444444444444444,
+            "f1-score": 0.4,
             "support": 2.0
         },
         "NyalaData_157": {
@@ -459,9 +459,9 @@
             "support": 2.0
         },
         "NyalaData_176": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "NyalaData_177": {
@@ -471,9 +471,9 @@
             "support": 1.0
         },
         "NyalaData_178": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "NyalaData_18": {
@@ -681,9 +681,9 @@
             "support": 1.0
         },
         "NyalaData_218": {
-            "precision": 0.5,
+            "precision": 0.4,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.4444444444444444,
             "support": 4.0
         },
         "NyalaData_219": {
@@ -862,8 +862,8 @@
         },
         "NyalaData_252": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "NyalaData_26": {
@@ -885,9 +885,9 @@
             "support": 1.0
         },
         "NyalaData_268": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "NyalaData_269": {
@@ -939,27 +939,27 @@
             "support": 1.0
         },
         "NyalaData_3": {
-            "precision": 0.3333333333333333,
-            "recall": 0.5,
-            "f1-score": 0.4,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "NyalaData_30": {
-            "precision": 0.75,
+            "precision": 0.6,
             "recall": 0.6,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.6,
             "support": 5.0
         },
         "NyalaData_31": {
-            "precision": 0.3333333333333333,
-            "recall": 1.0,
-            "f1-score": 0.5,
+            "precision": 0.2,
+            "recall": 0.5,
+            "f1-score": 0.2857142857142857,
             "support": 2.0
         },
         "NyalaData_32": {
-            "precision": 0.2,
+            "precision": 0.125,
             "recall": 0.2,
-            "f1-score": 0.2,
+            "f1-score": 0.15384615384615385,
             "support": 5.0
         },
         "NyalaData_33": {
@@ -981,15 +981,15 @@
             "support": 1.0
         },
         "NyalaData_36": {
-            "precision": 0.6666666666666666,
+            "precision": 0.5,
             "recall": 0.6666666666666666,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5714285714285714,
             "support": 3.0
         },
         "NyalaData_37": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "NyalaData_38": {
@@ -1017,21 +1017,21 @@
             "support": 3.0
         },
         "NyalaData_41": {
-            "precision": 0.3333333333333333,
+            "precision": 0.25,
             "recall": 0.25,
-            "f1-score": 0.2857142857142857,
+            "f1-score": 0.25,
             "support": 4.0
         },
         "NyalaData_42": {
-            "precision": 0.3333333333333333,
+            "precision": 0.5,
             "recall": 0.5,
-            "f1-score": 0.4,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "NyalaData_43": {
             "precision": 1.0,
-            "recall": 0.4,
-            "f1-score": 0.5714285714285714,
+            "recall": 0.6,
+            "f1-score": 0.75,
             "support": 5.0
         },
         "NyalaData_44": {
@@ -1059,9 +1059,9 @@
             "support": 2.0
         },
         "NyalaData_48": {
-            "precision": 0.2857142857142857,
-            "recall": 0.5,
-            "f1-score": 0.36363636363636365,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 4.0
         },
         "NyalaData_49": {
@@ -1095,9 +1095,9 @@
             "support": 1.0
         },
         "NyalaData_54": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "NyalaData_55": {
@@ -1137,21 +1137,21 @@
             "support": 1.0
         },
         "NyalaData_61": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "NyalaData_62": {
             "precision": 0.5,
-            "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "NyalaData_63": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.4,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "NyalaData_64": {
@@ -1161,9 +1161,9 @@
             "support": 1.0
         },
         "NyalaData_65": {
-            "precision": 0.4,
+            "precision": 0.5,
             "recall": 0.6666666666666666,
-            "f1-score": 0.5,
+            "f1-score": 0.5714285714285714,
             "support": 3.0
         },
         "NyalaData_67": {
@@ -1173,9 +1173,9 @@
             "support": 1.0
         },
         "NyalaData_68": {
-            "precision": 0.3333333333333333,
+            "precision": 0.25,
             "recall": 0.5,
-            "f1-score": 0.4,
+            "f1-score": 0.3333333333333333,
             "support": 2.0
         },
         "NyalaData_69": {
@@ -1185,9 +1185,9 @@
             "support": 1.0
         },
         "NyalaData_7": {
-            "precision": 0.25,
+            "precision": 0.2857142857142857,
             "recall": 0.6666666666666666,
-            "f1-score": 0.36363636363636365,
+            "f1-score": 0.4,
             "support": 3.0
         },
         "NyalaData_70": {
@@ -1215,9 +1215,9 @@
             "support": 1.0
         },
         "NyalaData_74": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 0.3333333333333333,
-            "f1-score": 0.4,
+            "f1-score": 0.5,
             "support": 3.0
         },
         "NyalaData_75": {
@@ -1245,9 +1245,9 @@
             "support": 1.0
         },
         "NyalaData_8": {
-            "precision": 0.16666666666666666,
+            "precision": 0.2,
             "recall": 0.3333333333333333,
-            "f1-score": 0.2222222222222222,
+            "f1-score": 0.25,
             "support": 3.0
         },
         "NyalaData_80": {
@@ -1275,9 +1275,9 @@
             "support": 2.0
         },
         "NyalaData_85": {
-            "precision": 0.42857142857142855,
-            "recall": 0.75,
-            "f1-score": 0.5454545454545454,
+            "precision": 0.2857142857142857,
+            "recall": 0.5,
+            "f1-score": 0.36363636363636365,
             "support": 4.0
         },
         "NyalaData_86": {
@@ -1364,19 +1364,19 @@
             "f1-score": 1.0,
             "support": 1.0
         },
-        "accuracy": 0.20809248554913296,
+        "accuracy": 0.2254335260115607,
         "macro avg": {
-            "precision": 0.11961401300608349,
-            "recall": 0.14170337738619676,
-            "f1-score": 0.12073599430427626,
+            "precision": 0.14042549472064889,
+            "recall": 0.15558002936857565,
+            "f1-score": 0.13613743085108723,
             "support": 346.0
         },
         "weighted avg": {
-            "precision": 0.19244426094137076,
-            "recall": 0.20809248554913296,
-            "f1-score": 0.18542693658300594,
+            "precision": 0.21316290485365627,
+            "recall": 0.2254335260115607,
+            "f1-score": 0.20238314992650253,
             "support": 346.0
         }
     },
-    "eval_runtime_sec": 359.3453166484833
+    "eval_runtime_sec": 374.2676441669464
 }

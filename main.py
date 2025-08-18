@@ -87,9 +87,9 @@ if __name__ == '__main__':
                         help='Geometric verification method to use (RANSAC or MAGSAC)')
     parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN/Transformer embeddings')
     parser.add_argument('--use_shape', action='store_true', help='Use shape descriptors based on animal contours')
-    parser.add_argument('--w_fisher', type=float, default=0.0, help='Weight for Fisher vectors during fusion')
-    parser.add_argument('--w_color', type=float, default=0.0, help='Weight for colour descriptors during fusion')
-    parser.add_argument('--w_shape', type=float, default=0.0, help='Weight for shape descriptors during fusion')
+    parser.add_argument('--w_fisher', type=float, default=3.0, help='Weight for Fisher vectors during fusion')
+    parser.add_argument('--w_color', type=float, default=1.0, help='Weight for colour descriptors during fusion')
+    parser.add_argument('--w_shape', type=float, default=1.0, help='Weight for shape descriptors during fusion')
     parser.add_argument('--w_global', type=float, default=1.0, help='Weight for global embeddings during fusion')
 
 

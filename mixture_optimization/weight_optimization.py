@@ -229,18 +229,23 @@ def ensure_feature_files(
             pickle.dump(shape_te, f)
 
     # ------------------------------------------------------------------
-    # Fisher vectors
-    fv_tr_path = os.path.join(base_dir, "fisher_vectors_train.pkl")
-    fv_te_path = os.path.join(base_dir, "fisher_vectors_test.pkl")
+    # Fisher vectors (load if present; else train and save, per method)
+    fv_tr_path = os.path.join(base_dir, f"fisher_vectors_{method}.pkl")
+    fv_te_path = os.path.join(base_dir, f"fisher_vectors_{method}.pkl")
+
     if not (os.path.exists(fv_tr_path) and os.path.exists(fv_te_path)):
         methods = ["disk", "keynet_hardnet", "lightglue"] if method == "ensamble" else [method]
         fv_tr_list: List[Dict[str, np.ndarray]] = []
         fv_te_list: List[Dict[str, np.ndarray]] = []
+
         for m in methods:
+            # Method-specific descriptor dirs
             desc_tr_dir = os.path.join(base_dir, f"feature_descriptors_train_{m}")
             desc_te_dir = os.path.join(base_dir, f"feature_descriptors_test_{m}")
             desc_tr_path = os.path.join(desc_tr_dir, "descriptors.h5")
             desc_te_path = os.path.join(desc_te_dir, "descriptors.h5")
+
+            # Ensure local descriptors exist
             if not (os.path.exists(desc_tr_path) and os.path.exists(desc_te_path)):
                 if m == "disk":
                     extract_features(train_paths, MODEL_PATH, desc_tr_dir)
@@ -251,34 +256,67 @@ def ensure_feature_files(
                 elif m == "lightglue":
                     extract_features_lightglue(train_paths, desc_tr_dir)
                     extract_features_lightglue(test_paths, desc_te_dir)
+                else:
+                    raise ValueError(f"Unsupported method: {m}")
 
+            # Load local descriptors
             train_desc_m = load_descriptors(desc_tr_path)
-            test_desc_m = load_descriptors(desc_te_path)
-            stacked = stack_all_descriptors(train_desc_m)
-            pca = train_pca(stacked)
-            gmm = train_gmm(pca.transform(stacked))
-            fv_tr_m = compute_fisher_vectors(train_desc_m, pca, gmm)
-            fv_te_m = compute_fisher_vectors(test_desc_m, pca, gmm)
-            with open(PCA_PATH.format(dataset, m), "wb") as f:
-                pickle.dump(pca, f)
-            with open(GMM_PATH.format(dataset, m), "wb") as f:
-                pickle.dump(gmm, f)
-            with open(FISHER_VECTORS.format(dataset, m), "wb") as f:
-                pickle.dump(fv_tr_m, f)
+            test_desc_m  = load_descriptors(desc_te_path)
+
+            # Paths for PCA/GMM and per-method Fisher vectors
+            pca_path_m = PCA_PATH.format(dataset, m)               # e.g., data/<ds>/pca_model_disk.pkl
+            gmm_path_m = GMM_PATH.format(dataset, m)               # e.g., data/<ds>/gmm_model_disk.pkl
+            fv_tr_path_m = os.path.join(base_dir, f"fisher_vectors_{m}.pkl")
+            fv_te_path_m = os.path.join(base_dir, f"fisher_vectors_{m}.pkl")
+
+            have_all = os.path.exists(pca_path_m) and os.path.exists(gmm_path_m) \
+                    and os.path.exists(fv_tr_path_m) and os.path.exists(fv_te_path_m)
+
+            if have_all:
+                # Load PCA/GMM and per-method FVs
+                with open(pca_path_m, "rb") as f:
+                    pca_m = pickle.load(f)
+                with open(gmm_path_m, "rb") as f:
+                    gmm_m = pickle.load(f)
+                with open(fv_tr_path_m, "rb") as f:
+                    fv_tr_m = pickle.load(f)
+                with open(fv_te_path_m, "rb") as f:
+                    fv_te_m = pickle.load(f)
+            else:
+                # Train PCA/GMM on TRAIN descriptors and compute both TRAIN/TEST FVs
+                stacked = stack_all_descriptors(train_desc_m)
+                pca_m = train_pca(stacked)
+                gmm_m = train_gmm(pca_m.transform(stacked))
+                fv_tr_m = compute_fisher_vectors(train_desc_m, pca_m, gmm_m)
+                fv_te_m = compute_fisher_vectors(test_desc_m,  pca_m, gmm_m)
+
+                # Persist models and per-method FVs
+                with open(pca_path_m, "wb") as f:
+                    pickle.dump(pca_m, f)
+                with open(gmm_path_m, "wb") as f:
+                    pickle.dump(gmm_m, f)
+                with open(fv_tr_path_m, "wb") as f:
+                    pickle.dump(fv_tr_m, f)
+                with open(fv_te_path_m, "wb") as f:
+                    pickle.dump(fv_te_m, f)
+
+            # Accumulate per-method FVs for optional ensemble
             fv_tr_list.append(fv_tr_m)
             fv_te_list.append(fv_te_m)
 
+        # Build final Fisher vectors for the optimiser’s conventional filenames
         if method == "ensamble":
             fv_tr = combine_fisher_vectors(fv_tr_list, ENSEMBLE_WEIGHTS)
             fv_te = combine_fisher_vectors(fv_te_list, ENSEMBLE_WEIGHTS)
         else:
             fv_tr = fv_tr_list[0]
-            fv_te = fv_te_list[0]
+            fv_te = fv_te_list
 
         with open(fv_tr_path, "wb") as f:
             pickle.dump(fv_tr, f)
         with open(fv_te_path, "wb") as f:
             pickle.dump(fv_te, f)
+
 
 
 def load_local_features(
@@ -423,7 +461,7 @@ def optimise_dataset(
             #    continue
         #    weights[name] = trial.suggest_float(f"w_{name}", 0.0, 2.0)
 
-        weights = suggest_weights(trial, descriptor_names)
+        weights = suggest_weights(trial, descriptor_names, 2.0)
         combined_train = fuse_blocks_weighted_concat(normalized_train_blocks, weights)
         combined_test = fuse_blocks_weighted_concat(normalized_test_blocks, weights)
 
