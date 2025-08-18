@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 try:
     from megadescriptor import load_megadescriptor_l_384
-except Exception:  # pragma: no cover - optional dependency
+except Exception:
     load_megadescriptor_l_384 = None
 
 
