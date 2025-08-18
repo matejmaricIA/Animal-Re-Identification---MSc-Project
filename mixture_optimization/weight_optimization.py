@@ -9,6 +9,7 @@ before optimisation using the standard pipeline. Features are stored under
     fisher_vectors_{split}.pkl
     global_embeddings_{split}.pkl
 
+
 Only the files that exist are loaded which allows experimentation with any
 subset of descriptor types. Results are evaluated using the simple nearest
 neighbour classifier from :mod:`predict`. When the ``--use-gv`` flag is
@@ -79,7 +80,9 @@ def _load_pickle(path: str) -> Dict[str, np.ndarray]:
         return pickle.load(f)
 
 
-def load_features(base_dir: str, split: str) -> Dict[str, Dict[str, np.ndarray]]:
+def load_features(
+    base_dir: str, split: str, embedding_model: str = "resnet50"
+) -> Dict[str, Dict[str, np.ndarray]]:
     """Load any available features for ``split`` from ``base_dir``.
 
     This function looks for pickle files with conventional names. Only files
@@ -92,6 +95,7 @@ def load_features(base_dir: str, split: str) -> Dict[str, Dict[str, np.ndarray]]
     path_map = {
         "fisher": os.path.join(base_dir, f"fisher_vectors_{split}.pkl"),
         "global": os.path.join(base_dir, f"global_embeddings_{split}.pkl"),
+
     }
 
     for name, path in path_map.items():
@@ -150,6 +154,7 @@ def ensure_feature_files(
     train_df: pd.DataFrame,
     test_df: pd.DataFrame,
     method: str = "disk",
+    embedding_model: str = "resnet50",
 ) -> None:
     """Create descriptor pickles on disk if they are missing.
 
@@ -168,13 +173,13 @@ def ensure_feature_files(
     test_paths = get_image_paths(test_df)
 
     # Global embeddings
-    emb_tr_path = os.path.join(base_dir, "global_embeddings_train.pkl")
-    emb_te_path = os.path.join(base_dir, "global_embeddings_test.pkl")
+    emb_tr_path = os.path.join(base_dir, f"global_embeddings_train_{embedding_model}.pkl")
+    emb_te_path = os.path.join(base_dir, f"global_embeddings_test_{embedding_model}.pkl")
     if not (os.path.exists(emb_tr_path) and os.path.exists(emb_te_path)):
         train_map = dict(zip(train_df["image_id"].astype(str), train_paths))
         test_map = dict(zip(test_df["image_id"].astype(str), test_paths))
-        emb_tr = extract_global_embeddings(train_map)
-        emb_te = extract_global_embeddings(test_map)
+        emb_tr = extract_global_embeddings(train_map, model_name=embedding_model)
+        emb_te = extract_global_embeddings(test_map, model_name=embedding_model)
         emb_tr, mean_e, std_e = _standardize_generic(emb_tr)
         emb_te, _, _ = _standardize_generic(emb_te, mean_e, std_e)
         with open(emb_tr_path, "wb") as f:
@@ -349,6 +354,7 @@ def optimise_dataset(
     trials: int = 50,
     use_gv: bool = False,
     method: str = "disk",
+    embedding_model: str = "resnet50",
 ) -> None:
     """Run a weight search for a single dataset.
 
@@ -377,10 +383,10 @@ def optimise_dataset(
     test_labels = dict(zip(test_df["image_id"], test_df["identity"]))
 
     # Ensure required descriptor files exist; compute them if necessary
-    ensure_feature_files(dataset, train_df, test_df, method=method)
+    ensure_feature_files(dataset, train_df, test_df, method=method, embedding_model=embedding_model)
 
-    train_features = load_features(base_dir, "train")
-    test_features = load_features(base_dir, "test")
+    train_features = load_features(base_dir, "train", embedding_model=embedding_model)
+    test_features = load_features(base_dir, "test", embedding_model=embedding_model)
 
     if use_gv:
         train_descs, train_kp = load_local_features(dataset, "train", method)
@@ -443,9 +449,16 @@ def optimise_all(
     trials: int = 50,
     use_gv: bool = False,
     method: str = "disk",
+    embedding_model: str = "resnet50",
 ) -> None:
     for ds in datasets:
-        optimise_dataset(ds, trials=trials, use_gv=use_gv, method=method)
+        optimise_dataset(
+            ds,
+            trials=trials,
+            use_gv=use_gv,
+            method=method,
+            embedding_model=embedding_model,
+        )
 
 
 if __name__ == "__main__":
@@ -463,12 +476,30 @@ if __name__ == "__main__":
         choices=["disk", "ensamble"],
         help="Feature extraction method for Fisher vectors",
     )
+    parser.add_argument(
+        "--embedding-model",
+        type=str,
+        default="resnet50",
+        choices=["resnet50", "megadescriptor-l-384"],
+        help="Global embedding model to use",
+    )
 
     args = parser.parse_args()
 
     if args.all:
-        optimise_all(trials=args.trials, use_gv=args.use_gv, method=args.method)
+        optimise_all(
+            trials=args.trials,
+            use_gv=args.use_gv,
+            method=args.method,
+            embedding_model=args.embedding_model,
+        )
     elif args.dataset:
-        optimise_dataset(args.dataset, trials=args.trials, use_gv=args.use_gv, method=args.method)
+        optimise_dataset(
+            args.dataset,
+            trials=args.trials,
+            use_gv=args.use_gv,
+            method=args.method,
+            embedding_model=args.embedding_model,
+        )
     else:
         parser.print_help()
