@@ -57,14 +57,6 @@ EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_segment
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 
-# Shape descriptor storage paths
-SHAPE_TRAIN_PATH = './data/{}/shape_descriptors_train.pkl'
-SHAPE_TEST_PATH = './data/{}/shape_descriptors_test.pkl'
-
-# Weight for shape descriptor contribution
-SHAPE_WEIGHT = 0.2
-
-
 # Keynet, Hardnet, Affnet
 PATCH_SIZE = 32
 
