@@ -1,30 +1,34 @@
-from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from constants import *
 import pandas as pd
-from geometric_verification import load_keypoints, compute_geometric_similarity
+from geometric_verification import compute_geometric_similarity
 import time
 from tqdm import tqdm
 from utils import distance_utils
 
+
 def classify_test_images_with_geometric_verification(
-    test_fisher_vectors, train_fisher_vectors, 
-    test_keypoints, train_keypoints,
-    test_descriptors, train_descriptors,
-    train_labels, top_n=5, geometric_candidates=GEOMETRIC_CANDIDATES,
-    use_lightglue=False, method='disk', alpha=ALPHA, min_inliers=MIN_INLIERS,
-    inlier_threshold=INLIER_THRESHOLD, test_shapes=None, train_shapes=None,
-    shape_weight=SHAPE_WEIGHT):
-    """Efficient geometric verification with two-stage filtering"""
+    test_fisher_vectors,
+    train_fisher_vectors,
+    test_keypoints,
+    train_keypoints,
+    test_descriptors,
+    train_descriptors,
+    train_labels,
+    top_n=5,
+    geometric_candidates=GEOMETRIC_CANDIDATES,
+    use_lightglue=False,
+    method="disk",
+    alpha=ALPHA,
+    min_inliers=MIN_INLIERS,
+    inlier_threshold=INLIER_THRESHOLD,
+):
+    """Efficient geometric verification with two-stage filtering."""
     
     predictions = {}
     train_vectors = np.stack(list(train_fisher_vectors.values()))
     train_image_ids = list(train_fisher_vectors.keys())
     train_class_labels = np.array([train_labels[image_id] for image_id in train_image_ids])
-
-    shape_enabled = test_shapes is not None and train_shapes is not None
-    if shape_enabled:
-        train_shape_mat = np.stack([train_shapes[i] for i in train_image_ids])
 
     train_vectors_normalized = train_vectors / np.linalg.norm(train_vectors, axis=1, keepdims=True)
     
@@ -58,12 +62,6 @@ def classify_test_images_with_geometric_verification(
         test_fisher_vector = test_fisher_vector / np.linalg.norm(test_fisher_vector)
         #train_vectors_normalized = train_vectors / np.linalg.norm(train_vectors, axis=1, keepdims=True)
         similarities = np.dot(train_vectors_normalized, test_fisher_vector)
-
-        if shape_enabled and test_image_id in test_shapes:
-            ts = test_shapes[test_image_id]
-            shape_dists = np.linalg.norm(train_shape_mat - ts, axis=1)
-            shape_sim = 1.0 / (1.0 + shape_dists)
-            similarities = (1 - shape_weight) * similarities + shape_weight * shape_sim
         
         # Get top candidates based on Fisher similarity
         top_indices = np.argsort(similarities)[::-1][:geometric_candidates]
@@ -90,13 +88,7 @@ def classify_test_images_with_geometric_verification(
                 train_image_id = train_image_ids[idx]
                 #fisher_distance = 1.0 - similarities[idx]
                 fisher_distance = distance_utils.fisher_distance(test_fisher_vector, train_vectors[idx])
-
                 combined_distance = fisher_distance
-                if shape_enabled and test_image_id in test_shapes and train_image_id in train_shapes:
-                    ts = test_shapes[test_image_id]
-                    tr = train_shapes[train_image_id]
-                    shape_distance = np.linalg.norm(ts - tr)
-                    combined_distance = (1 - shape_weight) * fisher_distance + shape_weight * shape_distance
                 
                 train_kp = train_keypoints.get(train_image_id, np.array([]))
                 train_desc = train_descriptors.get(train_image_id, np.array([]))
@@ -182,7 +174,12 @@ def classify_test_images_with_geometric_verification(
 
 
 
-def classify_test_images(test_fisher_vectors, train_fisher_vectors, train_labels, top_n = 5, test_shapes=None, train_shapes=None, shape_weight=SHAPE_WEIGHT):
+def classify_test_images(
+    test_fisher_vectors,
+    train_fisher_vectors,
+    train_labels,
+    top_n=5,
+):
 
     predictions = {}
 
@@ -190,10 +187,6 @@ def classify_test_images(test_fisher_vectors, train_fisher_vectors, train_labels
     train_vectors = np.stack(list(train_fisher_vectors.values()))
     train_image_ids = list(train_fisher_vectors.keys())
     train_class_labels = np.array([train_labels[image_id] for image_id in train_image_ids])
-
-    shape_enabled = test_shapes is not None and train_shapes is not None
-    if shape_enabled:
-        train_shape_mat = np.stack([train_shapes[i] for i in train_image_ids])
 
     for test_image_id, test_fisher_vector in test_fisher_vectors.items():
         # Normalize Fisher Vectors for cosine similarity
@@ -203,27 +196,20 @@ def classify_test_images(test_fisher_vectors, train_fisher_vectors, train_labels
         # Compute cosine similarity
         similarities = np.dot(train_vectors_normalized, test_fisher_vector)
 
-        if shape_enabled and test_image_id in test_shapes:
-            ts = test_shapes[test_image_id]
-            shape_dists = np.linalg.norm(train_shape_mat - ts, axis=1)
-            shape_sim = 1.0 / (1.0 + shape_dists)
-            similarities = (1 - shape_weight) * similarities + shape_weight * shape_sim
-
         # Sort similarities in descending order
         sorted_indices = np.argsort(similarities)[::-1]
         top_indices = sorted_indices[:top_n]
 
         # Get top-N class labels and similarities
         top_n_matches = [(similarities[i], train_class_labels[i]) for i in top_indices]
-        #print(top_n_matches)
 
         # Predicted class is the class of the most similar train image
         predicted_class = top_n_matches[0][1]
 
         # Save the prediction and top-N matches
         predictions[test_image_id] = {
-            'predicted_class': predicted_class,
-            'top_n': top_n_matches
+            "predicted_class": predicted_class,
+            "top_n": top_n_matches,
         }
 
     return predictions

@@ -51,7 +51,7 @@ python main.py --train --ds ATRW --use_geometric_verification --use_lightglue --
 - **`--save_eval`**: Saves evaluation results to `./data/evaluations`.
  **`--version`**:  version tag of the method in use. Together with background-removal and tone-mapping settings it forms a “tag” used to store results in a sub-directory of evaluations/. Optional argument and not important for the training itself.
 - **`--use_lightglue`**: Uses the LightGlue matcher during geometric verification.
-- **`--w_fisher`, `--w_color`, `--w_shape`, `--w_global`**: Weights for Fisher vectors, colour descriptors, shape descriptors and global embeddings when fusing descriptor blocks.
+- **`--w_fisher`, `--w_global`**: Weights for Fisher vectors and global embeddings when fusing descriptor blocks.
 
   
 During training:
@@ -90,7 +90,7 @@ python main.py --count --ds ATRW --num_vertices 150 --num_neighbors 20
 - **`--num_neighbors`**: Number of neighbours per vertex.
 - **`--automated_mode`**: Use fully automated counting without human labels (faster but potentially less accurate).
 - **`--use_global_embedding`**: Include global CNN embeddings (ResNet50) to enhance Fisher vector representations.
-- **`--w_fisher`, `--w_color`, `--w_shape`, `--w_global`**: Descriptor fusion weights (same as in training).
+- **`--w_fisher`, `--w_global`**: Descriptor fusion weights (same as in training).
 
 #### Automated vs Human-in-the-Loop Modes
 

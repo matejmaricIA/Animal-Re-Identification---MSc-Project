@@ -19,14 +19,7 @@ from utility_functions import load_dataset, save_count_results
 from constants import MAX_GMM_DESCRIPTORS, ENABLE_MULTISCALE, EVAL_RESULTS_XLSX, MAX_DESCRIPTORS_PER_IMAGE, WILD_DATASET_PATH
 import numpy as np
 
-from feature_extraction import get_image_paths
-from color_descriptors import (
-    compute_color_descriptors,
-    standardize as standardize_colors,
-    normalize_hsv,
-)
-
-def optimise_dataset(dataset: str, trials: int = 50, use_color: bool = False):
+def optimise_dataset(dataset: str, trials: int = 50):
     """Run Optuna hyperparameter search on a single dataset."""
     method = "disk"
     base_dir = f"./data/{dataset}"
@@ -52,19 +45,6 @@ def optimise_dataset(dataset: str, trials: int = 50, use_color: bool = False):
     train_keypoints = load_keypoints(train_kp_path)
     test_keypoints = load_keypoints(test_kp_path)
     #print(df)
-    # Optional colour descriptors
-    if use_color:
-        train_paths = get_image_paths(train_df, remove_background=False)
-        test_paths = get_image_paths(test_df, remove_background=False)
-        color_tr = compute_color_descriptors(train_paths)
-        color_te = compute_color_descriptors(test_paths)
-        color_tr, mean_c, std_c = standardize_colors(color_tr)
-        color_te, _, _ = standardize_colors(color_te, mean_c, std_c)
-        color_tr = normalize_hsv(color_tr)
-        color_te = normalize_hsv(color_te)
-    else:
-        color_tr, color_te = None, None
-
     stacked_descriptors_train = stack_all_descriptors(
         train_descriptors, max_samples=MAX_GMM_DESCRIPTORS
     )
@@ -125,18 +105,6 @@ def optimise_dataset(dataset: str, trials: int = 50, use_color: bool = False):
                 with open(fv_te_path, "wb") as f:
                     pickle.dump(fisher_vectors_test, f)
             
-            if use_color:
-                for k in fisher_vectors_train.keys():
-                    if k in color_tr:
-                        fisher_vectors_train[k] = np.concatenate(
-                            [fisher_vectors_train[k], color_tr[k]]
-                        )
-                for k in fisher_vectors_test.keys():
-                    if k in color_te:
-                        fisher_vectors_test[k] = np.concatenate(
-                            [fisher_vectors_test[k], color_te[k]]
-                        )
-            
             predictions = classify_test_images_with_geometric_verification(
                 fisher_vectors_test,
                 fisher_vectors_train,
@@ -160,7 +128,6 @@ def optimise_dataset(dataset: str, trials: int = 50, use_color: bool = False):
                 "Num Classes": train_df["identity"].nunique(),
                 "Method": method,
                 "Remove Background": False,
-                "Use Color": use_color,
                 "GMM Components": n_gmm,
                 "PCA Components": n_pca,
                 "Use GV": True,
@@ -185,9 +152,9 @@ def optimise_dataset(dataset: str, trials: int = 50, use_color: bool = False):
     study.optimize(objective, n_trials=trials)
     print(f"Best parameters for {dataset}: {study.best_params}")
 
-def optimise_all(datasets, trials = 50, use_color = False):
+def optimise_all(datasets, trials=50):
     for ds in datasets:
-        optimise_dataset(ds, trials=trials, use_color = use_color)
+        optimise_dataset(ds, trials=trials)
 
 
 if __name__ == "__main__":
@@ -195,11 +162,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--trials", type=int, default=20, help="Number of Optuna trials")
-    parser.add_argument(
-        "--use_color",
-        action="store_true",
-        help="Use colour descriptors in addition to Fisher vectors",
-    )
     args = parser.parse_args()
     DATASETS = [
         "ATRW",
@@ -212,4 +174,4 @@ if __name__ == "__main__":
     #    "StripeSpotter",
     #    "Giraffes",
     ]
-    optimise_all(DATASETS, trials=args.trials, use_color=args.use_color)
+    optimise_all(DATASETS, trials=args.trials)
