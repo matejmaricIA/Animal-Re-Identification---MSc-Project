@@ -86,6 +86,13 @@ if __name__ == '__main__':
     parser.add_argument('--gv_method', type=str, default='RANSAC', choices=['RANSAC', 'MAGSAC'],
                         help='Geometric verification method to use (RANSAC or MAGSAC)')
     parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN/Transformer embeddings')
+    parser.add_argument(
+        '--embedding_model',
+        type=str,
+        default='resnet50',
+        choices=['resnet50', 'megadescriptor-l-384'],
+        help='Model for global embeddings',
+    )
     parser.add_argument('--use_shape', action='store_true', help='Use shape descriptors based on animal contours')
     parser.add_argument('--w_fisher', type=float, default=3.0, help='Weight for Fisher vectors during fusion')
     parser.add_argument('--w_color', type=float, default=1.0, help='Weight for colour descriptors during fusion')
@@ -334,16 +341,16 @@ if __name__ == '__main__':
             print("Extracting global embeddings...")
             train_paths = dict(zip(df_train["image_id"].astype(str), get_image_paths(df_train, args.remove_background)))
             test_paths = dict(zip(df_test["image_id"].astype(str), get_image_paths(df_test, args.remove_background)))
-            emb_tr_path = f"{base_dir}/global_embeddings_train.pkl"
-            emb_te_path = f"{base_dir}/global_embeddings_test.pkl"
+            emb_tr_path = f"{base_dir}/global_embeddings_train_{args.embedding_model}.pkl"
+            emb_te_path = f"{base_dir}/global_embeddings_test_{args.embedding_model}.pkl"
             if os.path.exists(emb_tr_path) and os.path.exists(emb_te_path):
                 with open(emb_tr_path, "rb") as f:
                     emb_tr = pickle.load(f)
                 with open(emb_te_path, "rb") as f:
                     emb_te = pickle.load(f)
             else:
-                emb_tr = extract_global_embeddings(train_paths)
-                emb_te = extract_global_embeddings(test_paths)
+                emb_tr = extract_global_embeddings(train_paths, model_name=args.embedding_model)
+                emb_te = extract_global_embeddings(test_paths, model_name=args.embedding_model)
                 with open(emb_tr_path, "wb") as f:
                     pickle.dump(emb_tr, f)
                 with open(emb_te_path, "wb") as f:
@@ -584,7 +591,7 @@ if __name__ == '__main__':
         if args.use_global_embedding:
             print("Extracting global embeddings for population counting...")
             image_paths = dict(zip(df["image_id"].astype(str), get_image_paths(df, args.remove_background)))
-            emb_path = f"{base_dir}/global_embeddings_count.pkl"
+            emb_path = f"{base_dir}/global_embeddings_count_{args.embedding_model}.pkl"
 
             if os.path.exists(emb_path):
                 print("Loading cached global embeddings...")
@@ -592,7 +599,7 @@ if __name__ == '__main__':
                     emb = pickle.load(f)
             else:
                 print("Computing global embeddings...")
-                emb = extract_global_embeddings(image_paths)
+                emb = extract_global_embeddings(image_paths, model_name=args.embedding_model)
                 with open(emb_path, "wb") as f:
                     pickle.dump(emb, f)
             blocks['global'] = emb

@@ -51,6 +51,11 @@ python main.py --train --ds ATRW --use_geometric_verification --use_lightglue --
 - **`--save_eval`**: Saves evaluation results to `./data/evaluations`.
  **`--version`**:  version tag of the method in use. Together with background-removal and tone-mapping settings it forms a “tag” used to store results in a sub-directory of evaluations/. Optional argument and not important for the training itself.
 - **`--use_lightglue`**: Uses the LightGlue matcher during geometric verification.
+- **`--use_global_embedding`**: Use global CNN/Transformer embeddings.
+- **`--embedding_model`**: Backbone for global embeddings (`resnet50` or
+   `megadescriptor-l-384`). The latter downloads the
+   [`BVRA/MegaDescriptor-L-384`](https://huggingface.co/BVRA/MegaDescriptor-L-384)
+   encoder via `timm`, producing 384-D image descriptors.
 - **`--w_fisher`, `--w_color`, `--w_shape`, `--w_global`**: Weights for Fisher vectors, colour descriptors, shape descriptors and global embeddings when fusing descriptor blocks.
 
   
@@ -89,7 +94,12 @@ python main.py --count --ds ATRW --num_vertices 150 --num_neighbors 20
 - **`--num_vertices`**: Number of sampled vertices.
 - **`--num_neighbors`**: Number of neighbours per vertex.
 - **`--automated_mode`**: Use fully automated counting without human labels (faster but potentially less accurate).
-- **`--use_global_embedding`**: Include global CNN embeddings (ResNet50) to enhance Fisher vector representations.
+- **`--use_global_embedding`**: Include global image embeddings (ResNet50 or
+  MegaDescriptor-L-384) to enhance Fisher vector representations.
+- **`--embedding_model`**: Choose the global embedding model (`resnet50` or
+  `megadescriptor-l-384`, which pulls the HuggingFace
+  [`BVRA/MegaDescriptor-L-384`](https://huggingface.co/BVRA/MegaDescriptor-L-384)
+  encoder).
 - **`--w_fisher`, `--w_color`, `--w_shape`, `--w_global`**: Descriptor fusion weights (same as in training).
 
 #### Automated vs Human-in-the-Loop Modes
@@ -114,7 +124,7 @@ python main.py --count --ds ATRW --use_geometric_verification --use_lightglue --
 ```bash
 python main.py --count --ds ATRW --use_geometric_verification --use_lightglue --automated_mode --use_global_embedding
 ```
-- Combines Fisher vectors with ResNet50 global image embeddings
+- Combines Fisher vectors with configurable global image embeddings
 - Potentially more robust individual recognition
 - Slightly longer processing time due to CNN feature extraction
 
