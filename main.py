@@ -15,17 +15,6 @@ from feature_aggregation import (
     compute_fisher_vectors,
     load_keypoints,
 )
-from color_descriptors import (
-    compute_color_descriptors,
-    standardize as standardize_colors,
-    normalize_hsv,
-)
-
-from shape_descriptors import (
-    compute_shape_descriptors,
-    standardize as standardize_shapes,
-)
-
 from constants import *
 import os
 import pickle
@@ -73,7 +62,6 @@ if __name__ == '__main__':
     parser.add_argument('--method', type = str, default = 'disk', help='Feature extraction method to use')
     parser.add_argument('--use_geometric_verification', action='store_true', help='Use geometric verification during prediction', default=False)
     parser.add_argument('--use_lightglue', action ='store_true', help='Use LightGlue for feature matching when performing geometric verification', default=True)
-    parser.add_argument('--use_color', action='store_true', help='Use colour descriptors (HSV histogram and Lab moments)')
     parser.add_argument('--num_vertices', type=int, default=100, help='Vertices sampled in Nested-IS')
     parser.add_argument('--num_neighbors', type=int, default=10, help='Neighbors sampled per vertex in Nested-IS')
     parser.add_argument('--save_count', action='store_true', help='Save population estimation results to XLSX')
@@ -86,10 +74,7 @@ if __name__ == '__main__':
     parser.add_argument('--gv_method', type=str, default='RANSAC', choices=['RANSAC', 'MAGSAC'],
                         help='Geometric verification method to use (RANSAC or MAGSAC)')
     parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN/Transformer embeddings')
-    parser.add_argument('--use_shape', action='store_true', help='Use shape descriptors based on animal contours')
     parser.add_argument('--w_fisher', type=float, default=3.0, help='Weight for Fisher vectors during fusion')
-    parser.add_argument('--w_color', type=float, default=1.0, help='Weight for colour descriptors during fusion')
-    parser.add_argument('--w_shape', type=float, default=1.0, help='Weight for shape descriptors during fusion')
     parser.add_argument('--w_global', type=float, default=1.0, help='Weight for global embeddings during fusion')
 
 
@@ -111,7 +96,7 @@ if __name__ == '__main__':
         f"rmbkg_{args.remove_background}_tm_{args.use_mantiuk}_{method}"
         f"_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}"
         f"_gv_{args.use_geometric_verification}_lg_{args.use_lightglue}"
-        f"_color_{args.use_color}_v{args.version}"
+        f"_v{args.version}"
     )
     
     # Check if GPU is available
@@ -317,19 +302,6 @@ if __name__ == '__main__':
             #print("Dataset-specific GV params: ", params)
             
 
-        if args.use_color:
-            print("Extracting colour descriptors...")
-            train_paths = get_image_paths(df_train, args.remove_background)
-            test_paths = get_image_paths(df_test, args.remove_background)
-            color_tr = compute_color_descriptors(train_paths)
-            color_te = compute_color_descriptors(test_paths)
-            color_tr, mean_c, std_c = standardize_colors(color_tr)
-            color_te, _, _ = standardize_colors(color_te, mean_c, std_c)
-            color_tr = normalize_hsv(color_tr)
-            color_te = normalize_hsv(color_te)
-        else:
-            color_tr, color_te = {}, {}
-
         if args.use_global_embedding:
             print("Extracting global embeddings...")
             train_paths = dict(zip(df_train["image_id"].astype(str), get_image_paths(df_train, args.remove_background)))
@@ -353,33 +325,12 @@ if __name__ == '__main__':
 
         train_labels = dict(zip(df_train["image_id"], df_train["identity"]))
         test_labels = dict(zip(df_test["image_id"], df_test["identity"]))
-        if args.use_shape:
-            print("Extracting shape descriptors...")
-            train_paths = get_image_paths(df_train, args.remove_background)
-            test_paths = get_image_paths(df_test, args.remove_background)
-            shape_tr = compute_shape_descriptors(train_paths)
-            shape_te = compute_shape_descriptors(test_paths)
-            shape_tr, mean_s, std_s = standardize_shapes(shape_tr)
-            shape_te, _, _ = standardize_shapes(shape_te, mean_s, std_s)
-            with open(SHAPE_TRAIN_PATH.format(ds_tag), 'wb') as f:
-                pickle.dump(shape_tr, f)
-            with open(SHAPE_TEST_PATH.format(ds_tag), 'wb') as f:
-                pickle.dump(shape_te, f)
-        else:
-            shape_tr, shape_te = {}, {}
-
         # Normalise and fuse descriptor blocks
         train_blocks = {'fisher': fv_tr}
         test_blocks = {'fisher': fv_te}
-        if args.use_color:
-            train_blocks['color'] = color_tr
-            test_blocks['color'] = color_te
         if args.use_global_embedding:
             train_blocks['global'] = emb_tr
             test_blocks['global'] = emb_te
-        if args.use_shape:
-            train_blocks['shape'] = shape_tr
-            test_blocks['shape'] = shape_te
 
         norm_train_blocks = {}
         norm_test_blocks = {}
@@ -390,8 +341,6 @@ if __name__ == '__main__':
 
         weight_map = {
             'fisher': args.w_fisher,
-            'color': args.w_color,
-            'shape': args.w_shape,
             'global': args.w_global,
         }
 
@@ -433,8 +382,6 @@ if __name__ == '__main__':
                 "Num Classes": df_train['identity'].nunique(),
                 "Method": args.method,
                 "Remove Background": args.remove_background,
-                "Use Color": args.use_color,
-                "Use Shape": args.use_shape,
                 "Use Global Embedding": args.use_global_embedding,
                 "GMM Components": N_COMPONENTS_GMM,
                 "PCA Components": N_COMPONENTS_PCA,
@@ -566,21 +513,6 @@ if __name__ == '__main__':
         # Gather descriptor blocks
         blocks = {'fisher': fisher_vectors}
 
-        if args.use_color:
-            print("Extracting colour descriptors for counting...")
-            image_paths = get_image_paths(df, args.remove_background)
-            color = compute_color_descriptors(image_paths)
-            color, _, _ = standardize_colors(color)
-            color = normalize_hsv(color)
-            blocks['color'] = color
-
-        if args.use_shape:
-            print("Extracting shape descriptors for counting...")
-            image_paths = get_image_paths(df, args.remove_background)
-            shape = compute_shape_descriptors(image_paths)
-            shape, _, _ = standardize_shapes(shape)
-            blocks['shape'] = shape
-
         if args.use_global_embedding:
             print("Extracting global embeddings for population counting...")
             image_paths = dict(zip(df["image_id"].astype(str), get_image_paths(df, args.remove_background)))
@@ -605,8 +537,6 @@ if __name__ == '__main__':
 
         weight_map = {
             'fisher': args.w_fisher,
-            'color': args.w_color,
-            'shape': args.w_shape,
             'global': args.w_global,
         }
 
@@ -687,8 +617,6 @@ if __name__ == '__main__':
                 "Label Queries": int(stats.get("label_queries", 0)),
                 "Matches": int(stats.get("matches", 0)),
                 "Remove Background": args.remove_background,
-                "Use Color": args.use_color,
-                "Use Shape": args.use_shape,
                 "Use Global Embedding": args.use_global_embedding,
                 "GMM Components": N_COMPONENTS_GMM,
                 "MAX GMM Descriptors": MAX_GMM_DESCRIPTORS,

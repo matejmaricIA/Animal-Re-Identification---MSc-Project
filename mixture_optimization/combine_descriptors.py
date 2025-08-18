@@ -25,7 +25,7 @@ def combine_descriptor_dicts(
     Parameters
     ----------
     descriptor_dicts:
-        Mapping from a descriptor name (e.g. ``"fisher"`` or ``"color"``) to a
+        Mapping from a descriptor name (e.g. ``"fisher"`` or ``"global"``) to a
         dictionary of image ids and descriptor vectors.  All vectors belonging
         to a single descriptor type must have the same dimensionality.
     weights:

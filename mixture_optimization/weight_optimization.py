@@ -1,16 +1,13 @@
 """Search for optimal descriptor weights on multiple datasets.
 
 This module provides a command line interface that runs an Optuna search to
-find weights for combining Fisher vectors, colour descriptors, global
-embeddings and shape descriptors. If any of the required descriptor pickles
-are missing they are generated on-the-fly before optimisation using the
-standard pipeline. Features are stored under ``data/<dataset>/`` using the
-following file names::
+find weights for combining Fisher vectors and global embeddings. If any of
+the required descriptor pickles are missing they are generated on-the-fly
+before optimisation using the standard pipeline. Features are stored under
+``data/<dataset>/`` using the following file names::
 
     fisher_vectors_{split}.pkl
-    color_descriptors_{split}.pkl
     global_embeddings_{split}.pkl
-    shape_descriptors_{split}.pkl
 
 Only the files that exist are loaded which allows experimentation with any
 subset of descriptor types. Results are evaluated using the simple nearest
@@ -50,16 +47,7 @@ from feature_extraction import (
     extract_features_keynet_hardnet_faster,
     extract_features_lightglue,
 )
-from color_descriptors import (
-    compute_color_descriptors,
-    standardize as standardize_colors,
-    normalize_hsv,
-)
 from global_embedding import extract_global_embeddings
-from shape_descriptors import (
-    compute_shape_descriptors,
-    standardize as standardize_shapes,
-)
 from constants import (
     MODEL_PATH,
     PCA_PATH,
@@ -103,9 +91,7 @@ def load_features(base_dir: str, split: str) -> Dict[str, Dict[str, np.ndarray]]
 
     path_map = {
         "fisher": os.path.join(base_dir, f"fisher_vectors_{split}.pkl"),
-        "color": os.path.join(base_dir, f"color_descriptors_{split}.pkl"),
         "global": os.path.join(base_dir, f"global_embeddings_{split}.pkl"),
-        "shape": os.path.join(base_dir, f"shape_descriptors_{split}.pkl"),
     }
 
     for name, path in path_map.items():
@@ -167,12 +153,11 @@ def ensure_feature_files(
 ) -> None:
     """Create descriptor pickles on disk if they are missing.
 
-    This covers Fisher vectors, colour descriptors, global embeddings and
-    shape descriptors. Existing files are left untouched. When ``method`` is
-    ``'ensamble'`` Fisher vectors are computed separately for DISK,
-    KeyNet+HardNet and LightGlue features and combined using
-    :data:`constants.ENSEMBLE_WEIGHTS`. All local feature descriptors are
-    stored under method-specific folders, mirroring the behaviour in
+    This covers Fisher vectors and global embeddings. Existing files are left
+    untouched. When ``method`` is ``'ensamble'`` Fisher vectors are computed
+    separately for DISK, KeyNet+HardNet and LightGlue features and combined
+    using :data:`constants.ENSEMBLE_WEIGHTS`. All local feature descriptors
+    are stored under method-specific folders, mirroring the behaviour in
     ``main.py``.
     """
 
@@ -182,23 +167,6 @@ def ensure_feature_files(
     train_paths = get_image_paths(train_df)
     test_paths = get_image_paths(test_df)
 
-    # ------------------------------------------------------------------
-    # Colour descriptors
-    color_tr_path = os.path.join(base_dir, "color_descriptors_train.pkl")
-    color_te_path = os.path.join(base_dir, "color_descriptors_test.pkl")
-    if not (os.path.exists(color_tr_path) and os.path.exists(color_te_path)):
-        color_tr = compute_color_descriptors(train_paths)
-        color_te = compute_color_descriptors(test_paths)
-        color_tr, mean_c, std_c = standardize_colors(color_tr)
-        color_te, _, _ = standardize_colors(color_te, mean_c, std_c)
-        color_tr = normalize_hsv(color_tr)
-        color_te = normalize_hsv(color_te)
-        with open(color_tr_path, "wb") as f:
-            pickle.dump(color_tr, f)
-        with open(color_te_path, "wb") as f:
-            pickle.dump(color_te, f)
-
-    # ------------------------------------------------------------------
     # Global embeddings
     emb_tr_path = os.path.join(base_dir, "global_embeddings_train.pkl")
     emb_te_path = os.path.join(base_dir, "global_embeddings_test.pkl")
@@ -214,21 +182,6 @@ def ensure_feature_files(
         with open(emb_te_path, "wb") as f:
             pickle.dump(emb_te, f)
 
-    # ------------------------------------------------------------------
-    # Shape descriptors
-    shape_tr_path = os.path.join(base_dir, "shape_descriptors_train.pkl")
-    shape_te_path = os.path.join(base_dir, "shape_descriptors_test.pkl")
-    if not (os.path.exists(shape_tr_path) and os.path.exists(shape_te_path)):
-        shape_tr = compute_shape_descriptors(train_paths)
-        shape_te = compute_shape_descriptors(test_paths)
-        shape_tr, mean_s, std_s = standardize_shapes(shape_tr)
-        shape_te, _, _ = standardize_shapes(shape_te, mean_s, std_s)
-        with open(shape_tr_path, "wb") as f:
-            pickle.dump(shape_tr, f)
-        with open(shape_te_path, "wb") as f:
-            pickle.dump(shape_te, f)
-
-    # ------------------------------------------------------------------
     # Fisher vectors (load if present; else train and save, per method)
     fv_tr_path = os.path.join(base_dir, f"fisher_vectors_{method}.pkl")
     fv_te_path = os.path.join(base_dir, f"fisher_vectors_{method}.pkl")
