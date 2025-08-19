@@ -1,205 +1,239 @@
 import argparse
-import itertools
-import json
-import os
 import subprocess
-from typing import Dict, List, Optional
-
+import json
+from pathlib import Path
 import pandas as pd
+from itertools import product
 
 from constants import (
     N_COMPONENTS_GMM,
     N_COMPONENTS_PCA,
+    EVAL_RESULTS_XLSX,
     EVALUATION_DIR,
 )
 
-# Configuration spaces
-BACKGROUND_OPTIONS = [False, True]
-EMBEDDING_MODELS = ["resnet50", "megadescriptor-l-384"]
-WEIGHT_COMBINATIONS = [(1.0, 1.0), (2.0, 1.0), (1.0, 2.0)]
-GV_METHODS = [None, "RANSAC", "MAGSAC"]
+# ---------------------------------------------------------------------------
+# Helper utilities
+# ---------------------------------------------------------------------------
+
+def run_main(dataset: str, cfg: dict, version: int) -> dict:
+    """Run main.py with a specific configuration."""
+    cmd = [
+        "python",
+        "main.py",
+        "--train",
+        "--ds",
+        dataset,
+        "--method",
+        "disk",
+        "--version",
+        str(version),
+        "--save_eval",
+    ]
+
+    if cfg.get("remove_background", False):
+        cmd.append("--remove_background")
+
+    if cfg.get("use_global_embedding", False):
+        cmd.append("--use_global_embedding")
+        cmd.extend(["--embedding_model", cfg["embedding_model"]])
+        cmd.extend(["--w_global", str(cfg["w_global"])])
+
+    if cfg.get("use_fisher", True):
+        cmd.append("--use_fisher")
+        cmd.extend(["--w_fisher", str(cfg["w_fisher"])])
+    else:
+        cmd.append("--no-use_fisher")
+
+    if cfg.get("use_geometric_verification", False):
+        cmd.append("--use_geometric_verification")
+        cmd.extend(["--gv_method", cfg["gv_method"]])
+
+    subprocess.run(cmd, check=True)
+
+    tag = (
+        f"rmbkg_{cfg.get('remove_background', False)}_tm_False_disk"
+        f"_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}"
+        f"_gv_{cfg.get('use_geometric_verification', False)}_lg_True"
+        f"_v{version}"
+    )
+    eval_path = Path(EVALUATION_DIR) / tag / f"{dataset}_evaluation.json"
+    if eval_path.exists():
+        with open(eval_path) as f:
+            return json.load(f)
+    return {}
 
 
-def generate_configs() -> List[Dict[str, Optional[float]]]:
-    """Generate all model configuration combinations."""
-    configs: List[Dict[str, Optional[float]]] = []
+def collect_problematic_classes(metrics: dict, top_k: int = 5) -> pd.DataFrame:
+    """Return dataframe of classes with lowest F1 scores."""
+    cm = metrics.get("classification_metrics", {})
+    rows = []
+    for label, stats in cm.items():
+        if label in {"accuracy", "macro avg", "weighted avg"}:
+            continue
+        rows.append(
+            {
+                "class": label,
+                "precision": stats.get("precision", 0.0),
+                "recall": stats.get("recall", 0.0),
+                "f1": stats.get("f1-score", 0.0),
+                "support": stats.get("support", 0),
+            }
+        )
+    df = pd.DataFrame(rows)
+    if df.empty:
+        return df
+    df.sort_values("f1", inplace=True)
+    return df.head(top_k)
+
+
+def build_configurations():
+    """Generate all experiment configurations."""
+    configs = []
+    backgrounds = [False, True]
 
     # Global embedding only
-    for model in EMBEDDING_MODELS:
+    for remove_bg, model in product(backgrounds, ["resnet50", "megadescriptor-l-384"]):
         configs.append(
             {
+                "remove_background": remove_bg,
                 "use_global_embedding": True,
                 "embedding_model": model,
                 "use_fisher": False,
                 "use_geometric_verification": False,
+                "w_global": 1.0,
+                "w_fisher": 0.0,
             }
         )
 
     # Fisher vectors only
-    configs.append({"use_fisher": True, "use_geometric_verification": False})
-    for gv in GV_METHODS[1:]:  # skip None
-        configs.append(
-            {
-                "use_fisher": True,
-                "use_geometric_verification": True,
-                "gv_method": gv,
-            }
-        )
-
-    # Fisher + Global with weight combinations
-    for model in EMBEDDING_MODELS:
-        for w_fisher, w_global in WEIGHT_COMBINATIONS:
-            # without GV
-            configs.append(
-                {
-                    "use_fisher": True,
-                    "use_global_embedding": True,
-                    "embedding_model": model,
-                    "w_fisher": w_fisher,
-                    "w_global": w_global,
-                    "use_geometric_verification": False,
-                }
-            )
-            # with GV methods
-            for gv in GV_METHODS[1:]:
+    for remove_bg, use_gv in product(backgrounds, [False, True]):
+        if use_gv:
+            for gv_method in ["RANSAC", "MAGSAC"]:
                 configs.append(
                     {
+                        "remove_background": remove_bg,
+                        "use_global_embedding": False,
                         "use_fisher": True,
-                        "use_global_embedding": True,
-                        "embedding_model": model,
-                        "w_fisher": w_fisher,
-                        "w_global": w_global,
                         "use_geometric_verification": True,
-                        "gv_method": gv,
+                        "gv_method": gv_method,
+                        "w_fisher": 1.0,
+                        "w_global": 0.0,
                     }
                 )
+        else:
+            configs.append(
+                {
+                    "remove_background": remove_bg,
+                    "use_global_embedding": False,
+                    "use_fisher": True,
+                    "use_geometric_verification": False,
+                    "w_fisher": 1.0,
+                    "w_global": 0.0,
+                }
+            )
+
+    # Both embeddings with weights
+    weight_combos = [(1.0, 1.0), (2.0, 1.0), (1.0, 2.0), (3.0, 1.0), (1.0, 3.0), (0.5, 3.0), (3.0, 0.5), (0.5, 1.0), (1.0, 0.5)]
+    for remove_bg, (wf, wg) in product(backgrounds, weight_combos):
+        for model in ["resnet50", "megadescriptor-l-384"]:
+            for use_gv in [False, True]:
+                if use_gv:
+                    for gv_method in ["RANSAC", "MAGSAC"]:
+                        configs.append(
+                            {
+                                "remove_background": remove_bg,
+                                "use_global_embedding": True,
+                                "embedding_model": model,
+                                "use_fisher": True,
+                                "use_geometric_verification": True,
+                                "gv_method": gv_method,
+                                "w_fisher": wf,
+                                "w_global": wg,
+                            }
+                        )
+                else:
+                    configs.append(
+                        {
+                            "remove_background": remove_bg,
+                            "use_global_embedding": True,
+                            "embedding_model": model,
+                            "use_fisher": True,
+                            "use_geometric_verification": False,
+                            "w_fisher": wf,
+                            "w_global": wg,
+                        }
+                    )
+
     return configs
 
 
-def build_cmd(
-    dataset: str, remove_background: bool, config: Dict[str, Optional[float]]
-) -> List[str]:
-    cmd = ["python", "main.py", "--train", "--ds", dataset]
-    if remove_background:
-        cmd.append("--remove_background")
+def run_dataset(dataset: str):
+    """Run all configurations for a single dataset and summarise results."""
+    configs = build_configurations()
+    results = []
+    for idx, cfg in enumerate(configs):
+        print(f"\nRunning {dataset} configuration {idx+1}/{len(configs)}: {cfg}")
+        metrics = run_main(dataset, cfg, idx + 1)
+        results.append({"version": idx + 1, "config": cfg, "metrics": metrics})
 
-    # Fisher usage
-    if not config.get("use_fisher", True):
-        cmd.append("--no-use_fisher")
+    # Read global results Excel to summarise best accuracy
+    try:
+        global_df = pd.read_excel(EVAL_RESULTS_XLSX)
+        ds_df = global_df[global_df["Dataset"] == dataset]
+    except FileNotFoundError:
+        ds_df = pd.DataFrame()
+
+    if not ds_df.empty:
+        best_row = ds_df.sort_values("Accuracy", ascending=False).iloc[0]
+        print(f"Best configuration for {dataset} from XLSX: accuracy={best_row['Accuracy']}")
     else:
-        cmd.append("--use_fisher")
+        best_row = None
+        print(f"No XLSX results found for {dataset}.")
 
-    # Global embedding usage
-    if config.get("use_global_embedding"):
-        cmd.append("--use_global_embedding")
-        cmd.extend(["--embedding_model", config["embedding_model"]])
-    # Geometric verification
-    if config.get("use_geometric_verification"):
-        cmd.append("--use_geometric_verification")
-        gv_method = config.get("gv_method", "RANSAC")
-        cmd.extend(["--gv_method", gv_method])
+    # Determine best run using metrics collected during execution
+    scored = [r for r in results if r["metrics"]]
+    if scored:
+        best = max(scored, key=lambda x: x["metrics"].get("accuracy", 0))
+        problematic = collect_problematic_classes(best["metrics"])
     else:
-        cmd.append("--no-use_geometric_verification")
+        best = None
+        problematic = pd.DataFrame()
 
-    # Weights
-    if config.get("w_fisher") is not None:
-        cmd.extend(["--w_fisher", str(config["w_fisher"])])
-    if config.get("w_global") is not None:
-        cmd.extend(["--w_global", str(config["w_global"])])
-    return cmd
+    summary_path = Path(EVALUATION_DIR) / f"{dataset}_hyperparam_summary.xlsx"
+    with pd.ExcelWriter(summary_path) as writer:
+        df_runs = pd.DataFrame(
+            [
+                {
+                    **r["config"],
+                    "version": r["version"],
+                    "accuracy": r["metrics"].get("accuracy"),
+                    "top5_accuracy": r["metrics"].get("top_n_accuracy"),
+                }
+                for r in results
+            ]
+        )
+        df_runs.to_excel(writer, sheet_name="all_runs", index=False)
+        if best_row is not None:
+            best_row.to_frame().T.to_excel(writer, sheet_name="best_from_xlsx", index=False)
+        if not problematic.empty:
+            problematic.to_excel(writer, sheet_name="problematic_classes", index=False)
 
-
-def eval_json_path(dataset: str, remove_background: bool, use_gv: bool) -> str:
-    tag = (
-        f"rmbkg_{remove_background}_tm_{False}_disk"
-        f"_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}"
-        f"_gv_{use_gv}_lg_{True}_v1"
-    )
-    return os.path.join(EVALUATION_DIR, tag, f"{dataset}_evaluation.json")
-
-
-def extract_worst_classes(metrics: Dict, k: int = 5) -> str:
-    cls_metrics = metrics.get("classification_metrics", {})
-    per_class = {
-        k: v
-        for k, v in cls_metrics.items()
-        if k not in {"accuracy", "macro avg", "weighted avg"}
-    }
-    sorted_classes = sorted(per_class.items(), key=lambda kv: kv[1]["f1-score"])[:k]
-    return "; ".join(
-        [f"{cls}:{vals['f1-score']:.3f}" for cls, vals in sorted_classes]
-    )
-
-
-def run_experiment(dataset: str, remove_background: bool, config: Dict) -> Dict:
-    cmd = build_cmd(dataset, remove_background, config)
-    print("Running:", " ".join(cmd))
-    subprocess.run(cmd, check=True)
-
-    path = eval_json_path(
-        dataset, remove_background, config.get("use_geometric_verification", False)
-    )
-    with open(path, "r") as f:
-        metrics = json.load(f)
-
-    row = {
-        "Dataset": dataset,
-        "Remove Background": remove_background,
-        "Use Global": config.get("use_global_embedding", False),
-        "Embedding Model": config.get("embedding_model"),
-        "Use Fisher": config.get("use_fisher", True),
-        "Use GV": config.get("use_geometric_verification", False),
-        "GV Method": config.get("gv_method"),
-        "w_fisher": config.get("w_fisher"),
-        "w_global": config.get("w_global"),
-        "Accuracy": metrics["accuracy"],
-        "Top-5 Accuracy": metrics["top_n_accuracy"],
-        "F1": metrics["classification_metrics"]["weighted avg"]["f1-score"],
-        "Worst Classes": extract_worst_classes(metrics),
-    }
-    return row
-
-
-def grid_search_dataset(dataset: str, output_dir: str) -> None:
-    results: List[Dict] = []
-    configs = generate_configs()
-    for remove_background in BACKGROUND_OPTIONS:
-        for cfg in configs:
-            try:
-                row = run_experiment(dataset, remove_background, cfg)
-                results.append(row)
-            except subprocess.CalledProcessError:
-                print("Experiment failed for", dataset, cfg)
-
-    df = pd.DataFrame(results)
-    os.makedirs(output_dir, exist_ok=True)
-    excel_path = os.path.join(output_dir, f"{dataset}_results.xlsx")
-    best = df.loc[df["Accuracy"].idxmax()].to_frame().T
-    with pd.ExcelWriter(excel_path) as writer:
-        df.to_excel(writer, index=False, sheet_name="results")
-        best.to_excel(writer, index=False, sheet_name="summary")
-    print(f"Saved results to {excel_path}")
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Grid search over main.py options")
-    parser.add_argument(
-        "--datasets",
-        nargs="+",
-        default=["ATRW"],
-        help="Datasets to evaluate",
-    )
-    parser.add_argument(
-        "--output_dir",
-        type=str,
-        default="./evaluations/hyperparameter_search",
-        help="Directory to store result spreadsheets",
-    )
-    args = parser.parse_args()
-
-    for dataset in args.datasets:
-        grid_search_dataset(dataset, args.output_dir)
+    print(f"Saved summary to {summary_path}")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Run grid search experiments over datasets")
+    parser.add_argument(
+        "--datasets",
+        nargs="+",
+        default=["ATRW", "BelugaID", "CowDataset", "IPanda50", "NyalaData", "SealID", "HyenaID2022", "StripeSpotter", "Giraffes"],
+        help="Datasets to evaluate",
+    )
+    args = parser.parse_args()
+    for ds in args.datasets:
+        try:    
+            run_dataset(ds)
+        except Exception as e:
+            print(f"Error running {ds}: {e}")
+            continue
