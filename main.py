@@ -465,7 +465,12 @@ if __name__ == '__main__':
                 if args.remove_background
                 else ["processed_path"]
             )
-            missing_cols = [col for col in required_cols if col not in df.columns]
+            #missing_cols = [col for col in required_cols if col not in df.columns]
+            missing_cols = [
+                col
+                for col in required_cols
+                if col not in df.columns or df[col].isna().all()
+            ]
         
         if missing_cols or not os.path.exists(csv_path) or not os.path.exists(output_dir):
             os.makedirs(base_dir, exist_ok=True)
