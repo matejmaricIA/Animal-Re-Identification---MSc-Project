@@ -168,22 +168,46 @@ def preprocess_dataset(df, output_dir, dataset_name, use_mantiuk = True, remove_
     """
     Preprocess the dataset by applying Mantiuk tone mapping
     and background removal using SAM and ISNet."""
-    
+    # Path to metadata CSV for the given dataset
+    metadata_path = DATAFRAME_PATH.format(dataset_name)
+
+    # Load existing metadata if available so we don't lose previously
+    # processed path columns when updating one of them.
+    if os.path.exists(metadata_path):
+        existing_df = pd.read_csv(metadata_path).set_index("image_id")
+    else:
+        existing_df = pd.DataFrame().set_index("image_id")
+
     args = [(row, output_dir, use_mantiuk, dataset_name, remove_background) for _, row in df.iterrows()]
-    
+
     # Process sequentially
     processed_paths = []
-    #index = 0
     for arg in tqdm(args, desc = "Preprocessing images", unit = "image"):
         processed_path = process_image(*arg)
         processed_paths.append(processed_path)
-        #print(f"Processed image {index}/{len(args)}")
-        #index += 1
+
     if remove_background:
         df['processed_path_segmented'] = processed_paths
     else:
         df['processed_path'] = processed_paths
-    return df
+
+    # Merge with existing metadata to retain both processed path columns
+    df = df.set_index("image_id")
+    merged_df = df.combine_first(existing_df)
+
+    # Ensure both processed path columns exist
+    if 'processed_path' not in merged_df.columns:
+        merged_df['processed_path'] = np.nan
+    if 'processed_path_segmented' not in merged_df.columns:
+        merged_df['processed_path_segmented'] = np.nan
+
+    merged_df = merged_df.reset_index()
+
+    # Save merged metadata so subsequent preprocessing runs keep both columns
+    os.makedirs(os.path.dirname(metadata_path), exist_ok=True)
+    merged_df.to_csv(metadata_path, index=False)
+
+    return merged_df
         
 def preprocess_inference(image_paths, use_mantiuk=False, remove_background=False, dataset_name=None):
     save_dir = os.path.join(TMP, 'segmented')
