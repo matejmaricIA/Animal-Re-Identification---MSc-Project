@@ -399,6 +399,7 @@ if __name__ == '__main__':
                 "Method": args.method,
                 "Remove Background": args.remove_background,
                 "Use Global Embedding": args.use_global_embedding,
+                "Embedding Model": args.embedding_model if args.use_global_embedding else "None",
                 "GMM Components": N_COMPONENTS_GMM,
                 "PCA Components": N_COMPONENTS_PCA,
                 "Use GV": args.use_geometric_verification,
@@ -415,6 +416,9 @@ if __name__ == '__main__':
                 "F-1 Score": round(float(metrics["classification_metrics"]["weighted avg"]["f1-score"]), 4)
                 
             }
+            if args.use_global_embedding and args.use_fisher:
+                row["Global Weight"] = args.w_global
+                row["Fisher Weight"] = args.w_fisher
             save_count_results_wrapper(row, EVAL_RESULTS_XLSX)
         
         #_input = input("Create a full‑dataset DB? (yes/no) ")
@@ -617,6 +621,7 @@ if __name__ == '__main__':
                 "Matches": int(stats.get("matches", 0)),
                 "Remove Background": args.remove_background,
                 "Use Global Embedding": args.use_global_embedding,
+                "Embedding Model": args.embedding_model if args.use_global_embedding else "None",
                 "GMM Components": N_COMPONENTS_GMM,
                 "MAX GMM Descriptors": MAX_GMM_DESCRIPTORS,
                 "GV Threshold": args.gv_threshold,
@@ -628,4 +633,7 @@ if __name__ == '__main__':
                 "Ground Truth": int(df["identity"].nunique()),
                 
             }
+            if args.use_global_embedding and args.use_fisher:
+                row["Global Weight"] = args.w_global
+                row["Fisher Weight"] = args.w_fisher
             save_count_results(row)

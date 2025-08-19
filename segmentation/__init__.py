@@ -46,7 +46,7 @@ def segment_image(name: str, image: np.ndarray) -> Optional[np.ndarray]:
 
 def segment_dataset(df, output_dir: str, dataset_name: str, use_mantiuk: bool = True):
     """Preprocess and segment an entire dataset using preprocessing pipeline."""
-    from preprocessing import preprocess_dataset  # lazy import to avoid circular
+    from preprocessing import preprocess_dataset
     return preprocess_dataset(
         df,
         output_dir,
