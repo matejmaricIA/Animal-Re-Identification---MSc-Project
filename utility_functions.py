@@ -143,7 +143,7 @@ def save_count_results_wrapper(row, path = COUNT_RESULTS_XLSX) :
     
     
     
-def save_stuff(pca, gmm, fisher_vectors, paths = (PCA_PATH, GMM_PATH, FISHER_VECTORS)):
+def save_stuff(pca, gmm, fisher_vectors, paths):
     with open(paths[0], "wb") as f:
         pickle.dump(pca, f)
 

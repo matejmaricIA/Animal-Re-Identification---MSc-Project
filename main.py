@@ -6,7 +6,14 @@ datasets.ELPephants = PatchedELPephants
 from segmentation import segment_dataset, has_segmenter
 import preprocessing
 import sys
-from feature_extraction import get_image_paths, extract_features, extract_features_keynet_hardnet, extract_features_keynet_hardnet_faster, extract_features_lightglue
+from feature_extraction import (
+    get_image_paths,
+    extract_features,
+    extract_features_keynet_hardnet,
+    extract_features_keynet_hardnet_faster,
+    extract_features_lightglue,
+    get_segmentation_tag,
+)
 from feature_aggregation import (
     load_descriptors,
     stack_all_descriptors,
@@ -14,6 +21,7 @@ from feature_aggregation import (
     train_gmm,
     compute_fisher_vectors,
     load_keypoints,
+    descriptor_dir,
 )
 from constants import *
 import os
@@ -90,6 +98,7 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
+    seg_tag = get_segmentation_tag(args.remove_background)
     args.split_type = 'closed'
     dataset_name = args.ds
     method = args.method
@@ -225,8 +234,8 @@ if __name__ == '__main__':
         if method == 'ensamble':
             methods = ['disk', 'keynet_hardnet', 'lightglue']
             for m in methods:
-                dir_tr = f"{base_dir}/feature_descriptors_train_{m}/"
-                dir_te = f"{base_dir}/feature_descriptors_test_{m}/"
+                dir_tr = descriptor_dir(base_dir, m, 'train', seg_tag)
+                dir_te = descriptor_dir(base_dir, m, 'test', seg_tag)
                 if not os.path.isdir(dir_tr):
                     if m == 'disk':
                         extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, dir_tr)
@@ -241,18 +250,20 @@ if __name__ == '__main__':
             fv_tr_list = []
             fv_te_list = []
             for m in methods:
-                train_dict_m = load_descriptors(f"{base_dir}/feature_descriptors_train_{m}/descriptors.h5")
-                test_dict_m = load_descriptors(f"{base_dir}/feature_descriptors_test_{m}/descriptors.h5")
+                dir_tr = descriptor_dir(base_dir, m, 'train', seg_tag)
+                dir_te = descriptor_dir(base_dir, m, 'test', seg_tag)
+                train_dict_m = load_descriptors(os.path.join(dir_tr, 'descriptors.h5'))
+                test_dict_m = load_descriptors(os.path.join(dir_te, 'descriptors.h5'))
                 if m == 'disk':
                     train_dict = train_dict_m
                     test_dict = test_dict_m
-                    train_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_train_{m}/keypoints.h5")
-                    test_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_test_{m}/keypoints.h5")
+                    train_keypoints = load_keypoints(os.path.join(dir_tr, 'keypoints.h5'))
+                    test_keypoints = load_keypoints(os.path.join(dir_te, 'keypoints.h5'))
                 if args.use_fisher:
                     desc_tr_m = stack_all_descriptors(train_dict_m)
-                    pca_path_m = f"{base_dir}/pca_model_{m}.pkl"
-                    gmm_path_m = f"{base_dir}/gmm_model_{m}_{N_COMPONENTS_GMM}.pkl"
-                    fv_path_m  = f"{base_dir}/fisher_vectors_{m}_{N_COMPONENTS_GMM}.pkl"
+                    pca_path_m = PCA_PATH.format(ds_tag, m, seg_tag)
+                    gmm_path_m = GMM_PATH.format(ds_tag, m, seg_tag)
+                    fv_path_m  = FISHER_VECTORS.format(ds_tag, m, seg_tag)
                     if os.path.exists(pca_path_m) and os.path.exists(gmm_path_m) and os.path.exists(fv_path_m):
                         pca_m, gmm_m, fv_tr_m = load_stuff(pca_path_m, gmm_path_m, fv_path_m)
                         fv_te_m = compute_fisher_vectors(test_dict_m, pca_m, gmm_m)
@@ -261,8 +272,7 @@ if __name__ == '__main__':
                         gmm_m = train_gmm(pca_m.transform(desc_tr_m))
                         fv_tr_m = compute_fisher_vectors(train_dict_m, pca_m, gmm_m)
                         fv_te_m = compute_fisher_vectors(test_dict_m, pca_m, gmm_m)
-                        save_stuff(pca_m, gmm_m, fv_tr_m,
-                            (PCA_PATH.format(ds_tag, m), GMM_PATH.format(ds_tag, m), FISHER_VECTORS.format(ds_tag, m)))
+                        save_stuff(pca_m, gmm_m, fv_tr_m, (pca_path_m, gmm_path_m, fv_path_m))
                     fv_tr_list.append(fv_tr_m)
                     fv_te_list.append(fv_te_m)
 
@@ -271,26 +281,28 @@ if __name__ == '__main__':
                 fv_te = combine_fisher_vectors(fv_te_list, ENSEMBLE_WEIGHTS)
 
         else:
-            if not os.path.isdir(f"{base_dir}/feature_descriptors_train_{method}/"):
+            dir_tr = descriptor_dir(base_dir, method, 'train', seg_tag)
+            dir_te = descriptor_dir(base_dir, method, 'test', seg_tag)
+            if not os.path.isdir(dir_tr):
                 if method == 'disk':
-                    extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, f"{base_dir}/feature_descriptors_train_{method}/")
-                    extract_features(get_image_paths(df_test, args.remove_background), MODEL_PATH, f"{base_dir}/feature_descriptors_test_{method}/")
+                    extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, dir_tr)
+                    extract_features(get_image_paths(df_test, args.remove_background), MODEL_PATH, dir_te)
                 elif method == 'keynet_hardnet':
-                    extract_features_keynet_hardnet_faster(get_image_paths(df_train, args.remove_background), f"{base_dir}/feature_descriptors_train_{method}/")
-                    extract_features_keynet_hardnet_faster(get_image_paths(df_test, args.remove_background), f"{base_dir}/feature_descriptors_test_{method}/")
+                    extract_features_keynet_hardnet_faster(get_image_paths(df_train, args.remove_background), dir_tr)
+                    extract_features_keynet_hardnet_faster(get_image_paths(df_test, args.remove_background), dir_te)
                 elif method == 'lightglue':
-                    extract_features_lightglue(get_image_paths(df_train, args.remove_background), f"{base_dir}/feature_descriptors_train_{method}/")
-                    extract_features_lightglue(get_image_paths(df_test, args.remove_background), f"{base_dir}/feature_descriptors_test_{method}/")
+                    extract_features_lightglue(get_image_paths(df_train, args.remove_background), dir_tr)
+                    extract_features_lightglue(get_image_paths(df_test, args.remove_background), dir_te)
 
-            train_dict = load_descriptors(f"{base_dir}/feature_descriptors_train_{method}/descriptors.h5")
-            test_dict = load_descriptors(f"{base_dir}/feature_descriptors_test_{method}/descriptors.h5")
-            train_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_train_{method}/keypoints.h5")
-            test_keypoints = load_keypoints(f"{base_dir}/feature_descriptors_test_{method}/keypoints.h5")
+            train_dict = load_descriptors(os.path.join(dir_tr, 'descriptors.h5'))
+            test_dict = load_descriptors(os.path.join(dir_te, 'descriptors.h5'))
+            train_keypoints = load_keypoints(os.path.join(dir_tr, 'keypoints.h5'))
+            test_keypoints = load_keypoints(os.path.join(dir_te, 'keypoints.h5'))
             if args.use_fisher:
                 desc_tr = stack_all_descriptors(train_dict)
-                pca_path = f"{base_dir}/pca_model_{method}.pkl"
-                gmm_path = f"{base_dir}/gmm_model_{method}_{N_COMPONENTS_GMM}.pkl"
-                fv_path  = f"{base_dir}/fisher_vectors_{method}_{N_COMPONENTS_GMM}.pkl"
+                pca_path = PCA_PATH.format(ds_tag, method, seg_tag)
+                gmm_path = GMM_PATH.format(ds_tag, method, seg_tag)
+                fv_path  = FISHER_VECTORS.format(ds_tag, method, seg_tag)
                 if os.path.exists(pca_path) and os.path.exists(gmm_path) and os.path.exists(fv_path):
                     print("Using already trained PCA and GMM models.")
                     pca, gmm, fv_tr = load_stuff(pca_path, gmm_path, fv_path)
@@ -302,8 +314,7 @@ if __name__ == '__main__':
                     fv_tr = compute_fisher_vectors(train_dict, pca, gmm)
                     fv_te = compute_fisher_vectors(test_dict, pca, gmm)
                     print("Fisher vectors computed for training and test sets.")
-                    save_stuff(pca, gmm, fv_tr,
-                        (PCA_PATH.format(ds_tag, method), GMM_PATH.format(ds_tag, method), FISHER_VECTORS.format(ds_tag, method)))
+                    save_stuff(pca, gmm, fv_tr, (pca_path, gmm_path, fv_path))
             
             #params = calibrate(
             #    dataset_tag = dataset_name,
@@ -501,7 +512,7 @@ if __name__ == '__main__':
             methods = ['disk', 'keynet_hardnet', 'lightglue']
             fv_list = []
             for m in methods:
-                feat_dir = f"{base_dir}/feature_descriptors_{m}/"
+                feat_dir = f"{base_dir}/feature_descriptors_{m}_{seg_tag}/"
                 if not os.path.isdir(feat_dir):
                     if m == 'disk':
                         extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, feat_dir)
@@ -515,9 +526,9 @@ if __name__ == '__main__':
                     descriptors = desc
                     keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
                 if args.use_fisher:
-                    pca_path_m = f"{base_dir}/pca_model_{m}.pkl"
-                    gmm_path_m = f"{base_dir}/gmm_model_{m}_{N_COMPONENTS_GMM}.pkl"
-                    fv_path_m = f"{base_dir}/fisher_vectors_{m}_{N_COMPONENTS_GMM}.pkl"
+                    pca_path_m = PCA_PATH.format(ds_tag, m, seg_tag)
+                    gmm_path_m = GMM_PATH.format(ds_tag, m, seg_tag)
+                    fv_path_m = FISHER_VECTORS.format(ds_tag, m, seg_tag)
                     if os.path.exists(fv_path_m):
                         pca_m, gmm_m, fv_m = load_stuff(pca_path_m, gmm_path_m, fv_path_m)
                     else:
@@ -531,7 +542,7 @@ if __name__ == '__main__':
             if args.use_fisher:
                 fisher_vectors = combine_fisher_vectors(fv_list, ENSEMBLE_WEIGHTS)
         else:
-            feat_dir = f"{base_dir}/feature_descriptors_{method}/"
+            feat_dir = f"{base_dir}/feature_descriptors_{method}_{seg_tag}/"
             if not os.path.isdir(feat_dir) and method == 'disk':
                 extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, feat_dir)
             elif not os.path.isdir(feat_dir) and method == 'keynet_hardnet':
@@ -540,9 +551,9 @@ if __name__ == '__main__':
             keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
 
             if args.use_fisher:
-                pca_path = f"{base_dir}/pca_model_{method}.pkl"
-                gmm_path = f"{base_dir}/gmm_model_{method}_{N_COMPONENTS_GMM}.pkl"
-                fv_path = f"{base_dir}/fisher_vectors_{method}_{N_COMPONENTS_GMM}.pkl"
+                pca_path = PCA_PATH.format(ds_tag, method, seg_tag)
+                gmm_path = GMM_PATH.format(ds_tag, method, seg_tag)
+                fv_path = FISHER_VECTORS.format(ds_tag, method, seg_tag)
                 if os.path.exists(fv_path):
                     pca, gmm, fisher_vectors = load_stuff(pca_path, gmm_path, fv_path)
                 else:
