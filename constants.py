@@ -16,7 +16,7 @@ SAM2_CFG  = "configs/sam2.1/sam2.1_hiera_s.yaml"
 SAM2_CHECKPOINT_PATH = os.path.join(ROOT_DIR, 'models', SAM2_MODEL_NAME)
 
 # Segmented Dataset Path
-SEGMENTED_DATASET = os.path.join(ROOT_DIR, 'data', '{}', 'segmented_dataset_unsegmented')
+SEGMENTED_DATASET = os.path.join(ROOT_DIR, 'data', '{}', 'segmented_dataset_{}')
 
 # Model Paths (Disk)
 MODEL_PATH = os.path.join(ROOT_DIR, 'disk', 'depth-save.pth')
@@ -29,19 +29,19 @@ DATAFRAME_PATH = os.path.join(ROOT_DIR, 'data', '{}', 'processed_metadata.csv')
 DEVICE = 'GPU'
 
 # Descriptor Paths
-SAVE_TRAIN_DESCRIPTORS_PATH = './data/{}/feature_descriptors_train/descriptors.h5'
-SAVE_TEST_DESCRIPTORS_PATH = './data/{}/feature_descriptors_test/descriptors.h5'
-SAVE_TRAIN_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_train/'
-SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
+SAVE_TRAIN_DESCRIPTORS_PATH = './data/{}/feature_descriptors_train_{}_{}/descriptors.h5'
+SAVE_TEST_DESCRIPTORS_PATH = './data/{}/feature_descriptors_test_{}_{}/descriptors.h5'
+SAVE_TRAIN_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_train_{}_{}/'
+SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test_{}_{}/'
 
 # PCA and GMM Components
 N_COMPONENTS_GMM = 256
 N_COMPONENTS_PCA = 128 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
-PCA_PATH = './data/{}/pca_model_{}.pkl'
-GMM_PATH = './data/{}/gmm_model_{}.pkl'
-FISHER_VECTORS = './data/{}/fisher_vectors_{}.pkl'
+PCA_PATH = './data/{}/pca_model_{}_{}.pkl'
+GMM_PATH = './data/{}/gmm_model_{}_{}.pkl'
+FISHER_VECTORS = './data/{}/fisher_vectors_{}_{}.pkl'
 
 # Database Path
 DB_PATH = './data/{}/db/'

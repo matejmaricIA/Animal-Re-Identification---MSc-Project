@@ -6,7 +6,7 @@ the required descriptor pickles are missing they are generated on-the-fly
 before optimisation using the standard pipeline. Features are stored under
 ``data/<dataset>/`` using the following file names::
 
-    fisher_vectors_{split}.pkl
+    fisher_vectors_{method}_{seg_tag}.pkl
     global_embeddings_{split}.pkl
 
 
@@ -81,7 +81,11 @@ def _load_pickle(path: str) -> Dict[str, np.ndarray]:
 
 
 def load_features(
-    base_dir: str, split: str, embedding_model: str = "resnet50"
+    base_dir: str,
+    split: str,
+    embedding_model: str = "resnet50",
+    method: str = "disk",
+    seg_tag: str = "unsegmented",
 ) -> Dict[str, Dict[str, np.ndarray]]:
     """Load any available features for ``split`` from ``base_dir``.
 
@@ -93,9 +97,8 @@ def load_features(
     feature_dicts: Dict[str, Dict[str, np.ndarray]] = {}
 
     path_map = {
-        "fisher": os.path.join(base_dir, f"fisher_vectors_{split}.pkl"),
+        "fisher": os.path.join(base_dir, f"fisher_vectors_{method}_{seg_tag}.pkl"),
         "global": os.path.join(base_dir, f"global_embeddings_{split}.pkl"),
-
     }
 
     for name, path in path_map.items():
@@ -155,6 +158,7 @@ def ensure_feature_files(
     test_df: pd.DataFrame,
     method: str = "disk",
     embedding_model: str = "resnet50",
+    remove_background: bool = False,
 ) -> None:
     """Create descriptor pickles on disk if they are missing.
 
@@ -167,10 +171,11 @@ def ensure_feature_files(
     """
 
     base_dir = os.path.join("./data", dataset)
+    seg_tag = "segmented" if remove_background else "unsegmented"
 
     # Image paths for convenience
-    train_paths = get_image_paths(train_df)
-    test_paths = get_image_paths(test_df)
+    train_paths = get_image_paths(train_df, remove_background)
+    test_paths = get_image_paths(test_df, remove_background)
 
     # Global embeddings
     emb_tr_path = os.path.join(base_dir, f"global_embeddings_train_{embedding_model}.pkl")
@@ -188,8 +193,8 @@ def ensure_feature_files(
             pickle.dump(emb_te, f)
 
     # Fisher vectors (load if present; else train and save, per method)
-    fv_tr_path = os.path.join(base_dir, f"fisher_vectors_{method}.pkl")
-    fv_te_path = os.path.join(base_dir, f"fisher_vectors_{method}.pkl")
+    fv_tr_path = os.path.join(base_dir, f"fisher_vectors_{method}_{seg_tag}.pkl")
+    fv_te_path = os.path.join(base_dir, f"fisher_vectors_{method}_{seg_tag}.pkl")
 
     if not (os.path.exists(fv_tr_path) and os.path.exists(fv_te_path)):
         methods = ["disk", "keynet_hardnet", "lightglue"] if method == "ensamble" else [method]
@@ -198,8 +203,8 @@ def ensure_feature_files(
 
         for m in methods:
             # Method-specific descriptor dirs
-            desc_tr_dir = os.path.join(base_dir, f"feature_descriptors_train_{m}")
-            desc_te_dir = os.path.join(base_dir, f"feature_descriptors_test_{m}")
+            desc_tr_dir = os.path.join(base_dir, f"feature_descriptors_train_{m}_{seg_tag}")
+            desc_te_dir = os.path.join(base_dir, f"feature_descriptors_test_{m}_{seg_tag}")
             desc_tr_path = os.path.join(desc_tr_dir, "descriptors.h5")
             desc_te_path = os.path.join(desc_te_dir, "descriptors.h5")
 
@@ -222,10 +227,10 @@ def ensure_feature_files(
             test_desc_m  = load_descriptors(desc_te_path)
 
             # Paths for PCA/GMM and per-method Fisher vectors
-            pca_path_m = PCA_PATH.format(dataset, m)               # e.g., data/<ds>/pca_model_disk.pkl
-            gmm_path_m = GMM_PATH.format(dataset, m)               # e.g., data/<ds>/gmm_model_disk.pkl
-            fv_tr_path_m = os.path.join(base_dir, f"fisher_vectors_{m}.pkl")
-            fv_te_path_m = os.path.join(base_dir, f"fisher_vectors_{m}.pkl")
+            pca_path_m = PCA_PATH.format(dataset, m, seg_tag)
+            gmm_path_m = GMM_PATH.format(dataset, m, seg_tag)
+            fv_tr_path_m = os.path.join(base_dir, f"fisher_vectors_{m}_{seg_tag}.pkl")
+            fv_te_path_m = os.path.join(base_dir, f"fisher_vectors_{m}_{seg_tag}.pkl")
 
             have_all = os.path.exists(pca_path_m) and os.path.exists(gmm_path_m) \
                     and os.path.exists(fv_tr_path_m) and os.path.exists(fv_te_path_m)
@@ -278,7 +283,10 @@ def ensure_feature_files(
 
 
 def load_local_features(
-    dataset: str, split: str, method: str = "disk"
+    dataset: str,
+    split: str,
+    method: str = "disk",
+    seg_tag: str = "unsegmented",
 ) -> tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
     """Load keypoints and local descriptors for geometric verification.
 
@@ -290,7 +298,7 @@ def load_local_features(
         method = "disk"
 
     base_dir = os.path.join(
-        "./data", dataset, f"feature_descriptors_{split.lower()}_{method}"
+        "./data", dataset, f"feature_descriptors_{split.lower()}_{method}_{seg_tag}"
     )
     desc_path = os.path.join(base_dir, "descriptors.h5")
     kp_path = os.path.join(base_dir, "keypoints.h5")
@@ -355,6 +363,7 @@ def optimise_dataset(
     use_gv: bool = False,
     method: str = "disk",
     embedding_model: str = "resnet50",
+    remove_background: bool = False,
 ) -> None:
     """Run a weight search for a single dataset.
 
@@ -373,6 +382,7 @@ def optimise_dataset(
     """
 
     base_dir = os.path.join("./data", dataset)
+    seg_tag = "segmented" if remove_background else "unsegmented"
 
     # Load metadata for labels
     df = pd.read_csv(os.path.join(base_dir, "processed_metadata.csv"))
@@ -383,14 +393,21 @@ def optimise_dataset(
     test_labels = dict(zip(test_df["image_id"], test_df["identity"]))
 
     # Ensure required descriptor files exist; compute them if necessary
-    ensure_feature_files(dataset, train_df, test_df, method=method, embedding_model=embedding_model)
+    ensure_feature_files(
+        dataset,
+        train_df,
+        test_df,
+        method=method,
+        embedding_model=embedding_model,
+        remove_background=remove_background,
+    )
 
-    train_features = load_features(base_dir, "train", embedding_model=embedding_model)
-    test_features = load_features(base_dir, "test", embedding_model=embedding_model)
+    train_features = load_features(base_dir, "train", embedding_model=embedding_model, method=method, seg_tag=seg_tag)
+    test_features = load_features(base_dir, "test", embedding_model=embedding_model, method=method, seg_tag=seg_tag)
 
     if use_gv:
-        train_descs, train_kp = load_local_features(dataset, "train", method)
-        test_descs, test_kp = load_local_features(dataset, "test", method)
+        train_descs, train_kp = load_local_features(dataset, "train", method, seg_tag)
+        test_descs, test_kp = load_local_features(dataset, "test", method, seg_tag)
     else:
         train_descs = test_descs = train_kp = test_kp = {}
 

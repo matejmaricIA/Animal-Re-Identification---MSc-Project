@@ -33,6 +33,12 @@ except Exception:
 
 import torch.nn.functional as F
 
+
+def get_segmentation_tag(remove_background: bool) -> str:
+    """Return a string tag for segmented or unsegmented mode."""
+    return "segmented" if remove_background else "unsegmented"
+
+
 class ImageDataset(torch.utils.data.Dataset):
         def __init__(self, paths, max_size=None):
             self.paths = paths
