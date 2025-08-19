@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
+import os
 from constants import (
     N_COMPONENTS_GMM,
     N_COMPONENTS_PCA,
@@ -87,10 +88,66 @@ def train_pca(stacked_descriptors, n_components = N_COMPONENTS_PCA):
     print("PCA training completed.")
     return pca
 
-def train_gmm(reduced_stacked_descs, n_components = N_COMPONENTS_GMM):
-    print("Training GMM...")
-    gmm = GaussianMixture(n_components = n_components, covariance_type = 'diag')
-    gmm.fit(reduced_stacked_descs)
+def train_gmm(descriptor_source, n_components = N_COMPONENTS_GMM, chunk_size=10000, init_iterations=1):
+    """Train a GMM using mini-batches of descriptors.
+
+    Parameters
+    ----------
+    descriptor_source : Union[str, np.ndarray]
+        Either an array containing all descriptors or a path to an HDF5/NPY
+        file on disk. When a path is provided, descriptors are loaded in
+        chunks to avoid loading the whole dataset into memory.
+    n_components : int, optional
+        Number of mixture components for the GMM.
+    chunk_size : int, optional
+        Number of descriptors to load per mini-batch when reading from disk.
+    init_iterations : int, optional
+        Number of EM iterations to perform for each mini-batch update.
+
+    Returns
+    -------
+    GaussianMixture
+        Trained mixture model.
+    """
+
+    print("Training GMM with mini-batches...")
+
+    gmm = GaussianMixture(
+        n_components=n_components,
+        covariance_type="diag",
+        warm_start=True,
+        max_iter=init_iterations,
+    )
+
+    def _fit_chunk(chunk: np.ndarray):
+        if chunk.size == 0:
+            return
+        gmm.fit(chunk)
+
+    def _iterate_chunks(array: np.ndarray):
+        for start in range(0, array.shape[0], chunk_size):
+            yield array[start : start + chunk_size]
+
+    # First pass: fit on mini-batches
+    if isinstance(descriptor_source, (str, bytes, os.PathLike)):
+        with h5py.File(descriptor_source, "r") as f:
+            for key in f.keys():
+                dataset = f[key]
+                length = dataset.shape[0]
+                for start in range(0, length, chunk_size):
+                    _fit_chunk(dataset[start : start + chunk_size])
+        # Prepare for refinement
+        with h5py.File(descriptor_source, "r") as f:
+            full_data = np.vstack([np.array(f[key]) for key in f.keys()])
+    else:
+        for chunk in _iterate_chunks(descriptor_source):
+            _fit_chunk(chunk)
+        full_data = descriptor_source
+
+    # Final full EM pass
+    gmm.set_params(max_iter=100)
+    gmm.fit(full_data)
+
     return gmm
 
 def compute_fisher_vector(reduced_stacked_descs, gmm):
