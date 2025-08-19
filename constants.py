@@ -35,7 +35,7 @@ SAVE_TRAIN_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_train/'
 SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
 
 # PCA and GMM Components
-N_COMPONENTS_GMM = 128
+N_COMPONENTS_GMM = 256
 N_COMPONENTS_PCA = 128 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
@@ -53,7 +53,7 @@ TMP = './data/tmp/'
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
 COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results_ensamble_global_embedding.xlsx'
-EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_segmented.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_NEW_GLOBAL.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 

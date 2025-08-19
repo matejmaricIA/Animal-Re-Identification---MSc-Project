@@ -251,8 +251,8 @@ if __name__ == '__main__':
                 if args.use_fisher:
                     desc_tr_m = stack_all_descriptors(train_dict_m)
                     pca_path_m = f"{base_dir}/pca_model_{m}.pkl"
-                    gmm_path_m = f"{base_dir}/gmm_model_{m}.pkl"
-                    fv_path_m  = f"{base_dir}/fisher_vectors_{m}.pkl"
+                    gmm_path_m = f"{base_dir}/gmm_model_{m}_{N_COMPONENTS_GMM}.pkl"
+                    fv_path_m  = f"{base_dir}/fisher_vectors_{m}_{N_COMPONENTS_GMM}.pkl"
                     if os.path.exists(pca_path_m) and os.path.exists(gmm_path_m) and os.path.exists(fv_path_m):
                         pca_m, gmm_m, fv_tr_m = load_stuff(pca_path_m, gmm_path_m, fv_path_m)
                         fv_te_m = compute_fisher_vectors(test_dict_m, pca_m, gmm_m)
@@ -289,8 +289,8 @@ if __name__ == '__main__':
             if args.use_fisher:
                 desc_tr = stack_all_descriptors(train_dict)
                 pca_path = f"{base_dir}/pca_model_{method}.pkl"
-                gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
-                fv_path  = f"{base_dir}/fisher_vectors_{method}.pkl"
+                gmm_path = f"{base_dir}/gmm_model_{method}_{N_COMPONENTS_GMM}.pkl"
+                fv_path  = f"{base_dir}/fisher_vectors_{method}_{N_COMPONENTS_GMM}.pkl"
                 if os.path.exists(pca_path) and os.path.exists(gmm_path) and os.path.exists(fv_path):
                     print("Using already trained PCA and GMM models.")
                     pca, gmm, fv_tr = load_stuff(pca_path, gmm_path, fv_path)
@@ -445,33 +445,47 @@ if __name__ == '__main__':
         df_raw["image_id"] = df_raw["image_id"].astype(str)
 
         csv_path = f"{base_dir}/processed_metadata.csv"
+
+
+
+        output_dir = (
+            f"{base_dir}/segmented_dataset" if args.remove_background else f"{base_dir}/dataset"
+        )
+        print(f"Output directory: {output_dir}")
+        df = None
+        missing_cols = []
         if os.path.exists(csv_path):
             df = pd.read_csv(csv_path)
-            # Check if the metadata has the required columns for counting
-            required_cols = ['processed_path', 'processed_path_segmented'] if args.remove_background else ['processed_path']
+            required_cols = (
+                ["processed_path_segmented"]
+                if args.remove_background
+                else ["processed_path"]
+            )
             missing_cols = [col for col in required_cols if col not in df.columns]
-            
-            if missing_cols:
-                # Need to preprocess to create the missing columns
-                output_dir_preprocess = 'segmented_dataset' if args.remove_background else 'dataset'
+        
+        if missing_cols or not os.path.exists(csv_path) or not os.path.exists(output_dir):
+            os.makedirs(base_dir, exist_ok=True)
+            if (
+                args.remove_background
+                and has_segmenter(dataset_name)
+                and not os.path.exists(output_dir)
+            ):
+                print(f"Segmenting dataset...")
+                df = segment_dataset(
+                    df_raw.copy(),
+                    f"{output_dir}/",
+                    dataset_name,
+                    use_mantiuk=args.use_mantiuk,
+                )
+            else:
                 df = preprocessing.preprocess_dataset(
                     df_raw.copy(),
-                    f"{base_dir}/{output_dir_preprocess}/",
+                    f"{output_dir}/",
                     dataset_name,
                     use_mantiuk=args.use_mantiuk,
                     remove_background=args.remove_background,
-                )
-                df.to_csv(csv_path, index=False)
-        else:
-            os.makedirs(base_dir, exist_ok=True)
-            output_dir_preprocess = 'segmented_dataset' if args.remove_background else 'dataset'
-            df = preprocessing.preprocess_dataset(
-                df_raw.copy(),
-                f"{base_dir}/{output_dir_preprocess}/",
-                dataset_name,
-                use_mantiuk=args.use_mantiuk,
-                remove_background=args.remove_background,
-            )
+                )    
+
             df.to_csv(csv_path, index=False)
 
         if method == 'ensamble':
@@ -493,8 +507,8 @@ if __name__ == '__main__':
                     keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
                 if args.use_fisher:
                     pca_path_m = f"{base_dir}/pca_model_{m}.pkl"
-                    gmm_path_m = f"{base_dir}/gmm_model_{m}.pkl"
-                    fv_path_m = f"{base_dir}/fisher_vectors_{m}.pkl"
+                    gmm_path_m = f"{base_dir}/gmm_model_{m}_{N_COMPONENTS_GMM}.pkl"
+                    fv_path_m = f"{base_dir}/fisher_vectors_{m}_{N_COMPONENTS_GMM}.pkl"
                     if os.path.exists(fv_path_m):
                         pca_m, gmm_m, fv_m = load_stuff(pca_path_m, gmm_path_m, fv_path_m)
                     else:
@@ -518,8 +532,8 @@ if __name__ == '__main__':
 
             if args.use_fisher:
                 pca_path = f"{base_dir}/pca_model_{method}.pkl"
-                gmm_path = f"{base_dir}/gmm_model_{method}.pkl"
-                fv_path = f"{base_dir}/fisher_vectors_{method}.pkl"
+                gmm_path = f"{base_dir}/gmm_model_{method}_{N_COMPONENTS_GMM}.pkl"
+                fv_path = f"{base_dir}/fisher_vectors_{method}_{N_COMPONENTS_GMM}.pkl"
                 if os.path.exists(fv_path):
                     pca, gmm, fisher_vectors = load_stuff(pca_path, gmm_path, fv_path)
                 else:
@@ -566,63 +580,26 @@ if __name__ == '__main__':
 
         labels = dict(zip(df["image_id"], df["identity"])) if not args.automated_mode else {}
         
-        if args.enhanced_estimation:
-            print(f"🎯 Using Enhanced Population Estimation")
-            if args.use_ensemble:
-                print(f"Multi-threshold ensemble mode")
-            else:
-                print(f"Single threshold with confidence assessment")
-            
-            enhanced_results = enhanced_population_estimation(
-                fisher_vectors=fisher_vectors,
-                labels=labels,
-                keypoints=keypoints,
-                descriptors=descriptors,
-                use_ensemble=args.use_ensemble,
-                single_threshold=args.gv_threshold,
-                # Pass through other parameters
-                use_geometric=args.use_geometric_verification,
-                use_lightglue=args.use_lightglue,
-                method='disk',
-                n_vertices=args.num_vertices,
-                n_neighbors=args.num_neighbors,
-                label_error_rate=args.label_error_rate,
-                automated_mode=args.automated_mode
-            )
-            
-            if args.use_ensemble:
-                estimate = enhanced_results['ensemble_estimate']
-                se = enhanced_results['ensemble_std']
-                stats = enhanced_results['best_individual']['stats']
-                confidence = enhanced_results['best_individual']['confidence']
-                print(f"Enhanced Results: {estimate:.2f} ± {se:.2f} (ensemble)")
-                print(f"Recommendation: {enhanced_results['recommendation']}")
-            else:
-                estimate = enhanced_results['estimate']
-                se = enhanced_results['std_error']
-                stats = enhanced_results['stats']
-                confidence = enhanced_results['confidence']
-                print(f"Enhanced Results: {estimate:.2f} ± {se:.2f} ({confidence})")
-        else:
-            print(f"Using Standard Population Estimation")
-            estimate, se, stats = nested_importance_sampling(
-                fisher_vectors,
-                labels,
-                keypoints=keypoints,
-                descriptors=descriptors,
-                use_geometric=args.use_geometric_verification,
-                use_lightglue=args.use_lightglue,
-                method='disk',
-                gv_threshold = args.gv_threshold,
-                n_vertices=args.num_vertices,
-                n_neighbors=args.num_neighbors,
-                label_error_rate=args.label_error_rate,
-                return_stats = True,
-                automated_mode=args.automated_mode
-            )
-            # Add confidence assessment even for standard mode
-            confidence, reason = assess_confidence_level(stats)
-            print(f"Confidence Assessment: {confidence} - {reason}")
+        	
+        print(f"Using Standard Population Estimation")
+        estimate, se, stats = nested_importance_sampling(
+            fisher_vectors,
+            labels,
+            keypoints=keypoints,
+            descriptors=descriptors,
+            use_geometric=args.use_geometric_verification,
+            use_lightglue=args.use_lightglue,
+            method='disk',
+            gv_threshold = args.gv_threshold,
+            n_vertices=args.num_vertices,
+            n_neighbors=args.num_neighbors,
+            label_error_rate=args.label_error_rate,
+            return_stats = True,
+            automated_mode=args.automated_mode
+        )
+        # Add confidence assessment even for standard mode
+        #confidence, reason = assess_confidence_level(stats)
+        #print(f"Confidence Assessment: {confidence} - {reason}")
         runtime = time.time() - start_time
         print(f"Estimated individuals: {estimate:.2f} \u00b1 {se:.2f}")
         print(stats)
@@ -644,11 +621,7 @@ if __name__ == '__main__':
                 "MAX GMM Descriptors": MAX_GMM_DESCRIPTORS,
                 "GV Threshold": args.gv_threshold,
                 "GV Method": gv_method if args.use_geometric_verification else "N/A",
-                "Error Rate": args.label_error_rate,
                 "Automated Mode": args.automated_mode,
-                "Enhanced Estimation": args.enhanced_estimation,
-                "Use Ensemble": args.use_ensemble if args.enhanced_estimation else False,
-                "Confidence Level": confidence if 'confidence' in locals() else "N/A",
                 "Result": round(float(estimate), 2),
                 "Std Error": round(float(se), 2),
                 "Runtime (minutes)": round(float(runtime) / 60, 2) ,

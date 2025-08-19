@@ -3,7 +3,7 @@
 params=("ATRW" "CowDataset" "IPanda50" "NyalaData" "SealID" "BelugaID" "HyenaID2022" "StripeSpotter" "Giraffes")
 for p in "${params[@]}"; do
     echo "Running script with parameter: $p"
-    python main.py --ds "$p" --train --method ensamble --save_eval --use_geometric_verification --use_lightglue --remove_background
+    python main.py --ds "$p" --train --method ensamble --save_eval --remove_background --use_geometric_verification --use_lightglue --use_global_embedding --embedding_model megadescriptor-l-384  --w_fisher 1.0 --w_global 1.0
     #python main.py --ds "$p" --train --method disk --save_eval --use_geometric_verification --use_lightglue
     #python main.py --ds "$p" --train --method keynet_hardnet --save_eval --use_geometric_verification --use_lightglue
     #python main.py --ds "$p" --train --method lightglue --save_eval --use_geometric_verification --use_lightglue

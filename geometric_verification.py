@@ -141,6 +141,10 @@ def match_features_lightglue(desc1, desc2, kp1, kp2, method='disk'):
     kp1 = _ensure_xy(kp1)
     kp2 = _ensure_xy(kp2)
 
+    # Guard against empty keypoints/descriptors
+    if kp1.shape[0] == 0 or kp2.shape[0] == 0 or desc1.size == 0 or desc2.size == 0:
+        return [], np.empty((0, 2)), np.empty((0, 2))
+
     kpts0 = torch.from_numpy(kp1).float().unsqueeze(0).to(device)
     desc0 = torch.from_numpy(desc1).float().unsqueeze(0).to(device)
     kpts1 = torch.from_numpy(kp2).float().unsqueeze(0).to(device)
