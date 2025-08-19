@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import h5py
 import numpy as np
@@ -10,6 +11,11 @@ from constants import (
     MAX_GMM_DESCRIPTORS,
     MAX_DESCRIPTORS_PER_IMAGE,
 )
+
+
+def descriptor_dir(base_dir: str, method: str, split: str, seg_tag: str) -> str:
+    """Build path to the descriptor directory for a given split and method."""
+    return os.path.join(base_dir, f"feature_descriptors_{split}_{method}_{seg_tag}")
 
 
 def load_descriptors(descriptors_file):
