@@ -231,35 +231,38 @@ if __name__ == '__main__':
         os.makedirs(base_dir, exist_ok=True)
         
         # ── Feature extraction ──
-        if method == 'ensamble':
-            methods = ['disk', 'keynet_hardnet', 'lightglue']
-            for m in methods:
-                dir_tr = descriptor_dir(base_dir, m, 'train', seg_tag)
-                dir_te = descriptor_dir(base_dir, m, 'test', seg_tag)
-                if not os.path.isdir(dir_tr):
-                    if m == 'disk':
-                        extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, dir_tr)
-                        extract_features(get_image_paths(df_test, args.remove_background), MODEL_PATH, dir_te)
-                    elif m == 'keynet_hardnet':
-                        extract_features_keynet_hardnet_faster(get_image_paths(df_train, args.remove_background), dir_tr)
-                        extract_features_keynet_hardnet_faster(get_image_paths(df_test, args.remove_background), dir_te)
-                    elif m == 'lightglue':
-                        extract_features_lightglue(get_image_paths(df_train, args.remove_background), dir_tr)
-                        extract_features_lightglue(get_image_paths(df_test, args.remove_background), dir_te)
+        train_dict, test_dict = {}, {}
+        train_keypoints, test_keypoints = {}, {}
+        fv_tr, fv_te = {}, {}
+        if args.use_fisher:
+            if method == 'ensamble':
+                methods = ['disk', 'keynet_hardnet', 'lightglue']
+                for m in methods:
+                    dir_tr = descriptor_dir(base_dir, m, 'train', seg_tag)
+                    dir_te = descriptor_dir(base_dir, m, 'test', seg_tag)
+                    if not os.path.isdir(dir_tr):
+                        if m == 'disk':
+                            extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, dir_tr)
+                            extract_features(get_image_paths(df_test, args.remove_background), MODEL_PATH, dir_te)
+                        elif m == 'keynet_hardnet':
+                            extract_features_keynet_hardnet_faster(get_image_paths(df_train, args.remove_background), dir_tr)
+                            extract_features_keynet_hardnet_faster(get_image_paths(df_test, args.remove_background), dir_te)
+                        elif m == 'lightglue':
+                            extract_features_lightglue(get_image_paths(df_train, args.remove_background), dir_tr)
+                            extract_features_lightglue(get_image_paths(df_test, args.remove_background), dir_te)
 
-            fv_tr_list = []
-            fv_te_list = []
-            for m in methods:
-                dir_tr = descriptor_dir(base_dir, m, 'train', seg_tag)
-                dir_te = descriptor_dir(base_dir, m, 'test', seg_tag)
-                train_dict_m = load_descriptors(os.path.join(dir_tr, 'descriptors.h5'))
-                test_dict_m = load_descriptors(os.path.join(dir_te, 'descriptors.h5'))
-                if m == 'disk':
-                    train_dict = train_dict_m
-                    test_dict = test_dict_m
-                    train_keypoints = load_keypoints(os.path.join(dir_tr, 'keypoints.h5'))
-                    test_keypoints = load_keypoints(os.path.join(dir_te, 'keypoints.h5'))
-                if args.use_fisher:
+                fv_tr_list = []
+                fv_te_list = []
+                for m in methods:
+                    dir_tr = descriptor_dir(base_dir, m, 'train', seg_tag)
+                    dir_te = descriptor_dir(base_dir, m, 'test', seg_tag)
+                    train_dict_m = load_descriptors(os.path.join(dir_tr, 'descriptors.h5'))
+                    test_dict_m = load_descriptors(os.path.join(dir_te, 'descriptors.h5'))
+                    if m == 'disk':
+                        train_dict = train_dict_m
+                        test_dict = test_dict_m
+                        train_keypoints = load_keypoints(os.path.join(dir_tr, 'keypoints.h5'))
+                        test_keypoints = load_keypoints(os.path.join(dir_te, 'keypoints.h5'))
                     desc_tr_m = stack_all_descriptors(train_dict_m)
                     pca_path_m = PCA_PATH.format(ds_tag, m, seg_tag)
                     gmm_path_m = GMM_PATH.format(ds_tag, m, seg_tag)
@@ -276,29 +279,28 @@ if __name__ == '__main__':
                     fv_tr_list.append(fv_tr_m)
                     fv_te_list.append(fv_te_m)
 
-            if args.use_fisher:
                 fv_tr = combine_fisher_vectors(fv_tr_list, ENSEMBLE_WEIGHTS)
                 fv_te = combine_fisher_vectors(fv_te_list, ENSEMBLE_WEIGHTS)
 
-        else:
-            dir_tr = descriptor_dir(base_dir, method, 'train', seg_tag)
-            dir_te = descriptor_dir(base_dir, method, 'test', seg_tag)
-            if not os.path.isdir(dir_tr):
-                if method == 'disk':
-                    extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, dir_tr)
-                    extract_features(get_image_paths(df_test, args.remove_background), MODEL_PATH, dir_te)
-                elif method == 'keynet_hardnet':
-                    extract_features_keynet_hardnet_faster(get_image_paths(df_train, args.remove_background), dir_tr)
-                    extract_features_keynet_hardnet_faster(get_image_paths(df_test, args.remove_background), dir_te)
-                elif method == 'lightglue':
-                    extract_features_lightglue(get_image_paths(df_train, args.remove_background), dir_tr)
-                    extract_features_lightglue(get_image_paths(df_test, args.remove_background), dir_te)
+            else:
+                dir_tr = descriptor_dir(base_dir, method, 'train', seg_tag)
+                dir_te = descriptor_dir(base_dir, method, 'test', seg_tag)
+                if not os.path.isdir(dir_tr):
+                    if method == 'disk':
+                        extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, dir_tr)
+                        extract_features(get_image_paths(df_test, args.remove_background), MODEL_PATH, dir_te)
+                    elif method == 'keynet_hardnet':
+                        extract_features_keynet_hardnet_faster(get_image_paths(df_train, args.remove_background), dir_tr)
+                        extract_features_keynet_hardnet_faster(get_image_paths(df_test, args.remove_background), dir_te)
+                    elif method == 'lightglue':
+                        extract_features_lightglue(get_image_paths(df_train, args.remove_background), dir_tr)
+                        extract_features_lightglue(get_image_paths(df_test, args.remove_background), dir_te)
 
-            train_dict = load_descriptors(os.path.join(dir_tr, 'descriptors.h5'))
-            test_dict = load_descriptors(os.path.join(dir_te, 'descriptors.h5'))
-            train_keypoints = load_keypoints(os.path.join(dir_tr, 'keypoints.h5'))
-            test_keypoints = load_keypoints(os.path.join(dir_te, 'keypoints.h5'))
-            if args.use_fisher:
+                train_dict = load_descriptors(os.path.join(dir_tr, 'descriptors.h5'))
+                test_dict = load_descriptors(os.path.join(dir_te, 'descriptors.h5'))
+                train_keypoints = load_keypoints(os.path.join(dir_tr, 'keypoints.h5'))
+                test_keypoints = load_keypoints(os.path.join(dir_te, 'keypoints.h5'))
+
                 desc_tr = stack_all_descriptors(train_dict)
                 pca_path = PCA_PATH.format(ds_tag, method, seg_tag)
                 gmm_path = GMM_PATH.format(ds_tag, method, seg_tag)
@@ -503,24 +505,25 @@ if __name__ == '__main__':
 
             df.to_csv(csv_path, index=False)
 
-        if method == 'ensamble':
-            methods = ['disk', 'keynet_hardnet', 'lightglue']
-            fv_list = []
-            for m in methods:
-                feat_dir = f"{base_dir}/feature_descriptors_{m}_{seg_tag}/"
-                if not os.path.isdir(feat_dir):
-                    if m == 'disk':
-                        extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, feat_dir)
-                    elif m == 'keynet_hardnet':
-                        extract_features_keynet_hardnet_faster(get_image_paths(df, args.remove_background), feat_dir)
-                    elif m == 'lightglue':
-                        extract_features_lightglue(get_image_paths(df, args.remove_background), feat_dir)
+        descriptors, keypoints, fisher_vectors = {}, {}, {}
+        if args.use_fisher:
+            if method == 'ensamble':
+                methods = ['disk', 'keynet_hardnet', 'lightglue']
+                fv_list = []
+                for m in methods:
+                    feat_dir = f"{base_dir}/feature_descriptors_{m}_{seg_tag}/"
+                    if not os.path.isdir(feat_dir):
+                        if m == 'disk':
+                            extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, feat_dir)
+                        elif m == 'keynet_hardnet':
+                            extract_features_keynet_hardnet_faster(get_image_paths(df, args.remove_background), feat_dir)
+                        elif m == 'lightglue':
+                            extract_features_lightglue(get_image_paths(df, args.remove_background), feat_dir)
 
-                desc = load_descriptors(os.path.join(feat_dir, "descriptors.h5"))
-                if m == 'disk':
-                    descriptors = desc
-                    keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
-                if args.use_fisher:
+                    desc = load_descriptors(os.path.join(feat_dir, "descriptors.h5"))
+                    if m == 'disk':
+                        descriptors = desc
+                        keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
                     pca_path_m = PCA_PATH.format(ds_tag, m, seg_tag)
                     gmm_path_m = GMM_PATH.format(ds_tag, m, seg_tag)
                     fv_path_m = FISHER_VECTORS.format(ds_tag, m, seg_tag)
@@ -534,18 +537,18 @@ if __name__ == '__main__':
                         save_stuff(pca_m, gmm_m, fv_m, (pca_path_m, gmm_path_m, fv_path_m))
                     fv_list.append(fv_m)
 
-            if args.use_fisher:
                 fisher_vectors = combine_fisher_vectors(fv_list, ENSEMBLE_WEIGHTS)
-        else:
-            feat_dir = f"{base_dir}/feature_descriptors_{method}_{seg_tag}/"
-            if not os.path.isdir(feat_dir) and method == 'disk':
-                extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, feat_dir)
-            elif not os.path.isdir(feat_dir) and method == 'keynet_hardnet':
-                extract_features_keynet_hardnet_faster(get_image_paths(df, args.remove_background), feat_dir)
-            descriptors = load_descriptors(os.path.join(feat_dir, "descriptors.h5"))
-            keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
+            else:
+                feat_dir = f"{base_dir}/feature_descriptors_{method}_{seg_tag}/"
+                if not os.path.isdir(feat_dir) and method == 'disk':
+                    extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, feat_dir)
+                elif not os.path.isdir(feat_dir) and method == 'keynet_hardnet':
+                    extract_features_keynet_hardnet_faster(get_image_paths(df, args.remove_background), feat_dir)
+                elif not os.path.isdir(feat_dir) and method == 'lightglue':
+                    extract_features_lightglue(get_image_paths(df, args.remove_background), feat_dir)
+                descriptors = load_descriptors(os.path.join(feat_dir, "descriptors.h5"))
+                keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
 
-            if args.use_fisher:
                 pca_path = PCA_PATH.format(ds_tag, method, seg_tag)
                 gmm_path = GMM_PATH.format(ds_tag, method, seg_tag)
                 fv_path = FISHER_VECTORS.format(ds_tag, method, seg_tag)
