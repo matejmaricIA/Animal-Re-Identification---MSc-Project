@@ -36,7 +36,7 @@ SAVE_TEST_DESCRIPTORS_FOLDER = './data/{}/feature_descriptors_test/'
 
 # PCA and GMM Components
 N_COMPONENTS_GMM = 256
-N_COMPONENTS_PCA = 128 # Ovo promijenio zadnje da testiram.
+N_COMPONENTS_PCA = 96 # Ovo promijenio zadnje da testiram.
 
 # Pkl Paths
 PCA_PATH = './data/{}/pca_model_{}.pkl'
@@ -89,7 +89,7 @@ MAX_FEATURES_PER_SCALE = 2000  # Limit features to control memory usage
 ENABLE_MULTISCALE = False  # Toggle for easy comparison with single-scale
 
 
-MAX_GMM_DESCRIPTORS = 7000000000
+MAX_GMM_DESCRIPTORS = 7000000
 # Cap descriptors contributed by each image when stacking for PCA/GMM training.
 MAX_DESCRIPTORS_PER_IMAGE = 5000
 
