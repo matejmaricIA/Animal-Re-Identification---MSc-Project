@@ -331,8 +331,8 @@ if __name__ == '__main__':
             print("Extracting global embeddings...")
             train_paths = dict(zip(df_train["image_id"].astype(str), get_image_paths(df_train, args.remove_background)))
             test_paths = dict(zip(df_test["image_id"].astype(str), get_image_paths(df_test, args.remove_background)))
-            emb_tr_path = f"{base_dir}/global_embeddings_train_{args.embedding_model}.pkl"
-            emb_te_path = f"{base_dir}/global_embeddings_test_{args.embedding_model}.pkl"
+            emb_tr_path = f"{base_dir}/global_embeddings_train_{args.embedding_model}_{seg_tag}.pkl"
+            emb_te_path = f"{base_dir}/global_embeddings_test_{args.embedding_model}_{seg_tag}.pkl"
             if os.path.exists(emb_tr_path) and os.path.exists(emb_te_path):
                 with open(emb_tr_path, "rb") as f:
                     emb_tr = pickle.load(f)
@@ -574,7 +574,7 @@ if __name__ == '__main__':
         if args.use_global_embedding:
             print("Extracting global embeddings for population counting...")
             image_paths = dict(zip(df["image_id"].astype(str), get_image_paths(df, args.remove_background)))
-            emb_path = f"{base_dir}/global_embeddings_count_{args.embedding_model}.pkl"
+            emb_path = f"{base_dir}/global_embeddings_count_{args.embedding_model}_{seg_tag}.pkl"
 
             if os.path.exists(emb_path):
                 print("Loading cached global embeddings...")
