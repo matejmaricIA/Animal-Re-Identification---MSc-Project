@@ -206,7 +206,8 @@ if __name__ == '__main__':
                     )
                 df.to_csv(csv_path, index=False)
             else:
-                df = pd.read_csv(csv_path)
+                #df = pd.read_csv(csv_path)
+                df = pd.read_csv(csv_path, dtype={"image_id": str})
 
         df["image_id"] = df["image_id"].astype(str)
         
@@ -409,7 +410,8 @@ if __name__ == '__main__':
                 "Dataset": dataset_name,
                 "Training Examples": len(df_train.index),
                 "Num Classes": df_train['identity'].nunique(),
-                "Method": args.method,
+                "Method": args.method if args.use_fisher else "N/A",
+                "Use Fisher": args.use_fisher,
                 "Remove Background": args.remove_background,
                 "Use Global Embedding": args.use_global_embedding,
                 "Embedding Model": args.embedding_model if args.use_global_embedding else "None",
@@ -472,7 +474,8 @@ if __name__ == '__main__':
         df = None
         missing_cols = []
         if os.path.exists(csv_path):
-            df = pd.read_csv(csv_path)
+            #df = pd.read_csv(csv_path)
+            df = pd.read_csv(csv_path, dtype={"image_id": str})
             required_cols = (
                 ["processed_path_segmented"]
                 if args.remove_background
@@ -629,7 +632,8 @@ if __name__ == '__main__':
         if args.save_count:
             row = {
                 "Dataset": dataset_name,
-                "Method": method,
+                "Method": method if args.use_fisher else "N/A",
+                "Use Fisher": args.use_fisher,
                 "Mutliscale Enabled": ENABLE_MULTISCALE,
                 "Num Vertices": args.num_vertices,
                 "Num Neighbors": args.num_neighbors,
@@ -655,4 +659,4 @@ if __name__ == '__main__':
             if args.use_global_embedding and args.use_fisher:
                 row["Global Weight"] = args.w_global
                 row["Fisher Weight"] = args.w_fisher
-            save_count_results(row)
+            save_count_results_wrapper(row)

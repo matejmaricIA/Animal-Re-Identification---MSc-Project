@@ -13,11 +13,17 @@ from constants import (
 )
 
 # ---------------------------------------------------------------------------
+# Config
+# ---------------------------------------------------------------------------
+
+METHODS = ["keynet-hardnet", "disk", "ensemble"]  # adjust names if main.py expects different tokens
+
+# ---------------------------------------------------------------------------
 # Helper utilities
 # ---------------------------------------------------------------------------
 
-def run_main(dataset: str, cfg: dict, version: int) -> dict:
-    """Run main.py with a specific configuration."""
+def run_main(dataset: str, cfg: dict, version: int, method: str) -> dict:
+    """Run main.py with a specific configuration and method."""
     cmd = [
         "python",
         "main.py",
@@ -25,7 +31,7 @@ def run_main(dataset: str, cfg: dict, version: int) -> dict:
         "--ds",
         dataset,
         "--method",
-        "disk",
+        method,
         "--version",
         str(version),
         "--save_eval",
@@ -51,8 +57,9 @@ def run_main(dataset: str, cfg: dict, version: int) -> dict:
 
     subprocess.run(cmd, check=True)
 
+    # Compose tag used by your evaluation writer; includes method now
     tag = (
-        f"rmbkg_{cfg.get('remove_background', False)}_tm_False_disk"
+        f"rmbkg_{cfg.get('remove_background', False)}_tm_False_{method}"
         f"_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}"
         f"_gv_{cfg.get('use_geometric_verification', False)}_lg_True"
         f"_v{version}"
@@ -134,7 +141,11 @@ def build_configurations():
             )
 
     # Both embeddings with weights
-    weight_combos = [(1.0, 1.0), (2.0, 1.0), (1.0, 2.0), (3.0, 1.0), (1.0, 3.0), (0.5, 3.0), (3.0, 0.5), (0.5, 1.0), (1.0, 0.5)]
+    weight_combos = [
+        (1.0, 1.0), (2.0, 1.0), (1.0, 2.0),
+        (3.0, 1.0), (1.0, 3.0), (0.5, 3.0),
+        (3.0, 0.5), (0.5, 1.0), (1.0, 0.5)
+    ]
     for remove_bg, (wf, wg) in product(backgrounds, weight_combos):
         for model in ["resnet50", "megadescriptor-l-384"]:
             for use_gv in [False, True]:
@@ -169,15 +180,20 @@ def build_configurations():
 
 
 def run_dataset(dataset: str):
-    """Run all configurations for a single dataset and summarise results."""
+    """Run all configurations for a single dataset and summarise results across methods."""
     configs = build_configurations()
     results = []
-    for idx, cfg in enumerate(configs):
-        print(f"\nRunning {dataset} configuration {idx+1}/{len(configs)}: {cfg}")
-        metrics = run_main(dataset, cfg, idx + 1)
-        results.append({"version": idx + 1, "config": cfg, "metrics": metrics})
 
-    # Read global results Excel to summarise best accuracy
+    # Global version counter across methods × configs
+    version_counter = 0
+    for method in METHODS:
+        for idx, cfg in enumerate(configs):
+            version_counter += 1
+            print(f"\nRunning {dataset} method {method} configuration {idx+1}/{len(configs)} (v{version_counter}): {cfg}")
+            metrics = run_main(dataset, cfg, version_counter, method)
+            results.append({"version": version_counter, "method": method, "config": cfg, "metrics": metrics})
+
+    # Read global results Excel to summarise best accuracy (if you aggregate methods there)
     try:
         global_df = pd.read_excel(EVAL_RESULTS_XLSX)
         ds_df = global_df[global_df["Dataset"] == dataset]
@@ -191,7 +207,7 @@ def run_dataset(dataset: str):
         best_row = None
         print(f"No XLSX results found for {dataset}.")
 
-    # Determine best run using metrics collected during execution
+    # Determine best run using in-run metrics
     scored = [r for r in results if r["metrics"]]
     if scored:
         best = max(scored, key=lambda x: x["metrics"].get("accuracy", 0))
@@ -207,6 +223,7 @@ def run_dataset(dataset: str):
                 {
                     **r["config"],
                     "version": r["version"],
+                    "method": r["method"],
                     "accuracy": r["metrics"].get("accuracy"),
                     "top5_accuracy": r["metrics"].get("top_n_accuracy"),
                 }
@@ -223,7 +240,7 @@ def run_dataset(dataset: str):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run grid search experiments over datasets")
+    parser = argparse.ArgumentParser(description="Run grid search experiments over datasets and methods")
     parser.add_argument(
         "--datasets",
         nargs="+",
@@ -232,7 +249,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     for ds in args.datasets:
-        try:    
+        try:
             run_dataset(ds)
         except Exception as e:
             print(f"Error running {ds}: {e}")

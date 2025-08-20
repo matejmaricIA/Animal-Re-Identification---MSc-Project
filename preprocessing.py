@@ -174,11 +174,15 @@ def preprocess_dataset(df, output_dir, dataset_name, use_mantiuk = True, remove_
     # Load existing metadata if available so we don't lose previously
     # processed path columns when updating one of them.
     if os.path.exists(metadata_path):
-        existing_df = pd.read_csv(metadata_path).set_index("image_id")
+        #existing_df = pd.read_csv(metadata_path).set_index("image_id")
+        existing_df = pd.read_csv(
+            metadata_path, dtype={"image_id": str}
+        ).set_index("image_id")
     else:
         #existing_df = pd.DataFrame().set_index("image_id")
         existing_df = pd.DataFrame(columns=["image_id"]).set_index("image_id")
-
+        
+    df["image_id"] = df["image_id"].astype(str)
     args = [(row, output_dir, use_mantiuk, dataset_name, remove_background) for _, row in df.iterrows()]
 
     # Process sequentially
