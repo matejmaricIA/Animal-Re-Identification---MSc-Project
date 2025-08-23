@@ -22,7 +22,7 @@ def load_descriptors(descriptors_file):
     data = {}
     with h5py.File(descriptors_file, 'r') as df:
         for key in df.keys():
-            descriptors = np.array(df[key])
+            descriptors = np.array(df[key]).astype(np.float32)
             data[key] = descriptors
     print(f"Loaded dataset with {len(data)} images.")
     return data
@@ -38,7 +38,11 @@ def load_keypoints(keypoints_file):
         print(f"Loaded keypoints for {len(data)} images from {keypoints_file}")
         return data
 
-def stack_all_descriptors(descriptors, max_samples=MAX_GMM_DESCRIPTORS, per_image_max = MAX_DESCRIPTORS_PER_IMAGE):
+def stack_all_descriptors(
+    descriptors,
+    max_samples: int = MAX_GMM_DESCRIPTORS,
+    per_image_max: int = MAX_DESCRIPTORS_PER_IMAGE,
+):
     """Stack descriptors from all images.
 
     If ``max_samples`` is provided, a random subset of descriptors with at most
@@ -54,9 +58,10 @@ def stack_all_descriptors(descriptors, max_samples=MAX_GMM_DESCRIPTORS, per_imag
             continue
         if per_image_max is not None and len(d) > per_image_max:
             idx = rng.choice(len(d), size=per_image_max, replace=False)
-            arrays.append(d[idx])
+            arr = d[idx]
         else:
-            arrays.append(d)
+            arr = d
+        arrays.append(arr.astype(np.float32))
     if not arrays:
         return np.empty((0, 0))
 
@@ -88,6 +93,7 @@ def stack_all_descriptors(descriptors, max_samples=MAX_GMM_DESCRIPTORS, per_imag
 
 def train_pca(stacked_descriptors, n_components = N_COMPONENTS_PCA):
     print("Training PCA...")
+    stacked_descriptors = stacked_descriptors.astype(np.float32, copy=False)
     pca = PCA(n_components = n_components, whiten = True)
     pca.fit(stacked_descriptors)
     print("PCA training completed.")
@@ -95,6 +101,7 @@ def train_pca(stacked_descriptors, n_components = N_COMPONENTS_PCA):
 
 def train_gmm(reduced_stacked_descs, n_components = N_COMPONENTS_GMM):
     print("Training GMM...")
+    reduced_stacked_descs = reduced_stacked_descs.astype(np.float32, copy=False)
     gmm = GaussianMixture(n_components = n_components, covariance_type = 'diag')
     gmm.fit(reduced_stacked_descs)
     return gmm

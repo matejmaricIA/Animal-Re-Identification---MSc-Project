@@ -16,7 +16,7 @@ from constants import (
 # Config
 # ---------------------------------------------------------------------------
 
-METHODS = ["keynet-hardnet", "disk", "ensemble"]  # adjust names if main.py expects different tokens
+METHODS = ["ensamble", "keynet_hardnet", "disk"]
 
 # ---------------------------------------------------------------------------
 # Helper utilities
@@ -53,7 +53,6 @@ def run_main(dataset: str, cfg: dict, version: int, method: str) -> dict:
 
     if cfg.get("use_geometric_verification", False):
         cmd.append("--use_geometric_verification")
-        cmd.extend(["--gv_method", cfg["gv_method"]])
 
     subprocess.run(cmd, check=True)
 
@@ -116,14 +115,12 @@ def build_configurations():
     # Fisher vectors only
     for remove_bg, use_gv in product(backgrounds, [False, True]):
         if use_gv:
-            for gv_method in ["RANSAC", "MAGSAC"]:
                 configs.append(
                     {
                         "remove_background": remove_bg,
                         "use_global_embedding": False,
                         "use_fisher": True,
                         "use_geometric_verification": True,
-                        "gv_method": gv_method,
                         "w_fisher": 1.0,
                         "w_global": 0.0,
                     }
@@ -144,13 +141,12 @@ def build_configurations():
     weight_combos = [
         (1.0, 1.0), (2.0, 1.0), (1.0, 2.0),
         (3.0, 1.0), (1.0, 3.0), (0.5, 3.0),
-        (3.0, 0.5), (0.5, 1.0), (1.0, 0.5)
+        (3.0, 0.5),
     ]
     for remove_bg, (wf, wg) in product(backgrounds, weight_combos):
         for model in ["resnet50", "megadescriptor-l-384"]:
             for use_gv in [False, True]:
                 if use_gv:
-                    for gv_method in ["RANSAC", "MAGSAC"]:
                         configs.append(
                             {
                                 "remove_background": remove_bg,
@@ -158,7 +154,6 @@ def build_configurations():
                                 "embedding_model": model,
                                 "use_fisher": True,
                                 "use_geometric_verification": True,
-                                "gv_method": gv_method,
                                 "w_fisher": wf,
                                 "w_global": wg,
                             }
