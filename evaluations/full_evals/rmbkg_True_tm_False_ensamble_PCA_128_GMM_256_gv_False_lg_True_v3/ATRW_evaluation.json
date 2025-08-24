@@ -1,6 +1,6 @@
 {
     "accuracy": 0.5334174022698613,
-    "top_n_accuracy": 0.691046658259773,
+    "top_n_accuracy": 0.6960907944514502,
     "classification_metrics": {
         "ATRW_0": {
             "precision": 1.0,
@@ -1060,5 +1060,5 @@
             "support": 793.0
         }
     },
-    "eval_runtime_sec": 11.904756784439087
+    "eval_runtime_sec": 11.965135097503662
 }

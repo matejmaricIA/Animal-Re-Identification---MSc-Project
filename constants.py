@@ -89,7 +89,7 @@ MAX_FEATURES_PER_SCALE = 2000  # Limit features to control memory usage
 ENABLE_MULTISCALE = False  # Toggle for easy comparison with single-scale
 
 
-MAX_GMM_DESCRIPTORS = 7000000
+MAX_GMM_DESCRIPTORS = 2000000
 # Cap descriptors contributed by each image when stacking for PCA/GMM training.
 MAX_DESCRIPTORS_PER_IMAGE = 5000
 
