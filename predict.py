@@ -5,6 +5,13 @@ from geometric_verification import compute_geometric_similarity
 import time
 from tqdm import tqdm
 from utils import distance_utils
+import os
+from visualization_suite import (
+    io as vis_io,
+    matching as vis_matching,
+    geometric_verification as vis_gv,
+    classification as vis_classification,
+)
 
 
 def classify_test_images_with_geometric_verification(
@@ -22,6 +29,13 @@ def classify_test_images_with_geometric_verification(
     alpha=ALPHA,
     min_inliers=MIN_INLIERS,
     inlier_threshold=INLIER_THRESHOLD,
+    visualize: bool = False,
+    image_root: str | None = None,
+    train_kp_h5: str | None = None,
+    train_desc_h5: str | None = None,
+    test_kp_h5: str | None = None,
+    test_desc_h5: str | None = None,
+    vis_output_dir: str | None = None,
 ):
     """Efficient geometric verification with two-stage filtering."""
     
@@ -140,6 +154,36 @@ def classify_test_images_with_geometric_verification(
             'predicted_class': predicted_class,
             'top_n': top_n_matches
         }
+
+        if visualize:
+            if not all([image_root, train_kp_h5, train_desc_h5, test_kp_h5, test_desc_h5]):
+                raise ValueError("Visualization requires image root and HDF5 paths")
+            scores_subset = final_scores[:top_n] if 'final_scores' in locals() else []
+            candidate_ids = [s['train_image_id'] for s in scores_subset]
+            query_img = vis_io.load_image(f"{image_root}/{test_image_id}.jpg")
+            candidate_imgs = [vis_io.load_image(f"{image_root}/{cid}.jpg") for cid in candidate_ids]
+            q_kp = vis_io.load_keypoints_h5(test_kp_h5, [test_image_id]).get(test_image_id, np.empty((0,2)))
+            q_desc = vis_io.load_descriptors_h5(test_desc_h5, [test_image_id]).get(test_image_id, np.empty((0,0)))
+            train_kps = vis_io.load_keypoints_h5(train_kp_h5, candidate_ids)
+            train_descs = vis_io.load_descriptors_h5(train_desc_h5, candidate_ids)
+            match_info = []
+            for cid, score in zip(candidate_ids, scores_subset):
+                match_info.append({
+                    'train_id': cid,
+                    'score': 1.0 - score['distance'],
+                    'n_inliers': score['n_inliers'],
+                    'query_kp': q_kp,
+                    'train_kp': train_kps.get(cid, np.empty((0,2))),
+                    'query_desc': q_desc,
+                    'train_desc': train_descs.get(cid, np.empty((0,0))),
+                })
+            if candidate_ids:
+                vis_img, caption = vis_classification.visualize_top_matches(
+                    query_img, candidate_imgs, match_info, top_k=top_n
+                )
+                if vis_output_dir:
+                    os.makedirs(vis_output_dir, exist_ok=True)
+                    vis_io.save_image(f"{vis_output_dir}/{test_image_id}.png", vis_img)
         
         # Show running statistics every 10 images
         if (i + 1) % 10 == 0:
