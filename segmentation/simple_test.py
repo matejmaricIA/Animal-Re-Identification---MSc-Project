@@ -100,7 +100,8 @@ def medvednica_segment(image):
 SEGMENTERS = {
     'BelugaID': beluga_segment,
     'Giraffes': giraffe_segment,
-    'MedvednicaDS': medvednica_segment,
+    'roe_deer': medvednica_segment,
+    'wild_boar': medvednica_segment,
     'CowDataset': cow_segment,
     'IPanda50': ipanda_segment,
     'HyenaID2022': hyena_segment,

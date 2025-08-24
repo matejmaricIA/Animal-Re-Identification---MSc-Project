@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.987389659520807,
-    "top_n_accuracy": 0.9962168978562421,
+    "accuracy": 0.9899117276166457,
+    "top_n_accuracy": 0.9911727616645649,
     "classification_metrics": {
         "ATRW_0": {
             "precision": 1.0,
@@ -39,15 +39,15 @@
             "support": 5.0
         },
         "ATRW_105": {
-            "precision": 0.8333333333333334,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.9090909090909091,
+            "f1-score": 1.0,
             "support": 5.0
         },
         "ATRW_106": {
             "precision": 1.0,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "ATRW_108": {
@@ -183,9 +183,9 @@
             "support": 2.0
         },
         "ATRW_141": {
-            "precision": 0.8,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.8888888888888888,
+            "f1-score": 0.8,
             "support": 4.0
         },
         "ATRW_142": {
@@ -196,8 +196,8 @@
         },
         "ATRW_144": {
             "precision": 1.0,
-            "recall": 0.8571428571428571,
-            "f1-score": 0.9230769230769231,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.8333333333333334,
             "support": 7.0
         },
         "ATRW_145": {
@@ -388,8 +388,8 @@
         },
         "ATRW_189": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
             "support": 3.0
         },
         "ATRW_19": {
@@ -465,9 +465,9 @@
             "support": 4.0
         },
         "ATRW_207": {
-            "precision": 1.0,
+            "precision": 0.6,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.75,
             "support": 3.0
         },
         "ATRW_208": {
@@ -873,9 +873,9 @@
             "support": 2.0
         },
         "ATRW_6": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "ATRW_60": {
@@ -922,14 +922,14 @@
         },
         "ATRW_7": {
             "precision": 1.0,
-            "recall": 0.7142857142857143,
-            "f1-score": 0.8333333333333334,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 7.0
         },
         "ATRW_70": {
             "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 4.0
         },
         "ATRW_72": {
@@ -957,9 +957,9 @@
             "support": 2.0
         },
         "ATRW_79": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 4.0
         },
         "ATRW_81": {
@@ -1046,19 +1046,19 @@
             "f1-score": 1.0,
             "support": 6.0
         },
-        "accuracy": 0.987389659520807,
+        "accuracy": 0.9899117276166457,
         "macro avg": {
-            "precision": 0.9849616858237548,
-            "recall": 0.9822112753147235,
-            "f1-score": 0.9811530104633552,
+            "precision": 0.9876436781609197,
+            "recall": 0.9839901477832512,
+            "f1-score": 0.9834266308404239,
             "support": 793.0
         },
         "weighted avg": {
-            "precision": 0.9904791929382094,
-            "recall": 0.987389659520807,
-            "f1-score": 0.987195584295206,
+            "precision": 0.9922866750735603,
+            "recall": 0.9899117276166457,
+            "f1-score": 0.9894496214168346,
             "support": 793.0
         }
     },
-    "eval_runtime_sec": 914.9353306293488
+    "eval_runtime_sec": 522.7470128536224
 }

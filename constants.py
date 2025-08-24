@@ -53,7 +53,7 @@ TMP = './data/tmp/'
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
 COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results_ensamble_global_embedding.xlsx'
-EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_grid_search_final.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_grid_search_final_new.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 
@@ -70,7 +70,7 @@ POOR_GEOMETRY_PENALTY = 5.0     # Penalty multiplier for poor geometric consiste
 FISHER_DISTANCE_MIN_CLAMP = 0.01     # Minimum clamp value for Fisher distance
 FISHER_DISTANCE_MAX_CLAMP = 1.0      # Maximum clamp value for Fisher distance
 NORMALIZED_THRESHOLD_DIVISOR = 100.0 # Divisor for normalizing RANSAC threshold
-GEOMETRIC_CANDIDATES = 50
+GEOMETRIC_CANDIDATES = 10
 
 # Geometric Verification Method Selection
 GV_METHOD = "RANSAC"  # Options: "RANSAC" or "MAGSAC"
