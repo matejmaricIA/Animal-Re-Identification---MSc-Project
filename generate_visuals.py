@@ -82,10 +82,10 @@ def main(dataset: str, method: str, seg_tag: str | None, query_id: str | None, o
     cand_img = io.load_image(cand_path)
 
     # load keypoints and descriptors
-    q_kp = io.load_keypoints_h5(test_kp_h5, [query_id]).get(query_id)
-    q_desc = io.load_descriptors_h5(test_desc_h5, [query_id]).get(query_id)
-    t_kp = io.load_keypoints_h5(train_kp_h5, [candidate_id]).get(candidate_id)
-    t_desc = io.load_descriptors_h5(train_desc_h5, [candidate_id]).get(candidate_id)
+    q_kp = io.load_keypoints_h5(test_kp_h5, [query_id]).get(str(query_id))
+    q_desc = io.load_descriptors_h5(test_desc_h5, [query_id]).get(str(query_id))
+    t_kp = io.load_keypoints_h5(train_kp_h5, [candidate_id]).get(str(candidate_id))
+    t_desc = io.load_descriptors_h5(train_desc_h5, [candidate_id]).get(str(candidate_id))
 
     if q_kp is None or q_desc is None:
         raise ValueError(f"Features for query ID {query_id} not found in HDF5 stores")
