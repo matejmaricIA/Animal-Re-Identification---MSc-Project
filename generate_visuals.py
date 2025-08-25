@@ -13,13 +13,14 @@ import os
 import random
 from typing import Dict, List
 
+import cv2
 import h5py
 import pandas as pd
 
 from constants import DATAFRAME_PATH, ROOT_DIR
 from feature_aggregation import descriptor_dir
 from feature_extraction import get_segmentation_tag
-from visualization_suite import descriptors as vis_desc, io, keypoints
+from visualization_suite import descriptors as vis_desc, io, keypoints, matching
 
 
 def build_paths(dataset: str, method: str, seg_tag: str | None):
@@ -98,22 +99,34 @@ def visualise_images(
     seg_tags = ["unsegmented", "segmented"]
     paths: Dict[str, Dict[str, str]] = {}
     for tag in seg_tags:
-        _, test_desc_h5, _, test_kp_h5, image_root = build_paths(dataset, method, tag)
+        train_desc_h5, test_desc_h5, train_kp_h5, test_kp_h5, image_root = build_paths(
+            dataset, method, tag
+        )
         paths[tag] = {
-            "desc": test_desc_h5,
-            "kp": test_kp_h5,
+            "train_desc": train_desc_h5,
+            "test_desc": test_desc_h5,
+            "train_kp": train_kp_h5,
+            "test_kp": test_kp_h5,
             "img_root": image_root,
         }
 
     os.makedirs(out_dir, exist_ok=True)
 
     # determine ids present in both segmented and unsegmented stores
-    sample_ids = sample_image_ids({t: p["desc"] for t, p in paths.items()}, num_images)
+    sample_ids = sample_image_ids(
+        {t: p["test_desc"] for t, p in paths.items()}, num_images
+    )
 
     df = pd.read_csv(DATAFRAME_PATH.format(dataset))
     id_to_identity = {
         str(row.image_id): row.identity for row in df.itertuples()
     }
+    train_ids_by_identity: Dict[str, List[str]] = {}
+    for row in df.itertuples():
+        if getattr(row, "split", None) == "train":
+            train_ids_by_identity.setdefault(str(row.identity), []).append(
+                str(row.image_id)
+            )
 
     for img_id in sample_ids:
         identity = id_to_identity.get(str(img_id))
@@ -121,30 +134,66 @@ def visualise_images(
             # skip if identity is unknown
             continue
 
+        train_ids = train_ids_by_identity.get(str(identity))
+        if not train_ids:
+            continue
+        train_img_id = random.choice(train_ids)
+
         for tag in seg_tags:
             tag_dir = os.path.join(out_dir, tag)
             os.makedirs(tag_dir, exist_ok=True)
 
-            img_path = os.path.join(paths[tag]["img_root"], identity, f"{img_id}.jpg")
-            if not os.path.exists(img_path):
+            q_img_path = os.path.join(paths[tag]["img_root"], identity, f"{img_id}.jpg")
+            t_img_path = os.path.join(paths[tag]["img_root"], identity, f"{train_img_id}.jpg")
+            if not os.path.exists(q_img_path) or not os.path.exists(t_img_path):
                 continue
 
-            image = io.load_image(img_path)
-            kp = io.load_keypoints_h5(paths[tag]["kp"], [img_id]).get(str(img_id))
-            desc = io.load_descriptors_h5(paths[tag]["desc"], [img_id]).get(str(img_id))
+            q_img = io.load_image(q_img_path)
+            t_img = io.load_image(t_img_path)
 
-            if kp is None or desc is None or len(kp) == 0 or len(desc) == 0:
+            q_kp = io.load_keypoints_h5(paths[tag]["test_kp"], [img_id]).get(str(img_id))
+            q_desc = io.load_descriptors_h5(paths[tag]["test_desc"], [img_id]).get(str(img_id))
+            t_kp = io.load_keypoints_h5(paths[tag]["train_kp"], [train_img_id]).get(
+                str(train_img_id)
+            )
+            t_desc = io.load_descriptors_h5(paths[tag]["train_desc"], [train_img_id]).get(
+                str(train_img_id)
+            )
+
+            if (
+                q_kp is None
+                or q_desc is None
+                or t_kp is None
+                or t_desc is None
+                or len(q_kp) == 0
+                or len(q_desc) == 0
+                or len(t_kp) == 0
+                or len(t_desc) == 0
+            ):
                 continue
 
-            if max_keypoints and len(kp) > max_keypoints:
-                kp = kp[:max_keypoints]
-                desc = desc[:max_keypoints]
+            if max_keypoints:
+                if len(q_kp) > max_keypoints:
+                    q_kp = q_kp[:max_keypoints]
+                    q_desc = q_desc[:max_keypoints]
+                if len(t_kp) > max_keypoints:
+                    t_kp = t_kp[:max_keypoints]
+                    t_desc = t_desc[:max_keypoints]
 
-            kp_vis, _ = keypoints.draw_keypoints(image, kp)
+            # Save keypoints and descriptor visualisations for the query image
+            kp_vis, _ = keypoints.draw_keypoints(q_img, q_kp)
             io.save_image(os.path.join(tag_dir, f"{img_id}_keypoints.png"), kp_vis)
 
-            desc_vis, _ = vis_desc.visualize_descriptor(desc[0])
+            desc_vis, _ = vis_desc.visualize_descriptor(q_desc[0])
             io.save_image(os.path.join(tag_dir, f"{img_id}_descriptor.png"), desc_vis)
+
+            # Match descriptors and save visualisation
+            matcher = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+            matches = matcher.match(q_desc, t_desc)
+            match_vis, _ = matching.draw_matches(q_img, q_kp, t_img, t_kp, matches)
+            io.save_image(
+                os.path.join(tag_dir, f"{img_id}_{train_img_id}_matches.png"), match_vis
+            )
 
     print(f"Visualisations saved to '{out_dir}'")
 
