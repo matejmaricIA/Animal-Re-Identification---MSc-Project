@@ -16,7 +16,7 @@ from feature_aggregation import (
 from predict import classify_test_images_with_geometric_verification
 from evaluate import evaluate_predictions
 from utility_functions import load_dataset, save_count_results
-from constants import MAX_GMM_DESCRIPTORS, ENABLE_MULTISCALE, EVAL_RESULTS_XLSX, MAX_DESCRIPTORS_PER_IMAGE, WILD_DATASET_PATH
+from constants import MAX_GMM_DESCRIPTORS, EVAL_RESULTS_XLSX, MAX_DESCRIPTORS_PER_IMAGE, WILD_DATASET_PATH
 import numpy as np
 
 def optimise_dataset(dataset: str, trials: int = 50):
@@ -136,7 +136,6 @@ def optimise_dataset(dataset: str, trials: int = 50):
                 "Min Inliers": min_inliers,
                 "Inlier Threshold": inlier_threshold,
                 "MAX GMM Descriptors (per image)": MAX_DESCRIPTORS_PER_IMAGE,
-                "Multiscale Enabled": ENABLE_MULTISCALE,
                 "Run Time (minutes)": round(metrics["eval_runtime_sec"] / 60, 2),
                 "Accuracy": round(float(metrics["accuracy"]), 4),
                 "Top-5 Accuracy": round(float(metrics["top_n_accuracy"]), 4),

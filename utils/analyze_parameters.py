@@ -12,7 +12,7 @@ def analyze_hyperparameter_results(file_path='../evaluations/classification/clas
     # Define the parameter columns that were optimized
     param_columns = [
         'Dataset', 'GMM Components', 'PCA Components', 'Use GV', 'Alpha (fv sim - gv)',
-        'Geom. Candidates', 'Min Inliers', 'Inlier Threshold', 'Multiscale Enabled'
+        'Geom. Candidates', 'Min Inliers', 'Inlier Threshold'
     ]
     
     print("=== HYPERPARAMETER OPTIMIZATION ANALYSIS ===\n")
@@ -96,7 +96,6 @@ def analyze_hyperparameter_results(file_path='../evaluations/classification/clas
     print()
     print("**Universal Settings (used in all best combinations):**")
     print("  - Use GV: True")
-    print("  - Multiscale Enabled: False")
     print()
     print("**Recommended Parameter Ranges:**")
     print(f"  - GMM Components: {int(weighted_recommendations['GMM Components'])} (±100)")

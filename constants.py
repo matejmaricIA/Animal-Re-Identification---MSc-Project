@@ -83,10 +83,6 @@ SIGMOID_STEEPNESS = 0.1           # Controls sigmoid curve steepness
 SIGMOID_MIDPOINT = 20             # Midpoint for sigmoid scaling
 MAX_REASONABLE_INLIERS = 50       # Expected maximum inliers for normalization
 
-# For multi-scaling
-MULTISCALE_SCALES = [0.75, 1.0, 1.25]
-MAX_FEATURES_PER_SCALE = 2000  # Limit features to control memory usage
-ENABLE_MULTISCALE = False  # Toggle for easy comparison with single-scale
 
 
 MAX_GMM_DESCRIPTORS = 2000000
