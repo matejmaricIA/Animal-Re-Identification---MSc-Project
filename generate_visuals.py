@@ -1,15 +1,25 @@
+"""Generate visualisations of randomly selected images.
+
+This script samples a number of images that have features stored in the
+``descriptors.h5`` files and creates keypoint and descriptor visualisations
+for both the segmented and unsegmented versions of the images.  Only the top
+keypoints/descriptors are shown to keep the images readable.
+"""
+
 from __future__ import annotations
 
 import argparse
 import os
+import random
+from typing import Dict, List
 
-import cv2
+import h5py
 import pandas as pd
 
 from constants import DATAFRAME_PATH, ROOT_DIR
 from feature_aggregation import descriptor_dir
 from feature_extraction import get_segmentation_tag
-from visualization_suite import descriptors as vis_desc, io, keypoints, matching
+from visualization_suite import descriptors as vis_desc, io, keypoints
 
 
 def build_paths(dataset: str, method: str, seg_tag: str | None):
@@ -46,81 +56,111 @@ def build_paths(dataset: str, method: str, seg_tag: str | None):
     return train_desc_h5, test_desc_h5, train_kp_h5, test_kp_h5, image_root
 
 
-def main(dataset: str, method: str, seg_tag: str | None, query_id: str | None, out_dir: str) -> None:
-    train_desc_h5, test_desc_h5, train_kp_h5, test_kp_h5, image_root = build_paths(
-        dataset, method, seg_tag
-    )
+def sample_image_ids(h5_paths: Dict[str, str], n: int) -> List[str]:
+    """Return ``n`` random image ids present in all ``h5_paths``."""
 
-    df = pd.read_csv(DATAFRAME_PATH.format(dataset))
-    train_df = df[df['split'] == 'train']
-    test_df = df[df['split'] == 'test']
+    key_sets = []
+    for path in h5_paths.values():
+        with h5py.File(path, "r") as f:
+            key_sets.append(set(f.keys()))
 
-    if query_id is None:
-        query_id = str(test_df.iloc[0]['image_id'])
+    common_ids = list(set.intersection(*key_sets)) if key_sets else []
+    if not common_ids:
+        raise ValueError("No common image ids found in provided HDF5 files")
 
-    # choose a training image with the same identity if possible
-    row = test_df[test_df['image_id'].astype(str) == str(query_id)]
-    if row.empty:
-        raise ValueError(f"Query ID {query_id} not found in test split")
-    query_identity = row['identity'].iloc[0]
-    cand_df = train_df[train_df['identity'] == query_identity]
-    if cand_df.empty:
-        cand_row = train_df.iloc[0]
-    else:
-        cand_row = cand_df.iloc[0]
-    candidate_id = str(cand_row['image_id'])
-    candidate_identity = cand_row['identity']
+    n = min(n, len(common_ids))
+    return random.sample(common_ids, n)
 
-    # load images from identity subfolders
-    query_path = os.path.join(image_root, query_identity, f"{query_id}.jpg")
-    cand_path = os.path.join(image_root, candidate_identity, f"{candidate_id}.jpg")
-    if not os.path.exists(query_path):
-        raise FileNotFoundError(query_path)
-    if not os.path.exists(cand_path):
-        raise FileNotFoundError(cand_path)
-    query_img = io.load_image(query_path)
-    cand_img = io.load_image(cand_path)
 
-    # load keypoints and descriptors
-    q_kp = io.load_keypoints_h5(test_kp_h5, [query_id]).get(str(query_id))
-    q_desc = io.load_descriptors_h5(test_desc_h5, [query_id]).get(str(query_id))
-    t_kp = io.load_keypoints_h5(train_kp_h5, [candidate_id]).get(str(candidate_id))
-    t_desc = io.load_descriptors_h5(train_desc_h5, [candidate_id]).get(str(candidate_id))
+def visualise_images(
+    dataset: str,
+    method: str,
+    out_dir: str,
+    num_images: int = 5,
+    max_keypoints: int = 100,
+) -> None:
+    """Create visualisations for randomly chosen images.
 
-    if q_kp is None or q_desc is None:
-        raise ValueError(f"Features for query ID {query_id} not found in HDF5 stores")
-    if t_kp is None or t_desc is None:
-        raise ValueError(f"Features for candidate ID {candidate_id} not found in HDF5 stores")
+    Parameters
+    ----------
+    dataset : str
+        Dataset name (e.g. ``ATRW``).
+    method : str
+        Feature extraction method.
+    out_dir : str
+        Directory where the visualisations will be written.
+    num_images : int, optional
+        Number of random images to draw.
+    max_keypoints : int, optional
+        Only the top ``max_keypoints`` keypoints/descriptors are displayed.
+    """
+
+    seg_tags = ["unsegmented", "segmented"]
+    paths: Dict[str, Dict[str, str]] = {}
+    for tag in seg_tags:
+        _, test_desc_h5, _, test_kp_h5, image_root = build_paths(dataset, method, tag)
+        paths[tag] = {
+            "desc": test_desc_h5,
+            "kp": test_kp_h5,
+            "img_root": image_root,
+        }
 
     os.makedirs(out_dir, exist_ok=True)
 
-    # visualise keypoints
-    q_kp_vis, _ = keypoints.draw_keypoints(query_img, q_kp)
-    io.save_image(os.path.join(out_dir, f"{query_id}_keypoints.png"), q_kp_vis)
-    t_kp_vis, _ = keypoints.draw_keypoints(cand_img, t_kp)
-    io.save_image(os.path.join(out_dir, f"{candidate_id}_keypoints.png"), t_kp_vis)
+    # determine ids present in both segmented and unsegmented stores
+    sample_ids = sample_image_ids({t: p["desc"] for t, p in paths.items()}, num_images)
 
-    # visualise first descriptor of the query image
-    desc_vis, _ = vis_desc.visualize_descriptor(q_desc[0])
-    io.save_image(os.path.join(out_dir, f"{query_id}_descriptor.png"), desc_vis)
+    df = pd.read_csv(DATAFRAME_PATH.format(dataset))
+    id_to_identity = {
+        str(row.image_id): row.identity for row in df.itertuples()
+    }
 
-    # match and visualise correspondences
-    norm = cv2.NORM_HAMMING if q_desc.dtype == 'uint8' else cv2.NORM_L2
-    matcher = cv2.BFMatcher(norm, crossCheck=True)
-    matches = matcher.match(q_desc, t_desc)
-    match_vis, _ = matching.draw_matches(query_img, q_kp, cand_img, t_kp, matches)
-    io.save_image(os.path.join(out_dir, f"{query_id}_matches.png"), match_vis)
+    for img_id in sample_ids:
+        identity = id_to_identity.get(str(img_id))
+        if identity is None:
+            # skip if identity is unknown
+            continue
+
+        for tag in seg_tags:
+            tag_dir = os.path.join(out_dir, tag)
+            os.makedirs(tag_dir, exist_ok=True)
+
+            img_path = os.path.join(paths[tag]["img_root"], identity, f"{img_id}.jpg")
+            if not os.path.exists(img_path):
+                continue
+
+            image = io.load_image(img_path)
+            kp = io.load_keypoints_h5(paths[tag]["kp"], [img_id]).get(str(img_id))
+            desc = io.load_descriptors_h5(paths[tag]["desc"], [img_id]).get(str(img_id))
+
+            if kp is None or desc is None or len(kp) == 0 or len(desc) == 0:
+                continue
+
+            if max_keypoints and len(kp) > max_keypoints:
+                kp = kp[:max_keypoints]
+                desc = desc[:max_keypoints]
+
+            kp_vis, _ = keypoints.draw_keypoints(image, kp)
+            io.save_image(os.path.join(tag_dir, f"{img_id}_keypoints.png"), kp_vis)
+
+            desc_vis, _ = vis_desc.visualize_descriptor(desc[0])
+            io.save_image(os.path.join(tag_dir, f"{img_id}_descriptor.png"), desc_vis)
 
     print(f"Visualisations saved to '{out_dir}'")
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Generate example visualisations')
-    parser.add_argument('--dataset', default='ATRW', help='Dataset name')
-    parser.add_argument('--method', default='disk', help='Feature extraction method')
-    parser.add_argument('--seg_tag', help='Segmentation tag (e.g. segmented or unsegmented)')
-    parser.add_argument('--query_id', help='Test image identifier')
-    parser.add_argument('--out_dir', default='visualizations', help='Output directory')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate random visualisations")
+    parser.add_argument("--dataset", default="ATRW", help="Dataset name")
+    parser.add_argument("--method", default="disk", help="Feature extraction method")
+    parser.add_argument("--out_dir", default="visualizations", help="Output directory")
+    parser.add_argument("--num_images", type=int, default=5, help="Number of images to sample")
+    parser.add_argument(
+        "--max_keypoints", type=int, default=100, help="Maximum keypoints to display"
+    )
     args = parser.parse_args()
 
-    main(args.dataset, args.method, args.seg_tag, args.query_id, args.out_dir)
+    visualise_images(
+        args.dataset, args.method, args.out_dir, args.num_images, args.max_keypoints
+    )
+
