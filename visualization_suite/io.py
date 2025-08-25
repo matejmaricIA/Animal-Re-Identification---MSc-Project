@@ -44,10 +44,8 @@ def bgr_to_rgb(image: np.ndarray) -> np.ndarray:
 def fig_to_image(fig) -> np.ndarray:
     """Convert a matplotlib figure to a BGR ``numpy.ndarray``."""
     fig.canvas.draw()
-    data = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-    w, h = fig.canvas.get_width_height()
-    data = data.reshape((h, w, 3))
-    return cv2.cvtColor(data, cv2.COLOR_RGB2BGR)
+    rgba = np.asarray(fig.canvas.buffer_rgba())
+    return cv2.cvtColor(rgba, cv2.COLOR_RGBA2BGR)
 
 
 def load_keypoints_h5(h5_path: str, ids: Sequence[str]) -> Dict[str, np.ndarray]:
