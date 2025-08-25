@@ -19,8 +19,12 @@ import numpy as np
 from kornia.feature import KeyNetAffNetHardNet
 import kornia as K
 
-from constants import (MODEL_PATH, DATAFRAME_PATH, DEVICE, SAVE_TEST_DESCRIPTORS_PATH, SAVE_TRAIN_DESCRIPTORS_PATH,
- PATCH_SIZE, MULTISCALE_SCALES, MAX_FEATURES_PER_SCALE, ENABLE_MULTISCALE, MAX_KEYPOINTS)
+from constants import (
+    MODEL_PATH,
+    DATAFRAME_PATH,
+    SAVE_TEST_DESCRIPTORS_PATH,
+    MAX_KEYPOINTS,
+)
 
 try:
     import lightglue
@@ -31,7 +35,6 @@ try:
 except Exception:
     _LIGHTGLUE_AVAILABLE = False
 
-import torch.nn.functional as F
 
 
 def get_segmentation_tag(remove_background: bool) -> str:
@@ -84,7 +87,7 @@ def get_image_paths(df, remove_background = True):
 
 
 def extract_features(image_paths, model_path, output_dir, max_keypoints=MAX_KEYPOINTS):
-    """Extract DISK features with optional multi-scale support."""
+    """Extract DISK features."""
 
     if _LIGHTGLUE_AVAILABLE:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -99,48 +102,21 @@ def extract_features(image_paths, model_path, output_dir, max_keypoints=MAX_KEYP
                 img_id = Path(img_path).stem
                 image = load_image(img_path).to(device)
 
-                desc_list = []
-                kp_list = []
-                scales = MULTISCALE_SCALES if ENABLE_MULTISCALE else [1.0]
-                for scale in scales:
-                    if scale != 1.0:
-                        scaled = F.interpolate(image.unsqueeze(0), scale_factor=scale, mode="bilinear", align_corners=False).squeeze(0)
-                    else:
-                        scaled = image
+                with torch.inference_mode():
+                    try:
+                        feats = extractor.extract(image)
+                    except Exception as e:
+                        print(f"Error extracting features for {img_path}: {e}")
+                        continue
 
-                    with torch.inference_mode():
-                        try:
-                            feats = extractor.extract(scaled)
-                        except Exception as e:
-                            print(f"Error extracting features for {img_path}: {e}")
-                            continue
-                        #print(feats.keys())
+                desc = feats["descriptors"]
+                kp = feats["keypoints"]
+                if len(desc.shape) == 3:
+                    desc = desc.squeeze(0)
+                    kp = kp.squeeze(0)
 
-                        desc = feats["descriptors"]
-                        kp = feats["keypoints"]
-                        if len(desc.shape) == 3:
-                            desc = desc.squeeze(0)
-                            kp = kp.squeeze(0)
-
-                        
-
-                        desc_np = desc.cpu().numpy().astype(np.float32)
-                        kp_np = kp.cpu().numpy().astype(np.float32)
-                        if scale != 1.0:
-                            kp_np /= scale
-
-                        if desc_np.shape[0] > MAX_FEATURES_PER_SCALE:
-                            desc_np = desc_np[:MAX_FEATURES_PER_SCALE]
-                            kp_np = kp_np[:MAX_FEATURES_PER_SCALE]
-
-                        desc_list.append(desc_np)
-                        kp_list.append(kp_np)
-
-                if not desc_list:
-                    continue
-
-                desc_np = np.concatenate(desc_list, axis=0)
-                kp_np = np.concatenate(kp_list, axis=0)
+                desc_np = desc.cpu().numpy().astype(np.float32)
+                kp_np = kp.cpu().numpy().astype(np.float32)
 
                 desc_h5.create_dataset(img_id, data=desc_np, compression="gzip")
                 kp_h5.create_dataset(img_id, data=kp_np, compression="gzip")
