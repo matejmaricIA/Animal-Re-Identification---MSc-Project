@@ -68,9 +68,22 @@ def load_keypoints_h5(h5_path: str, ids: Sequence[str]) -> Dict[str, np.ndarray]
     """
     data: Dict[str, np.ndarray] = {}
     with h5py.File(h5_path, "r") as f:
+        # Determine zero-padding length from any existing key (if numeric)
+        pad_len = None
+        keys = list(f.keys())
+        if keys:
+            sample_key = keys[0]
+            if sample_key.isdigit():
+                pad_len = len(sample_key)
+
         for image_id in ids:
-            if image_id in f:
-                data[image_id] = np.array(f[image_id])
+            key = str(image_id)
+            if key not in f and pad_len and key.isdigit():
+                key = key.zfill(pad_len)
+            if key in f:
+                # Store under the original id (as string) so callers can use
+                # their provided identifier regardless of padding.
+                data[str(image_id)] = np.array(f[key])
     return data
 
 
@@ -78,7 +91,17 @@ def load_descriptors_h5(h5_path: str, ids: Sequence[str]) -> Dict[str, np.ndarra
     """Load descriptors for ``ids`` from an HDF5 file."""
     data: Dict[str, np.ndarray] = {}
     with h5py.File(h5_path, "r") as f:
+        pad_len = None
+        keys = list(f.keys())
+        if keys:
+            sample_key = keys[0]
+            if sample_key.isdigit():
+                pad_len = len(sample_key)
+
         for image_id in ids:
-            if image_id in f:
-                data[image_id] = np.array(f[image_id])
+            key = str(image_id)
+            if key not in f and pad_len and key.isdigit():
+                key = key.zfill(pad_len)
+            if key in f:
+                data[str(image_id)] = np.array(f[key])
     return data
