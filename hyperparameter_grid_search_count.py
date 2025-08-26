@@ -9,12 +9,12 @@ import pandas as pd
 from constants import COUNT_RESULTS_XLSX
 
 # Datasets to evaluate
-datasets = ["ATRW"]
+datasets = ["NyalaData"]
 
 # Parameter grid for count mode experiments
 PARAM_GRID: Dict[str, List] = {
-    "num_vertices": [250, 750],
-    "num_neighbors": [250, 750],
+    "num_vertices": [50, 200, 500, 700],
+    "num_neighbors": [50, 200, 500, 700],
     "use_fisher": [True],
     "use_global_embedding": [True],
     "w_fisher": [3.0],
@@ -22,6 +22,7 @@ PARAM_GRID: Dict[str, List] = {
     "gv_threshold": [0.95],
     "use_geometric_verification": [True],
     "embedding_model": ["megadescriptor-l-384"],
+    "remove_background": [False, True],
 }
 
 METHOD = "ensamble"
@@ -30,26 +31,21 @@ METHOD = "ensamble"
 def run_main(dataset: str, cfg: Dict, seed: int) -> None:
     """Execute main.py in count mode with the provided configuration."""
     cmd = [
-        "python",
-        "main.py",
-        "--count",
-        "--save_count",
-        "--ds",
-        dataset,
-        "--method",
-        METHOD,
-        "--num_vertices",
-        str(cfg["num_vertices"]),
-        "--num_neighbors",
-        str(cfg["num_neighbors"]),
-        "--gv_threshold",
-        str(cfg["gv_threshold"]),
-        "--seed",
-        str(seed),
+        "python", "main.py", "--count", "--save_count",
+        "--ds", dataset, "--method", METHOD,
+        "--num_vertices", str(cfg["num_vertices"]),
+        "--num_neighbors", str(cfg["num_neighbors"]),
+        "--gv_threshold", str(cfg["gv_threshold"]),
+        "--seed", str(seed),
     ]
+
+    if cfg.get("remove_background", False):
+        cmd.append("--remove_background")
 
     if cfg.get("use_geometric_verification", False):
         cmd.append("--use_geometric_verification")
+        cmd.append("--use_lightglue")
+        cmd.append("--automated_mode")
 
     if cfg.get("use_fisher", True):
         cmd.append("--use_fisher")
@@ -68,11 +64,7 @@ def run_main(dataset: str, cfg: Dict, seed: int) -> None:
 def build_configs() -> List[Dict]:
     keys = list(PARAM_GRID.keys())
     values = [PARAM_GRID[k] for k in keys]
-    configs = []
-    for combo in product(*values):
-        cfg = dict(zip(keys, combo))
-        configs.append(cfg)
-    return configs
+    return [dict(zip(keys, combo)) for combo in product(*values)]
 
 
 def aggregate_runs(start_idx: int, n_runs: int) -> pd.DataFrame:
@@ -86,10 +78,7 @@ def main(n_runs: int, base_seed: int) -> None:
 
     for dataset in datasets:
         for cfg in configs:
-            if os.path.exists(COUNT_RESULTS_XLSX):
-                start_idx = len(pd.read_excel(COUNT_RESULTS_XLSX))
-            else:
-                start_idx = 0
+            start_idx = len(pd.read_excel(COUNT_RESULTS_XLSX)) if os.path.exists(COUNT_RESULTS_XLSX) else 0
 
             for i in range(n_runs):
                 seed = base_seed + i
@@ -101,8 +90,14 @@ def main(n_runs: int, base_seed: int) -> None:
             se_mean = new_rows["Std Error"].mean()
             gt = new_rows["Ground Truth"].iloc[0] if not new_rows.empty else float("nan")
 
-            summary = {"Dataset": dataset, **cfg, "Estimate Mean": est_mean, "Estimate Std": est_std,
-                       "Std Error Mean": se_mean, "Ground Truth": gt}
+            summary = {
+                "Dataset": dataset,
+                **cfg,
+                "Estimate Mean": est_mean,
+                "Estimate Std": est_std,
+                "Std Error Mean": se_mean,
+                "Ground Truth": gt,
+            }
             summary_rows.append(summary)
 
     summary_df = pd.DataFrame(summary_rows)

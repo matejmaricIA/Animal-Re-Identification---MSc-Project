@@ -200,12 +200,12 @@ def visualise_images(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate random visualisations")
-    parser.add_argument("--dataset", default="ATRW", help="Dataset name")
-    parser.add_argument("--method", default="disk", help="Feature extraction method")
+    parser.add_argument("--dataset", default="BelugaID", help="Dataset name")
+    parser.add_argument("--method", default="keynet_hardnet", help="Feature extraction method")
     parser.add_argument("--out_dir", default="visualizations", help="Output directory")
-    parser.add_argument("--num_images", type=int, default=5, help="Number of images to sample")
+    parser.add_argument("--num_images", type=int, default=50, help="Number of images to sample")
     parser.add_argument(
-        "--max_keypoints", type=int, default=100, help="Maximum keypoints to display"
+        "--max_keypoints", type=int, default=20, help="Maximum keypoints to display"
     )
     args = parser.parse_args()
 

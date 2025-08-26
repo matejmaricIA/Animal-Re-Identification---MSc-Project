@@ -1,5 +1,5 @@
 {
-    "accuracy": 0.9899117276166457,
+    "accuracy": 0.987389659520807,
     "top_n_accuracy": 0.9949558638083228,
     "classification_metrics": {
         "ATRW_0": {
@@ -183,9 +183,9 @@
             "support": 2.0
         },
         "ATRW_141": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 4.0
         },
         "ATRW_142": {
@@ -196,8 +196,8 @@
         },
         "ATRW_144": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.8333333333333334,
             "support": 7.0
         },
         "ATRW_145": {
@@ -1046,19 +1046,19 @@
             "f1-score": 1.0,
             "support": 6.0
         },
-        "accuracy": 0.9899117276166457,
+        "accuracy": 0.987389659520807,
         "macro avg": {
-            "precision": 0.9840038314176245,
-            "recall": 0.978927203065134,
-            "f1-score": 0.9791046756563998,
+            "precision": 0.9820881226053639,
+            "recall": 0.9772851669403393,
+            "f1-score": 0.9769973959629132,
             "support": 793.0
         },
         "weighted avg": {
-            "precision": 0.990899537620849,
-            "recall": 0.9899117276166457,
-            "f1-score": 0.9891776711448842,
+            "precision": 0.9892181588902901,
+            "recall": 0.987389659520807,
+            "f1-score": 0.9866976375173095,
             "support": 793.0
         }
     },
-    "eval_runtime_sec": 307.49713802337646
+    "eval_runtime_sec": 336.65264439582825
 }

@@ -1,5 +1,5 @@
 {
-    "accuracy": 0.9911727616645649,
+    "accuracy": 0.9886506935687264,
     "top_n_accuracy": 0.9911727616645649,
     "classification_metrics": {
         "ATRW_0": {
@@ -423,9 +423,9 @@
             "support": 2.0
         },
         "ATRW_196": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 2.0
         },
         "ATRW_198": {
@@ -447,9 +447,9 @@
             "support": 3.0
         },
         "ATRW_202": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "ATRW_204": {
@@ -459,9 +459,9 @@
             "support": 3.0
         },
         "ATRW_205": {
-            "precision": 1.0,
+            "precision": 0.8,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8888888888888888,
             "support": 4.0
         },
         "ATRW_207": {
@@ -1046,19 +1046,19 @@
             "f1-score": 1.0,
             "support": 6.0
         },
-        "accuracy": 0.9911727616645649,
+        "accuracy": 0.9886506935687264,
         "macro avg": {
-            "precision": 0.989080459770115,
-            "recall": 0.986863711001642,
-            "f1-score": 0.9861633577150817,
+            "precision": 0.9807471264367816,
+            "recall": 0.9811165845648605,
+            "f1-score": 0.9789566436118159,
             "support": 793.0
         },
         "weighted avg": {
-            "precision": 0.9932324506094998,
-            "recall": 0.9911727616645649,
-            "f1-score": 0.990830753945508,
+            "precision": 0.9887557797393862,
+            "recall": 0.9886506935687264,
+            "f1-score": 0.9872077831094226,
             "support": 793.0
         }
     },
-    "eval_runtime_sec": 306.7007439136505
+    "eval_runtime_sec": 340.60383105278015
 }

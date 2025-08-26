@@ -1,0 +1,1502 @@
+{
+    "accuracy": 0.8004201680672269,
+    "top_n_accuracy": 0.8781512605042017,
+    "classification_metrics": {
+        "HyenaID2022_02e5fbda-3d57-4b0a-be41-2b151ac1ff30": {
+            "precision": 0.9,
+            "recall": 1.0,
+            "f1-score": 0.9473684210526315,
+            "support": 9.0
+        },
+        "HyenaID2022_02f49469-a41a-4829-b9b5-33b9f6f24a88": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_0469ca59-fa1d-4e41-9885-f797f7b6670b": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_06569257-d4a3-45a1-af58-688cb9a7bf5a": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_06fed4b8-bd2d-4410-a9b5-84f030997d01": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_08626c7e-f14d-4a22-8b38-f8474c0196de": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "HyenaID2022_0965523b-f66a-4413-99b4-c7483c3cfd27": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_0a5cd6a9-b021-4725-acca-6d5b257d2e67": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_0b85b8c4-5ea9-46bd-8ba2-86ee385b1eb3": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_0d234988-cf58-4e62-b45b-4f23b54b1f2a": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_0de12031-f35f-41d5-aced-5ea6ba6e1236": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_0e0b6c85-b5d2-479d-93b1-ee4fbea7f463": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_0eac9e8c-6604-4224-8017-7552aea6cf42": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_0fe176d4-93fd-4d08-b0fa-a5c571579188": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_10d0c599-86ff-4965-a23b-4cd1c951768c": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "HyenaID2022_11ae9785-7d82-4bd6-8ce9-e94ed362c23f": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_1220f464-0f56-455a-891b-98e895b73bae": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_126523de-9fe0-4630-8fb3-256a723adb4a": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_12a16fc6-0581-4276-9dc4-ffe7d8c13617": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "HyenaID2022_143bf01f-d0f1-4ec9-bedd-ad0aa26e0cc2": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_160e1683-7837-43ea-8ce7-755d101c419c": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "HyenaID2022_18d82d10-7fdf-4306-9fe7-73a7f6152e53": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_1ad6ea04-7e16-4875-aeb8-d088f5ac7325": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_1b72f52c-12ba-43bb-8b2f-64975becab88": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_1b7c302c-68ae-46a7-b18e-a97d342081a9": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_1c6b6027-329e-4703-9580-bbf1e8a08647": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_1da24c9f-d62d-48a6-81b9-afbdc5c0e7af": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
+            "support": 4.0
+        },
+        "HyenaID2022_1e5eea5f-ede8-4660-9314-5b3e53b2cfcc": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_1ec97520-1eae-4b9e-9f5c-1f181a8daf3a": {
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1-score": 0.75,
+            "support": 3.0
+        },
+        "HyenaID2022_1ff8ad98-b860-4de4-ba7d-9c0177c44bab": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_20086390-26ac-4539-9130-b31b9d993672": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_204b687d-7113-4c69-95a9-6d40ef0e59e8": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_20c4e967-97c4-4546-b7ca-6b57b6f4c19a": {
+            "precision": 0.4,
+            "recall": 1.0,
+            "f1-score": 0.5714285714285714,
+            "support": 2.0
+        },
+        "HyenaID2022_20e1204f-ae7b-4297-b578-ef07ac24829a": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_21ff4f8a-be18-46de-872c-c10cd153631a": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_23784095-dc48-48a0-8326-9340074ab4d1": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_238a48f4-e86d-42d8-a18a-ae526e48f5c4": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 5.0
+        },
+        "HyenaID2022_23950465-b1cb-4e7e-a861-b18ce82aac55": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_2434dcf2-9360-46ae-b7be-96de59209f91": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_248353ce-530e-4dea-97c7-31f6029b2088": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_249a4d40-2256-444e-a4d5-68209d8d134d": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_252b0d87-abfc-4622-b3b6-2c815900026f": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_280baaed-937b-4984-b7af-3ab6cefd61f9": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_281d2f9c-e9d9-4125-9ecf-e5fd4c4f9fa0": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_2b13d5a4-831c-4c87-8294-4b0c61541e3b": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_2b733eca-99a6-482f-b57f-567970a2e8dd": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_2c44f7c6-44e5-4d34-9304-7807962aa038": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_2c47b308-3b61-45db-b6fd-f1560b32f358": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 9.0
+        },
+        "HyenaID2022_2d191ce6-09a1-427e-b32c-4001038057c3": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_2db6e83c-f316-45ea-9a60-b1fc2482a2f8": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_2f698ae6-cb0a-44e4-b813-ebd2faf0af13": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_306f89ef-3312-4218-8c1c-59f94f3fc32c": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_3347e8b1-1d84-412a-8e3f-5b0c146f9b95": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_34365bcc-5b2d-4f80-b721-ef7039e64fe8": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 12.0
+        },
+        "HyenaID2022_36fe7f0d-eb06-416e-b9c3-0387b970ccc9": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_3772d75f-1801-4307-a18f-5fbcc1c10897": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_3975753d-27c1-4733-ac0e-a547772c331c": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_39e2a478-dfec-4851-be25-af197a3d183f": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_3a43347c-9ad1-47aa-969b-843ce5a0eac7": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
+            "support": 2.0
+        },
+        "HyenaID2022_3c5a76ad-2355-4293-a88a-03d7f6296c65": {
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1-score": 0.75,
+            "support": 3.0
+        },
+        "HyenaID2022_3c7716c2-9660-4e75-8db1-3739a147837d": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_3d7cacfc-f9da-4922-8603-69f8007b2e55": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_3e73eeb2-add8-4aa2-9641-96c456ad837a": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_4004afe6-b476-475e-867c-8d3b17e378c6": {
+            "precision": 0.9090909090909091,
+            "recall": 1.0,
+            "f1-score": 0.9523809523809523,
+            "support": 10.0
+        },
+        "HyenaID2022_400b4d96-c51c-4184-8f66-7f95319e45f3": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_400b6573-9ae7-400a-b437-b18098f2a67f": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_41eef245-4fd5-42e4-9db8-c2076bd902b9": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "HyenaID2022_42779875-0894-4e77-99f4-da82f72a17fa": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_44af1942-49f4-45ef-aed6-df0ce47d4bc9": {
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
+            "support": 1.0
+        },
+        "HyenaID2022_44b705bc-5e1f-4759-aa8d-a888223e921f": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_45712db8-9da3-4558-bcc9-22d25d842af7": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_477d721a-6027-42a5-a2d7-94dc7e550fcc": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_48a2a80a-436d-4af1-b67a-8084c52f60d4": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_49993bd8-5e05-48a1-a8eb-1aa5212aea36": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_4b3d02b4-f522-464b-ab0e-79e1089c5b57": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_4bb25d71-806b-442d-950b-f137f820a90f": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_4c139246-f943-4f0b-a658-d1a2fac27dc7": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_4f461caa-6f3a-47c7-8926-050f87f9c8f0": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_4f895a17-6192-4ff1-863a-004837871796": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_51029c66-ec8d-4601-afb1-6c0164c303b4": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_525405f2-808c-4ab9-9364-f7fd9d076f6b": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_5260c0df-76a3-4cb1-82fc-fd2f6a6440ad": {
+            "precision": 0.8571428571428571,
+            "recall": 1.0,
+            "f1-score": 0.9230769230769231,
+            "support": 6.0
+        },
+        "HyenaID2022_5610d2b4-3e70-4ba0-8d05-47957e68b512": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_56d1a077-635d-4401-a74b-ce92bad46e70": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_5714276c-6415-4eae-980b-1e4b923847b2": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "HyenaID2022_57a99b4b-793b-423b-97f2-0c41eaae7006": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_5b3f1cd0-8656-4803-b85a-ac405603f434": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_5c6bdd77-0364-48e8-8022-591ca47f076e": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_5fdac45d-b5e7-4133-a8f4-05b28552990c": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "HyenaID2022_5ff6a7d1-4616-4201-a82f-30fad5e933a1": {
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
+            "support": 1.0
+        },
+        "HyenaID2022_60a80045-52d9-4d37-abc6-a396254d59f0": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_60b9e2bb-87ef-4b1d-923c-f0585a74d0b7": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_610a34bf-1456-4efe-b5c7-10c5b588be2e": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_62087513-88bc-4a3f-8699-cb8db0665501": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_656932aa-cf53-4f70-985b-a388f6c88f69": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_66a99503-a6e9-47cd-b28a-ac543d20f110": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_66f06e87-bcea-487d-b5c6-6e5cbfb52ce4": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_67006b29-4adc-41dc-9b30-39a94363a81a": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_6810b958-c4ad-4c34-9590-94b819ff444b": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_68996e21-12ab-4183-ab94-d2b0331efb10": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "HyenaID2022_6a1fc5e8-c077-41c4-9c3b-ff5d0b0364a2": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_6e8d3aef-1f16-4b06-a5d4-9cf11fd29530": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 7.0
+        },
+        "HyenaID2022_7145ff09-9841-43c9-8137-9bb3ea90a5b8": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_7153eda6-946a-4e9d-9c3d-c5c034cbc5e3": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_71d1140b-f983-4554-8283-d1c162cebc94": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_7201896a-1323-4e70-b147-4cc6d13b2784": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 3.0
+        },
+        "HyenaID2022_7250d64b-90db-40d5-8db0-db0b74f86cd3": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_7251cda9-d3d5-4249-baf0-4f4c1480adc9": {
+            "precision": 0.8571428571428571,
+            "recall": 0.75,
+            "f1-score": 0.8,
+            "support": 8.0
+        },
+        "HyenaID2022_736ca848-7821-430b-9aaa-f8870e80aec4": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_73ccff66-e431-422c-9c79-3026cb1280a1": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "HyenaID2022_73f670e9-5ee3-49f3-8db2-3ea557a428b8": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_74b049c5-916c-4dad-96f4-d34a63ef6e26": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "HyenaID2022_74d538f0-cb3e-4982-9584-7e0f886b8397": {
+            "precision": 0.875,
+            "recall": 1.0,
+            "f1-score": 0.9333333333333333,
+            "support": 7.0
+        },
+        "HyenaID2022_761abc97-f81c-4a09-823b-7cb1c528c290": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "HyenaID2022_763682fe-336a-4e52-b076-e904de642832": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_7802d893-e75c-48c3-b822-8a9704bbbd4d": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_79dafc01-fa64-4db3-b3b6-ed5236ed6a68": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_7a0e8d37-e27f-4378-bab8-7cc37821cd8e": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_7a2a6f84-a929-4b78-999b-a299daa575da": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_7b9a9e8d-86d5-4c6c-8b10-8a129f8a10c4": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_7dd17d2d-1eb3-4ccd-afc3-527226c935e6": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_7e67fb5a-4323-46b1-9686-68f84d2ee169": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_7e9d299f-be22-497a-9d79-a1e9d909c013": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_7f9b060d-6457-4c82-bd00-37dfaec1d1d0": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_81725e48-3c1f-4c7c-89d6-334c10234cf9": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_831e0a81-f0e5-435c-a1f3-6cd854e9ef3a": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_83207e09-61eb-4594-80f5-6a452cdd1dcf": {
+            "precision": 0.25,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.2857142857142857,
+            "support": 3.0
+        },
+        "HyenaID2022_837298c0-13cb-470f-8a28-f513694ee20e": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_83c4c239-d588-4d69-b848-dadb4810487c": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_84040874-ad2a-4c44-9f3d-50d044367062": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_844640ea-498e-4d2e-a578-3783c217fb3c": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_844cb3cc-89dc-4609-b33a-3ffc2bb85fd7": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_85527fa6-6c14-45eb-91eb-32106f41f728": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_88db538e-05ee-4e9f-8163-e1bb7e4743fc": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_89d1463d-4e1c-4edd-88a1-19f30914d459": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "HyenaID2022_8a8944da-f6b6-46a5-8b6c-2952d7a1733c": {
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
+            "support": 1.0
+        },
+        "HyenaID2022_8a8f6936-9ca2-49d1-a7b5-e6733beaebdf": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_8aa6f9e4-e249-494f-a762-11e847296544": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_8b530229-7b7d-4744-a09d-d489933fc659": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_8b7d4bbc-67e2-4588-9156-9748edce3fb5": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_8c3be170-b41e-411e-9940-1f5960cfa850": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_8c5534ba-2153-455d-b8e5-468a1c35b511": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_8c755bf5-a137-4d36-b924-def3665fc42e": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_8d704d6e-76b3-4fef-b7e7-5522bc453d98": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_8e52a7f7-8046-4567-b92a-e5941b184745": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_8e9cd5f5-095b-4295-8bbc-a3a67cffd935": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "HyenaID2022_9003c31f-6d6f-4ad9-b535-4e5c5698659b": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
+            "support": 4.0
+        },
+        "HyenaID2022_9110686e-9241-4260-ab50-18cf4ae4a49f": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "HyenaID2022_91be8644-a55d-45bf-9b4e-34c56c607690": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_95a161f7-5a75-4e56-9b3e-ae37f1d61a31": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_96229e46-d462-4f06-a46b-8661b61fb0ec": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_970a8e69-2ce2-4515-bb96-de91d7afcb00": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_981331f5-85cc-41d1-bbf6-6733aa8e2c42": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_992f8369-b55b-43c6-b0ce-a9a51a54320c": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "HyenaID2022_9aeef74b-58bf-4133-abd3-e611b7ba11f7": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "HyenaID2022_9d4d0203-ff17-4318-bd95-f1871e4aba4b": {
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
+            "support": 1.0
+        },
+        "HyenaID2022_a052575c-682f-488a-8034-ce8b0d68e6dd": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_a0539b15-8bd3-4931-9e63-8d956755d9a6": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_a06366b7-a0e0-471e-9595-8eb50b6d499f": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "HyenaID2022_a220a462-baa7-4dc0-b011-12c38649674c": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_a539ecd4-d1a5-49d8-aa11-e4a6d9bf3c70": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_a5e8a2bf-014f-41eb-b33b-7249b2ea3637": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_a5f6a30d-faa1-4d73-aebd-5dff073c6191": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_a6d6607a-edd0-45a9-a9bf-7bac78c1db29": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_a6eae8cd-910e-44a2-a5f4-4766b66fc7b2": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_a7288960-d2a0-41fe-9617-3c45ee3fb409": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_aa5f5b18-31cf-4278-b92a-d22d3fc5ddf9": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
+            "support": 2.0
+        },
+        "HyenaID2022_aa99b035-19c0-4cfb-9c06-a58914422fc5": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_ac7a3ba9-58c0-47e0-8814-1c5ba150c70d": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_ace33278-b65f-43d4-9c12-530e420ddef5": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_aed03e34-d258-4795-bd37-d63eb4c49802": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.8571428571428571,
+            "support": 4.0
+        },
+        "HyenaID2022_aeea8cca-a56f-4662-8f86-3a7f8f7237a0": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_b07dd6f4-8c65-4c6c-b4eb-a65188e81c2c": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_b0d09afd-0469-48b6-9718-02f644ba1969": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_b0fb2cd7-62b2-46ff-9893-f23def9d9b8f": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_b257ec4e-0b36-4e80-85be-b75c8df39b01": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_b38b7f3d-5275-467d-a9fa-7a66af3d5b3e": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_b422e55f-0afc-4b34-922e-9da329a2f53e": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "HyenaID2022_b4f217b9-8188-4f1e-a9a6-a1e67e809c8a": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_b5c37454-cf12-49c5-96c0-aff806c293c2": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_b734856c-cfc6-4b40-abff-48e7b29496c6": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_b881438e-7b28-4d49-a263-9cbca96e62ba": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_b8f52f8c-3f36-4970-8813-0093fedc6081": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_bb7b8783-ecf2-466b-956a-b07381a49e31": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_bbbaafbc-3889-4d6f-843b-d58fb94fb07c": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 8.0
+        },
+        "HyenaID2022_bfa8b15b-15b7-4f41-b44e-fdec1e1bb74c": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_bfab3e8b-c8a4-40d7-9a55-ad0e9c744283": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_bff16f45-9acf-4eac-8d62-52b1fefb9e0f": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_c1593d0b-5f78-4f62-8304-932d7fbcc9fe": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_c273c534-7efa-4da8-bdba-6fdb44d92fed": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_c3835fcb-41e1-4d3a-877c-ca359a7c4e74": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_c5c66d36-d1a6-412e-8289-0b5d8b275be9": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_c755133f-a088-47fb-be84-0c36422a9901": {
+            "precision": 0.7142857142857143,
+            "recall": 1.0,
+            "f1-score": 0.8333333333333334,
+            "support": 5.0
+        },
+        "HyenaID2022_c7fc642b-3a46-4bda-ac76-abcbffdf2260": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_c9b45bc0-1fd5-4ce9-8421-6372800eb59b": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_c9c4d9d7-11c7-4b16-91f7-f554f081e639": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_cc198eff-cbca-4c78-8e28-00592ef701f7": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "HyenaID2022_ccf6e18f-f6bb-4cd7-8166-31a1a8cce2ce": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_cd551358-32f0-45dd-8199-029eca63fa81": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_cec93868-770e-44c5-8bbd-097be098f498": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_cefe7503-7a7b-4573-b0a1-465cb3580565": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_cf07567a-7a4f-42a1-86f3-0cc569dcefae": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_cf22e101-9fef-48d5-9b40-a9a143c96a92": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_d0d01842-f151-46dd-85e8-e7f141de39ef": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_d11e7615-c86e-40f5-bf09-41cc4e39f863": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_d395c979-0cc5-456a-bbb3-c71f42849a88": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_d3977dfd-d0f9-4318-8ea9-f7c337898633": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_d548ac7d-62f0-48cb-a8eb-4b7e0a5191b4": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_d653ccd7-98af-4641-bdad-47dd2242501a": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_d68ac804-a792-44c8-af29-a8e80a7848f1": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_d7b3e671-bcbe-4fec-8566-16d26bfb12f0": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_d7cd8e39-12e4-40a8-b2f7-7c24f291d2aa": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "HyenaID2022_d8653bff-a5e8-4b3a-bffd-a861abad29bf": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 3.0
+        },
+        "HyenaID2022_d8681847-63c6-40eb-8980-a3a4a09efb36": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_d8ec02f0-6a21-48a8-b2cc-f0005764bc2a": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_d9ca2395-17db-4aa9-8749-51a78eba5feb": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_db3de022-02a6-455a-8d26-5746c2a79514": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_ddda7c68-86ac-4448-9795-e1cc33d704bc": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_e0233424-00dc-4c88-9e76-5741a76d5781": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_e0c249f3-ec24-4a7e-97c8-abefd7cd27b1": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_e146c860-5de6-4870-978b-bb2f35f75d20": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_e1cb11c3-48d4-474d-9881-affe8b0d02d5": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_e217374d-17e1-4fa2-b4aa-868033edc1ed": {
+            "precision": 0.9166666666666666,
+            "recall": 1.0,
+            "f1-score": 0.9565217391304348,
+            "support": 11.0
+        },
+        "HyenaID2022_e3e8dcae-7c7c-4492-812c-313c35c88f51": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_e77d385c-2200-4fa5-b90a-0dea100e69e5": {
+            "precision": 0.8333333333333334,
+            "recall": 1.0,
+            "f1-score": 0.9090909090909091,
+            "support": 5.0
+        },
+        "HyenaID2022_e7d7fd1f-5a2d-4073-ac1f-59f6268ba8de": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_ea524367-fb6b-438f-a077-aae1f8fe4b08": {
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
+            "support": 1.0
+        },
+        "HyenaID2022_ebe55d08-674f-417a-a8f6-c776dca6ee8c": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_ecda2205-db0b-4160-a40f-b6825fb43770": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "HyenaID2022_ed4a92c6-3d4e-40e0-b055-3175620123c1": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_eeed33f6-863c-49df-a1e3-1f711738b244": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
+            "support": 4.0
+        },
+        "HyenaID2022_ef582f4d-8d4e-4962-aeb4-3fd48824c85f": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "HyenaID2022_f0981810-e7ce-4e48-b699-c17fbbca7f3c": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_f1aa3589-f203-4455-a293-86f392932895": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 8.0
+        },
+        "HyenaID2022_f283fa30-6a63-47e6-82f5-0db96d01feb0": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_f4a2038b-8da9-451e-ae71-80cb90cb07b3": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
+            "support": 4.0
+        },
+        "HyenaID2022_f5536888-9190-4314-a13f-7ca19b1f07a9": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_f83057a7-a975-4900-a056-99f453bdf15f": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_fa2abd16-8947-4685-9d94-a389233cba74": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_fac82e27-beb0-4e8e-bf1f-13a381f0d459": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_faf75b6e-88a9-4213-ad92-b3c8d1accdfc": {
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
+            "support": 1.0
+        },
+        "HyenaID2022_fb14f620-2472-467f-a38d-b2d0a2b8081c": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "HyenaID2022_fd17ea5e-9fc6-4027-9f2f-5d5a5e67d653": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "HyenaID2022_fd56348b-a8c7-4635-800f-bf5f8c3dd4a0": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "HyenaID2022_fdcab2e1-312d-4116-bdef-7bfdfcefe705": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "HyenaID2022_fe44d727-75e4-4452-9428-95a5f3c7ea73": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "HyenaID2022_fee1977a-deac-4eb4-a1ba-5a5f669a9817": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 14.0
+        },
+        "accuracy": 0.8004201680672269,
+        "macro avg": {
+            "precision": 0.6133441120283226,
+            "recall": 0.6707152496626181,
+            "f1-score": 0.6271879476587691,
+            "support": 476.0
+        },
+        "weighted avg": {
+            "precision": 0.757361353632362,
+            "recall": 0.8004201680672269,
+            "f1-score": 0.7678109301467568,
+            "support": 476.0
+        }
+    },
+    "eval_runtime_sec": 141.03812098503113
+}

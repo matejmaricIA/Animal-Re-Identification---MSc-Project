@@ -239,7 +239,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--datasets",
         nargs="+",
-        default=["NyalaData", "SealID", "HyenaID2022", "StripeSpotter", "Giraffes", "ATRW", "BelugaID", "CowDataset", "IPanda50"],
+        default=["NyalaData", "SealID", "HyenaID2022", "StripeSpotter", "Giraffes", "ATRW", "CowDataset", "IPanda50"],
         help="Datasets to evaluate",
     )
     args = parser.parse_args()
