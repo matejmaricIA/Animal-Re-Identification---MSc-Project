@@ -32,6 +32,7 @@ def nested_importance_sampling(
     label_error_rate: float = 0.0,
     return_stats: bool = False,
     automated_mode: bool = False,
+    seed: Optional[int] = None,
 ) -> Union[Tuple[float, float], Tuple[float, float, Dict[str, Any]]]:
     """Nested Importance Sampling with *gated* human‑(label) feedback and
     **built‑in bookkeeping** for debugging / ablation studies.
@@ -62,6 +63,8 @@ def nested_importance_sampling(
     automated_mode : bool, default=False
         If True, uses only geometric verification without human labels.
         Faster but potentially less accurate than human-in-the-loop mode.
+    seed : int or ``None``, default=None
+        Random seed for reproducible vertex and neighbour sampling.
 
     Returns
     -------
@@ -81,7 +84,7 @@ def nested_importance_sampling(
     Q = 1.0 / (1.0 + degrees)
     Q /= Q.sum()
 
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(seed)
     population_estimates = []
 
     total_pairs: int = 0

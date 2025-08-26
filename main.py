@@ -95,6 +95,7 @@ if __name__ == '__main__':
     parser.add_argument('--use_shape', action='store_true', help='Use shape descriptors based on animal contours')
     parser.add_argument('--w_fisher', type=float, default=3.0, help='Weight for Fisher vectors during fusion')
     parser.add_argument('--w_global', type=float, default=1.0, help='Weight for global embeddings during fusion')
+    parser.add_argument('--seed', type=int, default=None, help='Random seed for reproducible counting')
 
 
     args = parser.parse_args()
@@ -518,7 +519,7 @@ if __name__ == '__main__':
                 methods = ['disk', 'keynet_hardnet', 'lightglue']
                 fv_list = []
                 for m in methods:
-                    feat_dir = f"{base_dir}/feature_descriptors_{m}_{seg_tag}/"
+                    feat_dir = f"{base_dir}/feature_descriptors_{m}_{seg_tag}_full/"
                     if not os.path.isdir(feat_dir):
                         if m == 'disk':
                             extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, feat_dir)
@@ -531,9 +532,9 @@ if __name__ == '__main__':
                     if m == 'disk':
                         descriptors = desc
                         keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
-                    pca_path_m = PCA_PATH.format(ds_tag, m, seg_tag)
-                    gmm_path_m = GMM_PATH.format(ds_tag, m, seg_tag)
-                    fv_path_m = FISHER_VECTORS.format(ds_tag, m, seg_tag)
+                    pca_path_m = PCA_PATH.format(ds_tag, m, f"{seg_tag}_full")
+                    gmm_path_m = GMM_PATH.format(ds_tag, m, f"{seg_tag}_full")
+                    fv_path_m = FISHER_VECTORS.format(ds_tag, m, f"{seg_tag}_full")
                     if os.path.exists(fv_path_m):
                         pca_m, gmm_m, fv_m = load_stuff(pca_path_m, gmm_path_m, fv_path_m)
                     else:
@@ -546,7 +547,7 @@ if __name__ == '__main__':
 
                 fisher_vectors = combine_fisher_vectors(fv_list, ENSEMBLE_WEIGHTS)
             else:
-                feat_dir = f"{base_dir}/feature_descriptors_{method}_{seg_tag}/"
+                feat_dir = f"{base_dir}/feature_descriptors_{method}_{seg_tag}_full/"
                 if not os.path.isdir(feat_dir) and method == 'disk':
                     extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, feat_dir)
                 elif not os.path.isdir(feat_dir) and method == 'keynet_hardnet':
@@ -556,9 +557,9 @@ if __name__ == '__main__':
                 descriptors = load_descriptors(os.path.join(feat_dir, "descriptors.h5"))
                 keypoints = load_keypoints(os.path.join(feat_dir, "keypoints.h5"))
 
-                pca_path = PCA_PATH.format(ds_tag, method, seg_tag)
-                gmm_path = GMM_PATH.format(ds_tag, method, seg_tag)
-                fv_path = FISHER_VECTORS.format(ds_tag, method, seg_tag)
+                pca_path = PCA_PATH.format(ds_tag, method, f"{seg_tag}_full")
+                gmm_path = GMM_PATH.format(ds_tag, method, f"{seg_tag}_full")
+                fv_path = FISHER_VECTORS.format(ds_tag, method, f"{seg_tag}_full")
                 if os.path.exists(fv_path):
                     pca, gmm, fisher_vectors = load_stuff(pca_path, gmm_path, fv_path)
                 else:
@@ -576,7 +577,7 @@ if __name__ == '__main__':
         if args.use_global_embedding:
             print("Extracting global embeddings for population counting...")
             image_paths = dict(zip(df["image_id"].astype(str), get_image_paths(df, args.remove_background)))
-            emb_path = f"{base_dir}/global_embeddings_count_{args.embedding_model}_{seg_tag}.pkl"
+            emb_path = f"{base_dir}/global_embeddings_count_{args.embedding_model}_{seg_tag}_full.pkl"
 
             if os.path.exists(emb_path):
                 print("Loading cached global embeddings...")
@@ -620,7 +621,8 @@ if __name__ == '__main__':
             n_neighbors=args.num_neighbors,
             label_error_rate=args.label_error_rate,
             return_stats = True,
-            automated_mode=args.automated_mode
+            automated_mode=args.automated_mode,
+            seed=args.seed,
         )
         # Add confidence assessment even for standard mode
         #confidence, reason = assess_confidence_level(stats)
