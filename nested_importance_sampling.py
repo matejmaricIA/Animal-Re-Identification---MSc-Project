@@ -32,6 +32,7 @@ def nested_importance_sampling(
     label_error_rate: float = 0.0,
     return_stats: bool = False,
     automated_mode: bool = False,
+    randomized_gate: bool = False,
     seed: Optional[int] = None,
 ) -> Union[Tuple[float, float], Tuple[float, float, Dict[str, Any]]]:
     """Nested Importance Sampling with *gated* human‑(label) feedback and
@@ -92,6 +93,8 @@ def nested_importance_sampling(
     gv_passes: int = 0
     label_queries: int = 0
     positive_matches: int = 0
+    rand_attempts: int = 0
+    rand_accepts: int = 0
 
     # 2.   Outer vertex loop                                             #
     outer_vertices = rng.choice(len(image_ids), size=min(n_vertices, len(image_ids)), replace=False, p=Q)
@@ -133,7 +136,16 @@ def nested_importance_sampling(
                     gv_pass = (dist < gv_threshold) and (n_inliers >= MIN_INLIERS)
                     if gv_pass:
                         gv_passes += 1
-                        
+
+                        gate_ok = True
+                        if randomized_gate:
+                            rand_attempts += 1
+                            gate_ok = rng.random() < 0.5
+                            if gate_ok:
+                                rand_accepts += 1
+                        if not gate_ok:
+                            continue
+
                         if automated_mode:
                             # Pure geometric verification with confidence weighting
                             confidence = min(1.0, n_inliers / 20.0)  # Normalize inliers to confidence
@@ -158,6 +170,15 @@ def nested_importance_sampling(
                 # else: skip GV → match stays 0
             else:
                 # Legacy path: direct label query, no gate
+                gate_ok = True
+                if randomized_gate:
+                    rand_attempts += 1
+                    gate_ok = rng.random() < 0.5
+                    if gate_ok:
+                        rand_accepts += 1
+                if not gate_ok:
+                    continue
+
                 if automated_mode:
                     # In automated mode without GV, fall back to Fisher vector similarity
                     fd = fisher_distance(fisher_vectors[u_id], fisher_vectors[v_id])
@@ -189,6 +210,9 @@ def nested_importance_sampling(
     mean_est = float(estimates.mean())
     stderr_est = float(estimates.std(ddof=1) / np.sqrt(len(estimates)))
 
+    if randomized_gate and rand_attempts > 0:
+        print(f"Randomized gate acceptance rate: {rand_accepts / rand_attempts:.3f}")
+
     if return_stats:
         stats = {
             "total_pairs": total_pairs,
@@ -196,6 +220,8 @@ def nested_importance_sampling(
             "gv_passes": gv_passes,
             "label_queries": label_queries,
             "matches": positive_matches,
+            "rand_attempts": rand_attempts,
+            "rand_accepts": rand_accepts,
         }
         return mean_est, stderr_est, stats
     else:
