@@ -6,43 +6,61 @@ from utils.distance_utils import fisher_distance
 from constants import MIN_INLIERS
 
 
-def gv_score(n_inliers: int, dist: float, fd: float) -> float:
+def _robust_unit(x: float, lo: float, hi: float) -> float:
+    """Map x to [0,1] using robust [lo, hi] percentiles; return 0.5 if degenerate."""
+    if hi <= lo:
+        return 0.5
+    return float(np.clip((x - lo) / (hi - lo), 0.0, 1.0))
+
+
+def gv_score(
+    n_inliers: int,
+    dist: float,
+    fd: float,
+    d_lo: float = None,
+    d_hi: float = None,
+    f_lo: float = None,
+    f_hi: float = None,
+) -> float:
     """
-    Monotone 'matchiness' score in ~[0,1]:
-    - higher with more inliers
-    - higher when geometric distance is smaller
-    - higher when Fisher distance is smaller
+    Monotone 'matchiness' score; if robust bounds are provided, use them, otherwise
+    fall back to the previous heuristic so legacy calls do not break.
     """
     n_inliers = max(int(n_inliers), 0)
-    dist = float(dist)
-    fd = float(fd)
-
-    t_inl  = np.tanh(n_inliers / 20.0)       # 0..~1
-    t_dist = 1.0 - np.clip(dist, 0.0, 1.0)   # 1 when dist~0
-    t_fd   = 1.0 - np.tanh(fd / 5.0)         # 1 when Fisher small
-
-    return float(np.clip(0.45*t_dist + 0.35*t_inl + 0.20*t_fd, 0.0, 1.0))
+    if (
+        d_lo is not None and d_hi is not None and f_lo is not None and f_hi is not None
+    ):
+        d_unit = _robust_unit(float(dist), d_lo, d_hi)   # bad→1
+        f_unit = _robust_unit(float(fd),   f_lo, f_hi)   # bad→1
+        t_inl  = np.tanh(n_inliers / 20.0)               # good→1
+        t_dist = 1.0 - d_unit
+        t_fd   = 1.0 - f_unit
+        return float(np.clip(0.45*t_dist + 0.35*t_inl + 0.20*t_fd, 0.0, 1.0))
+    else:
+        # legacy fallback (pre-normalization behavior)
+        t_inl  = np.tanh(n_inliers / 20.0)
+        t_dist = 1.0 - np.clip(float(dist), 0.0, 1.0)
+        t_fd   = 1.0 - np.tanh(float(fd) / 5.0)
+        return float(np.clip(0.45*t_dist + 0.35*t_inl + 0.20*t_fd, 0.0, 1.0))
 
 
 def accept_prob(score: float, a: float, tau: float, pi_floor: float) -> float:
-    """Logistic acceptance with floor to bound weights."""
     pi = 1.0 / (1.0 + np.exp(-a * (score - tau)))
     return float(max(pi_floor, min(1.0, pi)))
 
 
 def pick_tau_from_pilot(scores: np.ndarray, a: float, p_target: float) -> float:
-    """Choose τ so that mean σ(a(s-τ)) ≈ p_target via bisection."""
     if scores.size == 0:
         return 0.5
-    lo, hi = float(np.min(scores))-1e-6, float(np.max(scores))+1e-6
+    lo, hi = float(np.min(scores)) - 1e-6, float(np.max(scores)) + 1e-6
     for _ in range(30):
-        mid = 0.5*(lo+hi)
-        acc = 1.0 / (1.0 + np.exp(-a*(scores - mid)))
+        mid = 0.5 * (lo + hi)
+        acc = 1.0 / (1.0 + np.exp(-a * (scores - mid)))
         if float(acc.mean()) > p_target:
-            lo = mid  # too many accepted → raise τ
+            lo = mid
         else:
             hi = mid
-    return 0.5*(lo+hi)
+    return 0.5 * (lo + hi)
 
 
 def cosine_similarity_matrix(vectors: Sequence[np.ndarray]) -> np.ndarray:
@@ -125,7 +143,8 @@ def nested_importance_sampling(
     stats : dict  (only if ``return_stats=True``)
         See *return_stats* description.
     """
-
+    if randomized_gate and gv_threshold != 0.75:
+        print("Note: gv_threshold ignored when randomized_gate=True")
 
     # 1. Build similarity graph & vertex proposal distribution
     image_ids = list(fisher_vectors.keys())
@@ -146,16 +165,21 @@ def nested_importance_sampling(
     positive_matches: int = 0
     rand_attempts: int = 0
     rand_accepts: int = 0
-
     tau = 0.5  # default midpoint
+    d_lo = d_hi = f_lo = f_hi = None
     if randomized_gate and keypoints is not None and descriptors is not None:
         rng_local = np.random.default_rng(seed if seed is not None else 123)
-        pilot_scores = []
+        pilot_dists, pilot_fds, pilot_inliers = [], [], []
         # Small pilot: ~min(2000, n_vertices*n_neighbors) pairs
         n_pilot = int(min(2000, max(1, n_vertices) * max(1, n_neighbors)))
         # Sample anchors ~ Q
         n_anchors = max(1, n_pilot // max(1, n_neighbors))
-        anchor_idxs = rng_local.choice(len(image_ids), size=min(len(image_ids), n_anchors), replace=False, p=Q)
+        anchor_idxs = rng_local.choice(
+            len(image_ids),
+            size=min(len(image_ids), n_anchors),
+            replace=False,
+            p=Q,
+        )
 
         for u_idx in anchor_idxs:
             # neighbor proposal for this anchor
@@ -167,7 +191,12 @@ def nested_importance_sampling(
 
             # sample neighbors ~ q
             k = max(1, n_pilot // max(1, len(anchor_idxs)))
-            v_idx_sample = rng_local.choice(len(image_ids), size=min(len(image_ids), k), replace=False, p=q_vec)
+            v_idx_sample = rng_local.choice(
+                len(image_ids),
+                size=min(len(image_ids), k),
+                replace=False,
+                p=q_vec,
+            )
 
             u_id = image_ids[u_idx]
             for v_idx in v_idx_sample:
@@ -180,12 +209,34 @@ def nested_importance_sampling(
                 dist, n_inliers = compute_geometric_similarity(
                     desc_u, kp_u, desc_v, kp_v, fd, use_lightglue=use_lightglue, method=method
                 )
-                pilot_scores.append(gv_score(n_inliers, dist, fd))
+                pilot_dists.append(dist)
+                pilot_fds.append(fd)
+                pilot_inliers.append(n_inliers)
 
-        if len(pilot_scores) >= 50:
-            
-            tau = pick_tau_from_pilot(np.asarray(pilot_scores, dtype=float), a=pi_slope, p_target=pi_target)
-            print('Picked tau from pilot: ', tau)
+        if len(pilot_dists) >= 50:
+            d_lo, d_hi = np.percentile(pilot_dists, [5, 95])
+            f_lo, f_hi = np.percentile(pilot_fds,   [5, 95])
+            # build scores with normalization
+            pilot_scores = [
+                gv_score(n, d, f, d_lo, d_hi, f_lo, f_hi)
+                for n, d, f in zip(pilot_inliers, pilot_dists, pilot_fds)
+            ]
+            tau = pick_tau_from_pilot(
+                np.asarray(pilot_scores, dtype=float),
+                a=pi_slope,
+                p_target=pi_target,
+            )
+            print(
+                f"Picked tau from pilot: {tau:.6f} | d∈[{d_lo:.3f},{d_hi:.3f}] fd∈[{f_lo:.3f},{f_hi:.3f}]"
+            )
+        else:
+            # fallback bounds if pilot too small
+            d_lo, d_hi = 0.0, 1.0
+            f_lo, f_hi = 0.0, 5.0
+    else:
+        # defaults when randomized_gate is False or missing data
+        d_lo, d_hi = 0.0, 1.0
+        f_lo, f_hi = 0.0, 5.0
 
     # 2.   Outer vertex loop                                             #
     outer_vertices = rng.choice(len(image_ids), size=min(n_vertices, len(image_ids)), replace=False, p=Q)
@@ -219,30 +270,27 @@ def nested_importance_sampling(
                     )
 
                     if randomized_gate:
-                        s  = gv_score(n_inliers, dist, fd)
+                        # Compute normalized units using robust bounds from pilot
+                        d_unit = _robust_unit(dist, d_lo, d_hi)        # 0..1 (bad→1)
+                        f_unit = _robust_unit(fd,   f_lo, f_hi)        # 0..1 (bad→1)
+                        t_inl  = np.tanh(n_inliers/20.0)               # 0..~1 (good→1)
+
+                        # Score for acceptance π(s)
+                        s = float(np.clip(0.45*(1.0 - d_unit) + 0.35*t_inl + 0.20*(1.0 - f_unit), 0.0, 1.0))
                         pi = accept_prob(s, a=pi_slope, tau=tau, pi_floor=pi_floor)
 
                         rand_attempts += 1
-                        r = rng.random()
-                        if r < pi:
+                        if rng.random() < pi:
                             rand_accepts += 1
                             gv_passes += 1
-                            if automated_mode:
-                                yhat = float(np.clip(
-                                    0.6*(1.0 - dist) + 0.3*np.tanh(n_inliers/20.0) + 0.1*(1.0 - np.tanh(fd/5.0)),
-                                    0.0, 1.0
-                                ))
-                                if yhat > 0.5:
-                                    positive_matches += 1
-                            else:
-                                label_queries += 1
-                                yhat = 1.0 if labels.get(u_id) == labels.get(v_id) else 0.0
-                                if label_error_rate > 0.0 and rng.random() < label_error_rate:
-                                    yhat = 1.0 - yhat
-                                if yhat == 1.0:
-                                    positive_matches += 1
+                            # Conservative soft label in [0,1] using same normalized features
+                            raw = 0.55*(1.0 - d_unit) + 0.30*t_inl + 0.15*(1.0 - f_unit)
+                            yhat = float(np.clip(raw, 0.0, 1.0))
+
                             q_v = float(max(q[v_idx], 1e-12))
                             fb_list.append(yhat / (q_v * pi))
+                            if yhat > 0.5:
+                                positive_matches += 1
                         else:
                             fb_list.append(0.0)
                     else:
@@ -311,6 +359,11 @@ def nested_importance_sampling(
         if randomized_gate:
             stats["rand_attempts"] = rand_attempts
             stats["rand_accepts"] = rand_accepts
+            stats["tau"] = float(tau)
+            stats["pi_target"] = float(pi_target)
+            stats["pi_slope"] = float(pi_slope)
+            stats["pi_floor"] = float(pi_floor)
+            stats["accept_rate"] = float(rand_accepts / max(1, rand_attempts))
         return mean_est, stderr_est, stats
     else:
         return mean_est, stderr_est
