@@ -183,8 +183,9 @@ def nested_importance_sampling(
                 pilot_scores.append(gv_score(n_inliers, dist, fd))
 
         if len(pilot_scores) >= 50:
-            print('Picked tau from pilot: ', tau)
+            
             tau = pick_tau_from_pilot(np.asarray(pilot_scores, dtype=float), a=pi_slope, p_target=pi_target)
+            print('Picked tau from pilot: ', tau)
 
     # 2.   Outer vertex loop                                             #
     outer_vertices = rng.choice(len(image_ids), size=min(n_vertices, len(image_ids)), replace=False, p=Q)
