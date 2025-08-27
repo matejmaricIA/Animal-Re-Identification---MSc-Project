@@ -145,8 +145,7 @@ def nested_importance_sampling(
     label_queries: int = 0
     positive_matches: int = 0
 
-    tau = 0.5  # default midpoint; used only if randomized_gate is True
-
+    tau = 0.5  # default midpoint
     if randomized_gate and keypoints is not None and descriptors is not None:
         rng_local = np.random.default_rng(seed if seed is not None else 123)
         pilot_scores = []
@@ -182,6 +181,7 @@ def nested_importance_sampling(
                 pilot_scores.append(gv_score(n_inliers, dist, fd))
 
         if len(pilot_scores) >= 50:
+            print('Picked tau from pilot: ', tau)
             tau = pick_tau_from_pilot(np.asarray(pilot_scores, dtype=float), a=pi_slope, p_target=pi_target)
 
     # 2.   Outer vertex loop                                             #

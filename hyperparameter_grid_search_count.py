@@ -9,17 +9,17 @@ import pandas as pd
 from constants import COUNT_RESULTS_XLSX
 
 # Datasets to evaluate
-datasets = ["NyalaData"]
+datasets = ["NyalaData", "ATRW", "Giraffes", "HyenaID2022", "StripeSpotter"]
 
 # Parameter grid for count mode experiments
 PARAM_GRID: Dict[str, List] = {
-    "num_vertices": [50, 200, 500, 700],
-    "num_neighbors": [50, 200, 500, 700],
+    "num_vertices": [50, 100, 200],
+    "num_neighbors": [50, 100, 200],
     "use_fisher": [True],
-    "use_global_embedding": [True],
+    "use_global_embedding": [True, False],
     "w_fisher": [3.0],
     "w_global": [1.0],
-    "gv_threshold": [0.95],
+    "gv_threshold": [0.9],
     "use_geometric_verification": [True],
     "embedding_model": ["megadescriptor-l-384"],
     "remove_background": [False, True],

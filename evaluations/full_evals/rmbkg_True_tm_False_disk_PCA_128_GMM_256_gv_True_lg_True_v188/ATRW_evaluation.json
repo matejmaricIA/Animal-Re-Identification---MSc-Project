@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.8234552332912989,
-    "top_n_accuracy": 0.8776796973518285,
+    "accuracy": 0.807061790668348,
+    "top_n_accuracy": 0.8461538461538461,
     "classification_metrics": {
         "ATRW_0": {
             "precision": 1.0,
@@ -39,15 +39,15 @@
             "support": 5.0
         },
         "ATRW_105": {
-            "precision": 0.7142857142857143,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8333333333333334,
+            "f1-score": 1.0,
             "support": 5.0
         },
         "ATRW_106": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "ATRW_108": {
@@ -57,8 +57,8 @@
             "support": 2.0
         },
         "ATRW_109": {
-            "precision": 1.0,
-            "recall": 0.5,
+            "precision": 0.5,
+            "recall": 1.0,
             "f1-score": 0.6666666666666666,
             "support": 2.0
         },
@@ -141,15 +141,15 @@
             "support": 2.0
         },
         "ATRW_130": {
-            "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "ATRW_132": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "ATRW_133": {
@@ -166,14 +166,14 @@
         },
         "ATRW_136": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.9090909090909091,
             "support": 6.0
         },
         "ATRW_138": {
-            "precision": 0.875,
+            "precision": 0.7777777777777778,
             "recall": 1.0,
-            "f1-score": 0.9333333333333333,
+            "f1-score": 0.875,
             "support": 7.0
         },
         "ATRW_139": {
@@ -189,9 +189,9 @@
             "support": 4.0
         },
         "ATRW_142": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "ATRW_144": {
@@ -237,33 +237,33 @@
             "support": 2.0
         },
         "ATRW_153": {
-            "precision": 0.625,
+            "precision": 0.8333333333333334,
             "recall": 0.6666666666666666,
-            "f1-score": 0.6451612903225806,
+            "f1-score": 0.7407407407407407,
             "support": 15.0
         },
         "ATRW_154": {
-            "precision": 0.4,
-            "recall": 0.5,
-            "f1-score": 0.4444444444444444,
+            "precision": 0.2857142857142857,
+            "recall": 0.25,
+            "f1-score": 0.26666666666666666,
             "support": 8.0
         },
         "ATRW_156": {
-            "precision": 0.6521739130434783,
-            "recall": 0.6,
-            "f1-score": 0.625,
+            "precision": 0.7777777777777778,
+            "recall": 0.56,
+            "f1-score": 0.6511627906976745,
             "support": 25.0
         },
         "ATRW_157": {
-            "precision": 0.6,
-            "recall": 0.45,
-            "f1-score": 0.5142857142857142,
+            "precision": 0.7692307692307693,
+            "recall": 0.5,
+            "f1-score": 0.6060606060606061,
             "support": 20.0
         },
         "ATRW_159": {
-            "precision": 0.8571428571428571,
-            "recall": 0.35294117647058826,
-            "f1-score": 0.5,
+            "precision": 0.6111111111111112,
+            "recall": 0.3235294117647059,
+            "f1-score": 0.4230769230769231,
             "support": 34.0
         },
         "ATRW_16": {
@@ -273,21 +273,21 @@
             "support": 7.0
         },
         "ATRW_160": {
-            "precision": 0.27586206896551724,
-            "recall": 0.5333333333333333,
-            "f1-score": 0.36363636363636365,
+            "precision": 0.25,
+            "recall": 0.4,
+            "f1-score": 0.3076923076923077,
             "support": 15.0
         },
         "ATRW_162": {
-            "precision": 0.8709677419354839,
+            "precision": 0.7297297297297297,
             "recall": 0.7105263157894737,
-            "f1-score": 0.782608695652174,
+            "f1-score": 0.72,
             "support": 38.0
         },
         "ATRW_163": {
-            "precision": 0.85,
-            "recall": 0.7727272727272727,
-            "f1-score": 0.8095238095238095,
+            "precision": 0.6521739130434783,
+            "recall": 0.6818181818181818,
+            "f1-score": 0.6666666666666666,
             "support": 22.0
         },
         "ATRW_165": {
@@ -297,9 +297,9 @@
             "support": 11.0
         },
         "ATRW_166": {
-            "precision": 0.9583333333333334,
+            "precision": 0.8214285714285714,
             "recall": 0.9583333333333334,
-            "f1-score": 0.9583333333333334,
+            "f1-score": 0.8846153846153846,
             "support": 24.0
         },
         "ATRW_168": {
@@ -321,9 +321,9 @@
             "support": 2.0
         },
         "ATRW_172": {
-            "precision": 0.6,
+            "precision": 0.75,
             "recall": 0.6,
-            "f1-score": 0.6,
+            "f1-score": 0.6666666666666666,
             "support": 5.0
         },
         "ATRW_174": {
@@ -333,9 +333,9 @@
             "support": 7.0
         },
         "ATRW_175": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "ATRW_177": {
@@ -375,9 +375,9 @@
             "support": 7.0
         },
         "ATRW_186": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "ATRW_187": {
@@ -405,9 +405,9 @@
             "support": 6.0
         },
         "ATRW_192": {
-            "precision": 0.6666666666666666,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "ATRW_193": {
@@ -417,9 +417,9 @@
             "support": 3.0
         },
         "ATRW_195": {
-            "precision": 0.6666666666666666,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "ATRW_196": {
@@ -429,9 +429,9 @@
             "support": 2.0
         },
         "ATRW_198": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "ATRW_199": {
@@ -447,9 +447,9 @@
             "support": 3.0
         },
         "ATRW_202": {
-            "precision": 0.1111111111111111,
+            "precision": 0.2,
             "recall": 0.3333333333333333,
-            "f1-score": 0.16666666666666666,
+            "f1-score": 0.25,
             "support": 3.0
         },
         "ATRW_204": {
@@ -459,9 +459,9 @@
             "support": 3.0
         },
         "ATRW_205": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.09090909090909091,
+            "recall": 0.25,
+            "f1-score": 0.13333333333333333,
             "support": 4.0
         },
         "ATRW_207": {
@@ -484,8 +484,8 @@
         },
         "ATRW_210": {
             "precision": 0.3333333333333333,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.3333333333333333,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.4444444444444444,
             "support": 3.0
         },
         "ATRW_211": {
@@ -507,9 +507,9 @@
             "support": 3.0
         },
         "ATRW_216": {
-            "precision": 0.3333333333333333,
+            "precision": 0.25,
             "recall": 0.5,
-            "f1-score": 0.4,
+            "f1-score": 0.3333333333333333,
             "support": 2.0
         },
         "ATRW_217": {
@@ -543,9 +543,9 @@
             "support": 2.0
         },
         "ATRW_223": {
-            "precision": 1.0,
+            "precision": 0.3333333333333333,
             "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.4,
             "support": 2.0
         },
         "ATRW_225": {
@@ -579,15 +579,15 @@
             "support": 3.0
         },
         "ATRW_234": {
-            "precision": 0.8333333333333334,
+            "precision": 0.8823529411764706,
             "recall": 1.0,
-            "f1-score": 0.9090909090909091,
+            "f1-score": 0.9375,
             "support": 15.0
         },
         "ATRW_235": {
-            "precision": 1.0,
-            "recall": 0.9333333333333333,
-            "f1-score": 0.9655172413793104,
+            "precision": 0.875,
+            "recall": 0.4666666666666667,
+            "f1-score": 0.6086956521739131,
             "support": 15.0
         },
         "ATRW_237": {
@@ -597,9 +597,9 @@
             "support": 6.0
         },
         "ATRW_238": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "ATRW_24": {
@@ -627,9 +627,9 @@
             "support": 4.0
         },
         "ATRW_246": {
-            "precision": 0.875,
+            "precision": 0.7777777777777778,
             "recall": 1.0,
-            "f1-score": 0.9333333333333333,
+            "f1-score": 0.875,
             "support": 7.0
         },
         "ATRW_247": {
@@ -639,15 +639,15 @@
             "support": 5.0
         },
         "ATRW_249": {
-            "precision": 0.5555555555555556,
-            "recall": 0.8333333333333334,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
             "f1-score": 0.6666666666666666,
             "support": 6.0
         },
         "ATRW_25": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "ATRW_250": {
@@ -663,9 +663,9 @@
             "support": 2.0
         },
         "ATRW_253": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "ATRW_255": {
@@ -687,15 +687,15 @@
             "support": 8.0
         },
         "ATRW_259": {
-            "precision": 0.6666666666666666,
+            "precision": 0.2,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 0.3333333333333333,
             "support": 2.0
         },
         "ATRW_261": {
-            "precision": 1.0,
+            "precision": 0.8,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8888888888888888,
             "support": 4.0
         },
         "ATRW_264": {
@@ -712,8 +712,8 @@
         },
         "ATRW_267": {
             "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "recall": 0.25,
+            "f1-score": 0.4,
             "support": 4.0
         },
         "ATRW_268": {
@@ -789,21 +789,21 @@
             "support": 3.0
         },
         "ATRW_37": {
-            "precision": 0.75,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "ATRW_39": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "ATRW_4": {
-            "precision": 1.0,
+            "precision": 0.8,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8888888888888888,
             "support": 4.0
         },
         "ATRW_40": {
@@ -831,9 +831,9 @@
             "support": 2.0
         },
         "ATRW_46": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "ATRW_48": {
@@ -885,9 +885,9 @@
             "support": 2.0
         },
         "ATRW_61": {
-            "precision": 0.7142857142857143,
-            "recall": 1.0,
-            "f1-score": 0.8333333333333334,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
             "support": 5.0
         },
         "ATRW_63": {
@@ -898,8 +898,8 @@
         },
         "ATRW_64": {
             "precision": 1.0,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "ATRW_66": {
@@ -945,9 +945,9 @@
             "support": 3.0
         },
         "ATRW_76": {
-            "precision": 0.4,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.5714285714285714,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "ATRW_78": {
@@ -957,9 +957,9 @@
             "support": 2.0
         },
         "ATRW_79": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.5714285714285714,
             "support": 4.0
         },
         "ATRW_81": {
@@ -969,9 +969,9 @@
             "support": 2.0
         },
         "ATRW_82": {
-            "precision": 0.2857142857142857,
-            "recall": 1.0,
-            "f1-score": 0.4444444444444444,
+            "precision": 0.1,
+            "recall": 0.5,
+            "f1-score": 0.16666666666666666,
             "support": 2.0
         },
         "ATRW_84": {
@@ -981,9 +981,9 @@
             "support": 3.0
         },
         "ATRW_85": {
-            "precision": 0.3333333333333333,
+            "precision": 0.2,
             "recall": 0.5,
-            "f1-score": 0.4,
+            "f1-score": 0.2857142857142857,
             "support": 2.0
         },
         "ATRW_87": {
@@ -1017,27 +1017,27 @@
             "support": 2.0
         },
         "ATRW_93": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.6666666666666666,
+            "recall": 0.5,
+            "f1-score": 0.5714285714285714,
             "support": 4.0
         },
         "ATRW_94": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "ATRW_96": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "ATRW_97": {
-            "precision": 0.6,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 0.75,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "ATRW_99": {
@@ -1046,19 +1046,19 @@
             "f1-score": 0.9230769230769231,
             "support": 6.0
         },
-        "accuracy": 0.8234552332912989,
+        "accuracy": 0.807061790668348,
         "macro avg": {
-            "precision": 0.8478559432579017,
-            "recall": 0.8528508232749186,
-            "f1-score": 0.8395710637019412,
+            "precision": 0.8509050895240154,
+            "recall": 0.8509715846411159,
+            "f1-score": 0.8343826958207362,
             "support": 793.0
         },
         "weighted avg": {
-            "precision": 0.847229704436596,
-            "recall": 0.8234552332912989,
-            "f1-score": 0.8227665233905159,
+            "precision": 0.8346521721319746,
+            "recall": 0.807061790668348,
+            "f1-score": 0.806361446685368,
             "support": 793.0
         }
     },
-    "eval_runtime_sec": 783.8219840526581
+    "eval_runtime_sec": 374.3447434902191
 }
