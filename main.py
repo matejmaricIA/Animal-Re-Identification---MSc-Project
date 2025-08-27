@@ -96,6 +96,14 @@ if __name__ == '__main__':
     parser.add_argument('--w_fisher', type=float, default=3.0, help='Weight for Fisher vectors during fusion')
     parser.add_argument('--w_global', type=float, default=1.0, help='Weight for global embeddings during fusion')
     parser.add_argument('--seed', type=int, default=None, help='Random seed for reproducible counting')
+    parser.add_argument('--randomized_gate', action='store_true', default=False,
+                        help='Use randomized acceptance with known \u03c0(s) and HT weighting')
+    parser.add_argument('--pi_target', type=float, default=0.80,
+                        help='Target acceptance rate for randomized gate (0..1)')
+    parser.add_argument('--pi_slope', type=float, default=8.0,
+                        help='Logistic slope a for \u03c0(s)=\u03c3(a(s-\u03c4))')
+    parser.add_argument('--pi_floor', type=float, default=0.05,
+                        help='Lower bound on \u03c0 to cap 1/\u03c0 weights')
 
 
     args = parser.parse_args()
@@ -623,6 +631,10 @@ if __name__ == '__main__':
             return_stats = True,
             automated_mode=args.automated_mode,
             seed=args.seed,
+            randomized_gate=args.randomized_gate,
+            pi_target=args.pi_target,
+            pi_slope=args.pi_slope,
+            pi_floor=args.pi_floor,
         )
         # Add confidence assessment even for standard mode
         #confidence, reason = assess_confidence_level(stats)
