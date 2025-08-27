@@ -144,6 +144,8 @@ def nested_importance_sampling(
     gv_passes: int = 0
     label_queries: int = 0
     positive_matches: int = 0
+    rand_attempts: int = 0
+    rand_accepts: int = 0
 
     tau = 0.5  # default midpoint; used only if randomized_gate is True
 
@@ -219,7 +221,10 @@ def nested_importance_sampling(
                         s  = gv_score(n_inliers, dist, fd)
                         pi = accept_prob(s, a=pi_slope, tau=tau, pi_floor=pi_floor)
 
-                        if rng.random() < pi:
+                        rand_attempts += 1
+                        r = rng.random()
+                        if r < pi:
+                            rand_accepts += 1
                             gv_passes += 1
                             if automated_mode:
                                 yhat = float(np.clip(
@@ -291,6 +296,9 @@ def nested_importance_sampling(
     mean_est = float(estimates.mean())
     stderr_est = float(estimates.std(ddof=1) / np.sqrt(len(estimates)))
 
+    if randomized_gate and rand_attempts > 0:
+        print(f"Randomized gate acceptance rate: {rand_accepts / rand_attempts:.3f}")
+
     if return_stats:
         stats = {
             "total_pairs": total_pairs,
@@ -299,6 +307,9 @@ def nested_importance_sampling(
             "label_queries": label_queries,
             "matches": positive_matches,
         }
+        if randomized_gate:
+            stats["rand_attempts"] = rand_attempts
+            stats["rand_accepts"] = rand_accepts
         return mean_est, stderr_est, stats
     else:
         return mean_est, stderr_est
