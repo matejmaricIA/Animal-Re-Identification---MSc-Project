@@ -79,3 +79,5 @@ models/
 Output/
 segmentation_test_results/
 utils/yolo_output/
+# Snyk Security Extension - AI Rules (auto-generated)
+.cursor/rules/snyk_rules.mdc
