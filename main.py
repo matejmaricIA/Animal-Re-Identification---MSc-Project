@@ -82,14 +82,26 @@ if __name__ == '__main__':
     parser.add_argument('--gv_method', type=str, default='RANSAC', choices=['RANSAC', 'MAGSAC'],
                         help='Geometric verification method to use (RANSAC or MAGSAC)')
     parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN/Transformer embeddings')
-    parser.add_argument('--use_fisher', action=argparse.BooleanOptionalAction, default=True,
+    parser.add_argument('--use_fisher', action=argparse.BooleanOptionalAction,
                         help='Use PCA/GMM/Fisher-vector features')
 
     parser.add_argument(
         '--embedding_model',
         type=str,
-        default='resnet50',
-        choices=['resnet50', 'megadescriptor-l-384'],
+        default='megadescriptor-l-384',
+        choices=[
+            'resnet50',
+            'megadescriptor-l-384',
+            'dinov2',
+            'dinov2_vits14',
+            'dinov2_vitb14',
+            'dinov2_vitl14',
+            'dinov2_vitg14',
+            'dinov2_vits14_reg4',
+            'dinov2_vitb14_reg4',
+            'dinov2_vitl14_reg4',
+            'dinov2_vitg14_reg4',
+        ],
         help='Model for global embeddings',
     )
     parser.add_argument('--use_shape', action='store_true', help='Use shape descriptors based on animal contours')

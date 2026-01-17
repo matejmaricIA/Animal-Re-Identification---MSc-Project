@@ -77,7 +77,9 @@ test_images/
 notebooks/crop_test_results/
 models/
 Output/
+tmp/
 segmentation_test_results/
 utils/yolo_output/
 # Snyk Security Extension - AI Rules (auto-generated)
 .cursor/rules/snyk_rules.mdc
+AGENTS.md

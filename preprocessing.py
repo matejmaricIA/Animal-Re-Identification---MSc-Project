@@ -136,15 +136,13 @@ def background_removal(image, dataset_name=None):
 def process_image(row, output_dir, use_mantiuk, dataset_name, remove_background):
     """ Process an image by applying Mantiuk tone mapping and background removal."""
 
-    # Check if this is a manual dataset (wild_boar, roe_deer) or WildlifeReID10k dataset
-    manual_datasets = ['wild_boar', 'roe_deer']
-    
-    if dataset_name.lower() in manual_datasets:
-        # For manual datasets, use local project path
-        image_path = os.path.join('.', row['path'])  # row['path'] already contains the full relative path
+    # Prefer local paths when they exist; otherwise fall back to WildlifeReID10k root.
+    project_root = Path(__file__).resolve().parent
+    local_candidate = project_root / str(row["path"])
+    if local_candidate.exists():
+        image_path = str(local_candidate)
     else:
-        # For WildlifeReID10k datasets, use the standard path
-        image_path = os.path.join(f'{WILD_DATASET_PATH}', row['path'])
+        image_path = str(project_root / WILD_DATASET_PATH / str(row["path"]))
     
     identity = row['identity']
     id = str(row['image_id'])
@@ -152,6 +150,8 @@ def process_image(row, output_dir, use_mantiuk, dataset_name, remove_background)
     os.makedirs(save_dir, exist_ok = True)
 
     image = cv2.imread(image_path)
+    if image is None:
+        raise FileNotFoundError(f"Could not read image at: {image_path}")
     if use_mantiuk:
         image = mantiuk_tone_mapping(image)
     

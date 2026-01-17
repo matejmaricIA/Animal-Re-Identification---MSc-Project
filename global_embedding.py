@@ -10,6 +10,11 @@ try:
 except Exception:
     load_megadescriptor_l_384 = None
 
+try:
+    from dinov2 import load_dinov2
+except Exception:
+    load_dinov2 = None
+
 
 def extract_global_embeddings(
     image_paths: Dict[str, str],
@@ -24,7 +29,7 @@ def extract_global_embeddings(
         Mapping from image identifier to file path.
     model_name: str
         Name of the pre-trained model to use. Supports "resnet50" and
-        "megadescriptor-l-384".
+        "megadescriptor-l-384", and DINOv2 variants (e.g. "dinov2_vits14").
     device: torch.device, optional
         Device on which to run the model. Defaults to GPU if available.
 
@@ -47,6 +52,10 @@ def extract_global_embeddings(
         if load_megadescriptor_l_384 is None:
             raise ImportError("MegaDescriptor dependencies are not available")
         model, preprocess = load_megadescriptor_l_384(device)
+    elif "dinov2" in model_name_lower:
+        if load_dinov2 is None:
+            raise ImportError("DINOv2 dependencies are not available")
+        model, preprocess = load_dinov2(model_name, device=device, pretrained=True)
     else:
         raise ValueError(f"Unsupported model: {model_name}")
 

@@ -53,10 +53,12 @@ python main.py --train --ds ATRW --use_geometric_verification --use_lightglue --
 - **`--use_lightglue`**: Uses the LightGlue matcher during geometric verification.
 
 - **`--use_global_embedding`**: Use global CNN/Transformer embeddings.
-- **`--embedding_model`**: Backbone for global embeddings (`resnet50` or
-   `megadescriptor-l-384`). The latter downloads the
+- **`--embedding_model`**: Backbone for global embeddings (`resnet50`,
+   `megadescriptor-l-384`, or DINOv2 variants like `dinov2_vits14` /
+   `dinov2_vitb14` / `dinov2_vitl14` / `dinov2_vitg14` and `_reg4` versions). The
+   `megadescriptor-l-384` encoder is downloaded from
    [`BVRA/MegaDescriptor-L-384`](https://huggingface.co/BVRA/MegaDescriptor-L-384)
-   encoder via `timm`, producing 384-D image descriptors.
+   via `timm`.
 - **`--w_fisher`, `--w_global`**: Weights for Fisher vectors and global embeddings when fusing descriptor blocks.
 
 
@@ -96,12 +98,11 @@ python main.py --count --ds ATRW --num_vertices 150 --num_neighbors 20
 - **`--num_vertices`**: Number of sampled vertices.
 - **`--num_neighbors`**: Number of neighbours per vertex.
 - **`--automated_mode`**: Use fully automated counting without human labels (faster but potentially less accurate).
-- **`--use_global_embedding`**: Include global image embeddings (ResNet50 or
-  MegaDescriptor-L-384) to enhance Fisher vector representations.
-- **`--embedding_model`**: Choose the global embedding model (`resnet50` or
-  `megadescriptor-l-384`, which pulls the HuggingFace
-  [`BVRA/MegaDescriptor-L-384`](https://huggingface.co/BVRA/MegaDescriptor-L-384)
-  encoder).
+- **`--use_global_embedding`**: Include global image embeddings (ResNet50,
+  MegaDescriptor-L-384, or DINOv2) to enhance Fisher vector representations.
+- **`--embedding_model`**: Choose the global embedding model (`resnet50`,
+  `megadescriptor-l-384`, or DINOv2 variants like `dinov2_vits14` /
+  `dinov2_vitb14` / `dinov2_vitl14` / `dinov2_vitg14` and `_reg4` versions).
 - **`--w_fisher`, `--w_global`**: Descriptor fusion weights (same as in training).
 
 

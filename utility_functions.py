@@ -2,6 +2,7 @@ import os
 import sys
 import pickle
 import pandas as pd
+from pathlib import Path
 from wildlife_datasets.datasets import WildlifeReID10k
 from constants import (
     PCA_PATH, GMM_PATH, FISHER_VECTORS, COUNT_RESULTS_XLSX, WILD_DATASET_PATH
@@ -34,44 +35,43 @@ def load_dataset(subset, root=WILD_DATASET_PATH):
         DataFrame ready for the pipeline
     """
 
-    # Manual datasets that use local processed_metadata.csv
-    manual_datasets = ['wild_boar', 'roe_deer']
+    # Prefer local metadata when available (covers custom datasets and cached preprocessed subsets).
+    subset_str = str(subset)
+    local_candidates = [
+        Path("./data") / subset_str / "processed_metadata.csv",
+        Path("./data") / subset_str.lower() / "processed_metadata.csv",
+    ]
+    for metadata_path in local_candidates:
+        if metadata_path.exists():
+            print(f"Loading local dataset metadata: {metadata_path}")
+            df = pd.read_csv(metadata_path, dtype={"image_id": str})
+            print(f"Loaded {len(df)} images from local dataset '{subset_str}'")
+            return df
 
-    if subset.lower() in manual_datasets:
-        print(f"Loading manual dataset: {subset}")
-        
-        # Load from local processed_metadata.csv
-        metadata_path = f"./data/{subset}/processed_metadata.csv"
-        
-        if not os.path.exists(metadata_path):
-            print(f"Metadata file not found: {metadata_path}")
-            print(f"Please run: python utils/create_manual_dataset_metadata.py --dataset {subset}")
-            sys.exit(1)
-        
-        df = pd.read_csv(metadata_path)
-        print(f"Loaded {len(df)} images from {subset} dataset")
+    # Use original WildlifeReID10k loading
+    print(f"Loading WildlifeReID10k subset: {subset}")
+
+    try:
+        from wildlife_datasets.datasets import WildlifeReID10k
+
+        ds = WildlifeReID10k(root, check_files=False)
+        df = ds.metadata.copy()
+
+        if subset != 'full':
+            print(f"Filtering to subset: {subset}")
+            df = df[df["dataset"].str.lower() == subset.lower()].copy()
+            if df.empty:
+                print(f"Subset '{subset}' not found in WildlifeReID10k.")
+                print(
+                    f"If '{subset}' is a custom dataset, create `./data/{subset}/processed_metadata.csv` "
+                    f"(for Chicks4FreeID: `python utils/import_chicks4freeid.py`)."
+                )
+                sys.exit(1)
         return df
 
-    else:
-        # Use original WildlifeReID10k loading
-        print(f"Loading WildlifeReID10k subset: {subset}")
-        
-        try:
-            from wildlife_datasets.datasets import WildlifeReID10k
-            ds = WildlifeReID10k(root, check_files=False)
-            df = ds.metadata.copy()
-            
-            if subset != 'full':
-                print(f"Filtering to subset: {subset}")
-                df = df[df["dataset"].str.lower() == subset.lower()].copy()
-                if df.empty:
-                    print(f"Subset '{subset}' not found.")
-                    sys.exit(1)
-            return df
-            
-        except ImportError:
-            print("WildlifeReID10k not available. Please install wildlife-datasets package.")
-            sys.exit(1)
+    except ImportError:
+        print("WildlifeReID10k not available. Please install wildlife-datasets package.")
+        sys.exit(1)
 
 def validate_dataset_structure(dataset_name):
     """
