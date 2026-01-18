@@ -73,6 +73,129 @@ def load_dataset(subset, root=WILD_DATASET_PATH):
         print("WildlifeReID10k not available. Please install wildlife-datasets package.")
         sys.exit(1)
 
+
+def _normalize_path_value(value: str) -> str:
+    if value is None:
+        return ""
+    path = str(value).strip().replace("\\", "/")
+    if path.startswith("./"):
+        path = path[2:]
+    return path
+
+
+def _normalize_path_series(series: pd.Series) -> pd.Series:
+    return series.fillna("").astype(str).map(_normalize_path_value)
+
+
+def _find_official_metadata_csv(dataset_name: str, metadata_root: Path) -> Path | None:
+    candidates = [
+        metadata_root / dataset_name / "metadata.csv",
+        metadata_root / dataset_name.lower() / "metadata.csv",
+    ]
+    for path in candidates:
+        if path.exists():
+            return path
+    return None
+
+
+def _apply_official_split_from_csv(
+    df: pd.DataFrame, metadata_csv: Path, dataset_label: str
+) -> pd.DataFrame:
+    official = pd.read_csv(metadata_csv, dtype={"image_id": str})
+    if "split" not in official.columns:
+        raise ValueError(f"Official metadata missing 'split' column: {metadata_csv}")
+
+    df = df.copy()
+    if "image_id" in df.columns and "image_id" in official.columns:
+        df_keys = df["image_id"].astype(str)
+        official_keys = official["image_id"].astype(str)
+        match_label = "image_id"
+    elif "path" in df.columns and "path" in official.columns:
+        df_keys = _normalize_path_series(df["path"])
+        official_keys = _normalize_path_series(official["path"])
+        match_label = "path"
+    else:
+        raise ValueError(
+            f"Cannot match official metadata for '{dataset_label}': "
+            "missing image_id or path columns."
+        )
+
+    split_map = pd.Series(
+        official["split"].astype(str).values, index=official_keys
+    ).to_dict()
+    df["split_official"] = df_keys.map(split_map)
+
+    matched = int(df["split_official"].notna().sum())
+    total = len(df)
+    print(
+        f"Matched {matched}/{total} rows to official split for '{dataset_label}' "
+        f"using {match_label}."
+    )
+    if matched < total:
+        print(
+            f"[WARN] Dropping {total - matched} rows without official split for "
+            f"'{dataset_label}'."
+        )
+    df = df.loc[df["split_official"].notna()].copy()
+    df["split"] = df["split_official"]
+    df = df.drop(columns=["split_official"])
+    return df
+
+
+def apply_official_wildlifetools_split(
+    df: pd.DataFrame,
+    dataset_name: str,
+    metadata_root: Path | None = None,
+) -> pd.DataFrame:
+    """Replace local splits with WildlifeTools official per-dataset splits."""
+    if metadata_root is None:
+        metadata_root = (
+            Path(__file__).resolve().parent
+            / "baselines"
+            / "data"
+            / "metadata"
+            / "datasets"
+        )
+    else:
+        metadata_root = Path(metadata_root)
+
+    dataset_name_str = str(dataset_name)
+    if dataset_name_str.lower() == "full":
+        if "dataset" not in df.columns:
+            print(
+                "[WARN] Cannot apply official splits for full dataset: "
+                "missing 'dataset' column."
+            )
+            return df
+        frames = []
+        for ds_value, ds_df in df.groupby("dataset", sort=False):
+            if pd.isna(ds_value):
+                print("[WARN] Missing dataset label; skipping official split.")
+                frames.append(ds_df)
+                continue
+            metadata_csv = _find_official_metadata_csv(str(ds_value), metadata_root)
+            if metadata_csv is None:
+                print(
+                    f"[WARN] Official metadata not found for dataset '{ds_value}'. "
+                    "Keeping existing split."
+                )
+                frames.append(ds_df)
+                continue
+            frames.append(
+                _apply_official_split_from_csv(ds_df, metadata_csv, str(ds_value))
+            )
+        return pd.concat(frames, ignore_index=True)
+
+    metadata_csv = _find_official_metadata_csv(dataset_name_str, metadata_root)
+    if metadata_csv is None:
+        print(
+            f"[WARN] Official metadata not found for dataset '{dataset_name_str}' "
+            f"under {metadata_root}. Keeping existing split."
+        )
+        return df
+
+    return _apply_official_split_from_csv(df, metadata_csv, dataset_name_str)
+
 def validate_dataset_structure(dataset_name):
     """
     Validate that a dataset has the required structure for the pipeline.

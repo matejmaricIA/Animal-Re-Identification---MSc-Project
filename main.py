@@ -48,7 +48,7 @@ from utility_functions import (
     load_stuff,
     save_count_results,
     combine_fisher_vectors,
-    save_count_results_wrapper
+    save_count_results_wrapper,
 )
 
 from global_embedding import extract_global_embeddings
