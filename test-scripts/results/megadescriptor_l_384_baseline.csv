@@ -1,0 +1,33 @@
+dataset,status,error,n_train,n_test,n_id_train,n_id_test,top1_acc,top5_acc,seconds
+BirdIndividualID,error,root does not exist. You may have have mispelled it.,0,0,0,0,,,0.0
+SealID,ok,,1663,417,57,57,0.7865707434052758,0.8920863309352518,33.52
+FriesianCattle2015,ok,,297,80,40,40,0.55,1.0,6.65
+ATRW,ok,,4340,1075,182,182,0.9432558139534883,0.9944186046511628,86.59
+NDD20,error,[Errno 2] No such file or directory: '/home/mm-workstation/re-id/Animal-Re-Identification---MSc-Project/test-scripts/wildlife-tools-data/datasets/NDD20/ABOVE_LABELS.json',0,0,0,0,,,0.0
+SMALST,error,'file',0,0,0,0,,,0.0
+SeaTurtleIDHeads,error,[Errno 2] No such file or directory: '/home/mm-workstation/re-id/Animal-Re-Identification---MSc-Project/test-scripts/wildlife-tools-data/datasets/SeaTurtleIDHeads/annotations.json',0,0,0,0,,,0.0
+AAUZebraFish,error,[Errno 2] No such file or directory: '/home/mm-workstation/re-id/Animal-Re-Identification---MSc-Project/test-scripts/wildlife-tools-data/datasets/AAUZebraFish/annotations.csv',0,0,0,0,,,0.0
+CZoo,ok,,1686,423,24,24,0.9905437352245863,1.0,34.12
+CTai,ok,,3729,933,71,70,0.9110396570203644,0.9667738478027867,74.83
+Giraffes,ok,,1125,268,178,178,0.9104477611940298,0.9738805970149254,22.78
+HyenaID2022,ok,,2499,630,256,256,0.7841269841269841,0.8984126984126984,50.44
+MacaqueFaces,ok,,5024,1256,34,34,0.9904458598726115,0.9952229299363057,100.8
+OpenCows2020,ok,,3789,947,46,46,1.0,1.0,76.05
+StripeSpotter,ok,,656,164,45,44,0.9817073170731707,0.9939024390243902,13.63
+AerialCattle2017,ok,,37071,9269,23,23,1.0,1.0,759.6
+GiraffeZebraID,ok,,5422,1503,2056,1142,0.83166999334664,0.9021956087824351,112.71
+IPanda50,ok,,5499,1375,50,50,0.8690909090909091,0.9534545454545454,110.78
+WhaleSharkID,ok,,6108,1585,543,512,0.6201892744479496,0.7533123028391168,123.89
+FriesianCattle2017,ok,,742,198,89,84,0.9646464646464646,0.9949494949494949,15.64
+Cows2021,error,'path',0,0,0,0,,,0.0
+LeopardID2022,ok,,5373,1433,430,380,0.7557571528262387,0.8415910676901605,1571.49
+NOAARightWhale,skipped,"download failed: Kaggle terms must be agreed with.
+            Check https://wildlifedatasets.github.io/wildlife-datasets/downloads#noaarightwhale",0,0,0,0,,,0.17
+HappyWhale,skipped,"download failed: Kaggle terms must be agreed with.
+            Check https://wildlifedatasets.github.io/wildlife-datasets/downloads#happywhale",0,0,0,0,,,0.11
+HumpbackWhaleID,skipped,"download failed: Kaggle terms must be agreed with.
+            Check https://wildlifedatasets.github.io/wildlife-datasets/downloads#humpbackwhale",0,0,0,0,,,0.11
+LionData,ok,,585,155,94,94,0.25161290322580643,0.5483870967741935,106.69
+NyalaData,ok,,1514,428,237,236,0.3644859813084112,0.6401869158878505,113.6
+ZindiTurtleRecall,ok,,9721,3082,2265,2251,0.7439974042829332,0.890979883192732,1100.77
+BelugaID,ok,,4625,1277,788,633,0.6648394675019577,0.7635082223962412,254.61

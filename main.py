@@ -92,15 +92,6 @@ if __name__ == '__main__':
         choices=[
             'resnet50',
             'megadescriptor-l-384',
-            'dinov2',
-            'dinov2_vits14',
-            'dinov2_vitb14',
-            'dinov2_vitl14',
-            'dinov2_vitg14',
-            'dinov2_vits14_reg4',
-            'dinov2_vitb14_reg4',
-            'dinov2_vitl14_reg4',
-            'dinov2_vitg14_reg4',
         ],
         help='Model for global embeddings',
     )
