@@ -1,0 +1,2 @@
+dataset,status,error,split_type,n_train,n_test,n_id_train,n_id_test,top1_acc,top5_acc,random_split,trained_on,seconds
+processed_metadata,ok,,local,1573,505,274,272,0.1801980198019802,0.2871287128712871,False,False,0.0

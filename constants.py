@@ -98,3 +98,43 @@ MAX_KEYPOINTS = 5000
 # Default weights for combining Fisher vectors from multiple feature
 # extraction methods when using the ``ensamble`` option.
 ENSEMBLE_WEIGHTS = [1/3, 1/3, 1/3]
+
+# MegaDescriptor training/split metadata derived from MegaDescriptor_l_384_baseline.csv.
+# Keys are lowercase dataset names for case-insensitive lookup.
+MD_DATASET_SPLITS = {
+    "aerialcattle2017": {"split_type": "random", "trained_on": True, "random_split": True},
+    "amvrakikosturtles": {"split_type": "similarity-aware", "trained_on": False, "random_split": False},
+    "atrw": {"split_type": "random", "trained_on": True, "random_split": True},
+    "belugaid": {"split_type": "random", "trained_on": True, "random_split": True},
+    "catindividualimages": {"split_type": "similarity-aware", "trained_on": False, "random_split": False},
+    "chicks4freeid": {"split_type": "similarity-aware", "trained_on": False, "random_split": False},
+    "cowdataset": {"split_type": "time-aware", "trained_on": False, "random_split": False},
+    "ctai": {"split_type": "random", "trained_on": True, "random_split": True},
+    "czoo": {"split_type": "random", "trained_on": True, "random_split": True},
+    "dogfacenet": {"split_type": "similarity-aware", "trained_on": False, "random_split": False},
+    "elpephants": {"split_type": "original_split", "trained_on": False, "random_split": False},
+    "friesiancattle2015": {"split_type": "random", "trained_on": True, "random_split": True},
+    "friesiancattle2017": {"split_type": "random", "trained_on": True, "random_split": True},
+    "giraffes": {"split_type": "random", "trained_on": True, "random_split": True},
+    "giraffezebraid": {"split_type": "random", "trained_on": True, "random_split": True},
+    "hyenaid2022": {"split_type": "random", "trained_on": True, "random_split": True},
+    "ipanda50": {"split_type": "random", "trained_on": True, "random_split": True},
+    "leopardid2022": {"split_type": "random", "trained_on": True, "random_split": True},
+    "liondata": {"split_type": "random", "trained_on": True, "random_split": True},
+    "macaquefaces": {"split_type": "random", "trained_on": True, "random_split": True},
+    "mpdd": {"split_type": "similarity-aware", "trained_on": False, "random_split": False},
+    "multicamcows2024": {"split_type": "time-aware", "trained_on": False, "random_split": False},
+    "nyaladata": {"split_type": "random", "trained_on": True, "random_split": True},
+    "opencows2020": {"split_type": "random", "trained_on": True, "random_split": True},
+    "polarbearvidid": {"split_type": "similarity-aware", "trained_on": False, "random_split": False},
+    "primface": {"split_type": "similarity-aware", "trained_on": False, "random_split": False},
+    "reunionturtles": {"split_type": "similarity-aware", "trained_on": False, "random_split": False},
+    "seastarreid2023": {"split_type": "time-aware", "trained_on": False, "random_split": False},
+    "seaturtleid2022": {"split_type": "time-aware", "trained_on": False, "random_split": False},
+    "sealid": {"split_type": "random", "trained_on": True, "random_split": True},
+    "southernprovinceturtles": {"split_type": "similarity-aware", "trained_on": False, "random_split": False},
+    "stripespotter": {"split_type": "random", "trained_on": True, "random_split": True},
+    "whalesharkid": {"split_type": "random", "trained_on": True, "random_split": True},
+    "zakynthosturtles": {"split_type": "similarity-aware", "trained_on": False, "random_split": False},
+    "zinditurtlerecall": {"split_type": "random", "trained_on": True, "random_split": True},
+}

@@ -81,8 +81,8 @@ if __name__ == '__main__':
                         help='Use fully automated counting without (fake) human labels')
     parser.add_argument('--gv_method', type=str, default='RANSAC', choices=['RANSAC', 'MAGSAC'],
                         help='Geometric verification method to use (RANSAC or MAGSAC)')
-    parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN/Transformer embeddings')
-    parser.add_argument('--use_fisher', action=argparse.BooleanOptionalAction,
+    parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN')
+    parser.add_argument('--use_fisher', action=store_true,
                         help='Use PCA/GMM/Fisher-vector features')
 
     parser.add_argument(
@@ -123,6 +123,15 @@ if __name__ == '__main__':
         f"_v{args.version}"
     )
     
+    md_meta = MD_DATASET_SPLITS.get(str(dataset_name).strip().lower(), None)
+    if md_meta is not None:
+        print(
+            "MD split metadata: "
+            f"trained_on={md_meta['trained_on']}, "
+            f"split_type={md_meta['split_type']}, "
+            f"random_split={md_meta['random_split']}"
+        )
+
     # Check if GPU is available
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -400,7 +409,12 @@ if __name__ == '__main__':
             )
         
         metrics = evaluate_predictions(preds, test_labels)
-        
+
+        if md_meta is not None:
+            metrics["md_trained_on"] = md_meta["trained_on"]
+            metrics["md_split_type"] = md_meta["split_type"]
+            metrics["md_random_split"] = md_meta["random_split"]
+
         if use_cuda:
             torch.cuda.synchronize()
             
@@ -434,6 +448,10 @@ if __name__ == '__main__':
                 "F-1 Score": round(float(metrics["classification_metrics"]["weighted avg"]["f1-score"]), 4)
                 
             }
+            if md_meta is not None:
+                row["MD Trained On"] = md_meta["trained_on"]
+                row["MD Split Type"] = md_meta["split_type"]
+                row["MD Random Split"] = md_meta["random_split"]
             if args.use_global_embedding and args.use_fisher:
                 row["Global Weight"] = args.w_global
                 row["Fisher Weight"] = args.w_fisher

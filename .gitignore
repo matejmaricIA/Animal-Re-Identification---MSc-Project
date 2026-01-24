@@ -85,3 +85,4 @@ utils/yolo_output/
 AGENTS.md
 venv_wildlife_tools/
 test-scripts/wildlife-tools-data/*
+test-scripts/wildlifereid10k_splits/*

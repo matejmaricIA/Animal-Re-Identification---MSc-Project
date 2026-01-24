@@ -1,0 +1,13 @@
+dataset,group_key,n_train,n_test,total,grid_path
+PolarBearVidID,id::PolarBearVidID_Vera,99,16,115,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Vera.png
+PolarBearVidID,id::PolarBearVidID_Lloyd,98,16,114,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Lloyd.png
+PolarBearVidID,id::PolarBearVidID_Nana,98,15,113,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Nana.png
+PolarBearVidID,id::PolarBearVidID_Charlotte,96,15,111,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Charlotte.png
+PolarBearVidID,id::PolarBearVidID_Hertha,92,15,107,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Hertha.png
+PolarBearVidID,id::PolarBearVidID_Finja,90,14,104,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Finja.png
+PolarBearVidID,id::PolarBearVidID_Milana,85,14,99,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Milana.png
+PolarBearVidID,id::PolarBearVidID_Sprinter,84,13,97,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Sprinter.png
+PolarBearVidID,id::PolarBearVidID_Larissa,76,14,90,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Larissa.png
+PolarBearVidID,id::PolarBearVidID_Tonja,74,14,88,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Tonja.png
+PolarBearVidID,id::PolarBearVidID_Nanuq,72,14,86,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Nanuq.png
+PolarBearVidID,id::PolarBearVidID_Nora,62,14,76,test-scripts/results/cluster_viz/PolarBearVidID/id::PolarBearVidID_Nora.png
