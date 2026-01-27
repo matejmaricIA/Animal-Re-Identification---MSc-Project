@@ -35,8 +35,25 @@ def load_dataset(subset, root=WILD_DATASET_PATH):
         DataFrame ready for the pipeline
     """
 
-    # Prefer local metadata when available (covers custom datasets and cached preprocessed subsets).
     subset_str = str(subset)
+
+    # Prefer the curated all_datasets.csv when available.
+    all_datasets_path = Path("./data/all_datasets.csv")
+    if all_datasets_path.exists():
+        df_all = pd.read_csv(
+            all_datasets_path,
+            dtype={"image_id": str, "identity": str, "dataset": str},
+        )
+        if subset_str.lower() == "full":
+            print(f"Loading all datasets from {all_datasets_path}")
+            return df_all
+        df_sub = df_all[df_all["dataset"].str.lower() == subset_str.lower()].copy()
+        if not df_sub.empty:
+            print(f"Loading dataset '{subset_str}' from {all_datasets_path}")
+            return df_sub
+        print(f"Dataset '{subset_str}' not found in {all_datasets_path}, falling back.")
+
+    # Prefer local metadata when available (covers custom datasets and cached preprocessed subsets).
     local_candidates = [
         Path("./data") / subset_str / "processed_metadata.csv",
         Path("./data") / subset_str.lower() / "processed_metadata.csv",

@@ -88,5 +88,8 @@
             "support": 369.0
         }
     },
-    "eval_runtime_sec": 145.54595947265625
+    "md_trained_on": false,
+    "md_split_type": "time-aware",
+    "md_random_split": false,
+    "eval_runtime_sec": 88.79527854919434
 }

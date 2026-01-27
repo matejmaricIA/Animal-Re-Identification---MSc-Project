@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 from wildlife_datasets import datasets, splits
 from wildlife_datasets.datasets import WildlifeReID10k
 from patches.elpephants_patch import PatchedELPephants
@@ -60,8 +61,15 @@ if __name__ == '__main__':
     parser.add_argument('--train', action = 'store_true')
     parser.add_argument('--predict', action = 'store_true')
     parser.add_argument('--count', action = 'store_true', help='Estimate the population size using Nested Importance Sampling')
-    parser.add_argument('--ds', type = str, help="Specify the dataset to use (e.g., ATRW, BelugaID, etc.), full to train on the full dataset.",
-                        default = 'full')
+    parser.add_argument(
+        '--ds',
+        nargs='+',
+        help=(
+            "Specify one or more datasets (e.g., ATRW BelugaID). "
+            "Use 'full' to train on all datasets."
+        ),
+        default=['full'],
+    )
     parser.add_argument('--image_location', type = str)
     parser.add_argument('--save_eval', action='store_true', help='Save evaluation metrics during training', default = True)
     parser.add_argument('--use_mantiuk', action='store_true', help='Use Mantiuk tone mapping during preprocessing')
@@ -82,7 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('--gv_method', type=str, default='RANSAC', choices=['RANSAC', 'MAGSAC'],
                         help='Geometric verification method to use (RANSAC or MAGSAC)')
     parser.add_argument('--use_global_embedding', action='store_true', help='Use global CNN')
-    parser.add_argument('--use_fisher', action=store_true,
+    parser.add_argument('--use_fisher', action='store_true',
                         help='Use PCA/GMM/Fisher-vector features')
 
     parser.add_argument(
@@ -99,6 +107,19 @@ if __name__ == '__main__':
     parser.add_argument('--w_fisher', type=float, default=3.0, help='Weight for Fisher vectors during fusion')
     parser.add_argument('--w_global', type=float, default=1.0, help='Weight for global embeddings during fusion')
     parser.add_argument('--seed', type=int, default=None, help='Random seed for reproducible counting')
+    parser.add_argument(
+        '--skip_zscore',
+        action='store_true',
+        help='Skip z-score standardization and only apply L2 normalization.',
+    )
+    parser.add_argument(
+        '--use_md_baseline_split',
+        action='store_true',
+        help=(
+            "Override splits for MD 'trained_on' datasets with the MegaDescriptor "
+            "baseline ClosedSetSplit (0.8, seed=666)."
+        ),
+    )
 
 
     args = parser.parse_args()
@@ -123,80 +144,83 @@ if __name__ == '__main__':
         f"_v{args.version}"
     )
     
-    md_meta = MD_DATASET_SPLITS.get(str(dataset_name).strip().lower(), None)
-    if md_meta is not None:
-        print(
-            "MD split metadata: "
-            f"trained_on={md_meta['trained_on']}, "
-            f"split_type={md_meta['split_type']}, "
-            f"random_split={md_meta['random_split']}"
-        )
+    def run_training_for_dataset(dataset_name: str, df_raw: pd.DataFrame) -> None:
+        print(f"Training mode selected. Using dataset: {dataset_name}")
+        print("training...")
 
-    # Check if GPU is available
-    use_cuda = torch.cuda.is_available()
-    device = torch.device("cuda" if use_cuda else "cpu")
-    print(f"Using device: {device}")
-
-    if use_cuda:
-        print(f"GPU: {torch.cuda.get_device_name(0)}")
-        print(f"Memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB")
-
-    if args.train and not dataset_name:
-        print("Please specify the dataset to train on using the --ds argument.")
-        sys.exit(0)
-
-    if args.predict and not dataset_name:
-        print("Please specify the dataset to use for prediction with the --ds argument.")
-        sys.exit(0)
-    
-    if args.train:
-        dataset_name = args.ds
-        print(f"Training mode selected. Using dataset: {args.ds}")
-
-        print('training...')
-        #if not os.path.isdir(f"./data/{args.ds}"):
-            #datasets.ATRW.get_data(f'./data/ATRW/')
-        #    datasets.__dict__[dataset_name].get_data(f"./data/{dataset_name}/")
-
-        #dataset = datasets.ATRW('./data/ATRW')
-        #dataset = datasets.__dict__[dataset_name](f"./data/{dataset_name}/")
-        #df = dataset.df
-        #df['image_id'] = df['image_id'].astype(str)
-        
-        df_raw = load_dataset(dataset_name)
+        df_raw = df_raw.copy()
         df_raw["image_id"] = df_raw["image_id"].astype(str)
-        
+
+        md_meta = MD_DATASET_SPLITS.get(str(dataset_name).strip().lower(), None)
+        if md_meta is not None:
+            print(
+                "MD split metadata: "
+                f"trained_on={md_meta['trained_on']}, "
+                f"split_type={md_meta['split_type']}, "
+                f"random_split={md_meta['random_split']}"
+            )
+
+        feature_method = method
+
         start_eval_time = time.time()
-        # ── Pre‑processing (tone map / background removal) ──
-        if dataset_name.lower() == "full":
-            processed_frames = []
-        #    for sub_name, sub_df in df_raw.groupby("dataset"):
-        #        sub_dir = f"./data/{sub_name}"
-        #        os.makedirs(sub_dir, exist_ok=True)
-        #        csv_path = f"{sub_dir}/processed_metadata.csv"
-        #        if not os.path.exists(csv_path):
-        #            processed = preprocessing.preprocess_dataset(
-        #                sub_df.copy(),
-        #                f"{sub_dir}/segmented_dataset/",
-        #                sub_name,
-        #                use_mantiuk=args.use_mantiuk,
-        #                remove_background=args.remove_background,
-        #            )
-        #            processed.to_csv(csv_path, index=False)
-        #        else:
-        #            processed = pd.read_csv(csv_path)
-        #        processed_frames.append(processed)
-        #    df = pd.concat(processed_frames, ignore_index=True)
+        use_baseline_data = (
+            args.use_md_baseline_split and md_meta is not None and md_meta.get("trained_on")
+        )
+        baseline_dataset_label = None
+
+        # Pre‑processing (tone map / background removal)
+        sub_dir = f"./data/{dataset_name}"
+        os.makedirs(sub_dir, exist_ok=True)
+
+        if use_baseline_data:
+            if args.remove_background:
+                print(
+                    "[ERROR] --use_md_baseline_split uses baseline prepared images; "
+                    "--remove_background is not supported in this mode."
+                )
+                sys.exit(1)
+
+            repo_root = Path(__file__).resolve().parent
+            baseline_root = repo_root / "test-scripts" / "wildlife-tools-data"
+            metadata_root = baseline_root / "metadata" / "datasets"
+            images_root = baseline_root / "images" / "size-518"
+
+            def _resolve_baseline_dir(root: Path, name: str) -> Path | None:
+                direct = root / name
+                if direct.exists():
+                    return direct
+                name_lower = name.lower()
+                for child in root.iterdir():
+                    if child.is_dir() and child.name.lower() == name_lower:
+                        return child
+                return None
+
+            baseline_dir = _resolve_baseline_dir(metadata_root, str(dataset_name))
+            if baseline_dir is None:
+                print(f"[ERROR] Baseline metadata not found for dataset: {dataset_name}")
+                sys.exit(1)
+            baseline_dataset_label = baseline_dir.name
+            metadata_csv = baseline_dir / "metadata.csv"
+            if not metadata_csv.exists():
+                print(f"[ERROR] Missing baseline metadata CSV: {metadata_csv}")
+                sys.exit(1)
+
+            df = pd.read_csv(metadata_csv, dtype={"image_id": str, "identity": str})
+            df["image_id"] = df["image_id"].astype(str)
+            df["identity"] = df["identity"].astype(str)
+
+            image_root = images_root / baseline_dataset_label
+            df["baseline_path"] = df["path"].astype(str).apply(
+                lambda p: str((image_root / p).resolve())
+            )
+            print(f"Using baseline images from: {image_root}")
         else:
-            sub_dir = f"./data/{dataset_name}"
-            os.makedirs(sub_dir, exist_ok=True)
-
-            
-
             csv_path = f"{sub_dir}/processed_metadata.csv"
             output_dir = (
                 f"{sub_dir}/segmented_dataset" if args.remove_background else f"{sub_dir}/dataset"
             )
+
+            # This whole segment is kinda deprecated and should be addressed.
             if not (os.path.exists(csv_path) and os.path.exists(output_dir)):
                 if (
                     args.remove_background
@@ -219,17 +243,27 @@ if __name__ == '__main__':
                     )
                 df.to_csv(csv_path, index=False)
             else:
-                #df = pd.read_csv(csv_path)
                 df = pd.read_csv(csv_path, dtype={"image_id": str})
 
-        df["image_id"] = df["image_id"].astype(str)
-        
+            df["image_id"] = df["image_id"].astype(str)
+
+        if use_baseline_data:
+            print(
+                "Overriding split with MegaDescriptor baseline ClosedSetSplit "
+                "(ratio=0.8, seed=666)."
+            )
+            df = df.reset_index(drop=True)
+            splitter = splits.ClosedSetSplit(0.8, identity_skip="unknown", seed=666)
+            idx_train, idx_test = splitter.split(df)[0]
+            df["split"] = "train"
+            df.loc[df.index[idx_test], "split"] = "test"
+
         if "split" in df.columns:
             print("Using predefined split in WildlifeReID10k.")
             train_mask = df["split"].str.lower() != "test"
             test_mask = df["split"].str.lower() == "test"
             df_train, df_test = df[train_mask], df[test_mask]
-            
+
             if args.split_type == 'closed':
                 print('Using closed set split.')
                 # After loading the dataset splits
@@ -239,31 +273,55 @@ if __name__ == '__main__':
                 # Filter test set to only include identities seen in training
                 df_test = df_test[df_test["identity"].isin(train_identities)].copy()
             splits.analyze_split(df, df_train.index, df_test.index)
-            
+
+        use_baseline_paths = use_baseline_data and "baseline_path" in df.columns
+        if use_baseline_paths:
+            train_image_items = list(
+                zip(df_train["image_id"].astype(str), df_train["baseline_path"])
+            )
+            test_image_items = list(
+                zip(df_test["image_id"].astype(str), df_test["baseline_path"])
+            )
+            train_paths_map = dict(
+                zip(df_train["image_id"].astype(str), df_train["baseline_path"])
+            )
+            test_paths_map = dict(
+                zip(df_test["image_id"].astype(str), df_test["baseline_path"])
+            )
+        else:
+            train_image_items = get_image_paths(df_train, args.remove_background)
+            test_image_items = get_image_paths(df_test, args.remove_background)
+            train_paths_map = dict(
+                zip(df_train["image_id"].astype(str), train_image_items)
+            )
+            test_paths_map = dict(
+                zip(df_test["image_id"].astype(str), test_image_items)
+            )
+
         ds_tag = dataset_name
         base_dir = f"./data/{ds_tag}"
         os.makedirs(base_dir, exist_ok=True)
-        
+
         # ── Feature extraction ──
         train_dict, test_dict = {}, {}
         train_keypoints, test_keypoints = {}, {}
         fv_tr, fv_te = {}, {}
         if args.use_fisher:
-            if method == 'ensamble':
+            if feature_method == 'ensamble':
                 methods = ['disk', 'keynet_hardnet', 'lightglue']
                 for m in methods:
                     dir_tr = descriptor_dir(base_dir, m, 'train', seg_tag)
                     dir_te = descriptor_dir(base_dir, m, 'test', seg_tag)
                     if not os.path.isdir(dir_tr):
                         if m == 'disk':
-                            extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, dir_tr)
-                            extract_features(get_image_paths(df_test, args.remove_background), MODEL_PATH, dir_te)
+                            extract_features(train_image_items, MODEL_PATH, dir_tr)
+                            extract_features(test_image_items, MODEL_PATH, dir_te)
                         elif m == 'keynet_hardnet':
-                            extract_features_keynet_hardnet_faster(get_image_paths(df_train, args.remove_background), dir_tr)
-                            extract_features_keynet_hardnet_faster(get_image_paths(df_test, args.remove_background), dir_te)
+                            extract_features_keynet_hardnet_faster(train_image_items, dir_tr)
+                            extract_features_keynet_hardnet_faster(test_image_items, dir_te)
                         elif m == 'lightglue':
-                            extract_features_lightglue(get_image_paths(df_train, args.remove_background), dir_tr)
-                            extract_features_lightglue(get_image_paths(df_test, args.remove_background), dir_te)
+                            extract_features_lightglue(train_image_items, dir_tr)
+                            extract_features_lightglue(test_image_items, dir_te)
 
                 fv_tr_list = []
                 fv_te_list = []
@@ -297,18 +355,18 @@ if __name__ == '__main__':
                 fv_te = combine_fisher_vectors(fv_te_list, ENSEMBLE_WEIGHTS)
 
             else:
-                dir_tr = descriptor_dir(base_dir, method, 'train', seg_tag)
-                dir_te = descriptor_dir(base_dir, method, 'test', seg_tag)
+                dir_tr = descriptor_dir(base_dir, feature_method, 'train', seg_tag)
+                dir_te = descriptor_dir(base_dir, feature_method, 'test', seg_tag)
                 if not os.path.isdir(dir_tr):
-                    if method == 'disk':
-                        extract_features(get_image_paths(df_train, args.remove_background), MODEL_PATH, dir_tr)
-                        extract_features(get_image_paths(df_test, args.remove_background), MODEL_PATH, dir_te)
-                    elif method == 'keynet_hardnet':
-                        extract_features_keynet_hardnet_faster(get_image_paths(df_train, args.remove_background), dir_tr)
-                        extract_features_keynet_hardnet_faster(get_image_paths(df_test, args.remove_background), dir_te)
-                    elif method == 'lightglue':
-                        extract_features_lightglue(get_image_paths(df_train, args.remove_background), dir_tr)
-                        extract_features_lightglue(get_image_paths(df_test, args.remove_background), dir_te)
+                    if feature_method == 'disk':
+                        extract_features(train_image_items, MODEL_PATH, dir_tr)
+                        extract_features(test_image_items, MODEL_PATH, dir_te)
+                    elif feature_method == 'keynet_hardnet':
+                        extract_features_keynet_hardnet_faster(train_image_items, dir_tr)
+                        extract_features_keynet_hardnet_faster(test_image_items, dir_te)
+                    elif feature_method == 'lightglue':
+                        extract_features_lightglue(train_image_items, dir_tr)
+                        extract_features_lightglue(test_image_items, dir_te)
 
                 train_dict = load_descriptors(os.path.join(dir_tr, 'descriptors.h5'))
                 test_dict = load_descriptors(os.path.join(dir_te, 'descriptors.h5'))
@@ -316,9 +374,9 @@ if __name__ == '__main__':
                 test_keypoints = load_keypoints(os.path.join(dir_te, 'keypoints.h5'))
 
                 desc_tr = stack_all_descriptors(train_dict)
-                pca_path = PCA_PATH.format(ds_tag, method, seg_tag)
-                gmm_path = GMM_PATH.format(ds_tag, method, seg_tag)
-                fv_path  = FISHER_VECTORS.format(ds_tag, method, seg_tag)
+                pca_path = PCA_PATH.format(ds_tag, feature_method, seg_tag)
+                gmm_path = GMM_PATH.format(ds_tag, feature_method, seg_tag)
+                fv_path  = FISHER_VECTORS.format(ds_tag, feature_method, seg_tag)
                 if os.path.exists(pca_path) and os.path.exists(gmm_path) and os.path.exists(fv_path):
                     print("Using already trained PCA and GMM models.")
                     pca, gmm, fv_tr = load_stuff(pca_path, gmm_path, fv_path)
@@ -331,20 +389,11 @@ if __name__ == '__main__':
                     fv_te = compute_fisher_vectors(test_dict, pca, gmm)
                     print("Fisher vectors computed for training and test sets.")
                     save_stuff(pca, gmm, fv_tr, (pca_path, gmm_path, fv_path))
-            
-            #params = calibrate(
-            #    dataset_tag = dataset_name,
-            #    fisher_vecs = fv_tr,
-            #    descriptors = train_dict,
-            #    keypoints = train_keypoints,
-            #)
-            #print("Dataset-specific GV params: ", params)
-            
 
         if args.use_global_embedding:
             print("Extracting global embeddings...")
-            train_paths = dict(zip(df_train["image_id"].astype(str), get_image_paths(df_train, args.remove_background)))
-            test_paths = dict(zip(df_test["image_id"].astype(str), get_image_paths(df_test, args.remove_background)))
+            train_paths = train_paths_map
+            test_paths = test_paths_map
             emb_tr_path = f"{base_dir}/global_embeddings_train_{args.embedding_model}_{seg_tag}.pkl"
             emb_te_path = f"{base_dir}/global_embeddings_test_{args.embedding_model}_{seg_tag}.pkl"
             if os.path.exists(emb_tr_path) and os.path.exists(emb_te_path):
@@ -377,7 +426,11 @@ if __name__ == '__main__':
         norm_train_blocks = {}
         norm_test_blocks = {}
         for name in train_blocks.keys():
-            tr_norm, te_norm = apply_zscore_and_l2_train_test(train_blocks[name], test_blocks[name])
+            tr_norm, te_norm = apply_zscore_and_l2_train_test(
+                train_blocks[name],
+                test_blocks[name],
+                skip_zscore=args.skip_zscore,
+            )
             norm_train_blocks[name] = tr_norm
             norm_test_blocks[name] = te_norm
 
@@ -389,25 +442,22 @@ if __name__ == '__main__':
 
         fused_tr = fuse_blocks_weighted_concat(norm_train_blocks, weight_map)
         fused_te = fuse_blocks_weighted_concat(norm_test_blocks, weight_map)
-        
+
         if args.use_geometric_verification:
-            if args.method == 'keynet_hardnet':
-                method = 'disk'
-            else:
-                method = 'disk'
+            gv_feature_method = 'disk'
             print("Running training evaluation with geometric verification...")
             preds = classify_test_images_with_geometric_verification(
                 fused_te, fused_tr,
                 test_keypoints, train_keypoints,
                 test_dict, train_dict, train_labels, 5,
-                use_lightglue=args.use_lightglue, method=method,
+                use_lightglue=args.use_lightglue, method=gv_feature_method,
             )
         else:
             print("Running standard training evaluation...")
             preds = classify_test_images(
                 fused_te, fused_tr, train_labels, 5,
             )
-        
+
         metrics = evaluate_predictions(preds, test_labels)
 
         if md_meta is not None:
@@ -417,12 +467,11 @@ if __name__ == '__main__':
 
         if use_cuda:
             torch.cuda.synchronize()
-            
+
         runtime_sec = time.time() - start_eval_time
         metrics["eval_runtime_sec"] = runtime_sec
-        
+
         if args.save_eval:
-            #save_evaluation_results(metrics, ds_tag)
             save_evaluation_results(metrics, ds_tag, tag=tag)
             row = {
                 "Dataset": dataset_name,
@@ -446,7 +495,6 @@ if __name__ == '__main__':
                 "Accuracy": round(float(metrics["accuracy"]), 4),
                 "Top-5 Accuracy": round(float(metrics["top_n_accuracy"]), 4),
                 "F-1 Score": round(float(metrics["classification_metrics"]["weighted avg"]["f1-score"]), 4)
-                
             }
             if md_meta is not None:
                 row["MD Trained On"] = md_meta["trained_on"]
@@ -456,8 +504,7 @@ if __name__ == '__main__':
                 row["Global Weight"] = args.w_global
                 row["Fisher Weight"] = args.w_fisher
             save_count_results_wrapper(row, EVAL_RESULTS_XLSX)
-        
-        #_input = input("Create a full‑dataset DB? (yes/no) ")
+
         _input = 'no'
         if _input.strip().lower() == "yes" and args.use_fisher:
             extract_features(get_image_paths(df, args.remove_background), MODEL_PATH, f"{base_dir}/db/")
@@ -471,8 +518,43 @@ if __name__ == '__main__':
                 f"{base_dir}/db/gmm.pkl",
                 f"{base_dir}/db/fisher_vectors.pkl"))
             print("Database saved.")
+
+    # Check if GPU is available
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
+    print(f"Using device: {device}")
+
+    if use_cuda:
+        print(f"GPU: {torch.cuda.get_device_name(0)}")
+        print(f"Memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB")
+
+    if args.train and not dataset_name:
+        print("Please specify the dataset to train on using the --ds argument.")
         sys.exit(0)
-        
+
+    if args.predict and not dataset_name:
+        print("Please specify the dataset to use for prediction with the --ds argument.")
+        sys.exit(0)
+    
+    if args.train:
+        requested = [str(name).strip() for name in dataset_name if str(name).strip()]
+        if not requested:
+            print("Please specify the dataset to train on using the --ds argument.")
+            sys.exit(0)
+
+        if any(name.lower() == "full" for name in requested):
+            df_all = load_dataset("full")
+            if "dataset" not in df_all.columns:
+                print("Expected 'dataset' column in all_datasets.csv for full mode.")
+                sys.exit(1)
+            for sub_name, sub_df in df_all.groupby("dataset", sort=True):
+                run_training_for_dataset(sub_name, sub_df)
+        else:
+            for name in requested:
+                df_raw = load_dataset(name)
+                run_training_for_dataset(name, df_raw)
+        sys.exit(0)
+
     if args.count:
         print(f"Using geometric verification method: {gv_method}")
     

@@ -41,6 +41,14 @@ def get_segmentation_tag(remove_background: bool) -> str:
     """Return a string tag for segmented or unsegmented mode."""
     return "segmented" if remove_background else "unsegmented"
 
+def _parse_image_item(item):
+    """Return (image_id, path) from either a path string or (id, path) pair."""
+    if isinstance(item, (tuple, list)) and len(item) == 2:
+        img_id, path = item
+        return str(img_id), str(path)
+    path = str(item)
+    return Path(path).stem, path
+
 
 class ImageDataset(torch.utils.data.Dataset):
         def __init__(self, paths, max_size=None):
@@ -51,7 +59,7 @@ class ImageDataset(torch.utils.data.Dataset):
             return len(self.paths)
 
         def __getitem__(self, index):
-            path = self.paths[index]
+            img_id, path = _parse_image_item(self.paths[index])
             img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
             if img is None:
                 raise FileNotFoundError(path)
@@ -63,18 +71,18 @@ class ImageDataset(torch.utils.data.Dataset):
                     new_size = (int(w * scale), int(h * scale))
                     img = cv2.resize(img, new_size, interpolation=cv2.INTER_AREA)
             tens = torch.from_numpy(img).float().unsqueeze(0) / 255.0
-            return Path(path).stem, tens
+            return img_id, tens
 
         def __len__(self):
             return len(self.paths)
 
         def __getitem__(self, index):
-            path = self.paths[index]
+            img_id, path = _parse_image_item(self.paths[index])
             img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
             if img is None:
                 raise FileNotFoundError(path)
             tens = torch.from_numpy(img).float().unsqueeze(0) / 255.0
-            return Path(path).stem, tens
+            return img_id, tens
 
 
 def get_image_paths(df, remove_background = True):
@@ -98,8 +106,8 @@ def extract_features(image_paths, model_path, output_dir, max_keypoints=MAX_KEYP
         kp_h5_path = Path(output_dir) / "keypoints.h5"
 
         with h5py.File(desc_h5_path, "w") as desc_h5, h5py.File(kp_h5_path, "w") as kp_h5:
-            for img_path in tqdm.tqdm(image_paths, desc="DISK features"):
-                img_id = Path(img_path).stem
+            for img_item in tqdm.tqdm(image_paths, desc="DISK features"):
+                img_id, img_path = _parse_image_item(img_item)
                 image = load_image(img_path).to(device)
 
                 with torch.inference_mode():
@@ -166,8 +174,7 @@ def extract_features_keynet_hardnet(image_paths,
 
     with h5py.File(desc_h5_path, "w") as desc_h5, h5py.File(kp_h5_path, "w") as kp_h5:
         for img_idx in trange(len(image_paths), desc="KeyNetAffNetHardNet"):
-            img_path = image_paths[img_idx]
-            img_id   = Path(img_path).stem       # e.g. "00012345" without extension
+            img_id, img_path = _parse_image_item(image_paths[img_idx])
 
             img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
             if img is None:
@@ -548,8 +555,8 @@ def extract_features_lightglue(
     kp_h5_path = Path(output_dir) / "keypoints.h5"
 
     with h5py.File(desc_h5_path, "w") as desc_h5, h5py.File(kp_h5_path, "w") as kp_h5:
-        for img_path in tqdm.tqdm(image_paths, desc=f"{feature_type} features"):
-            img_id = Path(img_path).stem
+        for img_item in tqdm.tqdm(image_paths, desc=f"{feature_type} features"):
+            img_id, img_path = _parse_image_item(img_item)
             image = load_image(img_path).to(device)
             with torch.inference_mode():
                 feats = extractor.extract(image)
@@ -587,5 +594,3 @@ if __name__ == "__main__":
     
     img_paths = get_image_paths(args.df)
     extract_features(img_paths, args.model, args.output_dir)
-
-

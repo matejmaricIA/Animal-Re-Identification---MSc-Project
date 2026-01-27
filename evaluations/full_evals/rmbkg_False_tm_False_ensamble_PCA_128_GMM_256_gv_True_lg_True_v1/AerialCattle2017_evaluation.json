@@ -1,0 +1,161 @@
+{
+    "accuracy": 0.9956989247311828,
+    "top_n_accuracy": 0.9956989247311828,
+    "classification_metrics": {
+        "AerialCattle2017_0": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 14.0
+        },
+        "AerialCattle2017_1": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "AerialCattle2017_10": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 17.0
+        },
+        "AerialCattle2017_11": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "AerialCattle2017_12": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "AerialCattle2017_13": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 6.0
+        },
+        "AerialCattle2017_14": {
+            "precision": 0.8571428571428571,
+            "recall": 1.0,
+            "f1-score": 0.9230769230769231,
+            "support": 6.0
+        },
+        "AerialCattle2017_15": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 49.0
+        },
+        "AerialCattle2017_16": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 39.0
+        },
+        "AerialCattle2017_17": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 12.0
+        },
+        "AerialCattle2017_18": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "AerialCattle2017_19": {
+            "precision": 0.9545454545454546,
+            "recall": 1.0,
+            "f1-score": 0.9767441860465116,
+            "support": 21.0
+        },
+        "AerialCattle2017_2": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 7.0
+        },
+        "AerialCattle2017_20": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "AerialCattle2017_21": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 18.0
+        },
+        "AerialCattle2017_22": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 9.0
+        },
+        "AerialCattle2017_3": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 31.0
+        },
+        "AerialCattle2017_4": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 48.0
+        },
+        "AerialCattle2017_5": {
+            "precision": 1.0,
+            "recall": 0.9166666666666666,
+            "f1-score": 0.9565217391304348,
+            "support": 12.0
+        },
+        "AerialCattle2017_6": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 36.0
+        },
+        "AerialCattle2017_7": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 23.0
+        },
+        "AerialCattle2017_8": {
+            "precision": 1.0,
+            "recall": 0.9285714285714286,
+            "f1-score": 0.9629629629629629,
+            "support": 14.0
+        },
+        "AerialCattle2017_9": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 53.0
+        },
+        "accuracy": 0.9956989247311828,
+        "macro avg": {
+            "precision": 0.9918125352907963,
+            "recall": 0.9932712215320911,
+            "f1-score": 0.992143730922471,
+            "support": 465.0
+        },
+        "weighted avg": {
+            "precision": 0.996103896103896,
+            "recall": 0.9956989247311828,
+            "f1-score": 0.9957200683795376,
+            "support": 465.0
+        }
+    },
+    "md_trained_on": true,
+    "md_split_type": "random",
+    "md_random_split": true,
+    "eval_runtime_sec": 2402.6220264434814
+}

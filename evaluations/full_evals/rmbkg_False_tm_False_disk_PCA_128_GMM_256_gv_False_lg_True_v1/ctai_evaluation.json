@@ -1,0 +1,449 @@
+{
+    "accuracy": 0.8628081457663451,
+    "top_n_accuracy": 0.8853161843515541,
+    "classification_metrics": {
+        "Akrouba": {
+            "precision": 1.0,
+            "recall": 0.7727272727272727,
+            "f1-score": 0.8717948717948718,
+            "support": 22.0
+        },
+        "Akwaba": {
+            "precision": 1.0,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.9090909090909091,
+            "support": 18.0
+        },
+        "Alina": {
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "f1-score": 0.4,
+            "support": 4.0
+        },
+        "Athena": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 13.0
+        },
+        "Atra": {
+            "precision": 0.9285714285714286,
+            "recall": 0.896551724137931,
+            "f1-score": 0.9122807017543859,
+            "support": 29.0
+        },
+        "Baloo": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Besar": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.8571428571428571,
+            "support": 4.0
+        },
+        "Bienvenue": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "Caramel": {
+            "precision": 0.8888888888888888,
+            "recall": 0.8421052631578947,
+            "f1-score": 0.8648648648648649,
+            "support": 19.0
+        },
+        "Celine": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 4.0
+        },
+        "Coco": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 14.0
+        },
+        "Diva": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Duna": {
+            "precision": 1.0,
+            "recall": 0.8421052631578947,
+            "f1-score": 0.9142857142857143,
+            "support": 19.0
+        },
+        "Endora": {
+            "precision": 1.0,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.6,
+            "support": 7.0
+        },
+        "Eva": {
+            "precision": 0.9375,
+            "recall": 1.0,
+            "f1-score": 0.967741935483871,
+            "support": 15.0
+        },
+        "Fatima": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "Fredy": {
+            "precision": 0.9852941176470589,
+            "recall": 0.9710144927536232,
+            "f1-score": 0.9781021897810219,
+            "support": 69.0
+        },
+        "Garuda": {
+            "precision": 0.5454545454545454,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.6666666666666666,
+            "support": 7.0
+        },
+        "Gogol": {
+            "precision": 0.6,
+            "recall": 0.6,
+            "f1-score": 0.6,
+            "support": 5.0
+        },
+        "Haraka": {
+            "precision": 1.0,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.9090909090909091,
+            "support": 12.0
+        },
+        "Huxel": {
+            "precision": 0.8571428571428571,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.75,
+            "support": 9.0
+        },
+        "Ibrahim": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 6.0
+        },
+        "Inousha": {
+            "precision": 0.8,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.6666666666666666,
+            "support": 7.0
+        },
+        "Isha": {
+            "precision": 0.9473684210526315,
+            "recall": 0.75,
+            "f1-score": 0.8372093023255814,
+            "support": 24.0
+        },
+        "Jacobo": {
+            "precision": 0.8333333333333334,
+            "recall": 0.7692307692307693,
+            "f1-score": 0.8,
+            "support": 13.0
+        },
+        "Java": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "Julia": {
+            "precision": 0.8461538461538461,
+            "recall": 0.7857142857142857,
+            "f1-score": 0.8148148148148148,
+            "support": 14.0
+        },
+        "Kabisha": {
+            "precision": 0.8333333333333334,
+            "recall": 1.0,
+            "f1-score": 0.9090909090909091,
+            "support": 5.0
+        },
+        "Kaos": {
+            "precision": 0.9285714285714286,
+            "recall": 0.9285714285714286,
+            "f1-score": 0.9285714285714286,
+            "support": 14.0
+        },
+        "Kinshasa": {
+            "precision": 0.9375,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.8955223880597015,
+            "support": 35.0
+        },
+        "Kiriku": {
+            "precision": 0.96875,
+            "recall": 1.0,
+            "f1-score": 0.9841269841269841,
+            "support": 31.0
+        },
+        "Kuba": {
+            "precision": 1.0,
+            "recall": 0.9,
+            "f1-score": 0.9473684210526315,
+            "support": 20.0
+        },
+        "Lilou": {
+            "precision": 0.875,
+            "recall": 0.9333333333333333,
+            "f1-score": 0.9032258064516129,
+            "support": 15.0
+        },
+        "Linus": {
+            "precision": 0.75,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.5454545454545454,
+            "support": 7.0
+        },
+        "Louise": {
+            "precision": 0.9375,
+            "recall": 0.8823529411764706,
+            "f1-score": 0.9090909090909091,
+            "support": 34.0
+        },
+        "Lucas": {
+            "precision": 1.0,
+            "recall": 0.7333333333333333,
+            "f1-score": 0.8461538461538461,
+            "support": 15.0
+        },
+        "Mandy": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
+            "support": 4.0
+        },
+        "Marc": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "Margot": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
+            "support": 5.0
+        },
+        "Max": {
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
+            "support": 3.0
+        },
+        "Mbeli": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "Mkubwa": {
+            "precision": 1.0,
+            "recall": 0.9090909090909091,
+            "f1-score": 0.9523809523809523,
+            "support": 11.0
+        },
+        "Mustapha": {
+            "precision": 1.0,
+            "recall": 0.5555555555555556,
+            "f1-score": 0.7142857142857143,
+            "support": 9.0
+        },
+        "Olduvai": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Olivia": {
+            "precision": 0.9333333333333333,
+            "recall": 0.8235294117647058,
+            "f1-score": 0.875,
+            "support": 17.0
+        },
+        "Oscar": {
+            "precision": 0.8461538461538461,
+            "recall": 0.9166666666666666,
+            "f1-score": 0.88,
+            "support": 12.0
+        },
+        "Ravel": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "Romario": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
+            "support": 5.0
+        },
+        "Rubra": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "Sagu": {
+            "precision": 0.9285714285714286,
+            "recall": 0.9285714285714286,
+            "f1-score": 0.9285714285714286,
+            "support": 28.0
+        },
+        "Sassandra": {
+            "precision": 1.0,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.9411764705882353,
+            "support": 18.0
+        },
+        "Shogun": {
+            "precision": 0.9411764705882353,
+            "recall": 0.9411764705882353,
+            "f1-score": 0.9411764705882353,
+            "support": 34.0
+        },
+        "Sumatra": {
+            "precision": 1.0,
+            "recall": 0.8478260869565217,
+            "f1-score": 0.9176470588235294,
+            "support": 46.0
+        },
+        "Taboo": {
+            "precision": 0.6,
+            "recall": 0.375,
+            "f1-score": 0.46153846153846156,
+            "support": 8.0
+        },
+        "Tita": {
+            "precision": 0.625,
+            "recall": 0.625,
+            "f1-score": 0.625,
+            "support": 8.0
+        },
+        "Totem": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Utan": {
+            "precision": 0.95,
+            "recall": 0.95,
+            "f1-score": 0.95,
+            "support": 20.0
+        },
+        "Victor": {
+            "precision": 0.9772727272727273,
+            "recall": 0.9555555555555556,
+            "f1-score": 0.9662921348314607,
+            "support": 45.0
+        },
+        "Virunga": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "Voodoo": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Wala": {
+            "precision": 0.9166666666666666,
+            "recall": 0.88,
+            "f1-score": 0.8979591836734694,
+            "support": 25.0
+        },
+        "Wapi": {
+            "precision": 0.96,
+            "recall": 1.0,
+            "f1-score": 0.9795918367346939,
+            "support": 24.0
+        },
+        "Wendy": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "Woodstock": {
+            "precision": 0.9444444444444444,
+            "recall": 0.9444444444444444,
+            "f1-score": 0.9444444444444444,
+            "support": 18.0
+        },
+        "Yao": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Yoghiti": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
+            "support": 4.0
+        },
+        "Yucca": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
+            "support": 4.0
+        },
+        "Zita": {
+            "precision": 0.5384615384615384,
+            "recall": 0.875,
+            "f1-score": 0.6666666666666666,
+            "support": 8.0
+        },
+        "Zora": {
+            "precision": 0.9166666666666666,
+            "recall": 0.9166666666666666,
+            "f1-score": 0.9166666666666666,
+            "support": 12.0
+        },
+        "Zyon": {
+            "precision": 0.9642857142857143,
+            "recall": 0.9,
+            "f1-score": 0.9310344827586207,
+            "support": 30.0
+        },
+        "unknown": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "accuracy": 0.8628081457663451,
+        "macro avg": {
+            "precision": 0.8069351413604781,
+            "recall": 0.7499934648108115,
+            "f1-score": 0.7675722659747822,
+            "support": 933.0
+        },
+        "weighted avg": {
+            "precision": 0.9248644343012232,
+            "recall": 0.8628081457663451,
+            "f1-score": 0.8875415942181025,
+            "support": 933.0
+        }
+    },
+    "md_trained_on": true,
+    "md_split_type": "random",
+    "md_random_split": true,
+    "eval_runtime_sec": 126.84443092346191
+}

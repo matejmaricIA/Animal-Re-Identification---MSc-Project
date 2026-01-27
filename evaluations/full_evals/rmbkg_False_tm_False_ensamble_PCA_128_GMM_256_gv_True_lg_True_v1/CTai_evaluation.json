@@ -1,0 +1,443 @@
+{
+    "accuracy": 0.7127545551982851,
+    "top_n_accuracy": 0.8263665594855305,
+    "classification_metrics": {
+        "CTai_Akrouba": {
+            "precision": 0.7391304347826086,
+            "recall": 0.7727272727272727,
+            "f1-score": 0.7555555555555555,
+            "support": 22.0
+        },
+        "CTai_Akwaba": {
+            "precision": 0.7,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.7368421052631579,
+            "support": 18.0
+        },
+        "CTai_Alina": {
+            "precision": 0.3333333333333333,
+            "recall": 0.25,
+            "f1-score": 0.2857142857142857,
+            "support": 4.0
+        },
+        "CTai_Athena": {
+            "precision": 0.75,
+            "recall": 0.6923076923076923,
+            "f1-score": 0.72,
+            "support": 13.0
+        },
+        "CTai_Atra": {
+            "precision": 0.6060606060606061,
+            "recall": 0.6896551724137931,
+            "f1-score": 0.6451612903225806,
+            "support": 29.0
+        },
+        "CTai_Baloo": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "CTai_Besar": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
+            "support": 4.0
+        },
+        "CTai_Bienvenue": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "CTai_Caramel": {
+            "precision": 0.6875,
+            "recall": 0.5789473684210527,
+            "f1-score": 0.6285714285714286,
+            "support": 19.0
+        },
+        "CTai_Celine": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 4.0
+        },
+        "CTai_Coco": {
+            "precision": 0.6428571428571429,
+            "recall": 0.6428571428571429,
+            "f1-score": 0.6428571428571429,
+            "support": 14.0
+        },
+        "CTai_Diva": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "CTai_Duna": {
+            "precision": 0.6666666666666666,
+            "recall": 0.7368421052631579,
+            "f1-score": 0.7,
+            "support": 19.0
+        },
+        "CTai_Endora": {
+            "precision": 0.6,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.5,
+            "support": 7.0
+        },
+        "CTai_Eva": {
+            "precision": 0.5909090909090909,
+            "recall": 0.8666666666666667,
+            "f1-score": 0.7027027027027027,
+            "support": 15.0
+        },
+        "CTai_Fatima": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "CTai_Fredy": {
+            "precision": 0.8955223880597015,
+            "recall": 0.8695652173913043,
+            "f1-score": 0.8823529411764706,
+            "support": 69.0
+        },
+        "CTai_Garuda": {
+            "precision": 0.8333333333333334,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.7692307692307693,
+            "support": 7.0
+        },
+        "CTai_Gogol": {
+            "precision": 0.2857142857142857,
+            "recall": 0.4,
+            "f1-score": 0.3333333333333333,
+            "support": 5.0
+        },
+        "CTai_Haraka": {
+            "precision": 0.625,
+            "recall": 0.4166666666666667,
+            "f1-score": 0.5,
+            "support": 12.0
+        },
+        "CTai_Huxel": {
+            "precision": 0.5555555555555556,
+            "recall": 0.5555555555555556,
+            "f1-score": 0.5555555555555556,
+            "support": 9.0
+        },
+        "CTai_Ibrahim": {
+            "precision": 1.0,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.9090909090909091,
+            "support": 6.0
+        },
+        "CTai_Inousha": {
+            "precision": 0.6,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.5,
+            "support": 7.0
+        },
+        "CTai_Isha": {
+            "precision": 0.68,
+            "recall": 0.7083333333333334,
+            "f1-score": 0.6938775510204082,
+            "support": 24.0
+        },
+        "CTai_Jacobo": {
+            "precision": 0.7,
+            "recall": 0.5384615384615384,
+            "f1-score": 0.6086956521739131,
+            "support": 13.0
+        },
+        "CTai_Java": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "CTai_Julia": {
+            "precision": 0.9,
+            "recall": 0.6428571428571429,
+            "f1-score": 0.75,
+            "support": 14.0
+        },
+        "CTai_Kabisha": {
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1-score": 0.8,
+            "support": 5.0
+        },
+        "CTai_Kaos": {
+            "precision": 0.75,
+            "recall": 0.6428571428571429,
+            "f1-score": 0.6923076923076923,
+            "support": 14.0
+        },
+        "CTai_Kinshasa": {
+            "precision": 0.8055555555555556,
+            "recall": 0.8285714285714286,
+            "f1-score": 0.8169014084507042,
+            "support": 35.0
+        },
+        "CTai_Kiriku": {
+            "precision": 0.7714285714285715,
+            "recall": 0.8709677419354839,
+            "f1-score": 0.8181818181818182,
+            "support": 31.0
+        },
+        "CTai_Kuba": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
+            "support": 20.0
+        },
+        "CTai_Lilou": {
+            "precision": 0.6,
+            "recall": 0.4,
+            "f1-score": 0.48,
+            "support": 15.0
+        },
+        "CTai_Linus": {
+            "precision": 0.75,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.5454545454545454,
+            "support": 7.0
+        },
+        "CTai_Louise": {
+            "precision": 0.8214285714285714,
+            "recall": 0.6764705882352942,
+            "f1-score": 0.7419354838709677,
+            "support": 34.0
+        },
+        "CTai_Lucas": {
+            "precision": 0.5263157894736842,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5882352941176471,
+            "support": 15.0
+        },
+        "CTai_Mandy": {
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1-score": 0.6666666666666666,
+            "support": 4.0
+        },
+        "CTai_Marc": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "CTai_Margot": {
+            "precision": 0.3333333333333333,
+            "recall": 0.2,
+            "f1-score": 0.25,
+            "support": 5.0
+        },
+        "CTai_Max": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "CTai_Mbeli": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "CTai_Mkubwa": {
+            "precision": 0.5833333333333334,
+            "recall": 0.6363636363636364,
+            "f1-score": 0.6086956521739131,
+            "support": 11.0
+        },
+        "CTai_Mustapha": {
+            "precision": 0.7,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.7368421052631579,
+            "support": 9.0
+        },
+        "CTai_Olduvai": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "CTai_Olivia": {
+            "precision": 0.6666666666666666,
+            "recall": 0.5882352941176471,
+            "f1-score": 0.625,
+            "support": 17.0
+        },
+        "CTai_Oscar": {
+            "precision": 0.6,
+            "recall": 0.5,
+            "f1-score": 0.5454545454545454,
+            "support": 12.0
+        },
+        "CTai_Ravel": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "CTai_Romario": {
+            "precision": 0.6666666666666666,
+            "recall": 0.8,
+            "f1-score": 0.7272727272727273,
+            "support": 5.0
+        },
+        "CTai_Rubra": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "CTai_Sagu": {
+            "precision": 0.6176470588235294,
+            "recall": 0.75,
+            "f1-score": 0.6774193548387096,
+            "support": 28.0
+        },
+        "CTai_Sassandra": {
+            "precision": 0.5161290322580645,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.6530612244897959,
+            "support": 18.0
+        },
+        "CTai_Shogun": {
+            "precision": 0.6585365853658537,
+            "recall": 0.7941176470588235,
+            "f1-score": 0.72,
+            "support": 34.0
+        },
+        "CTai_Sumatra": {
+            "precision": 0.851063829787234,
+            "recall": 0.8695652173913043,
+            "f1-score": 0.8602150537634409,
+            "support": 46.0
+        },
+        "CTai_Taboo": {
+            "precision": 0.4,
+            "recall": 0.5,
+            "f1-score": 0.4444444444444444,
+            "support": 8.0
+        },
+        "CTai_Tita": {
+            "precision": 0.3333333333333333,
+            "recall": 0.125,
+            "f1-score": 0.18181818181818182,
+            "support": 8.0
+        },
+        "CTai_Totem": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "CTai_Utan": {
+            "precision": 0.7727272727272727,
+            "recall": 0.85,
+            "f1-score": 0.8095238095238095,
+            "support": 20.0
+        },
+        "CTai_Victor": {
+            "precision": 0.8461538461538461,
+            "recall": 0.7333333333333333,
+            "f1-score": 0.7857142857142857,
+            "support": 45.0
+        },
+        "CTai_Virunga": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "CTai_Voodoo": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "CTai_Wala": {
+            "precision": 0.7333333333333333,
+            "recall": 0.88,
+            "f1-score": 0.8,
+            "support": 25.0
+        },
+        "CTai_Wapi": {
+            "precision": 0.9047619047619048,
+            "recall": 0.7916666666666666,
+            "f1-score": 0.8444444444444444,
+            "support": 24.0
+        },
+        "CTai_Wendy": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "CTai_Woodstock": {
+            "precision": 0.6666666666666666,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.717948717948718,
+            "support": 18.0
+        },
+        "CTai_Yao": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "CTai_Yoghiti": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
+            "support": 4.0
+        },
+        "CTai_Yucca": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 4.0
+        },
+        "CTai_Zita": {
+            "precision": 0.7,
+            "recall": 0.875,
+            "f1-score": 0.7777777777777778,
+            "support": 8.0
+        },
+        "CTai_Zora": {
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
+            "support": 12.0
+        },
+        "CTai_Zyon": {
+            "precision": 0.6428571428571429,
+            "recall": 0.6,
+            "f1-score": 0.6206896551724138,
+            "support": 30.0
+        },
+        "accuracy": 0.7127545551982851,
+        "macro avg": {
+            "precision": 0.6489455428270509,
+            "recall": 0.6351782922905996,
+            "f1-score": 0.6348411349293135,
+            "support": 933.0
+        },
+        "weighted avg": {
+            "precision": 0.7126182639912827,
+            "recall": 0.7127545551982851,
+            "f1-score": 0.706464204883506,
+            "support": 933.0
+        }
+    },
+    "md_trained_on": true,
+    "md_split_type": "random",
+    "md_random_split": true,
+    "eval_runtime_sec": 4807.633573055267
+}
