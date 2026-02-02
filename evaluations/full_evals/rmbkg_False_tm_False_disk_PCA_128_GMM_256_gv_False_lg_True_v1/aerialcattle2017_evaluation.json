@@ -157,5 +157,5 @@
     "md_trained_on": true,
     "md_split_type": "random",
     "md_random_split": true,
-    "eval_runtime_sec": 1515.4445118904114
+    "eval_runtime_sec": 655.4608564376831
 }

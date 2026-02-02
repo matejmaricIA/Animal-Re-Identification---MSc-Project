@@ -146,6 +146,7 @@ python main.py --count --ds ATRW --use_geometric_verification --use_lightglue --
 ## **Napomene**
 
 - **Podrška za GPU**: Aplikacija koristi GPU za ubrzanje rada. Ako GPU nije dostupan, automatski će se koristiti CPU.
+- **Memory warning**: `load_descriptors()` and `stack_all_descriptors()` currently load full `descriptors.h5` into RAM. Very large datasets (e.g., aerialcattle2017) can exceed memory and be OOM‑killed; consider a streaming/partial‑load approach when working with huge descriptor files.
 
 ## **Rezultati**
 

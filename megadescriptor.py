@@ -32,7 +32,7 @@ def load_megadescriptor_l_384(
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = timm.create_model("hf-hub:BVRA/MegaDescriptor-L-384", pretrained=True)
+    model = timm.create_model("hf-hub:BVRA/wildlife-mega-L-384", pretrained=True)
     model.to(device).eval()
 
     preprocess = T.Compose(

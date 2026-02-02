@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.6,
-    "top_n_accuracy": 0.9625,
+    "accuracy": 0.55,
+    "top_n_accuracy": 0.925,
     "classification_metrics": {
         "1": {
             "precision": 1.0,
@@ -15,15 +15,15 @@
             "support": 2.0
         },
         "11": {
-            "precision": 0.25,
-            "recall": 0.5,
-            "f1-score": 0.3333333333333333,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 2.0
         },
         "12": {
-            "precision": 0.25,
-            "recall": 0.5,
-            "f1-score": 0.3333333333333333,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 2.0
         },
         "13": {
@@ -159,9 +159,9 @@
             "support": 1.0
         },
         "33": {
-            "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 2.0
         },
         "34": {
@@ -183,9 +183,9 @@
             "support": 2.0
         },
         "37": {
-            "precision": 0.5,
-            "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "38": {
@@ -242,22 +242,22 @@
             "f1-score": 1.0,
             "support": 4.0
         },
-        "accuracy": 0.6,
+        "accuracy": 0.55,
         "macro avg": {
-            "precision": 0.46875,
-            "recall": 0.5,
-            "f1-score": 0.475,
+            "precision": 0.41875,
+            "recall": 0.4375,
+            "f1-score": 0.425,
             "support": 80.0
         },
         "weighted avg": {
-            "precision": 0.58125,
-            "recall": 0.6,
-            "f1-score": 0.5833333333333334,
+            "precision": 0.5375,
+            "recall": 0.55,
+            "f1-score": 0.5416666666666666,
             "support": 80.0
         }
     },
     "md_trained_on": true,
     "md_split_type": "random",
     "md_random_split": true,
-    "eval_runtime_sec": 14.64592170715332
+    "eval_runtime_sec": 0.05170154571533203
 }

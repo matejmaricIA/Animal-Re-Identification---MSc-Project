@@ -12,6 +12,8 @@ from visualization_suite import (
     geometric_verification as vis_gv,
     classification as vis_classification,
 )
+from typing import Dict, List
+from calibration import ScoreCalibrator
 
 
 def classify_test_images_with_geometric_verification(
@@ -256,6 +258,117 @@ def classify_test_images(
             "top_n": top_n_matches,
         }
 
+    return predictions
+
+def classify_test_images_late_fusion(
+    test_global_emb: Dict[str, np.ndarray],
+    train_global_emb: Dict[str, np.ndarray],
+    test_fisher: Dict[str, np.ndarray],
+    train_fisher: Dict[str, np.ndarray],
+    test_keypoints: Dict[str, np.ndarray],
+    train_keypoints: Dict[str, np.ndarray],
+    test_descriptors: Dict[str, np.ndarray],
+    train_descriptors: Dict[str, np.ndarray],
+    train_labels: Dict[str, str],
+    calibrators: Dict[str, 'ScoreCalibrator'],  # {'global': cal, 'fisher': cal, 'gv': cal}
+    top_n: int = 5,
+    shortlist_size: int = 300,
+    use_lightglue: bool = True,
+    method: str = 'disk',
+    fusion_signals: List[str] = ['global', 'gv'],  # or ['global', 'fisher', 'gv']
+):
+    """
+    WildFusion-style late fusion classification.
+    
+    fusion_signals: which calibrated scores to fuse
+        - ['global', 'gv']: two-signal fusion
+        - ['global', 'fisher', 'gv']: three-signal fusion
+    """
+    from geometric_verification import compute_geometric_similarity
+    from tqdm import tqdm
+    
+    predictions = {}
+    
+    train_ids = list(train_global_emb.keys())
+    
+    # Precompute normalized global embeddings for fast shortlisting
+    train_global_matrix = np.stack([train_global_emb[i] for i in train_ids])
+    train_global_matrix = train_global_matrix / (np.linalg.norm(train_global_matrix, axis=1, keepdims=True) + 1e-9)
+    
+    for test_id in tqdm(test_global_emb.keys(), desc="Late fusion classification"):
+        # === Stage 1: Shortlist by global similarity ===
+        test_emb = test_global_emb[test_id]
+        test_emb_norm = test_emb / (np.linalg.norm(test_emb) + 1e-9)
+        
+        global_sims = np.dot(train_global_matrix, test_emb_norm)
+        shortlist_indices = np.argsort(global_sims)[::-1][:shortlist_size]
+        shortlist_ids = [train_ids[i] for i in shortlist_indices]
+        
+        # === Stage 2: Compute all scores for shortlist ===
+        candidates = []
+        
+        for idx, train_id in zip(shortlist_indices, shortlist_ids):
+            # s_global
+            s_global = global_sims[idx]
+            
+            # s_fisher
+            if test_id in test_fisher and train_id in train_fisher:
+                q_fv = test_fisher[test_id] / (np.linalg.norm(test_fisher[test_id]) + 1e-9)
+                d_fv = train_fisher[train_id] / (np.linalg.norm(train_fisher[train_id]) + 1e-9)
+                s_fisher = np.dot(q_fv, d_fv)
+            else:
+                s_fisher = 0.0
+            
+            # s_gv (n_inliers)
+            q_kp = test_keypoints.get(test_id)
+            d_kp = train_keypoints.get(train_id)
+            q_desc = test_descriptors.get(test_id)
+            d_desc = train_descriptors.get(train_id)
+            
+            if all(x is not None for x in [q_kp, d_kp, q_desc, d_desc]):
+                _, n_inliers = compute_geometric_similarity(
+                    q_desc, q_kp, d_desc, d_kp, 0.5,
+                    use_lightglue=use_lightglue, method=method
+                )
+            else:
+                n_inliers = 0
+            
+            candidates.append({
+                'train_id': train_id,
+                's_global': s_global,
+                's_fisher': s_fisher,
+                's_gv': n_inliers,
+                'label': train_labels[train_id],
+            })
+        
+        # === Stage 3: Calibrate scores to probabilities ===
+        for c in candidates:
+            c['p_global'] = calibrators['global'].predict_proba([c['s_global']])[0]
+            c['p_fisher'] = calibrators['fisher'].predict_proba([c['s_fisher']])[0] if 'fisher' in calibrators else 0.0
+            c['p_gv'] = calibrators['gv'].predict_proba([c['s_gv']])[0]
+        
+        # === Stage 4: Fuse probabilities ===
+        for c in candidates:
+            probs = []
+            if 'global' in fusion_signals:
+                probs.append(c['p_global'])
+            if 'fisher' in fusion_signals:
+                probs.append(c['p_fisher'])
+            if 'gv' in fusion_signals:
+                probs.append(c['p_gv'])
+            c['p_fused'] = np.mean(probs)
+        
+        # === Stage 5: Rank by fused probability ===
+        candidates.sort(key=lambda x: x['p_fused'], reverse=True)
+        
+        top_n_matches = [(c['p_fused'], c['label']) for c in candidates[:top_n]]
+        predicted_class = candidates[0]['label']
+        
+        predictions[test_id] = {
+            'predicted_class': predicted_class,
+            'top_n': top_n_matches,
+        }
+    
     return predictions
 
 # This is deprecated and is not used anymore.

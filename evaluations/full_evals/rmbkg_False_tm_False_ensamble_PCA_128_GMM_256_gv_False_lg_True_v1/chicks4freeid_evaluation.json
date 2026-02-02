@@ -1,320 +1,311 @@
 {
-    "accuracy": 0.7217391304347827,
-    "top_n_accuracy": 0.9521739130434783,
+    "accuracy": 0.9058823529411765,
+    "top_n_accuracy": 0.9647058823529412,
     "classification_metrics": {
-        "0": {
-            "precision": 0.625,
-            "recall": 0.8333333333333334,
-            "f1-score": 0.7142857142857143,
-            "support": 6.0
-        },
-        "1": {
-            "precision": 0.6666666666666666,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.4444444444444444,
-            "support": 6.0
-        },
-        "2": {
-            "precision": 1.0,
-            "recall": 0.8,
-            "f1-score": 0.8888888888888888,
-            "support": 5.0
-        },
-        "3": {
-            "precision": 1.0,
-            "recall": 0.875,
-            "f1-score": 0.9333333333333333,
-            "support": 8.0
-        },
-        "4": {
-            "precision": 0.6666666666666666,
-            "recall": 0.5714285714285714,
-            "f1-score": 0.6153846153846154,
-            "support": 7.0
-        },
-        "5": {
-            "precision": 0.6,
-            "recall": 0.6,
-            "f1-score": 0.6,
-            "support": 5.0
-        },
-        "6": {
-            "precision": 0.6666666666666666,
-            "recall": 0.8,
-            "f1-score": 0.7272727272727273,
-            "support": 5.0
-        },
-        "7": {
-            "precision": 1.0,
-            "recall": 0.8,
-            "f1-score": 0.8888888888888888,
-            "support": 5.0
-        },
-        "8": {
-            "precision": 0.8,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.7272727272727273,
-            "support": 6.0
-        },
-        "9": {
-            "precision": 0.75,
-            "recall": 0.8571428571428571,
-            "f1-score": 0.8,
-            "support": 7.0
-        },
-        "10": {
-            "precision": 0.7142857142857143,
-            "recall": 0.8333333333333334,
-            "f1-score": 0.7692307692307693,
-            "support": 6.0
-        },
-        "11": {
+        "Chicks4FreeID_0": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
-            "support": 4.0
+            "support": 5.0
         },
-        "12": {
+        "Chicks4FreeID_10": {
             "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 5.0
+        },
+        "Chicks4FreeID_11": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
-        "13": {
-            "precision": 0.75,
-            "recall": 0.6,
-            "f1-score": 0.6666666666666666,
-            "support": 5.0
-        },
-        "14": {
-            "precision": 0.6666666666666666,
-            "recall": 1.0,
-            "f1-score": 0.8,
-            "support": 4.0
-        },
-        "15": {
-            "precision": 0.75,
-            "recall": 0.8571428571428571,
-            "f1-score": 0.8,
-            "support": 7.0
-        },
-        "16": {
-            "precision": 1.0,
-            "recall": 0.5714285714285714,
-            "f1-score": 0.7272727272727273,
-            "support": 7.0
-        },
-        "17": {
-            "precision": 0.6666666666666666,
-            "recall": 1.0,
-            "f1-score": 0.8,
-            "support": 4.0
-        },
-        "18": {
-            "precision": 0.6666666666666666,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.6666666666666666,
-            "support": 3.0
-        },
-        "19": {
+        "Chicks4FreeID_12": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
-            "support": 4.0
-        },
-        "20": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
             "support": 2.0
         },
-        "21": {
-            "precision": 1.0,
-            "recall": 0.25,
-            "f1-score": 0.4,
-            "support": 4.0
-        },
-        "22": {
-            "precision": 0.8333333333333334,
-            "recall": 1.0,
-            "f1-score": 0.9090909090909091,
-            "support": 5.0
-        },
-        "23": {
-            "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
-            "support": 2.0
-        },
-        "24": {
-            "precision": 0.875,
-            "recall": 0.875,
-            "f1-score": 0.875,
-            "support": 8.0
-        },
-        "25": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 4.0
-        },
-        "26": {
-            "precision": 0.6666666666666666,
-            "recall": 1.0,
-            "f1-score": 0.8,
-            "support": 2.0
-        },
-        "27": {
+        "Chicks4FreeID_13": {
             "precision": 1.0,
             "recall": 0.75,
             "f1-score": 0.8571428571428571,
             "support": 4.0
         },
-        "28": {
+        "Chicks4FreeID_14": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "Chicks4FreeID_15": {
+            "precision": 0.8333333333333334,
+            "recall": 1.0,
+            "f1-score": 0.9090909090909091,
+            "support": 5.0
+        },
+        "Chicks4FreeID_16": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
+            "support": 5.0
+        },
+        "Chicks4FreeID_17": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "Chicks4FreeID_18": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 3.0
+        },
+        "Chicks4FreeID_19": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "Chicks4FreeID_2": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "Chicks4FreeID_20": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "Chicks4FreeID_21": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "Chicks4FreeID_22": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "Chicks4FreeID_23": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "Chicks4FreeID_24": {
+            "precision": 0.8333333333333334,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.8333333333333334,
+            "support": 6.0
+        },
+        "Chicks4FreeID_25": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "Chicks4FreeID_26": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "Chicks4FreeID_27": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "Chicks4FreeID_28": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "Chicks4FreeID_29": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 6.0
+        },
+        "Chicks4FreeID_3": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
+            "support": 6.0
+        },
+        "Chicks4FreeID_30": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 5.0
         },
-        "29": {
-            "precision": 0.625,
-            "recall": 0.7142857142857143,
-            "f1-score": 0.6666666666666666,
-            "support": 7.0
-        },
-        "30": {
-            "precision": 0.875,
-            "recall": 1.0,
-            "f1-score": 0.9333333333333333,
-            "support": 7.0
-        },
-        "31": {
-            "precision": 0.6666666666666666,
-            "recall": 0.5,
-            "f1-score": 0.5714285714285714,
-            "support": 4.0
-        },
-        "32": {
-            "precision": 0.6,
-            "recall": 0.6,
-            "f1-score": 0.6,
-            "support": 10.0
-        },
-        "33": {
-            "precision": 0.4444444444444444,
+        "Chicks4FreeID_31": {
+            "precision": 1.0,
             "recall": 0.6666666666666666,
-            "f1-score": 0.5333333333333333,
-            "support": 6.0
+            "f1-score": 0.8,
+            "support": 3.0
         },
-        "34": {
-            "precision": 0.375,
-            "recall": 0.42857142857142855,
-            "f1-score": 0.4,
-            "support": 7.0
+        "Chicks4FreeID_32": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.8571428571428571,
+            "support": 8.0
         },
-        "35": {
+        "Chicks4FreeID_34": {
+            "precision": 0.8333333333333334,
+            "recall": 1.0,
+            "f1-score": 0.9090909090909091,
+            "support": 5.0
+        },
+        "Chicks4FreeID_35": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 2.0
         },
-        "36": {
-            "precision": 0.3333333333333333,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.3333333333333333,
-            "support": 3.0
-        },
-        "37": {
-            "precision": 0.6666666666666666,
-            "recall": 1.0,
-            "f1-score": 0.8,
-            "support": 4.0
-        },
-        "38": {
-            "precision": 0.6666666666666666,
-            "recall": 0.5,
-            "f1-score": 0.5714285714285714,
-            "support": 4.0
-        },
-        "39": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 3.0
-        },
-        "40": {
+        "Chicks4FreeID_36": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 2.0
         },
-        "41": {
+        "Chicks4FreeID_37": {
             "precision": 1.0,
-            "recall": 0.25,
-            "f1-score": 0.4,
-            "support": 4.0
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
         },
-        "42": {
+        "Chicks4FreeID_38": {
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
+            "support": 3.0
+        },
+        "Chicks4FreeID_39": {
             "precision": 0.6666666666666666,
             "recall": 1.0,
             "f1-score": 0.8,
-            "support": 4.0
+            "support": 2.0
         },
-        "43": {
+        "Chicks4FreeID_4": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 5.0
+        },
+        "Chicks4FreeID_40": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "Chicks4FreeID_41": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "Chicks4FreeID_42": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 3.0
+        },
+        "Chicks4FreeID_43": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "Chicks4FreeID_44": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "Chicks4FreeID_45": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
         },
-        "44": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+        "Chicks4FreeID_46": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
-        "45": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 1.0
-        },
-        "46": {
-            "precision": 0.3333333333333333,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.3333333333333333,
+        "Chicks4FreeID_47": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
-        "47": {
+        "Chicks4FreeID_48": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "Chicks4FreeID_49": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "Chicks4FreeID_5": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "Chicks4FreeID_6": {
             "precision": 0.75,
             "recall": 0.75,
             "f1-score": 0.75,
             "support": 4.0
         },
-        "48": {
-            "precision": 0.6,
-            "recall": 0.75,
-            "f1-score": 0.6666666666666666,
+        "Chicks4FreeID_7": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
             "support": 4.0
         },
-        "49": {
-            "precision": 0.6666666666666666,
-            "recall": 0.8,
-            "f1-score": 0.7272727272727273,
+        "Chicks4FreeID_8": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 5.0
         },
-        "accuracy": 0.7217391304347827,
+        "Chicks4FreeID_9": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
+            "support": 5.0
+        },
+        "accuracy": 0.9058823529411765,
         "macro avg": {
-            "precision": 0.7226746031746032,
-            "recall": 0.6899999999999998,
-            "f1-score": 0.6832861027861027,
-            "support": 230.0
+            "precision": 0.8899305555555556,
+            "recall": 0.8961805555555555,
+            "f1-score": 0.8839601370851371,
+            "support": 170.0
         },
         "weighted avg": {
-            "precision": 0.7483074534161492,
-            "recall": 0.7217391304347827,
-            "f1-score": 0.7145090175524957,
-            "support": 230.0
+            "precision": 0.9158823529411764,
+            "recall": 0.9058823529411765,
+            "f1-score": 0.9017485782191663,
+            "support": 170.0
         }
     },
-    "eval_runtime_sec": 184.33631253242493
+    "md_trained_on": false,
+    "md_split_type": "similarity-aware",
+    "md_random_split": false,
+    "eval_runtime_sec": 287.46560502052307
 }

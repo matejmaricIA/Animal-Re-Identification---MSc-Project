@@ -1,0 +1,95 @@
+{
+    "accuracy": 0.8620689655172413,
+    "top_n_accuracy": 0.9597701149425287,
+    "classification_metrics": {
+        "PolarBearVidID_Charlotte": {
+            "precision": 0.9230769230769231,
+            "recall": 0.8,
+            "f1-score": 0.8571428571428571,
+            "support": 15.0
+        },
+        "PolarBearVidID_Finja": {
+            "precision": 0.9285714285714286,
+            "recall": 0.9285714285714286,
+            "f1-score": 0.9285714285714286,
+            "support": 14.0
+        },
+        "PolarBearVidID_Hertha": {
+            "precision": 0.7647058823529411,
+            "recall": 0.8666666666666667,
+            "f1-score": 0.8125,
+            "support": 15.0
+        },
+        "PolarBearVidID_Larissa": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 14.0
+        },
+        "PolarBearVidID_Lloyd": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
+            "support": 16.0
+        },
+        "PolarBearVidID_Milana": {
+            "precision": 0.8571428571428571,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.8571428571428571,
+            "support": 14.0
+        },
+        "PolarBearVidID_Nana": {
+            "precision": 0.9285714285714286,
+            "recall": 0.8666666666666667,
+            "f1-score": 0.896551724137931,
+            "support": 15.0
+        },
+        "PolarBearVidID_Nanuq": {
+            "precision": 0.8333333333333334,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.7692307692307693,
+            "support": 14.0
+        },
+        "PolarBearVidID_Nora": {
+            "precision": 0.9285714285714286,
+            "recall": 0.9285714285714286,
+            "f1-score": 0.9285714285714286,
+            "support": 14.0
+        },
+        "PolarBearVidID_Sprinter": {
+            "precision": 0.7692307692307693,
+            "recall": 0.7692307692307693,
+            "f1-score": 0.7692307692307693,
+            "support": 13.0
+        },
+        "PolarBearVidID_Tonja": {
+            "precision": 0.8333333333333334,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.7692307692307693,
+            "support": 14.0
+        },
+        "PolarBearVidID_Vera": {
+            "precision": 0.8235294117647058,
+            "recall": 0.875,
+            "f1-score": 0.8484848484848485,
+            "support": 16.0
+        },
+        "accuracy": 0.8620689655172413,
+        "macro avg": {
+            "precision": 0.8658388996624292,
+            "recall": 0.8600351037851038,
+            "f1-score": 0.8604621950527124,
+            "support": 174.0
+        },
+        "weighted avg": {
+            "precision": 0.8652592955838393,
+            "recall": 0.8620689655172413,
+            "f1-score": 0.8610882761819146,
+            "support": 174.0
+        }
+    },
+    "md_trained_on": false,
+    "md_split_type": "similarity-aware",
+    "md_random_split": false,
+    "eval_runtime_sec": 58.22291970252991
+}

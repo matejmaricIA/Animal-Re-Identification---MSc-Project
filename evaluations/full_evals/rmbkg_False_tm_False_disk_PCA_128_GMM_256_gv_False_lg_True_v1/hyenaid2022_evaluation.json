@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.7603174603174603,
-    "top_n_accuracy": 0.8238095238095238,
+    "accuracy": 0.7841269841269841,
+    "top_n_accuracy": 0.8412698412698413,
     "classification_metrics": {
         "02e5fbda-3d57-4b0a-be41-2b151ac1ff30": {
             "precision": 1.0,
@@ -21,15 +21,15 @@
             "support": 2.0
         },
         "06569257-d4a3-45a1-af58-688cb9a7bf5a": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 2.0
         },
         "06fed4b8-bd2d-4410-a9b5-84f030997d01": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "08626c7e-f14d-4a22-8b38-f8474c0196de": {
@@ -39,15 +39,15 @@
             "support": 5.0
         },
         "0965523b-f66a-4413-99b4-c7483c3cfd27": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "0a5cd6a9-b021-4725-acca-6d5b257d2e67": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 2.0
         },
         "0b85b8c4-5ea9-46bd-8ba2-86ee385b1eb3": {
@@ -87,9 +87,9 @@
             "support": 1.0
         },
         "10d0c599-86ff-4965-a23b-4cd1c951768c": {
-            "precision": 0.8333333333333334,
+            "precision": 1.0,
             "recall": 0.8333333333333334,
-            "f1-score": 0.8333333333333334,
+            "f1-score": 0.9090909090909091,
             "support": 6.0
         },
         "11ae9785-7d82-4bd6-8ce9-e94ed362c23f": {
@@ -117,9 +117,9 @@
             "support": 3.0
         },
         "143bf01f-d0f1-4ec9-bedd-ad0aa26e0cc2": {
-            "precision": 0.75,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "160e1683-7837-43ea-8ce7-755d101c419c": {
@@ -147,9 +147,9 @@
             "support": 2.0
         },
         "1b72f52c-12ba-43bb-8b2f-64975becab88": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "1b7c302c-68ae-46a7-b18e-a97d342081a9": {
@@ -165,9 +165,9 @@
             "support": 1.0
         },
         "1da24c9f-d62d-48a6-81b9-afbdc5c0e7af": {
-            "precision": 0.6666666666666666,
-            "recall": 0.8,
-            "f1-score": 0.7272727272727273,
+            "precision": 0.7142857142857143,
+            "recall": 1.0,
+            "f1-score": 0.8333333333333334,
             "support": 5.0
         },
         "1e5eea5f-ede8-4660-9314-5b3e53b2cfcc": {
@@ -189,15 +189,15 @@
             "support": 1.0
         },
         "20086390-26ac-4539-9130-b31b9d993672": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "204b687d-7113-4c69-95a9-6d40ef0e59e8": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "20c4e967-97c4-4546-b7ca-6b57b6f4c19a": {
@@ -243,15 +243,15 @@
             "support": 1.0
         },
         "248353ce-530e-4dea-97c7-31f6029b2088": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "249a4d40-2256-444e-a4d5-68209d8d134d": {
             "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "252b0d87-abfc-4622-b3b6-2c815900026f": {
@@ -261,9 +261,9 @@
             "support": 2.0
         },
         "280baaed-937b-4984-b7af-3ab6cefd61f9": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "281d2f9c-e9d9-4125-9ecf-e5fd4c4f9fa0": {
@@ -279,15 +279,15 @@
             "support": 2.0
         },
         "2b733eca-99a6-482f-b57f-567970a2e8dd": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "2c44f7c6-44e5-4d34-9304-7807962aa038": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "2c47b308-3b61-45db-b6fd-f1560b32f358": {
@@ -309,9 +309,9 @@
             "support": 2.0
         },
         "2f698ae6-cb0a-44e4-b813-ebd2faf0af13": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "306f89ef-3312-4218-8c1c-59f94f3fc32c": {
@@ -327,15 +327,15 @@
             "support": 6.0
         },
         "3347e8b1-1d84-412a-8e3f-5b0c146f9b95": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "34365bcc-5b2d-4f80-b721-ef7039e64fe8": {
             "precision": 1.0,
-            "recall": 0.9333333333333333,
-            "f1-score": 0.9655172413793104,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 15.0
         },
         "36fe7f0d-eb06-416e-b9c3-0387b970ccc9": {
@@ -345,9 +345,9 @@
             "support": 1.0
         },
         "3772d75f-1801-4307-a18f-5fbcc1c10897": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "3975753d-27c1-4733-ac0e-a547772c331c": {
@@ -375,9 +375,9 @@
             "support": 2.0
         },
         "3c5a76ad-2355-4293-a88a-03d7f6296c65": {
-            "precision": 0.6666666666666666,
+            "precision": 0.5,
             "recall": 0.5,
-            "f1-score": 0.5714285714285714,
+            "f1-score": 0.5,
             "support": 4.0
         },
         "3c7716c2-9660-4e75-8db1-3739a147837d": {
@@ -393,21 +393,21 @@
             "support": 2.0
         },
         "3e73eeb2-add8-4aa2-9641-96c456ad837a": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "4004afe6-b476-475e-867c-8d3b17e378c6": {
-            "precision": 0.8461538461538461,
+            "precision": 0.9166666666666666,
             "recall": 0.8461538461538461,
-            "f1-score": 0.8461538461538461,
+            "f1-score": 0.88,
             "support": 13.0
         },
         "400b4d96-c51c-4184-8f66-7f95319e45f3": {
             "precision": 1.0,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "400b6573-9ae7-400a-b437-b18098f2a67f": {
@@ -423,9 +423,9 @@
             "support": 2.0
         },
         "42779875-0894-4e77-99f4-da82f72a17fa": {
-            "precision": 0.5,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "44af1942-49f4-45ef-aed6-df0ce47d4bc9": {
@@ -441,9 +441,9 @@
             "support": 1.0
         },
         "45712db8-9da3-4558-bcc9-22d25d842af7": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "477d721a-6027-42a5-a2d7-94dc7e550fcc": {
@@ -471,9 +471,9 @@
             "support": 3.0
         },
         "4bb25d71-806b-442d-950b-f137f820a90f": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "4c139246-f943-4f0b-a658-d1a2fac27dc7": {
@@ -501,8 +501,8 @@
             "support": 2.0
         },
         "525405f2-808c-4ab9-9364-f7fd9d076f6b": {
-            "precision": 0.5,
-            "recall": 1.0,
+            "precision": 1.0,
+            "recall": 0.5,
             "f1-score": 0.6666666666666666,
             "support": 2.0
         },
@@ -519,9 +519,9 @@
             "support": 1.0
         },
         "56d1a077-635d-4401-a74b-ce92bad46e70": {
-            "precision": 0.75,
-            "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "5714276c-6415-4eae-980b-1e4b923847b2": {
@@ -567,15 +567,15 @@
             "support": 1.0
         },
         "60b9e2bb-87ef-4b1d-923c-f0585a74d0b7": {
-            "precision": 0.5,
-            "recall": 1.0,
-            "f1-score": 0.6666666666666666,
-            "support": 1.0
-        },
-        "610a34bf-1456-4efe-b5c7-10c5b588be2e": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
+            "support": 1.0
+        },
+        "610a34bf-1456-4efe-b5c7-10c5b588be2e": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "61f3efff-c86f-48ed-8b36-0dec4078b231": {
@@ -585,9 +585,9 @@
             "support": 1.0
         },
         "62087513-88bc-4a3f-8699-cb8db0665501": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "656932aa-cf53-4f70-985b-a388f6c88f69": {
@@ -598,14 +598,14 @@
         },
         "66a99503-a6e9-47cd-b28a-ac543d20f110": {
             "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "66f06e87-bcea-487d-b5c6-6e5cbfb52ce4": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "67006b29-4adc-41dc-9b30-39a94363a81a": {
@@ -615,15 +615,15 @@
             "support": 3.0
         },
         "6810b958-c4ad-4c34-9590-94b819ff444b": {
-            "precision": 0.6666666666666666,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "68996e21-12ab-4183-ab94-d2b0331efb10": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "6a1fc5e8-c077-41c4-9c3b-ff5d0b0364a2": {
@@ -645,9 +645,9 @@
             "support": 1.0
         },
         "7153eda6-946a-4e9d-9c3d-c5c034cbc5e3": {
-            "precision": 0.75,
-            "recall": 0.75,
-            "f1-score": 0.75,
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
             "support": 4.0
         },
         "71d1140b-f983-4554-8283-d1c162cebc94": {
@@ -669,9 +669,9 @@
             "support": 2.0
         },
         "7251cda9-d3d5-4249-baf0-4f4c1480adc9": {
-            "precision": 0.875,
+            "precision": 1.0,
             "recall": 0.7,
-            "f1-score": 0.7777777777777778,
+            "f1-score": 0.8235294117647058,
             "support": 10.0
         },
         "736ca848-7821-430b-9aaa-f8870e80aec4": {
@@ -681,9 +681,9 @@
             "support": 2.0
         },
         "73ccff66-e431-422c-9c79-3026cb1280a1": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "73f670e9-5ee3-49f3-8db2-3ea557a428b8": {
@@ -699,9 +699,9 @@
             "support": 3.0
         },
         "74d538f0-cb3e-4982-9584-7e0f886b8397": {
-            "precision": 1.0,
+            "precision": 0.8888888888888888,
             "recall": 0.8888888888888888,
-            "f1-score": 0.9411764705882353,
+            "f1-score": 0.8888888888888888,
             "support": 9.0
         },
         "761abc97-f81c-4a09-823b-7cb1c528c290": {
@@ -711,9 +711,9 @@
             "support": 2.0
         },
         "763682fe-336a-4e52-b076-e904de642832": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "7802d893-e75c-48c3-b822-8a9704bbbd4d": {
@@ -729,9 +729,9 @@
             "support": 1.0
         },
         "7a0e8d37-e27f-4378-bab8-7cc37821cd8e": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "7a2a6f84-a929-4b78-999b-a299daa575da": {
@@ -753,9 +753,9 @@
             "support": 4.0
         },
         "7dd17d2d-1eb3-4ccd-afc3-527226c935e6": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "7e67fb5a-4323-46b1-9686-68f84d2ee169": {
@@ -765,9 +765,9 @@
             "support": 2.0
         },
         "7e9d299f-be22-497a-9d79-a1e9d909c013": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "7f9b060d-6457-4c82-bd00-37dfaec1d1d0": {
@@ -777,9 +777,9 @@
             "support": 2.0
         },
         "81725e48-3c1f-4c7c-89d6-334c10234cf9": {
-            "precision": 0.6666666666666666,
+            "precision": 0.8,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 0.8888888888888888,
             "support": 4.0
         },
         "831e0a81-f0e5-435c-a1f3-6cd854e9ef3a": {
@@ -814,20 +814,20 @@
         },
         "844640ea-498e-4d2e-a578-3783c217fb3c": {
             "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
-            "support": 2.0
-        },
-        "844cb3cc-89dc-4609-b33a-3ffc2bb85fd7": {
-            "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 2.0
         },
+        "844cb3cc-89dc-4609-b33a-3ffc2bb85fd7": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
         "85527fa6-6c14-45eb-91eb-32106f41f728": {
-            "precision": 0.6,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 0.75,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "88db538e-05ee-4e9f-8163-e1bb7e4743fc": {
@@ -837,15 +837,15 @@
             "support": 1.0
         },
         "89390731-0ff1-454f-a2ac-8017c49d8da6": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "89d1463d-4e1c-4edd-88a1-19f30914d459": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "8a8944da-f6b6-46a5-8b6c-2952d7a1733c": {
@@ -867,9 +867,9 @@
             "support": 1.0
         },
         "8b046377-529a-460d-8114-887322c52cde": {
-            "precision": 1.0,
+            "precision": 0.875,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.9333333333333333,
             "support": 7.0
         },
         "8b530229-7b7d-4744-a09d-d489933fc659": {
@@ -903,21 +903,21 @@
             "support": 2.0
         },
         "8d704d6e-76b3-4fef-b7e7-5522bc453d98": {
-            "precision": 0.6666666666666666,
-            "recall": 1.0,
-            "f1-score": 0.8,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "8e52a7f7-8046-4567-b92a-e5941b184745": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.25,
+            "recall": 1.0,
+            "f1-score": 0.4,
             "support": 1.0
         },
         "8e9cd5f5-095b-4295-8bbc-a3a67cffd935": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "9003c31f-6d6f-4ad9-b535-4e5c5698659b": {
@@ -934,8 +934,8 @@
         },
         "91be8644-a55d-45bf-9b4e-34c56c607690": {
             "precision": 1.0,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "95a161f7-5a75-4e56-9b3e-ae37f1d61a31": {
@@ -975,9 +975,9 @@
             "support": 2.0
         },
         "9d4d0203-ff17-4318-bd95-f1871e4aba4b": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "a052575c-682f-488a-8034-ce8b0d68e6dd": {
@@ -987,9 +987,9 @@
             "support": 1.0
         },
         "a0539b15-8bd3-4931-9e63-8d956755d9a6": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "a06366b7-a0e0-471e-9595-8eb50b6d499f": {
@@ -1011,15 +1011,15 @@
             "support": 1.0
         },
         "a5e8a2bf-014f-41eb-b33b-7249b2ea3637": {
-            "precision": 0.3333333333333333,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "a5f6a30d-faa1-4d73-aebd-5dff073c6191": {
-            "precision": 0.5,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.4,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "a6d6607a-edd0-45a9-a9bf-7bac78c1db29": {
@@ -1053,9 +1053,9 @@
             "support": 1.0
         },
         "ac7a3ba9-58c0-47e0-8814-1c5ba150c70d": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "ace33278-b65f-43d4-9c12-530e420ddef5": {
@@ -1065,15 +1065,15 @@
             "support": 4.0
         },
         "aed03e34-d258-4795-bd37-d63eb4c49802": {
-            "precision": 1.0,
+            "precision": 0.8,
             "recall": 0.8,
-            "f1-score": 0.8888888888888888,
+            "f1-score": 0.8,
             "support": 5.0
         },
         "aeea8cca-a56f-4662-8f86-3a7f8f7237a0": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "b07dd6f4-8c65-4c6c-b4eb-a65188e81c2c": {
@@ -1089,15 +1089,15 @@
             "support": 2.0
         },
         "b0fb2cd7-62b2-46ff-9893-f23def9d9b8f": {
-            "precision": 0.75,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "b257ec4e-0b36-4e80-85be-b75c8df39b01": {
-            "precision": 0.3333333333333333,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "b38b7f3d-5275-467d-a9fa-7a66af3d5b3e": {
@@ -1150,14 +1150,14 @@
         },
         "bbbaafbc-3889-4d6f-843b-d58fb94fb07c": {
             "precision": 1.0,
-            "recall": 0.9,
-            "f1-score": 0.9473684210526315,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 10.0
         },
         "bc95fccf-3431-4dee-b23f-c0a10f19b05c": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "bfa8b15b-15b7-4f41-b44e-fdec1e1bb74c": {
@@ -1173,9 +1173,9 @@
             "support": 1.0
         },
         "bff16f45-9acf-4eac-8d62-52b1fefb9e0f": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "c1593d0b-5f78-4f62-8304-932d7fbcc9fe": {
@@ -1191,9 +1191,9 @@
             "support": 1.0
         },
         "c3835fcb-41e1-4d3a-877c-ca359a7c4e74": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 0.25,
-            "f1-score": 0.2857142857142857,
+            "f1-score": 0.4,
             "support": 4.0
         },
         "c5c66d36-d1a6-412e-8289-0b5d8b275be9": {
@@ -1209,9 +1209,9 @@
             "support": 2.0
         },
         "c755133f-a088-47fb-be84-0c36422a9901": {
-            "precision": 0.7142857142857143,
-            "recall": 0.8333333333333334,
-            "f1-score": 0.7692307692307693,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 6.0
         },
         "c7fc642b-3a46-4bda-ac76-abcbffdf2260": {
@@ -1251,9 +1251,9 @@
             "support": 1.0
         },
         "cec93868-770e-44c5-8bbd-097be098f498": {
-            "precision": 0.5,
+            "precision": 0.4,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5714285714285714,
             "support": 2.0
         },
         "cefe7503-7a7b-4573-b0a1-465cb3580565": {
@@ -1269,9 +1269,9 @@
             "support": 1.0
         },
         "cf22e101-9fef-48d5-9b40-a9a143c96a92": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "d0d01842-f151-46dd-85e8-e7f141de39ef": {
@@ -1293,9 +1293,9 @@
             "support": 1.0
         },
         "d3977dfd-d0f9-4318-8ea9-f7c337898633": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "d548ac7d-62f0-48cb-a8eb-4b7e0a5191b4": {
@@ -1353,9 +1353,9 @@
             "support": 1.0
         },
         "db3de022-02a6-455a-8d26-5746c2a79514": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "ddda7c68-86ac-4448-9795-e1cc33d704bc": {
@@ -1389,15 +1389,15 @@
             "support": 1.0
         },
         "e217374d-17e1-4fa2-b4aa-868033edc1ed": {
-            "precision": 0.8666666666666667,
-            "recall": 0.9285714285714286,
-            "f1-score": 0.896551724137931,
+            "precision": 0.875,
+            "recall": 1.0,
+            "f1-score": 0.9333333333333333,
             "support": 14.0
         },
         "e3e8dcae-7c7c-4492-812c-313c35c88f51": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "e77d385c-2200-4fa5-b90a-0dea100e69e5": {
@@ -1449,9 +1449,9 @@
             "support": 2.0
         },
         "f0981810-e7ce-4e48-b699-c17fbbca7f3c": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "f1aa3589-f203-4455-a293-86f392932895": {
@@ -1467,15 +1467,15 @@
             "support": 1.0
         },
         "f4a2038b-8da9-451e-ae71-80cb90cb07b3": {
-            "precision": 0.8333333333333334,
-            "recall": 0.8333333333333334,
-            "f1-score": 0.8333333333333334,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 6.0
         },
         "f5536888-9190-4314-a13f-7ca19b1f07a9": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 0.6666666666666666,
-            "f1-score": 0.5714285714285714,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "f83057a7-a975-4900-a056-99f453bdf15f": {
@@ -1515,15 +1515,15 @@
             "support": 1.0
         },
         "fd56348b-a8c7-4635-800f-bf5f8c3dd4a0": {
-            "precision": 0.8333333333333334,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.9090909090909091,
+            "f1-score": 1.0,
             "support": 5.0
         },
         "fdcab2e1-312d-4116-bdef-7bfdfcefe705": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "fe44d727-75e4-4452-9428-95a5f3c7ea73": {
@@ -1534,26 +1534,26 @@
         },
         "fee1977a-deac-4eb4-a1ba-5a5f669a9817": {
             "precision": 1.0,
-            "recall": 0.8333333333333334,
-            "f1-score": 0.9090909090909091,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.9411764705882353,
             "support": 18.0
         },
-        "accuracy": 0.7603174603174603,
+        "accuracy": 0.7841269841269841,
         "macro avg": {
-            "precision": 0.6168280721015096,
-            "recall": 0.6602001297313798,
-            "f1-score": 0.6186355263931671,
+            "precision": 0.6480822454455267,
+            "recall": 0.6826362656440781,
+            "f1-score": 0.644024146043907,
             "support": 630.0
         },
         "weighted avg": {
-            "precision": 0.7479814585766965,
-            "recall": 0.7603174603174603,
-            "f1-score": 0.7392369581432756,
+            "precision": 0.7727339151148676,
+            "recall": 0.7841269841269841,
+            "f1-score": 0.7614876400702731,
             "support": 630.0
         }
     },
     "md_trained_on": true,
     "md_split_type": "random",
     "md_random_split": true,
-    "eval_runtime_sec": 67.81608462333679
+    "eval_runtime_sec": 2.5340468883514404
 }

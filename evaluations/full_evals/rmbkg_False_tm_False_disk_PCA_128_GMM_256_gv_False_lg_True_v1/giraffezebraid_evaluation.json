@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.8310046573519627,
-    "top_n_accuracy": 0.886892880904857,
+    "accuracy": 0.8296739853626082,
+    "top_n_accuracy": 0.8862275449101796,
     "classification_metrics": {
         "IBEIS_PZ_0001": {
             "precision": 1.0,
@@ -15,21 +15,21 @@
             "support": 1.0
         },
         "IBEIS_PZ_0003": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 1.0
-        },
-        "IBEIS_PZ_0004": {
             "precision": 0.5,
             "recall": 1.0,
             "f1-score": 0.6666666666666666,
             "support": 1.0
         },
-        "IBEIS_PZ_0005": {
+        "IBEIS_PZ_0004": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
+            "support": 1.0
+        },
+        "IBEIS_PZ_0005": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "IBEIS_PZ_0006": {
@@ -51,9 +51,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0009": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0010": {
@@ -123,9 +123,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0021": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "IBEIS_PZ_0022": {
@@ -189,9 +189,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0034": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0035": {
@@ -243,9 +243,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0045": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0047": {
@@ -273,15 +273,15 @@
             "support": 1.0
         },
         "IBEIS_PZ_0053": {
-            "precision": 0.3333333333333333,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0055": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "IBEIS_PZ_0056": {
@@ -297,9 +297,9 @@
             "support": 3.0
         },
         "IBEIS_PZ_0058": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0059": {
@@ -345,9 +345,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0067": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "IBEIS_PZ_0068": {
@@ -387,9 +387,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0074": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_0075": {
@@ -399,9 +399,9 @@
             "support": 2.0
         },
         "IBEIS_PZ_0077": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0078": {
@@ -411,15 +411,15 @@
             "support": 1.0
         },
         "IBEIS_PZ_0079": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "IBEIS_PZ_0080": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0081": {
@@ -435,15 +435,15 @@
             "support": 3.0
         },
         "IBEIS_PZ_0083": {
-            "precision": 0.5,
-            "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0084": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0085": {
@@ -477,9 +477,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0090": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "IBEIS_PZ_0091": {
@@ -543,27 +543,27 @@
             "support": 1.0
         },
         "IBEIS_PZ_0101": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0102": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0103": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0104": {
             "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_0105": {
@@ -591,9 +591,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0109": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0110": {
@@ -603,9 +603,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0111": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0112": {
@@ -633,21 +633,21 @@
             "support": 1.0
         },
         "IBEIS_PZ_0116": {
-            "precision": 0.5,
-            "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0117": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0118": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0120": {
@@ -687,9 +687,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0131": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "IBEIS_PZ_0132": {
@@ -735,16 +735,10 @@
             "support": 1.0
         },
         "IBEIS_PZ_0159": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 1.0
-        },
-        "IBEIS_PZ_0165": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
-            "support": 0.0
+            "support": 1.0
         },
         "IBEIS_PZ_0169": {
             "precision": 0.5,
@@ -807,9 +801,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0186": {
-            "precision": 1.0,
+            "precision": 0.25,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.4,
             "support": 1.0
         },
         "IBEIS_PZ_0187": {
@@ -843,9 +837,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0192": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "IBEIS_PZ_0193": {
@@ -957,9 +951,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0211": {
-            "precision": 1.0,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "IBEIS_PZ_0212": {
@@ -1005,9 +999,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0219": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "IBEIS_PZ_0220": {
@@ -1029,15 +1023,15 @@
             "support": 1.0
         },
         "IBEIS_PZ_0223": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0224": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0226": {
@@ -1083,9 +1077,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0234": {
-            "precision": 0.25,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.4,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "IBEIS_PZ_0235": {
@@ -1095,9 +1089,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0237": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0238": {
@@ -1131,9 +1125,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0246": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0247": {
@@ -1149,15 +1143,15 @@
             "support": 1.0
         },
         "IBEIS_PZ_0252": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0254": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0255": {
@@ -1173,9 +1167,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0260": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_0261": {
@@ -1197,9 +1191,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0264": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "IBEIS_PZ_0269": {
@@ -1232,6 +1226,18 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "IBEIS_PZ_0277": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "IBEIS_PZ_0278": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "IBEIS_PZ_0279": {
             "precision": 0.0,
             "recall": 0.0,
@@ -1239,9 +1245,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0287": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "IBEIS_PZ_0291": {
@@ -1264,8 +1270,8 @@
         },
         "IBEIS_PZ_0303": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "IBEIS_PZ_0306": {
@@ -1282,9 +1288,15 @@
         },
         "IBEIS_PZ_0312": {
             "precision": 1.0,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
             "support": 3.0
+        },
+        "IBEIS_PZ_0313": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "IBEIS_PZ_0318": {
             "precision": 0.0,
@@ -1292,7 +1304,7 @@
             "f1-score": 0.0,
             "support": 0.0
         },
-        "IBEIS_PZ_0324": {
+        "IBEIS_PZ_0328": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -1305,9 +1317,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0331": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0333": {
@@ -1454,6 +1466,12 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "IBEIS_PZ_0365": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "IBEIS_PZ_0367": {
             "precision": 1.0,
             "recall": 1.0,
@@ -1473,15 +1491,15 @@
             "support": 2.0
         },
         "IBEIS_PZ_0371": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0372": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_0373": {
@@ -1497,9 +1515,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0375": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "IBEIS_PZ_0376": {
@@ -1551,9 +1569,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0384": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0385": {
@@ -1617,9 +1635,9 @@
             "support": 4.0
         },
         "IBEIS_PZ_0395": {
-            "precision": 0.75,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "IBEIS_PZ_0396": {
@@ -1629,9 +1647,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0397": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0398": {
@@ -1671,9 +1689,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0404": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0405": {
@@ -1707,9 +1725,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0410": {
-            "precision": 0.5,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "IBEIS_PZ_0411": {
@@ -1766,12 +1784,6 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "IBEIS_PZ_0421": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_0423": {
             "precision": 1.0,
             "recall": 1.0,
@@ -1790,12 +1802,6 @@
             "f1-score": 1.0,
             "support": 1.0
         },
-        "IBEIS_PZ_0430": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_0432": {
             "precision": 0.0,
             "recall": 0.0,
@@ -1803,9 +1809,9 @@
             "support": 0.0
         },
         "IBEIS_PZ_0433": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0436": {
@@ -1833,9 +1839,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0443": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_0444": {
@@ -1869,9 +1875,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0449": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "IBEIS_PZ_0450": {
@@ -1893,9 +1899,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0453": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "IBEIS_PZ_0454": {
@@ -1929,9 +1935,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0459": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0460": {
@@ -1977,15 +1983,15 @@
             "support": 1.0
         },
         "IBEIS_PZ_0467": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0468": {
             "precision": 1.0,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
             "support": 3.0
         },
         "IBEIS_PZ_0469": {
@@ -2013,21 +2019,21 @@
             "support": 1.0
         },
         "IBEIS_PZ_0473": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0474": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0475": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0476": {
@@ -2042,6 +2048,12 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "IBEIS_PZ_0486": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "IBEIS_PZ_0495": {
             "precision": 1.0,
             "recall": 1.0,
@@ -2049,9 +2061,9 @@
             "support": 2.0
         },
         "IBEIS_PZ_0496": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_0497": {
@@ -2067,9 +2079,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0499": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0500": {
@@ -2163,9 +2175,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0515": {
-            "precision": 0.75,
+            "precision": 0.6,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 0.75,
             "support": 3.0
         },
         "IBEIS_PZ_0516": {
@@ -2187,9 +2199,9 @@
             "support": 3.0
         },
         "IBEIS_PZ_0519": {
-            "precision": 0.8,
-            "recall": 1.0,
-            "f1-score": 0.8888888888888888,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.8571428571428571,
             "support": 4.0
         },
         "IBEIS_PZ_0520": {
@@ -2270,6 +2282,12 @@
             "f1-score": 1.0,
             "support": 1.0
         },
+        "IBEIS_PZ_0538": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "IBEIS_PZ_0539": {
             "precision": 1.0,
             "recall": 1.0,
@@ -2282,6 +2300,12 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "IBEIS_PZ_0544": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "IBEIS_PZ_0548": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2289,9 +2313,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0549": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0550": {
@@ -2397,9 +2421,9 @@
             "support": 2.0
         },
         "IBEIS_PZ_0567": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0568": {
@@ -2408,12 +2432,6 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "IBEIS_PZ_0569": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_0571": {
             "precision": 1.0,
             "recall": 1.0,
@@ -2421,9 +2439,9 @@
             "support": 2.0
         },
         "IBEIS_PZ_0582": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0587": {
@@ -2469,9 +2487,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0595": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "IBEIS_PZ_0596": {
@@ -2481,15 +2499,15 @@
             "support": 1.0
         },
         "IBEIS_PZ_0597": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0598": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "IBEIS_PZ_0599": {
@@ -2499,9 +2517,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0600": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0603": {
@@ -2517,9 +2535,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0607": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0608": {
@@ -2535,10 +2553,16 @@
             "support": 1.0
         },
         "IBEIS_PZ_0610": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
+        },
+        "IBEIS_PZ_0614": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "IBEIS_PZ_0617": {
             "precision": 0.0,
@@ -2589,15 +2613,15 @@
             "support": 1.0
         },
         "IBEIS_PZ_0630": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "IBEIS_PZ_0640": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0647": {
@@ -2606,12 +2630,6 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "IBEIS_PZ_0648": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_0650": {
             "precision": 0.5,
             "recall": 1.0,
@@ -2619,9 +2637,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0651": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0652": {
@@ -2661,9 +2679,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0660": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0661": {
@@ -2709,18 +2727,12 @@
             "support": 1.0
         },
         "IBEIS_PZ_0668": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
-        "IBEIS_PZ_0669": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
-        "IBEIS_PZ_0674": {
+        "IBEIS_PZ_0672": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -2733,9 +2745,9 @@
             "support": 2.0
         },
         "IBEIS_PZ_0678": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0679": {
@@ -2793,9 +2805,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0694": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0695": {
@@ -2815,6 +2827,18 @@
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 1.0
+        },
+        "IBEIS_PZ_0698": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "IBEIS_PZ_0706": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "IBEIS_PZ_0708": {
             "precision": 1.0,
@@ -2925,9 +2949,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0726": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0727": {
@@ -2960,13 +2984,13 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "IBEIS_PZ_0742": {
+        "IBEIS_PZ_0749": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 0.0
         },
-        "IBEIS_PZ_0749": {
+        "IBEIS_PZ_0751": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -2979,9 +3003,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0754": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0755": {
@@ -3039,9 +3063,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0770": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_0771": {
@@ -3081,9 +3105,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0778": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0779": {
@@ -3147,9 +3171,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0789": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0791": {
@@ -3159,9 +3183,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0792": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0793": {
@@ -3177,10 +3201,16 @@
             "support": 1.0
         },
         "IBEIS_PZ_0800": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
+        },
+        "IBEIS_PZ_0801": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "IBEIS_PZ_0828": {
             "precision": 1.0,
@@ -3230,6 +3260,12 @@
             "f1-score": 1.0,
             "support": 1.0
         },
+        "IBEIS_PZ_0838": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "IBEIS_PZ_0840": {
             "precision": 0.0,
             "recall": 0.0,
@@ -3267,9 +3303,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0864": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0865": {
@@ -3345,9 +3381,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0877": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0878": {
@@ -3423,9 +3459,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0890": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_0891": {
@@ -3507,9 +3543,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0906": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0908": {
@@ -3585,9 +3621,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0944": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "IBEIS_PZ_0946": {
@@ -3596,6 +3632,12 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "IBEIS_PZ_0951": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "IBEIS_PZ_0955": {
             "precision": 0.0,
             "recall": 0.0,
@@ -3603,9 +3645,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_0956": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_0964": {
@@ -3619,12 +3661,6 @@
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 1.0
-        },
-        "IBEIS_PZ_0981": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "IBEIS_PZ_0983": {
             "precision": 0.0,
@@ -3723,9 +3759,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1006": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1008": {
@@ -3830,12 +3866,6 @@
             "f1-score": 0.0,
             "support": 0.0
         },
-        "IBEIS_PZ_1064": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_1074": {
             "precision": 0.0,
             "recall": 0.0,
@@ -3849,9 +3879,9 @@
             "support": 0.0
         },
         "IBEIS_PZ_1083": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1084": {
@@ -3968,12 +3998,6 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "IBEIS_PZ_1122": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_1125": {
             "precision": 1.0,
             "recall": 1.0,
@@ -3986,19 +4010,13 @@
             "f1-score": 1.0,
             "support": 1.0
         },
-        "IBEIS_PZ_1142": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_1144": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
         },
-        "IBEIS_PZ_1151": {
+        "IBEIS_PZ_1154": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -4033,12 +4051,6 @@
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 1.0
-        },
-        "IBEIS_PZ_1194": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "IBEIS_PZ_1204": {
             "precision": 1.0,
@@ -4101,9 +4113,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1214": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1215": {
@@ -4173,9 +4185,9 @@
             "support": 2.0
         },
         "IBEIS_PZ_1226": {
-            "precision": 0.75,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "IBEIS_PZ_1227": {
@@ -4228,8 +4240,8 @@
         },
         "IBEIS_PZ_1235": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "IBEIS_PZ_1236": {
@@ -4287,9 +4299,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1245": {
-            "precision": 0.3333333333333333,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1246": {
@@ -4311,15 +4323,15 @@
             "support": 3.0
         },
         "IBEIS_PZ_1249": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_1250": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 0.75,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 0.75,
             "support": 4.0
         },
         "IBEIS_PZ_1251": {
@@ -4365,15 +4377,15 @@
             "support": 1.0
         },
         "IBEIS_PZ_1258": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1259": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "IBEIS_PZ_1260": {
@@ -4425,21 +4437,21 @@
             "support": 3.0
         },
         "IBEIS_PZ_1268": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "IBEIS_PZ_1269": {
-            "precision": 0.3333333333333333,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1272": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_1273": {
@@ -4497,9 +4509,9 @@
             "support": 4.0
         },
         "IBEIS_PZ_1282": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "IBEIS_PZ_1283": {
@@ -4515,9 +4527,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1285": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_1286": {
@@ -4539,9 +4551,9 @@
             "support": 4.0
         },
         "IBEIS_PZ_1289": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_1290": {
@@ -4563,15 +4575,15 @@
             "support": 4.0
         },
         "IBEIS_PZ_1294": {
-            "precision": 1.0,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "IBEIS_PZ_1295": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_1298": {
@@ -4586,18 +4598,6 @@
             "f1-score": 0.0,
             "support": 0.0
         },
-        "IBEIS_PZ_1311": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
-        "IBEIS_PZ_1317": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_1318": {
             "precision": 0.0,
             "recall": 0.0,
@@ -4605,9 +4605,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1331": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1332": {
@@ -4622,12 +4622,6 @@
             "f1-score": 1.0,
             "support": 1.0
         },
-        "IBEIS_PZ_1337": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_1339": {
             "precision": 0.0,
             "recall": 0.0,
@@ -4639,6 +4633,12 @@
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 1.0
+        },
+        "IBEIS_PZ_1346": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "IBEIS_PZ_1347": {
             "precision": 1.0,
@@ -4653,9 +4653,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1350": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "IBEIS_PZ_1351": {
@@ -4719,9 +4719,9 @@
             "support": 2.0
         },
         "IBEIS_PZ_1366": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "IBEIS_PZ_1367": {
@@ -4731,9 +4731,9 @@
             "support": 3.0
         },
         "IBEIS_PZ_1368": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1369": {
@@ -4809,9 +4809,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1381": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1382": {
@@ -4821,9 +4821,9 @@
             "support": 2.0
         },
         "IBEIS_PZ_1383": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1384": {
@@ -4875,9 +4875,9 @@
             "support": 2.0
         },
         "IBEIS_PZ_1402": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_1403": {
@@ -4887,9 +4887,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1404": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1405": {
@@ -4922,6 +4922,12 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "IBEIS_PZ_1419": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "IBEIS_PZ_1421": {
             "precision": 1.0,
             "recall": 1.0,
@@ -4941,9 +4947,9 @@
             "support": 4.0
         },
         "IBEIS_PZ_1425": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1426": {
@@ -4959,9 +4965,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1429": {
-            "precision": 0.6666666666666666,
-            "recall": 1.0,
-            "f1-score": 0.8,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "IBEIS_PZ_1431": {
@@ -4983,9 +4989,9 @@
             "support": 0.0
         },
         "IBEIS_PZ_1442": {
-            "precision": 0.75,
+            "precision": 0.6,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 0.75,
             "support": 3.0
         },
         "IBEIS_PZ_1443": {
@@ -4995,9 +5001,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1444": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "IBEIS_PZ_1445": {
@@ -5061,9 +5067,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1494": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1495": {
@@ -5089,6 +5095,12 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
+        },
+        "IBEIS_PZ_1506": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "IBEIS_PZ_1512": {
             "precision": 1.0,
@@ -5139,9 +5151,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1531": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1535": {
@@ -5193,9 +5205,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1547": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1548": {
@@ -5337,9 +5349,9 @@
             "support": 2.0
         },
         "IBEIS_PZ_1588": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "IBEIS_PZ_1589": {
@@ -5403,9 +5415,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1599": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "IBEIS_PZ_1600": {
@@ -5427,9 +5439,9 @@
             "support": 5.0
         },
         "IBEIS_PZ_1603": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "IBEIS_PZ_1604": {
@@ -5451,9 +5463,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1607": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1608": {
@@ -5499,9 +5511,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1619": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1620": {
@@ -5536,8 +5548,8 @@
         },
         "IBEIS_PZ_1648": {
             "precision": 1.0,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "IBEIS_PZ_1650": {
@@ -5559,15 +5571,15 @@
             "support": 1.0
         },
         "IBEIS_PZ_1658": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_1659": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "IBEIS_PZ_1660": {
@@ -5607,9 +5619,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1666": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1667": {
@@ -5679,9 +5691,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1678": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1679": {
@@ -5751,9 +5763,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1690": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1691": {
@@ -5870,6 +5882,12 @@
             "f1-score": 0.0,
             "support": 0.0
         },
+        "IBEIS_PZ_1721": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "IBEIS_PZ_1722": {
             "precision": 0.0,
             "recall": 0.0,
@@ -5883,27 +5901,27 @@
             "support": 1.0
         },
         "IBEIS_PZ_1725": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 1.0
-        },
-        "IBEIS_PZ_1726": {
             "precision": 0.5,
             "recall": 1.0,
             "f1-score": 0.6666666666666666,
             "support": 1.0
         },
-        "IBEIS_PZ_1727": {
+        "IBEIS_PZ_1726": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "IBEIS_PZ_1728": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 0.0
         },
         "IBEIS_PZ_1730": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1731": {
@@ -5919,9 +5937,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1733": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1734": {
@@ -5949,15 +5967,15 @@
             "support": 1.0
         },
         "IBEIS_PZ_1738": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1739": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1740": {
@@ -5973,15 +5991,15 @@
             "support": 3.0
         },
         "IBEIS_PZ_1742": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 1.0
-        },
-        "IBEIS_PZ_1743": {
             "precision": 0.5,
             "recall": 1.0,
             "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "IBEIS_PZ_1743": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1744": {
@@ -5991,9 +6009,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1745": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1746": {
@@ -6039,9 +6057,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1753": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_1754": {
@@ -6087,9 +6105,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1761": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1762": {
@@ -6099,9 +6117,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1763": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_1764": {
@@ -6111,9 +6129,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1765": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1766": {
@@ -6129,9 +6147,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1768": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "IBEIS_PZ_1769": {
@@ -6140,16 +6158,10 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "IBEIS_PZ_1770": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_1771": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1774": {
@@ -6170,31 +6182,7 @@
             "f1-score": 0.6666666666666666,
             "support": 1.0
         },
-        "IBEIS_PZ_1790": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
-        "IBEIS_PZ_1799": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
-        "IBEIS_PZ_1808": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "IBEIS_PZ_1811": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
-        "IBEIS_PZ_1812": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -6267,9 +6255,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1831": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "IBEIS_PZ_1832": {
@@ -6345,9 +6333,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1844": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_1846": {
@@ -6448,8 +6436,8 @@
         },
         "IBEIS_PZ_1896": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "IBEIS_PZ_1902": {
@@ -6459,9 +6447,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1904": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "IBEIS_PZ_1905": {
@@ -6483,9 +6471,9 @@
             "support": 1.0
         },
         "IBEIS_PZ_1908": {
-            "precision": 0.5,
-            "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "IBEIS_PZ_1909": {
@@ -6493,6 +6481,12 @@
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 3.0
+        },
+        "IBEIS_PZ_1910": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "NNP_GIRM_0001": {
             "precision": 1.0,
@@ -6531,9 +6525,9 @@
             "support": 1.0
         },
         "NNP_GIRM_0007": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "NNP_GIRM_0008": {
@@ -6561,9 +6555,9 @@
             "support": 1.0
         },
         "NNP_GIRM_0012": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "NNP_GIRM_0013": {
@@ -6591,9 +6585,9 @@
             "support": 1.0
         },
         "NNP_GIRM_0017": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "NNP_GIRM_0018": {
@@ -6603,9 +6597,9 @@
             "support": 1.0
         },
         "NNP_GIRM_0019": {
-            "precision": 0.75,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "NNP_GIRM_0020": {
@@ -6675,9 +6669,9 @@
             "support": 1.0
         },
         "NNP_GIRM_0031": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "NNP_GIRM_0032": {
@@ -6717,9 +6711,9 @@
             "support": 2.0
         },
         "NNP_GIRM_0038": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "NNP_GIRM_0039": {
@@ -6753,9 +6747,9 @@
             "support": 3.0
         },
         "NNP_GIRM_0044": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "NNP_GIRM_0045": {
@@ -6807,9 +6801,9 @@
             "support": 1.0
         },
         "NNP_GIRM_0053": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "NNP_GIRM_0054": {
@@ -6819,9 +6813,9 @@
             "support": 1.0
         },
         "NNP_GIRM_0055": {
-            "precision": 0.8,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.8888888888888888,
+            "f1-score": 0.8,
             "support": 4.0
         },
         "NNP_GIRM_0057": {
@@ -6837,9 +6831,9 @@
             "support": 1.0
         },
         "NNP_GIRM_0059": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "NNP_GIRM_0060": {
@@ -6873,9 +6867,9 @@
             "support": 1.0
         },
         "NNP_GIRM_0065": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "NNP_GIRM_0066": {
@@ -6999,9 +6993,9 @@
             "support": 2.0
         },
         "NNP_GIRM_0101": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "NNP_GIRM_0103": {
@@ -7053,9 +7047,9 @@
             "support": 1.0
         },
         "NNP_GIRM_0115": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "NNP_GIRM_0116": {
@@ -7065,10 +7059,16 @@
             "support": 1.0
         },
         "NNP_GIRM_0119": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
+        },
+        "NNP_GIRM_0121": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "NNP_GIRM_0123": {
             "precision": 1.0,
@@ -7150,26 +7150,26 @@
         },
         "NNP_GIRM_0151": {
             "precision": 1.0,
-            "recall": 0.7272727272727273,
-            "f1-score": 0.8421052631578947,
+            "recall": 0.8181818181818182,
+            "f1-score": 0.9,
             "support": 11.0
         },
-        "accuracy": 0.8310046573519627,
+        "accuracy": 0.8296739853626082,
         "macro avg": {
-            "precision": 0.7274049217002236,
-            "recall": 0.7706744458002847,
-            "f1-score": 0.7385393713590463,
+            "precision": 0.7318931767337808,
+            "recall": 0.771659548505186,
+            "f1-score": 0.7412891498881431,
             "support": 1503.0
         },
         "weighted avg": {
-            "precision": 0.796717675759592,
-            "recall": 0.8310046573519627,
-            "f1-score": 0.8020169074271396,
+            "precision": 0.7979596362829895,
+            "recall": 0.8296739853626082,
+            "f1-score": 0.8019294743845643,
             "support": 1503.0
         }
     },
     "md_trained_on": true,
     "md_split_type": "random",
     "md_random_split": true,
-    "eval_runtime_sec": 154.33520817756653
+    "eval_runtime_sec": 13.439914464950562
 }

@@ -1,0 +1,227 @@
+{
+    "accuracy": 0.9904458598726115,
+    "top_n_accuracy": 0.9936305732484076,
+    "classification_metrics": {
+        "Dan": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Judd": {
+            "precision": 1.0,
+            "recall": 0.9722222222222222,
+            "f1-score": 0.9859154929577465,
+            "support": 36.0
+        },
+        "Lala": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Leah": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Libby": {
+            "precision": 1.0,
+            "recall": 0.9722222222222222,
+            "f1-score": 0.9859154929577465,
+            "support": 36.0
+        },
+        "Linz": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Love": {
+            "precision": 1.0,
+            "recall": 0.9722222222222222,
+            "f1-score": 0.9859154929577465,
+            "support": 36.0
+        },
+        "Lydia": {
+            "precision": 1.0,
+            "recall": 0.9722222222222222,
+            "f1-score": 0.9859154929577465,
+            "support": 36.0
+        },
+        "Maj": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Meesha": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 36.0
+        },
+        "Meg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 36.0
+        },
+        "Melody": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 36.0
+        },
+        "Mindy": {
+            "precision": 0.95,
+            "recall": 1.0,
+            "f1-score": 0.9743589743589743,
+            "support": 38.0
+        },
+        "Ocelot": {
+            "precision": 0.9743589743589743,
+            "recall": 1.0,
+            "f1-score": 0.987012987012987,
+            "support": 38.0
+        },
+        "Rupee": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Saphy": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Serena": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Shirley": {
+            "precision": 0.9473684210526315,
+            "recall": 1.0,
+            "f1-score": 0.972972972972973,
+            "support": 36.0
+        },
+        "Sizzle": {
+            "precision": 0.9714285714285714,
+            "recall": 1.0,
+            "f1-score": 0.9855072463768116,
+            "support": 34.0
+        },
+        "Sol": {
+            "precision": 0.972972972972973,
+            "recall": 1.0,
+            "f1-score": 0.9863013698630136,
+            "support": 36.0
+        },
+        "Sonja": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Spice": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Star": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 34.0
+        },
+        "Sugar": {
+            "precision": 0.9743589743589743,
+            "recall": 1.0,
+            "f1-score": 0.987012987012987,
+            "support": 38.0
+        },
+        "Tamara": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Tass": {
+            "precision": 1.0,
+            "recall": 0.9736842105263158,
+            "f1-score": 0.9866666666666667,
+            "support": 38.0
+        },
+        "Tea": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Teal": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Tes": {
+            "precision": 1.0,
+            "recall": 0.9473684210526315,
+            "f1-score": 0.972972972972973,
+            "support": 38.0
+        },
+        "Thyme": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 38.0
+        },
+        "Umbrella": {
+            "precision": 0.96875,
+            "recall": 0.9117647058823529,
+            "f1-score": 0.9393939393939394,
+            "support": 34.0
+        },
+        "Ursula": {
+            "precision": 1.0,
+            "recall": 0.9705882352941176,
+            "f1-score": 0.9850746268656716,
+            "support": 34.0
+        },
+        "Venus": {
+            "precision": 0.926829268292683,
+            "recall": 1.0,
+            "f1-score": 0.9620253164556962,
+            "support": 38.0
+        },
+        "Verity": {
+            "precision": 1.0,
+            "recall": 0.9722222222222222,
+            "f1-score": 0.9859154929577465,
+            "support": 36.0
+        },
+        "accuracy": 0.9904458598726115,
+        "macro avg": {
+            "precision": 0.9907666818372003,
+            "recall": 0.9901328436431333,
+            "f1-score": 0.9902611036688654,
+            "support": 1256.0
+        },
+        "weighted avg": {
+            "precision": 0.9908193916081984,
+            "recall": 0.9904458598726115,
+            "f1-score": 0.9904456521292827,
+            "support": 1256.0
+        }
+    },
+    "md_trained_on": true,
+    "md_split_type": "random",
+    "md_random_split": true,
+    "eval_runtime_sec": 10.140180110931396
+}

@@ -83,6 +83,7 @@ utils/yolo_output/
 # Snyk Security Extension - AI Rules (auto-generated)
 .cursor/rules/snyk_rules.mdc
 AGENTS.md
+GEMINI.md
 venv_wildlife_tools/
 test-scripts/wildlife-tools-data/*
 test-scripts/wildlifereid10k_splits/*

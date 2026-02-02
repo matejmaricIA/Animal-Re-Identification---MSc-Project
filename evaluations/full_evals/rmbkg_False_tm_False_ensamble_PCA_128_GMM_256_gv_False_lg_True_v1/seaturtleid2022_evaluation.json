@@ -1,0 +1,2195 @@
+{
+    "accuracy": 0.15102230483271376,
+    "top_n_accuracy": 0.2379182156133829,
+    "classification_metrics": {
+        "SeaTurtleID2022_t001": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t002": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t003": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t004": {
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t006": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "SeaTurtleID2022_t007": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t008": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t009": {
+            "precision": 1.0,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.2857142857142857,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t011": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t013": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t014": {
+            "precision": 0.25,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.15384615384615385,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t015": {
+            "precision": 0.6,
+            "recall": 0.21428571428571427,
+            "f1-score": 0.3157894736842105,
+            "support": 14.0
+        },
+        "SeaTurtleID2022_t017": {
+            "precision": 1.0,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.4444444444444444,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t018": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t020": {
+            "precision": 0.2,
+            "recall": 0.2,
+            "f1-score": 0.2,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t021": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t022": {
+            "precision": 0.09090909090909091,
+            "recall": 0.25,
+            "f1-score": 0.13333333333333333,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t023": {
+            "precision": 0.2,
+            "recall": 0.09090909090909091,
+            "f1-score": 0.125,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t025": {
+            "precision": 0.2857142857142857,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.25,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t027": {
+            "precision": 1.0,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.25,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t032": {
+            "precision": 1.0,
+            "recall": 0.375,
+            "f1-score": 0.5454545454545454,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t033": {
+            "precision": 0.30434782608695654,
+            "recall": 0.35,
+            "f1-score": 0.32558139534883723,
+            "support": 20.0
+        },
+        "SeaTurtleID2022_t034": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t035": {
+            "precision": 0.42857142857142855,
+            "recall": 1.0,
+            "f1-score": 0.6,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t036": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t037": {
+            "precision": 1.0,
+            "recall": 0.05,
+            "f1-score": 0.09523809523809523,
+            "support": 20.0
+        },
+        "SeaTurtleID2022_t038": {
+            "precision": 0.46153846153846156,
+            "recall": 0.75,
+            "f1-score": 0.5714285714285714,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t040": {
+            "precision": 0.2,
+            "recall": 0.5,
+            "f1-score": 0.2857142857142857,
+            "support": 2.0
+        },
+        "SeaTurtleID2022_t042": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t043": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t046": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t048": {
+            "precision": 0.3684210526315789,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.35,
+            "support": 21.0
+        },
+        "SeaTurtleID2022_t050": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t052": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t053": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t055": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t056": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t058": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t062": {
+            "precision": 0.2222222222222222,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.26666666666666666,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t063": {
+            "precision": 0.21428571428571427,
+            "recall": 0.75,
+            "f1-score": 0.3333333333333333,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t064": {
+            "precision": 0.25,
+            "recall": 0.125,
+            "f1-score": 0.16666666666666666,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t066": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t067": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t068": {
+            "precision": 0.2,
+            "recall": 0.07692307692307693,
+            "f1-score": 0.1111111111111111,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t069": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t070": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t071": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t073": {
+            "precision": 0.5,
+            "recall": 0.5555555555555556,
+            "f1-score": 0.5263157894736842,
+            "support": 18.0
+        },
+        "SeaTurtleID2022_t074": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t075": {
+            "precision": 0.6,
+            "recall": 0.2727272727272727,
+            "f1-score": 0.375,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t076": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t078": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t079": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t080": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t081": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t082": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t084": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t085": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t086": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t089": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t093": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t094": {
+            "precision": 0.35294117647058826,
+            "recall": 0.5454545454545454,
+            "f1-score": 0.42857142857142855,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t095": {
+            "precision": 0.1875,
+            "recall": 0.2727272727272727,
+            "f1-score": 0.2222222222222222,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t096": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t097": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t099": {
+            "precision": 0.2857142857142857,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.2857142857142857,
+            "support": 14.0
+        },
+        "SeaTurtleID2022_t102": {
+            "precision": 0.034482758620689655,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.05714285714285714,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t104": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t105": {
+            "precision": 0.5,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.18181818181818182,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t106": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t107": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t108": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t110": {
+            "precision": 0.07692307692307693,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.11428571428571428,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t112": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t114": {
+            "precision": 0.3333333333333333,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.2,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t115": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 21.0
+        },
+        "SeaTurtleID2022_t119": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t121": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t123": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t125": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t127": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t128": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t129": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t131": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t132": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t136": {
+            "precision": 0.25,
+            "recall": 0.1,
+            "f1-score": 0.14285714285714285,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t139": {
+            "precision": 1.0,
+            "recall": 0.09090909090909091,
+            "f1-score": 0.16666666666666666,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t141": {
+            "precision": 0.13333333333333333,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.13793103448275862,
+            "support": 14.0
+        },
+        "SeaTurtleID2022_t142": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t143": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t144": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t145": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "SeaTurtleID2022_t146": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t148": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t150": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t151": {
+            "precision": 0.25,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.18181818181818182,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t154": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t156": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t157": {
+            "precision": 1.0,
+            "recall": 0.07142857142857142,
+            "f1-score": 0.13333333333333333,
+            "support": 14.0
+        },
+        "SeaTurtleID2022_t158": {
+            "precision": 0.125,
+            "recall": 0.75,
+            "f1-score": 0.21428571428571427,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t159": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t160": {
+            "precision": 0.5,
+            "recall": 0.18181818181818182,
+            "f1-score": 0.26666666666666666,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t161": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t162": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t163": {
+            "precision": 0.7,
+            "recall": 0.5,
+            "f1-score": 0.5833333333333334,
+            "support": 14.0
+        },
+        "SeaTurtleID2022_t164": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t165": {
+            "precision": 0.8333333333333334,
+            "recall": 0.38461538461538464,
+            "f1-score": 0.5263157894736842,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t166": {
+            "precision": 0.16666666666666666,
+            "recall": 0.5,
+            "f1-score": 0.25,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t167": {
+            "precision": 1.0,
+            "recall": 0.18181818181818182,
+            "f1-score": 0.3076923076923077,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t168": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t170": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t171": {
+            "precision": 0.42857142857142855,
+            "recall": 0.375,
+            "f1-score": 0.4,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t172": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t173": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t174": {
+            "precision": 0.2857142857142857,
+            "recall": 0.25,
+            "f1-score": 0.26666666666666666,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t175": {
+            "precision": 0.7333333333333333,
+            "recall": 0.6470588235294118,
+            "f1-score": 0.6875,
+            "support": 17.0
+        },
+        "SeaTurtleID2022_t180": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t182": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t183": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t184": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t185": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t186": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t189": {
+            "precision": 0.4,
+            "recall": 0.15384615384615385,
+            "f1-score": 0.2222222222222222,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t190": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t191": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t192": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t194": {
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "f1-score": 0.4,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t195": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t197": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t199": {
+            "precision": 0.15384615384615385,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.21052631578947367,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t200": {
+            "precision": 0.0625,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.10526315789473684,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t201": {
+            "precision": 0.1875,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.2608695652173913,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t202": {
+            "precision": 0.14285714285714285,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.15384615384615385,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t203": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "SeaTurtleID2022_t204": {
+            "precision": 0.16666666666666666,
+            "recall": 0.25,
+            "f1-score": 0.2,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t206": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t208": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t211": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t212": {
+            "precision": 0.09090909090909091,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.11764705882352941,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t213": {
+            "precision": 0.14285714285714285,
+            "recall": 0.5,
+            "f1-score": 0.2222222222222222,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t214": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t215": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t216": {
+            "precision": 0.07692307692307693,
+            "recall": 0.2,
+            "f1-score": 0.1111111111111111,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t217": {
+            "precision": 0.2542372881355932,
+            "recall": 0.6,
+            "f1-score": 0.35714285714285715,
+            "support": 25.0
+        },
+        "SeaTurtleID2022_t220": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t222": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t223": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t224": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t225": {
+            "precision": 0.16666666666666666,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.15384615384615385,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t226": {
+            "precision": 0.3333333333333333,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.2222222222222222,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t227": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t228": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t229": {
+            "precision": 0.5,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.36363636363636365,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t230": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t231": {
+            "precision": 0.22580645161290322,
+            "recall": 0.875,
+            "f1-score": 0.358974358974359,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t232": {
+            "precision": 0.5,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.36363636363636365,
+            "support": 14.0
+        },
+        "SeaTurtleID2022_t233": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t234": {
+            "precision": 0.2777777777777778,
+            "recall": 0.4166666666666667,
+            "f1-score": 0.3333333333333333,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t235": {
+            "precision": 0.05,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.06896551724137931,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t236": {
+            "precision": 0.10526315789473684,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.10810810810810811,
+            "support": 36.0
+        },
+        "SeaTurtleID2022_t237": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t238": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t240": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 19.0
+        },
+        "SeaTurtleID2022_t241": {
+            "precision": 0.3333333333333333,
+            "recall": 0.125,
+            "f1-score": 0.18181818181818182,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t242": {
+            "precision": 0.08333333333333333,
+            "recall": 0.125,
+            "f1-score": 0.1,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t243": {
+            "precision": 0.1794871794871795,
+            "recall": 0.45161290322580644,
+            "f1-score": 0.25688073394495414,
+            "support": 31.0
+        },
+        "SeaTurtleID2022_t244": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t245": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t246": {
+            "precision": 0.037037037037037035,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.06557377049180328,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t248": {
+            "precision": 0.5,
+            "recall": 0.4,
+            "f1-score": 0.4444444444444444,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t249": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t250": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t251": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t252": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t253": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t254": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t255": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t257": {
+            "precision": 0.3333333333333333,
+            "recall": 0.25,
+            "f1-score": 0.2857142857142857,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t258": {
+            "precision": 1.0,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.4444444444444444,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t259": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t260": {
+            "precision": 0.1,
+            "recall": 0.2,
+            "f1-score": 0.13333333333333333,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t261": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t262": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t263": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t264": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t265": {
+            "precision": 0.3333333333333333,
+            "recall": 0.1,
+            "f1-score": 0.15384615384615385,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t266": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t267": {
+            "precision": 0.2,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.18181818181818182,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t268": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t269": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t270": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t271": {
+            "precision": 1.0,
+            "recall": 0.08333333333333333,
+            "f1-score": 0.15384615384615385,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t272": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t274": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t275": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t276": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t277": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t280": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t281": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t283": {
+            "precision": 0.1111111111111111,
+            "recall": 0.2,
+            "f1-score": 0.14285714285714285,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t285": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t286": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t287": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t288": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t289": {
+            "precision": 0.3333333333333333,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.2,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t291": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t292": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t293": {
+            "precision": 0.6666666666666666,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.4,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t294": {
+            "precision": 0.05555555555555555,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.08,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t295": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t296": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t298": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 19.0
+        },
+        "SeaTurtleID2022_t299": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t300": {
+            "precision": 0.3333333333333333,
+            "recall": 0.08333333333333333,
+            "f1-score": 0.13333333333333333,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t301": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t302": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t305": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t306": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t308": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t309": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t310": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t311": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t313": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t314": {
+            "precision": 0.375,
+            "recall": 0.42857142857142855,
+            "f1-score": 0.4,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t316": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 20.0
+        },
+        "SeaTurtleID2022_t317": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t318": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t319": {
+            "precision": 0.4444444444444444,
+            "recall": 0.3076923076923077,
+            "f1-score": 0.36363636363636365,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t321": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t322": {
+            "precision": 0.35294117647058826,
+            "recall": 0.46153846153846156,
+            "f1-score": 0.4,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t323": {
+            "precision": 0.2545454545454545,
+            "recall": 0.56,
+            "f1-score": 0.35,
+            "support": 25.0
+        },
+        "SeaTurtleID2022_t325": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t327": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t328": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t329": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t330": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t331": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t333": {
+            "precision": 0.36363636363636365,
+            "recall": 0.21052631578947367,
+            "f1-score": 0.26666666666666666,
+            "support": 19.0
+        },
+        "SeaTurtleID2022_t334": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t335": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t337": {
+            "precision": 0.3333333333333333,
+            "recall": 0.25,
+            "f1-score": 0.2857142857142857,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t338": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t339": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t341": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t342": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t343": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t344": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t345": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t346": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t347": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 15.0
+        },
+        "SeaTurtleID2022_t348": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t350": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t351": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t352": {
+            "precision": 0.2,
+            "recall": 0.09090909090909091,
+            "f1-score": 0.125,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t353": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 15.0
+        },
+        "SeaTurtleID2022_t354": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t357": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t358": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t359": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t360": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t361": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t362": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t363": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t364": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t365": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t366": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t368": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t372": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t373": {
+            "precision": 0.16666666666666666,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.13333333333333333,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t374": {
+            "precision": 0.5,
+            "recall": 0.125,
+            "f1-score": 0.2,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t376": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t377": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t380": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t382": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t385": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t386": {
+            "precision": 0.4666666666666667,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.5833333333333334,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t388": {
+            "precision": 0.1,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.11764705882352941,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t389": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t390": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t393": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t395": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t396": {
+            "precision": 0.08695652173913043,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.15384615384615385,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t397": {
+            "precision": 0.4375,
+            "recall": 0.7777777777777778,
+            "f1-score": 0.56,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t398": {
+            "precision": 0.18421052631578946,
+            "recall": 0.3684210526315789,
+            "f1-score": 0.24561403508771928,
+            "support": 19.0
+        },
+        "SeaTurtleID2022_t399": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t400": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t401": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t402": {
+            "precision": 0.09090909090909091,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.1111111111111111,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t403": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t404": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t405": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t407": {
+            "precision": 0.1875,
+            "recall": 0.23076923076923078,
+            "f1-score": 0.20689655172413793,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t408": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t409": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t410": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t411": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t412": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t413": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t415": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t417": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t418": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t419": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t420": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t421": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t422": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t423": {
+            "precision": 0.42857142857142855,
+            "recall": 0.375,
+            "f1-score": 0.4,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t424": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t425": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t426": {
+            "precision": 0.5,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.2222222222222222,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t427": {
+            "precision": 0.125,
+            "recall": 0.25,
+            "f1-score": 0.16666666666666666,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t429": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t430": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t431": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t432": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t433": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t434": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t436": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t438": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t439": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t441": {
+            "precision": 0.18518518518518517,
+            "recall": 0.38461538461538464,
+            "f1-score": 0.25,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t442": {
+            "precision": 0.5714285714285714,
+            "recall": 0.4444444444444444,
+            "f1-score": 0.5,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t450": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t451": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t453": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 8.0
+        },
+        "SeaTurtleID2022_t459": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 11.0
+        },
+        "SeaTurtleID2022_t467": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 13.0
+        },
+        "SeaTurtleID2022_t471": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t473": {
+            "precision": 0.3,
+            "recall": 0.25,
+            "f1-score": 0.2727272727272727,
+            "support": 12.0
+        },
+        "SeaTurtleID2022_t474": {
+            "precision": 0.06666666666666667,
+            "recall": 0.1111111111111111,
+            "f1-score": 0.08333333333333333,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t478": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t490": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t492": {
+            "precision": 0.375,
+            "recall": 0.75,
+            "f1-score": 0.5,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t493": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t496": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t497": {
+            "precision": 0.5,
+            "recall": 0.1,
+            "f1-score": 0.16666666666666666,
+            "support": 10.0
+        },
+        "SeaTurtleID2022_t500": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t514": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t518": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 2.0
+        },
+        "SeaTurtleID2022_t522": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t524": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t527": {
+            "precision": 0.5,
+            "recall": 0.75,
+            "f1-score": 0.6,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t528": {
+            "precision": 0.1,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.15384615384615385,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t544": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t547": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "SeaTurtleID2022_t548": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t553": {
+            "precision": 0.05,
+            "recall": 0.2,
+            "f1-score": 0.08,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t554": {
+            "precision": 0.5,
+            "recall": 0.25,
+            "f1-score": 0.3333333333333333,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t559": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
+        "SeaTurtleID2022_t566": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t567": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t568": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t570": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t584": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t585": {
+            "precision": 0.3333333333333333,
+            "recall": 0.2,
+            "f1-score": 0.25,
+            "support": 5.0
+        },
+        "SeaTurtleID2022_t586": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t589": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "SeaTurtleID2022_t590": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t591": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 9.0
+        },
+        "SeaTurtleID2022_t594": {
+            "precision": 0.2,
+            "recall": 0.25,
+            "f1-score": 0.2222222222222222,
+            "support": 4.0
+        },
+        "SeaTurtleID2022_t600": {
+            "precision": 0.125,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.17391304347826086,
+            "support": 7.0
+        },
+        "SeaTurtleID2022_t603": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 6.0
+        },
+        "SeaTurtleID2022_t610": {
+            "precision": 0.6666666666666666,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.3333333333333333,
+            "support": 9.0
+        },
+        "accuracy": 0.15102230483271376,
+        "macro avg": {
+            "precision": 0.11550005715439587,
+            "recall": 0.09814251446173317,
+            "f1-score": 0.08671772262034637,
+            "support": 2152.0
+        },
+        "weighted avg": {
+            "precision": 0.19272581032721883,
+            "recall": 0.15102230483271376,
+            "f1-score": 0.1393680640594263,
+            "support": 2152.0
+        }
+    },
+    "md_trained_on": false,
+    "md_split_type": "time-aware",
+    "md_random_split": false,
+    "eval_runtime_sec": 1597.7860062122345
+}

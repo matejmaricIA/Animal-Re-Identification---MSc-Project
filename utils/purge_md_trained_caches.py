@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Purge cached descriptors/embeddings for MD-trained datasets."""
+"""Delete data/<dataset>/ folders for MD-trained datasets."""
 
 from __future__ import annotations
 
@@ -14,15 +14,6 @@ sys.path.append(str(repo_root))
 from constants import MD_DATASET_SPLITS
 
 
-PATTERNS = (
-    "feature_descriptors_*",
-    "pca_model_*",
-    "gmm_model_*",
-    "fisher_vectors_*",
-    "global_embeddings_*",
-)
-
-
 def resolve_dataset_dir(data_root: Path, name: str) -> Path | None:
     direct = data_root / name
     if direct.exists():
@@ -34,32 +25,13 @@ def resolve_dataset_dir(data_root: Path, name: str) -> Path | None:
     return None
 
 
-def collect_paths(dataset_dir: Path) -> list[Path]:
-    paths: list[Path] = []
-    for pattern in PATTERNS:
-        paths.extend(dataset_dir.glob(pattern))
-    return sorted(set(paths))
-
-
-def delete_path(path: Path) -> None:
-    if path.is_dir():
-        shutil.rmtree(path)
-    else:
-        path.unlink()
+def delete_dataset_dir(path: Path) -> None:
+    shutil.rmtree(path)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Purge cached descriptors/embeddings for MD-trained datasets."
-    )
-    parser.add_argument(
-        "--datasets",
-        nargs="*",
-        default=None,
-        help=(
-            "Optional dataset names to purge (case-insensitive). "
-            "Default: all datasets with trained_on=True in constants.MD_DATASET_SPLITS."
-        ),
+        description="Delete data/<dataset>/ folders for MD dataset subsets."
     )
     parser.add_argument(
         "--data-root",
@@ -67,58 +39,61 @@ def main() -> int:
         help="Data root (default: data)",
     )
     parser.add_argument(
+        "--trained-on",
+        choices=["true", "false", "all"],
+        default="true",
+        help="Filter datasets by MD trained_on flag (default: true).",
+    )
+    parser.add_argument(
         "--apply",
         action="store_true",
-        help="Actually delete files (default: dry-run).",
+        help="Actually delete folders (default: dry-run).",
     )
     args = parser.parse_args()
 
     data_root = (repo_root / args.data_root).resolve()
-    if args.datasets:
-        targets = [str(name).strip() for name in args.datasets if str(name).strip()]
-        mode = "explicit"
+    trained_flag = args.trained_on.lower()
+    if trained_flag == "all":
+        targets = list(MD_DATASET_SPLITS.keys())
     else:
+        want_trained = trained_flag == "true"
         targets = [
             name
             for name, meta in MD_DATASET_SPLITS.items()
-            if meta.get("trained_on")
+            if meta.get("trained_on") == want_trained
         ]
-        mode = "trained_on"
 
     if not targets:
-        print("No datasets selected.")
+        print(f"No datasets found for trained_on={args.trained_on}.")
         return 0
 
     print(f"Data root: {data_root}")
-    print(f"Selection mode: {mode}")
+    print(f"Target datasets (trained_on={args.trained_on}): {len(targets)}")
 
-    total_paths: list[Path] = []
+    dataset_dirs: list[Path] = []
     for name in targets:
         dataset_dir = resolve_dataset_dir(data_root, name)
         if dataset_dir is None:
             print(f"[SKIP] Dataset not found under data root: {name}")
             continue
-        paths = collect_paths(dataset_dir)
-        if not paths:
-            print(f"[OK] No cached artifacts for {dataset_dir.name}")
-            continue
-        print(f"[FOUND] {dataset_dir.name}: {len(paths)} paths")
-        total_paths.extend(paths)
+        dataset_dirs.append(dataset_dir)
 
-    if not total_paths:
+    if not dataset_dirs:
         print("Nothing to purge.")
         return 0
 
-    for path in total_paths:
+    for path in dataset_dirs:
         action = "DELETE" if args.apply else "DRY-RUN"
         print(f"[{action}] {path}")
         if args.apply:
-            delete_path(path)
+            delete_dataset_dir(path)
 
     if args.apply:
-        print(f"Deleted {len(total_paths)} paths.")
+        print(f"Deleted {len(dataset_dirs)} dataset folders.")
     else:
-        print(f"Dry-run complete ({len(total_paths)} paths). Use --apply to delete.")
+        print(
+            f"Dry-run complete ({len(dataset_dirs)} folders). Use --apply to delete."
+        )
 
     return 0
 

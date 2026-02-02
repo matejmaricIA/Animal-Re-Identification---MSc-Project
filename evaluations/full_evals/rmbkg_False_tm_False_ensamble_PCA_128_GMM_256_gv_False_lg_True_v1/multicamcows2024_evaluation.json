@@ -1,0 +1,539 @@
+{
+    "accuracy": 0.7368421052631579,
+    "top_n_accuracy": 0.8578947368421053,
+    "classification_metrics": {
+        "MultiCamCows2024_1": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "MultiCamCows2024_10": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "MultiCamCows2024_11": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 4.0
+        },
+        "MultiCamCows2024_12": {
+            "precision": 0.875,
+            "recall": 1.0,
+            "f1-score": 0.9333333333333333,
+            "support": 28.0
+        },
+        "MultiCamCows2024_13": {
+            "precision": 0.625,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.7142857142857143,
+            "support": 6.0
+        },
+        "MultiCamCows2024_14": {
+            "precision": 0.8333333333333334,
+            "recall": 0.9090909090909091,
+            "f1-score": 0.8695652173913043,
+            "support": 11.0
+        },
+        "MultiCamCows2024_15": {
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1-score": 0.8,
+            "support": 5.0
+        },
+        "MultiCamCows2024_16": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "MultiCamCows2024_17": {
+            "precision": 0.2857142857142857,
+            "recall": 1.0,
+            "f1-score": 0.4444444444444444,
+            "support": 2.0
+        },
+        "MultiCamCows2024_18": {
+            "precision": 1.0,
+            "recall": 0.875,
+            "f1-score": 0.9333333333333333,
+            "support": 8.0
+        },
+        "MultiCamCows2024_19": {
+            "precision": 0.8421052631578947,
+            "recall": 0.8421052631578947,
+            "f1-score": 0.8421052631578947,
+            "support": 19.0
+        },
+        "MultiCamCows2024_2": {
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1-score": 0.6666666666666666,
+            "support": 8.0
+        },
+        "MultiCamCows2024_20": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_21": {
+            "precision": 0.972972972972973,
+            "recall": 0.972972972972973,
+            "f1-score": 0.972972972972973,
+            "support": 37.0
+        },
+        "MultiCamCows2024_22": {
+            "precision": 1.0,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.7272727272727273,
+            "support": 7.0
+        },
+        "MultiCamCows2024_23": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.8571428571428571,
+            "support": 4.0
+        },
+        "MultiCamCows2024_24": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
+            "support": 4.0
+        },
+        "MultiCamCows2024_25": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "MultiCamCows2024_27": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "MultiCamCows2024_28": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_3": {
+            "precision": 0.5,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.4,
+            "support": 3.0
+        },
+        "MultiCamCows2024_30": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_31": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 4.0
+        },
+        "MultiCamCows2024_32": {
+            "precision": 0.2222222222222222,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.3333333333333333,
+            "support": 3.0
+        },
+        "MultiCamCows2024_33": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
+            "support": 6.0
+        },
+        "MultiCamCows2024_34": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
+            "support": 4.0
+        },
+        "MultiCamCows2024_35": {
+            "precision": 0.8260869565217391,
+            "recall": 1.0,
+            "f1-score": 0.9047619047619048,
+            "support": 19.0
+        },
+        "MultiCamCows2024_36": {
+            "precision": 0.2222222222222222,
+            "recall": 1.0,
+            "f1-score": 0.36363636363636365,
+            "support": 2.0
+        },
+        "MultiCamCows2024_37": {
+            "precision": 1.0,
+            "recall": 0.5714285714285714,
+            "f1-score": 0.7272727272727273,
+            "support": 7.0
+        },
+        "MultiCamCows2024_38": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
+            "support": 4.0
+        },
+        "MultiCamCows2024_39": {
+            "precision": 0.5,
+            "recall": 0.4,
+            "f1-score": 0.4444444444444444,
+            "support": 5.0
+        },
+        "MultiCamCows2024_4": {
+            "precision": 1.0,
+            "recall": 0.2222222222222222,
+            "f1-score": 0.36363636363636365,
+            "support": 9.0
+        },
+        "MultiCamCows2024_40": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 4.0
+        },
+        "MultiCamCows2024_41": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "MultiCamCows2024_42": {
+            "precision": 0.36363636363636365,
+            "recall": 1.0,
+            "f1-score": 0.5333333333333333,
+            "support": 4.0
+        },
+        "MultiCamCows2024_43": {
+            "precision": 0.5,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5714285714285714,
+            "support": 3.0
+        },
+        "MultiCamCows2024_44": {
+            "precision": 0.2,
+            "recall": 0.16666666666666666,
+            "f1-score": 0.18181818181818182,
+            "support": 6.0
+        },
+        "MultiCamCows2024_45": {
+            "precision": 0.6666666666666666,
+            "recall": 0.8,
+            "f1-score": 0.7272727272727273,
+            "support": 5.0
+        },
+        "MultiCamCows2024_46": {
+            "precision": 0.3333333333333333,
+            "recall": 0.8,
+            "f1-score": 0.47058823529411764,
+            "support": 5.0
+        },
+        "MultiCamCows2024_47": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "MultiCamCows2024_48": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 4.0
+        },
+        "MultiCamCows2024_49": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
+            "support": 4.0
+        },
+        "MultiCamCows2024_5": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_50": {
+            "precision": 0.5,
+            "recall": 0.4,
+            "f1-score": 0.4444444444444444,
+            "support": 5.0
+        },
+        "MultiCamCows2024_51": {
+            "precision": 0.2,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.25,
+            "support": 3.0
+        },
+        "MultiCamCows2024_52": {
+            "precision": 0.8181818181818182,
+            "recall": 1.0,
+            "f1-score": 0.9,
+            "support": 9.0
+        },
+        "MultiCamCows2024_53": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_54": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_55": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
+            "support": 3.0
+        },
+        "MultiCamCows2024_56": {
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1-score": 0.75,
+            "support": 3.0
+        },
+        "MultiCamCows2024_57": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_58": {
+            "precision": 0.14285714285714285,
+            "recall": 0.14285714285714285,
+            "f1-score": 0.14285714285714285,
+            "support": 7.0
+        },
+        "MultiCamCows2024_59": {
+            "precision": 0.3333333333333333,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.4444444444444444,
+            "support": 3.0
+        },
+        "MultiCamCows2024_6": {
+            "precision": 0.07142857142857142,
+            "recall": 0.5,
+            "f1-score": 0.125,
+            "support": 2.0
+        },
+        "MultiCamCows2024_60": {
+            "precision": 0.5,
+            "recall": 0.375,
+            "f1-score": 0.42857142857142855,
+            "support": 8.0
+        },
+        "MultiCamCows2024_62": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_63": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 4.0
+        },
+        "MultiCamCows2024_64": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 3.0
+        },
+        "MultiCamCows2024_65": {
+            "precision": 0.5,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5714285714285714,
+            "support": 3.0
+        },
+        "MultiCamCows2024_66": {
+            "precision": 0.75,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.46153846153846156,
+            "support": 9.0
+        },
+        "MultiCamCows2024_67": {
+            "precision": 1.0,
+            "recall": 0.4,
+            "f1-score": 0.5714285714285714,
+            "support": 5.0
+        },
+        "MultiCamCows2024_68": {
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1-score": 0.4,
+            "support": 4.0
+        },
+        "MultiCamCows2024_69": {
+            "precision": 1.0,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.9090909090909091,
+            "support": 6.0
+        },
+        "MultiCamCows2024_7": {
+            "precision": 0.3333333333333333,
+            "recall": 0.125,
+            "f1-score": 0.18181818181818182,
+            "support": 8.0
+        },
+        "MultiCamCows2024_70": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 3.0
+        },
+        "MultiCamCows2024_71": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_72": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
+            "support": 2.0
+        },
+        "MultiCamCows2024_73": {
+            "precision": 1.0,
+            "recall": 0.2857142857142857,
+            "f1-score": 0.4444444444444444,
+            "support": 7.0
+        },
+        "MultiCamCows2024_74": {
+            "precision": 1.0,
+            "recall": 0.4,
+            "f1-score": 0.5714285714285714,
+            "support": 5.0
+        },
+        "MultiCamCows2024_75": {
+            "precision": 0.25,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.2857142857142857,
+            "support": 3.0
+        },
+        "MultiCamCows2024_76": {
+            "precision": 0.4,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5,
+            "support": 3.0
+        },
+        "MultiCamCows2024_77": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_78": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 6.0
+        },
+        "MultiCamCows2024_79": {
+            "precision": 0.7142857142857143,
+            "recall": 0.5555555555555556,
+            "f1-score": 0.625,
+            "support": 9.0
+        },
+        "MultiCamCows2024_8": {
+            "precision": 0.92,
+            "recall": 0.6764705882352942,
+            "f1-score": 0.7796610169491526,
+            "support": 34.0
+        },
+        "MultiCamCows2024_80": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
+            "support": 3.0
+        },
+        "MultiCamCows2024_81": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+        },
+        "MultiCamCows2024_82": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 3.0
+        },
+        "MultiCamCows2024_83": {
+            "precision": 1.0,
+            "recall": 0.717948717948718,
+            "f1-score": 0.835820895522388,
+            "support": 39.0
+        },
+        "MultiCamCows2024_84": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "MultiCamCows2024_85": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 4.0
+        },
+        "MultiCamCows2024_87": {
+            "precision": 1.0,
+            "recall": 0.125,
+            "f1-score": 0.2222222222222222,
+            "support": 8.0
+        },
+        "MultiCamCows2024_88": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
+            "support": 3.0
+        },
+        "MultiCamCows2024_89": {
+            "precision": 0.9583333333333334,
+            "recall": 1.0,
+            "f1-score": 0.9787234042553191,
+            "support": 46.0
+        },
+        "MultiCamCows2024_9": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
+            "support": 5.0
+        },
+        "MultiCamCows2024_90": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 3.0
+        },
+        "accuracy": 0.7368421052631579,
+        "macro avg": {
+            "precision": 0.7227912426341195,
+            "recall": 0.6988503271389007,
+            "f1-score": 0.6662506459728104,
+            "support": 570.0
+        },
+        "weighted avg": {
+            "precision": 0.8053762612504032,
+            "recall": 0.7368421052631579,
+            "f1-score": 0.736518880984213,
+            "support": 570.0
+        }
+    },
+    "md_trained_on": false,
+    "md_split_type": "time-aware",
+    "md_random_split": false,
+    "eval_runtime_sec": 295.67301297187805
+}
