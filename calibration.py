@@ -114,7 +114,7 @@ def build_calibration_pairs(
     return query_ids, db_ids, pair_labels
 
 def build_calibration_pairs_stratified(train_labels, global_emb, cal_size=50, 
-                                        shortlist_size=300, n_negatives=50):
+                                        shortlist_size=300, n_negatives=100):
     """
     Build calibration pairs that match inference distribution:
     - Positives: all same-identity pairs

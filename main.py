@@ -79,6 +79,8 @@ if __name__ == '__main__':
     parser.add_argument('--method', type = str, default = 'disk', help='Feature extraction method to use')
     parser.add_argument('--use_geometric_verification', action='store_true', help='Use geometric verification during prediction', default=False)
     parser.add_argument('--use_lightglue', action ='store_true', help='Use LightGlue for feature matching when performing geometric verification', default=True)
+    parser.add_argument('--gv_matcher', type=str, choices=['ratio', 'lightglue', 'loftr'],
+                        default=None, help='Matcher for geometric verification (ratio, lightglue, loftr)')
     parser.add_argument('--num_vertices', type=int, default=100, help='Vertices sampled in Nested-IS')
     parser.add_argument('--num_neighbors', type=int, default=10, help='Neighbors sampled per vertex in Nested-IS')
     parser.add_argument('--save_count', action='store_true', help='Save population estimation results to XLSX')
@@ -121,9 +123,10 @@ if __name__ == '__main__':
         ), # This is because MD was trained on some datasets so at least I want to use the same train/test split to avoid additional data leaks.
     )
     parser.add_argument('--fusion_mode', type=str, default='early', choices=['late', 'early'], help='Fusion mode to use')
-    parser.add_argument('--calibration_method', type=str, default='isotonic_pchip', choices=['isotonic_pchip', 'logistic_regression', 'isotonic'], help='Calibration method to use')
+    parser.add_argument('--calibration_method', type=str, default='isotonic_pchip', choices=['isotonic_pchip', 'logistic', 'isotonic'], help='Calibration method to use')
     parser.add_argument('--fusion_signals', type=str, nargs = '+', default=['global', 'gv'], choices=['global', 'fisher', 'gv'], help='Signals to fuse')
     parser.add_argument('--calib_size', type=int, default=50, help='Size of the calibration set')
+    parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     args = parser.parse_args()
     seg_tag = get_segmentation_tag(args.remove_background)
     args.split_type = 'closed'
@@ -134,6 +137,10 @@ if __name__ == '__main__':
     # Set the geometric verification method
     #import constants
     gv_method = args.gv_method
+    gv_matcher = args.gv_matcher
+    if gv_matcher is None:
+        gv_matcher = "lightglue" if args.use_lightglue else "ratio"
+    gv_matcher = gv_matcher.lower()
     
     already_trained = False
     #split_type = 'closed_split'
@@ -300,6 +307,13 @@ if __name__ == '__main__':
             test_paths_map = dict(
                 zip(df_test["image_id"].astype(str), test_image_items)
             )
+
+        image_paths = None
+        if gv_matcher == "loftr":
+            if use_baseline_paths:
+                image_paths = dict(zip(df["image_id"].astype(str), df["baseline_path"].astype(str)))
+            else:
+                image_paths = dict(zip(df["image_id"].astype(str), get_image_paths(df, args.remove_background)))
 
         ds_tag = dataset_name
         base_dir = f"./data/{ds_tag}"
@@ -468,9 +482,16 @@ if __name__ == '__main__':
                 train_labels=train_labels,
                 calibrators=calibrators,
                 top_n=5,
-                shortlist_size=GEOMETRIC_CANDIDATES,
+                shortlist_size=UNION_CANDIDATES,
                 use_lightglue=args.use_lightglue,
+                gv_matcher=gv_matcher,
+                image_paths=image_paths,
                 fusion_signals=args.fusion_signals,
+                test_labels=test_labels,
+                debug=args.debug,
+                dataset_name=dataset_name,
+                calibration_method=args.calibration_method,
+                calib_size=args.calib_size,
             )
         else:
 
@@ -488,6 +509,8 @@ if __name__ == '__main__':
                     test_keypoints, train_keypoints,
                     test_dict, train_dict, train_labels, 5,
                     use_lightglue=args.use_lightglue, method=gv_feature_method,
+                    gv_matcher=gv_matcher,
+                    image_paths=image_paths,
                 )
             else:
                 print("Running standard training evaluation...")
@@ -726,6 +749,10 @@ if __name__ == '__main__':
         if args.use_fisher:
             blocks['fisher'] = fisher_vectors
 
+        image_paths = None
+        if gv_matcher == "loftr":
+            image_paths = dict(zip(df["image_id"].astype(str), get_image_paths(df, args.remove_background)))
+
         if args.use_global_embedding:
             print("Extracting global embeddings for population counting...")
             image_paths = dict(zip(df["image_id"].astype(str), get_image_paths(df, args.remove_background)))
@@ -768,6 +795,8 @@ if __name__ == '__main__':
             use_geometric=args.use_geometric_verification,
             use_lightglue=args.use_lightglue,
             method='disk',
+            gv_matcher=gv_matcher,
+            image_paths=image_paths,
             gv_threshold = args.gv_threshold,
             n_vertices=args.num_vertices,
             n_neighbors=args.num_neighbors,

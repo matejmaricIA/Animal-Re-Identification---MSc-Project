@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from functools import lru_cache
 from scipy.spatial.distance import cdist
 import h5py
 from constants import (
@@ -21,11 +22,22 @@ from lightglue_singleton import get_lightglue
 import sys
 
 try:
-    from lightglue import LightGlue
     import torch
-    _LIGHTGLUE_AVAILABLE = True
+    _TORCH_AVAILABLE = True
+except Exception:
+    _TORCH_AVAILABLE = False
+
+try:
+    from lightglue import LightGlue
+    _LIGHTGLUE_AVAILABLE = _TORCH_AVAILABLE
 except Exception:
     _LIGHTGLUE_AVAILABLE = False
+
+try:
+    from kornia.feature import LoFTR as KorniaLoFTR
+    _LOFTR_AVAILABLE = _TORCH_AVAILABLE
+except Exception:
+    _LOFTR_AVAILABLE = False
     
 # Fallbacks    
 _FD_MIN, _FD_90, _I90 = 0.0, 1.0, 50 
@@ -184,6 +196,84 @@ def match_features_lightglue(desc1, desc2, kp1, kp2, method='disk'):
         return matches_arr, matched_kp1, matched_kp2
 
 
+@lru_cache(maxsize=None)
+def get_loftr(pretrained: str = "outdoor"):
+    if not _LOFTR_AVAILABLE:
+        raise RuntimeError("LoFTR is not available. Install kornia with LoFTR support.")
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    try:
+        model = KorniaLoFTR(pretrained=pretrained)
+    except TypeError:
+        try:
+            model = KorniaLoFTR(pretrained=True)
+        except TypeError:
+            model = KorniaLoFTR()
+    return model.to(device).eval()
+
+
+def _load_grayscale_image(image):
+    if isinstance(image, str):
+        img = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+        if img is None:
+            raise FileNotFoundError(image)
+        return img
+    if isinstance(image, np.ndarray):
+        if image.ndim == 2:
+            return image
+        if image.ndim == 3:
+            return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    raise ValueError("Unsupported image input for LoFTR")
+
+
+def _to_loftr_tensor(image: np.ndarray):
+    img = image.astype(np.float32)
+    if img.max() > 1.0:
+        img = img / 255.0
+    tensor = torch.from_numpy(img).float()
+    if tensor.ndim == 2:
+        tensor = tensor.unsqueeze(0).unsqueeze(0)
+    elif tensor.ndim == 3:
+        if tensor.shape[0] == 1:
+            tensor = tensor.unsqueeze(0)
+        else:
+            tensor = tensor.mean(dim=0, keepdim=True).unsqueeze(0)
+    else:
+        raise ValueError("Unsupported image shape for LoFTR")
+    return tensor
+
+
+def match_features_loftr(image0, image1, pretrained: str = "outdoor"):
+    if not _LOFTR_AVAILABLE:
+        return [], np.empty((0, 2)), np.empty((0, 2))
+
+    img0 = _load_grayscale_image(image0)
+    img1 = _load_grayscale_image(image1)
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    matcher = get_loftr(pretrained=pretrained)
+
+    input_dict = {
+        "image0": _to_loftr_tensor(img0).to(device),
+        "image1": _to_loftr_tensor(img1).to(device),
+    }
+
+    with torch.inference_mode():
+        output = matcher(input_dict)
+
+    keypoints0 = output.get("keypoints0", torch.empty((0, 2), device=device)).detach().cpu().numpy().astype(np.float32)
+    keypoints1 = output.get("keypoints1", torch.empty((0, 2), device=device)).detach().cpu().numpy().astype(np.float32)
+
+    if keypoints0.size == 0 or keypoints1.size == 0:
+        return [], np.empty((0, 2)), np.empty((0, 2))
+
+    num_matches = min(keypoints0.shape[0], keypoints1.shape[0])
+    keypoints0 = keypoints0[:num_matches]
+    keypoints1 = keypoints1[:num_matches]
+    matches_arr = np.stack([np.arange(num_matches), np.arange(num_matches)], axis=1).astype(np.int32)
+
+    return matches_arr, keypoints0, keypoints1
+
+
 
 def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, min_matches=MIN_MATCHES, gv_method = 'RANSAC'):
     """Apply RANSAC for geometric verification"""
@@ -225,7 +315,10 @@ def geometric_verification_ransac(kp1, kp2, inlier_threshold=INLIER_THRESHOLD, m
     
 def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
                                 feature_distance, min_inliers=MIN_INLIERS,
-                                use_lightglue: bool = False, method: str = 'disk', alpha: float = ALPHA):
+                                use_lightglue: bool = False, method: str = 'disk', alpha: float = ALPHA,
+                                gv_matcher: str | None = None,
+                                image0=None, image1=None,
+                                loftr_pretrained: str = "outdoor"):
     """Compute geometric similarity and combine it with a base feature distance.
 
     The ``feature_distance`` argument can be any distance measure where lower
@@ -238,10 +331,21 @@ def compute_geometric_similarity(query_desc, query_kp, db_desc, db_kp,
     #    query_desc, db_desc, query_kp, db_kp
     #)
     
-    if use_lightglue and _LIGHTGLUE_AVAILABLE:
-        
+    matcher = gv_matcher.lower() if isinstance(gv_matcher, str) else None
+    if matcher is None:
+        matcher = "lightglue" if use_lightglue else "ratio"
+
+    if matcher == "loftr":
+        if not _LOFTR_AVAILABLE:
+            raise RuntimeError("LoFTR matcher requested but not available.")
+        if image0 is None or image1 is None:
+            raise ValueError("LoFTR matcher requires image0 and image1 inputs.")
+        matches, matched_kp1, matched_kp2 = match_features_loftr(
+            image0, image1, pretrained=loftr_pretrained
+        )
+    elif matcher == "lightglue" and _LIGHTGLUE_AVAILABLE:
         matches, matched_kp1, matched_kp2 = match_features_lightglue(
-            query_desc, db_desc, query_kp, db_kp, method = method
+            query_desc, db_desc, query_kp, db_kp, method=method
         )
     else:
         matches, matched_kp1, matched_kp2 = match_features_by_descriptors(

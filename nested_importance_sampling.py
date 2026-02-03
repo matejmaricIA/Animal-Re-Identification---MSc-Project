@@ -26,6 +26,8 @@ def nested_importance_sampling(
     use_geometric: bool = True,
     use_lightglue: bool = False,
     method: str = "disk",
+    gv_matcher: Optional[str] = None,
+    image_paths: Optional[Dict[str, str]] = None,
     gv_threshold: float = 0.75,
     n_vertices: int = 100,
     n_neighbors: int = 10,
@@ -72,7 +74,10 @@ def nested_importance_sampling(
         Population size estimate and its standard error.
     stats : dict  (only if ``return_stats=True``)
         See *return_stats* description.
-    """
+    """    
+    matcher = gv_matcher.lower() if isinstance(gv_matcher, str) else None
+    if matcher == "loftr" and not image_paths:
+        raise ValueError("LoFTR matcher requires image_paths mapping.")
 
 
     # 1. Build similarity graph & vertex proposal distribution
@@ -128,6 +133,9 @@ def nested_importance_sampling(
                     dist, n_inliers = compute_geometric_similarity(
                         desc_u, kp_u, desc_v, kp_v, fd,
                         use_lightglue=use_lightglue, method=method,
+                        gv_matcher=matcher,
+                        image0=image_paths.get(u_id) if image_paths else None,
+                        image1=image_paths.get(v_id) if image_paths else None,
                     )
 
                     gv_pass = (dist < gv_threshold) and (n_inliers >= MIN_INLIERS)

@@ -53,7 +53,7 @@ TMP = './data/tmp/'
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
 COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results.xlsx'
-EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_LATE_FUSION.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_LATE_FUSION_tier3_FIXED_NEW.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 
@@ -71,9 +71,11 @@ FISHER_DISTANCE_MIN_CLAMP = 0.01     # Minimum clamp value for Fisher distance
 FISHER_DISTANCE_MAX_CLAMP = 1.0      # Maximum clamp value for Fisher distance
 NORMALIZED_THRESHOLD_DIVISOR = 100.0 # Divisor for normalizing RANSAC threshold
 GEOMETRIC_CANDIDATES = 20
+UNION_CANDIDATES = 500
+LOCAL_RANK_CANDIDATES = 20
 
 # Geometric Verification Method Selection
-GV_METHOD = "RANSAC"  # Options: "RANSAC" or "MAGSAC"
+GV_METHOD = "MAGSAC"  # Options: "RANSAC" or "MAGSAC"
 
 # Geometric Verification Scaling Constants
 MAX_INLIERS_FOR_SCALING = 20      # Cap inliers at this value for exponential formula
@@ -85,7 +87,7 @@ MAX_REASONABLE_INLIERS = 50       # Expected maximum inliers for normalization
 
 
 
-MAX_GMM_DESCRIPTORS = 2000000
+MAX_GMM_DESCRIPTORS = 5000000
 # Cap descriptors contributed by each image when stacking for PCA/GMM training.
 MAX_DESCRIPTORS_PER_IMAGE = 5000
 

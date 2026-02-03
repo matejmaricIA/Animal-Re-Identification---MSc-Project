@@ -51,6 +51,7 @@ python main.py --train --ds ATRW --use_geometric_verification --use_lightglue --
 - **`--save_eval`**: Saves evaluation results to `./data/evaluations`.
  **`--version`**:  version tag of the method in use. Together with background-removal and tone-mapping settings it forms a “tag” used to store results in a sub-directory of evaluations/. Optional argument and not important for the training itself.
 - **`--use_lightglue`**: Uses the LightGlue matcher during geometric verification.
+- **`--gv_matcher`**: Selects the geometric verification matcher (`ratio`, `lightglue`, or `loftr`). LoFTR requires image paths from baseline or processed datasets.
 
 - **`--use_global_embedding`**: Use global CNN/Transformer embeddings.
 - **`--embedding_model`**: Backbone for global embeddings (`resnet50`,

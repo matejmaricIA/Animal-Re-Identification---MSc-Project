@@ -12,7 +12,7 @@ def train_calibrators_two_stage(
     use_lightglue=True, method='disk',
     calibration_method='isotonic_pchip',
 ):
-    """Two-stage calibration matching inference distribution."""
+    """Calibrate global and fisher scores for Tier-2 ranking."""
     
     # === Stage 1: Global calibration (all pairs) ===
     query_ids_global, db_ids_global, labels_global = build_calibration_pairs(
@@ -28,34 +28,33 @@ def train_calibrators_two_stage(
     
     cal_global = ScoreCalibrator(method=calibration_method)
     cal_global.fit(np.array(s_global), np.array(labels_global))
-    
-    # === Stage 2: GV calibration (shortlist pairs only) ===
-    query_ids_gv, db_ids_gv, labels_gv = build_calibration_pairs_stratified(
-        train_labels, global_emb, cal_size=cal_size, 
-        shortlist_size=shortlist_size, n_negatives=50
+
+    print(
+        f"[Calibration] Global pairs={len(s_global)} "
+        f"raw(mean={np.mean(s_global):.4f}, std={np.std(s_global):.4f}, "
+        f"min={np.min(s_global):.4f}, max={np.max(s_global):.4f})"
     )
-    
-    # Compute GV scores (n_inliers)
-    s_gv = []
-    for q_id, d_id in tqdm(zip(query_ids_gv, db_ids_gv), desc="Computing GV for calibration"):
-        q_kp = keypoints.get(q_id)
-        d_kp = keypoints.get(d_id)
-        q_desc = descriptors.get(q_id)
-        d_desc = descriptors.get(d_id)
-        
-        if all(x is not None for x in [q_kp, d_kp, q_desc, d_desc]):
-            _, n_inliers = compute_geometric_similarity(
-                q_desc, q_kp, d_desc, d_kp, 0.5,
-                use_lightglue=use_lightglue, method=method
-            )
+
+    # === Stage 2: Fisher calibration (same pairs) ===
+    s_fisher = []
+    for q_id, d_id in zip(query_ids_global, db_ids_global):
+        if q_id in fisher_vectors and d_id in fisher_vectors:
+            q_fv = fisher_vectors[q_id] / (np.linalg.norm(fisher_vectors[q_id]) + 1e-9)
+            d_fv = fisher_vectors[d_id] / (np.linalg.norm(fisher_vectors[d_id]) + 1e-9)
+            s_fisher.append(np.dot(q_fv, d_fv))
         else:
-            n_inliers = 0
-        s_gv.append(n_inliers)
-    
-    cal_gv = ScoreCalibrator(method='isotonic_pchip')
-    cal_gv.fit(np.array(s_gv), np.array(labels_gv))
-    
-    return {'global': cal_global, 'gv': cal_gv}
+            s_fisher.append(0.0)
+
+    cal_fisher = ScoreCalibrator(method=calibration_method)
+    cal_fisher.fit(np.array(s_fisher), np.array(labels_global))
+
+    print(
+        f"[Calibration] Fisher pairs={len(s_fisher)} "
+        f"raw(mean={np.mean(s_fisher):.4f}, std={np.std(s_fisher):.4f}, "
+        f"min={np.min(s_fisher):.4f}, max={np.max(s_fisher):.4f})"
+    )
+
+    return {'global': cal_global, 'fisher': cal_fisher}
 
 
 def train_calibrators(
