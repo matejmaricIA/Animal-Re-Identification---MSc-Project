@@ -87,3 +87,11 @@ GEMINI.md
 venv_wildlife_tools/
 test-scripts/wildlife-tools-data/*
 test-scripts/wildlifereid10k_splits/*
+# Large local notebook artifacts
+notebooks/mantiuk_sweep.ipynb
+
+# Large generated artifacts / local research assets
+docs/papers/
+visualization_suite/output/
+evaluations/classifications/
+evaluations/full_evals/

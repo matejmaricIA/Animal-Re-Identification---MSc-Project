@@ -1,0 +1,160 @@
+\chapter{Population Size Estimation}
+
+Here I will, in detail, describe hte process of population counting.
+
+\section{Introduction}
+
+While individual animal re-identification provides the foundation for wildlife monitoring, the ultimate goal in many conservation and ecological applications is estimating population sizes. Traditional clustering approaches for population estimation often produce inaccurate results when applied to re-identification systems, particularly when the underlying pairwise similarities are noisy or unreliable~\cite{perez2024humanintheloopvisualreidpopulation}.
+
+In this chapter I present the implementation and adaptation of Nested Importance Sampling (NIS) for population size estimation, originally proposed by Perez et al.~\cite{perez2024humanintheloopvisualreidpopulation}. The method provides a statistically principled approach to estimate the number of unique individuals in a dataset by leveraging pairwise similarity scores from the re-identification system developed in previous chapters. Critically, this work extends the original framework by implementing a fully automated variant that eliminates the need for human annotation during the estimation process.
+
+\section{Theoretical Foundation}
+
+\subsection{Population Size as Connected Components}
+
+The population estimation problem can be formulated as counting connected components in a graph where vertices represent images and edges exist between images of the same individual. Formally, given a graph $G = (V, E)$ where vertices correspond to images and edges represent same-individual relationships, the number of clusters $K$ equals the number of connected components:
+
+\begin{equation}
+K = \text{CC}(G) = \sum_{u=1}^{n} \frac{1}{1 + d(u)}
+\label{eq:connected_components}
+\end{equation}
+
+where $d(u)$ is the degree of vertex $u$ (i.e., the number of edges connected to $u$)~\cite{perez2024humanintheloopvisualreidpopulation}.
+
+This elegant formulation arises from the observation that the graph $G$ consists of a collection of cliques, where each clique represents images of the same individual. The clique containing vertex $u$ has size $1 + d(u)$, and the total contribution of all vertices in this clique is $(1 + d(u)) \times \frac{1}{1 + d(u)} = 1$. Thus, each clique contributes exactly 1 to the sum, yielding the total number of connected components.
+
+This formulation provides the foundation for statistical estimation: instead of computing all pairwise similarities explicitly, we can sample vertices and estimate their degrees, then use importance sampling to obtain an unbiased estimate of the population size.
+
+\subsection{Nested Importance Sampling Framework}
+
+The NIS framework operates through a two-stage sampling process designed to efficiently estimate the population size while minimizing the number of pairwise comparisons required:
+
+\begin{enumerate}
+\item \textbf{Outer sampling}: Sample $N$ vertices from the graph according to a proposal distribution $Q(u) \propto \frac{1}{1 + \hat{d}(u)}$, where $\hat{d}(u)$ is the estimated degree based on approximate pairwise similarities.
+
+\item \textbf{Inner sampling}: For each sampled vertex $u_i$, sample $M$ neighbors according to $q_{u_i}(v) \propto \hat{s}(u_i, v)$, where $\hat{s}(u, v)$ is the approximate similarity between images $u$ and $v$.
+\end{enumerate}
+
+The population estimate is then computed as:
+
+\begin{equation}
+\widehat{\text{CC}}_{\text{NIS}}(G) = \frac{1}{N} \sum_{i=1}^{N} \frac{1}{Q(u_i)} \times \frac{1}{1 + \hat{d}(u_i)}
+\label{eq:nis_estimator}
+\end{equation}
+
+where $\hat{d}(u_i)$ is estimated through the inner sampling process~\cite{perez2024human}.
+
+The key insight behind this approach is that the proposal distribution $Q(u)$ biases sampling towards isolated vertices (those with low degrees), as these contribute most significantly to the cluster count. Similarly, the inner sampling distribution biases towards sampling nodes that are likely to be connected, maximizing the information gained from each pairwise query.
+
+\section{Automated Adaptation with Geometric Verification}
+
+\subsection{Motivation for Automation}
+
+The original NIS framework relies on human annotation to verify whether pairs of images contain the same individual~\cite{perez2024humanintheloopvisualreidpopulation}. While this approach provides high accuracy, it presents practical limitations for large-scale deployments where manual annotation becomes prohibitively expensive or where expert annotators are unavailable. To address these limitations, this work develops a fully automated variant that leverages geometric verification as described in Chapter~\ref{chap:geometric_verification}.
+
+\subsection{Similarity Computation}
+
+The approximate pairwise similarities $\hat{s}(u,v)$ are derived from the fused Fisher vector representations computed in the feature aggregation stage (Chapter~\ref{chap:feature_aggregation}). Cosine similarity is computed between normalized feature vectors and converted to a probability distribution using softmax normalization with temperature parameter $\tau = 0.5$:
+
+\begin{equation}
+\hat{s}(u,v) = \frac{e^{\hat{c}(u,v)/\tau}}{\sum_v e^{\hat{c}(u,v)/\tau}}
+\end{equation}
+
+where $\hat{c}(u,v) = \frac{\Phi(x_u) \cdot \Phi(x_v)}{||\Phi(x_u)||_2 ||\Phi(x_v)||_2}$ represents the normalized cosine similarity between feature vectors.
+
+\subsection{Automated Verification Process}
+
+Instead of relying on human verification of pairwise similarities, the automated system employs a gated verification process that combines Fisher vector distances with geometric verification. The process operates as follows:
+
+\begin{enumerate}
+\item \textbf{Initial filtering}: For each sampled pair $(u, v)$, verify that sufficient keypoints and descriptors are available for geometric verification.
+
+\item \textbf{Geometric verification}: Apply the geometric verification pipeline (Chapter~\ref{chap:geometric_verification}) to compute geometric distance and inlier count.
+
+\item \textbf{Confidence assessment}: Combine geometric quality metrics with Fisher vector similarity to produce an overall confidence score:
+
+\begin{align}
+\text{confidence} &= \min\left(1.0, \frac{n_{\text{inliers}}}{20.0}\right) \\
+\text{geometric\_quality} &= 1.0 - d_{\text{geometric}} \\
+\text{overall\_confidence} &= 0.6 \times \text{geometric\_quality} + 0.4 \times \text{confidence}
+\end{align}
+
+\item \textbf{Binary decision}: Accept the pair as a match if the overall confidence exceeds 0.5 and the number of inliers meets the minimum threshold.
+\end{enumerate}
+
+This automated approach eliminates the need for human annotation while maintaining the statistical framework of the original NIS method.
+
+\section{Advantages and Limitations}
+
+\subsection{Advantages}
+
+The automated NIS approach offers several key advantages over traditional clustering methods:
+
+\begin{enumerate}
+\item \textbf{Statistical guarantees}: Unlike heuristic clustering approaches, the NIS framework provides asymptotically unbiased population estimates with confidence intervals, enabling principled uncertainty quantification.
+
+\item \textbf{Minimal supervision}: The automated mode eliminates the need for human annotation during population estimation, making it practical for large-scale deployments where expert annotation is unavailable or prohibitively expensive.
+
+\item \textbf{Robustness}: The method handles noisy pairwise similarities better than traditional clustering approaches by explicitly modeling uncertainty through the sampling framework.
+
+\item \textbf{Scalability}: Computational complexity scales as $N \times M$ rather than $n^2$, where $N$ and $M$ are sampling parameters and $n$ is the total number of images, enabling application to large datasets.
+\end{enumerate}
+
+\subsection{Limitations and Bias Considerations}
+
+The automated approach introduces several sources of bias that must be acknowledged:
+
+\begin{enumerate}
+\item \textbf{Geometric verification bias}: The reliance on geometric verification may systematically exclude certain types of valid matches, particularly:
+\begin{itemize}
+    \item Images with significant pose variations where keypoint correspondences are sparse
+    \item Low-texture regions with insufficient keypoints for reliable geometric estimation
+    \item Cases where the homography model is inappropriate for the underlying transformation
+\end{itemize}
+
+\item \textbf{Feature quality dependence}: The method's accuracy is fundamentally limited by the quality of the underlying Fisher vector representations and local feature extraction. Poor feature extraction can lead to both false positives and false negatives in the verification process.
+
+\item \textbf{Threshold sensitivity}: The automated matching decisions depend on carefully tuned thresholds (geometric distance threshold, minimum inlier count, confidence threshold) that may not generalize across different species or imaging conditions.
+
+\item \textbf{Systematic underestimation}: By requiring geometric consistency, the automated mode may systematically underestimate population sizes when valid matches are rejected due to overly restrictive geometric constraints. This represents a conservative bias that prioritizes precision over recall.
+\end{enumerate}
+
+\subsection{Bias-Variance Trade-off}
+
+The automated approach represents a fundamental trade-off between bias and variance. While the original human-in-the-loop method provides nearly unbiased estimates (assuming perfect human annotation), it requires substantial manual effort. The automated variant introduces systematic bias through the geometric verification gate but enables deployment at scale without human intervention.
+
+This trade-off is particularly relevant in conservation applications where obtaining population estimates—even if slightly biased—may be more valuable than having no estimates at all due to the prohibitive cost of manual annotation.
+
+\section{Parameter Configuration}
+
+The implementation includes several key parameters that influence the bias-variance trade-off:
+
+\begin{itemize}
+\item \textbf{$N$ (n\_vertices)}: Number of vertices sampled in the outer loop (default: 100)
+\item \textbf{$M$ (n\_neighbors)}: Number of neighbors sampled per vertex (default: 10) 
+\item \textbf{$\theta$ (gv\_threshold)}: Distance threshold for geometric verification acceptance (default: 0.75)
+\item \textbf{$I_{\min}$ (min\_inliers)}: Minimum number of RANSAC inliers required for acceptance
+\end{itemize}
+
+These parameters represent a trade-off between computational efficiency and estimation accuracy. Higher sampling rates ($N$, $M$) generally produce more reliable estimates at increased computational cost, while more restrictive geometric thresholds ($\theta$, $I_{\min}$) reduce false positive matches but may increase systematic underestimation bias.
+
+\section{Integration with the Re-ID Pipeline}
+
+The population estimation module integrates seamlessly with the re-identification pipeline developed in previous chapters:
+
+\begin{enumerate}
+\item \textbf{Input}: Fused feature representations from the feature aggregation stage (Chapter~\ref{chap:feature_aggregation})
+\item \textbf{Optional inputs}: Keypoints and descriptors for geometric verification (Chapter~\ref{chap:geometric_verification})
+\item \textbf{Processing}: NIS-based sampling and automated verification
+\item \textbf{Output}: Population estimate with standard error and detailed verification statistics
+\end{enumerate}
+
+This integration allows the system to provide both individual re-identification capabilities and population-level statistics from the same underlying feature representations, maximizing the utility of the computational pipeline.
+
+\section{Summary}
+
+This chapter presented the implementation of automated population size estimation using Nested Importance Sampling. The approach extends the original human-in-the-loop framework~\cite{perez2024humanintheloopvisualreidpopulation} by replacing human annotation with geometric verification, enabling fully automated deployment while maintaining the statistical rigor of the importance sampling framework.
+
+While the automated approach introduces systematic bias through the geometric verification gate, it provides a practical solution for large-scale population estimation where human annotation is unavailable or prohibitively expensive. The method's effectiveness is evaluated experimentally in the following chapters, with particular attention to quantifying the trade-offs between automation and accuracy across different animal species and imaging conditions.
+
+

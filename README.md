@@ -37,7 +37,7 @@ To set up the project on your computer, follow these steps:
 
 ## **Using the project**
 
-The project supports two primary modes: **model training** and **inference (prediction)**. Training is mostly used for testing purposes on the wildlifereid-10k datasets, inference is used for creating a database from a dataset of images and approximating the number of unique individuals.
+The project supports two primary modes: **model training** and **population counting**. Training is mostly used for testing purposes on the wildlifereid-10k datasets, while counting estimates the number of unique individuals in a dataset.
 
 ### **1. Model training**
 
@@ -60,10 +60,6 @@ python main.py --train --ds ATRW --use_geometric_verification --use_lightglue --
    `megadescriptor-l-384` encoder is downloaded from
    [`BVRA/MegaDescriptor-L-384`](https://huggingface.co/BVRA/MegaDescriptor-L-384)
    via `timm`.
-- **`--w_fisher`, `--w_global`**: Weights for Fisher vectors and global embeddings when fusing descriptor blocks.
-
-
-  
 During training:
 - Data are split into train and test sets.
 - **PCA** and **GMM** models are fitted to the features.
@@ -71,67 +67,30 @@ During training:
 
 All results are saved to the project's predefined directories.
 
-### **2. Inference (Prediction)**
+### **2. Counting Individuals**
 
-Run predictions on new images with:
-```bash
-python main.py --predict --ds ATRW --image_location /path/to/dir
-```
-
-- **`--predict`**: Enables prediction mode.
-- **`--ds`**: Dataset whose trained models will be used as the reference database. (obsolete)
-- **`--image_location`**: Directory containing the images to analyse.
-
-During inference:
-- TO DO
-
----
-
-### **3. Counting Individuals**
-
-Estimate the number of unique individuals in a dataset using the Nested Importance Sampling approach:
+Estimate the number of unique individuals in a dataset using **Human-in-the-Loop Nested Importance Sampling (HITL Nested-IS)** with **late-fused proposals** (WildFusion-style calibration + shortlist local evidence):
 
 ```bash
-python main.py --count --ds ATRW --num_vertices 150 --num_neighbors 20
+python main.py --count --ds ATRW \
+  --use_global_embedding --use_fisher --method ensamble \
+  --count_proposal_mode calibrated \
+  --count_local_evidence inliers --count_shortlist_B 300 \
+  --num_vertices 150 --num_neighbors 20
 ```
 
 - **`--count`**: Enables population size estimation.
 - **`--num_vertices`**: Number of sampled vertices.
 - **`--num_neighbors`**: Number of neighbours per vertex.
-- **`--automated_mode`**: Use fully automated counting without human labels (faster but potentially less accurate).
-- **`--use_global_embedding`**: Include global image embeddings (ResNet50,
-  MegaDescriptor-L-384, or DINOv2) to enhance Fisher vector representations.
-- **`--embedding_model`**: Choose the global embedding model (`resnet50`,
-  `megadescriptor-l-384`, or DINOv2 variants like `dinov2_vits14` /
-  `dinov2_vitb14` / `dinov2_vitl14` / `dinov2_vitg14` and `_reg4` versions).
-- **`--w_fisher`, `--w_global`**: Descriptor fusion weights (same as in training).
+- **`--use_global_embedding`**, **`--embedding_model`**: Global embedding signal (cheap base proposal).
+- **`--use_fisher`**, **`--method`**: Fisher-vector signal (cheap base proposal; `ensamble` supported).
+- **`--count_proposal_mode {calibrated,power}`**:
+  - `calibrated`: calibrate global/fisher/local scores to **P(match)** and fuse them (recommended).
+  - `power`: boost the base score with local evidence (no local calibration).
+- **`--count_local_evidence {inliers,conf_matches}`**: Local evidence used *only on a shortlist*.
+- **`--count_shortlist_B`** / **`--count_mix_alpha`**: Local-evidence shortlist budget + mixture weight.
 
-
-#### Automated vs Human-in-the-Loop Modes
-
-**Human-in-the-Loop Mode (default)**:
-```bash
-python main.py --count --ds ATRW --use_geometric_verification --use_lightglue
-```
-- Uses geometric verification to filter pairs
-- Queries ground truth labels only for geometrically consistent pairs
-- More accurate but requires labeled data
-
-**Fully Automated Mode**:
-```bash
-python main.py --count --ds ATRW --use_geometric_verification --use_lightglue --automated_mode
-```
-- Uses only geometric verification without any labels
-- Faster execution and works with unlabeled data
-- Assumes geometric consistency = same individual
-
-**Enhanced Mode with Global Embeddings**:
-```bash
-python main.py --count --ds ATRW --use_geometric_verification --use_lightglue --automated_mode --use_global_embedding
-```
-- Combines Fisher vectors with configurable global image embeddings
-- Potentially more robust individual recognition
-- Slightly longer processing time due to CNN feature extraction
+> Note: Current count mode uses **GT `identity` labels** from `processed_metadata.csv` to **simulate the human oracle** (pair vetting). A manual pair-labeling loop for unlabeled deployments is planned but not yet integrated.
 
 ## **Data Structure**
 

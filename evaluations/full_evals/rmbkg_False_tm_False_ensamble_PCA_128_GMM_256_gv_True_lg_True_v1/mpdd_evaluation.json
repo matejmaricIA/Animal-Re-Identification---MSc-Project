@@ -1,5 +1,5 @@
 {
-    "accuracy": 0.8739837398373984,
+    "accuracy": 0.9105691056910569,
     "top_n_accuracy": 0.9552845528455285,
     "classification_metrics": {
         "MPDD_0": {
@@ -112,8 +112,8 @@
         },
         "MPDD_115": {
             "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_116": {
@@ -129,9 +129,9 @@
             "support": 2.0
         },
         "MPDD_119": {
-            "precision": 0.3333333333333333,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "MPDD_12": {
@@ -207,21 +207,21 @@
             "support": 1.0
         },
         "MPDD_131": {
-            "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "precision": 0.5,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5714285714285714,
             "support": 3.0
         },
         "MPDD_132": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "MPDD_133": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_134": {
@@ -232,20 +232,20 @@
         },
         "MPDD_135": {
             "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "MPDD_136": {
+            "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 2.0
         },
-        "MPDD_136": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
-            "support": 2.0
-        },
         "MPDD_137": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_138": {
@@ -255,9 +255,9 @@
             "support": 1.0
         },
         "MPDD_139": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_140": {
@@ -273,15 +273,15 @@
             "support": 1.0
         },
         "MPDD_143": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_144": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_145": {
@@ -315,9 +315,9 @@
             "support": 2.0
         },
         "MPDD_15": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "MPDD_150": {
@@ -339,9 +339,9 @@
             "support": 1.0
         },
         "MPDD_153": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "MPDD_154": {
@@ -399,15 +399,15 @@
             "support": 1.0
         },
         "MPDD_162": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_163": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_164": {
@@ -429,9 +429,9 @@
             "support": 1.0
         },
         "MPDD_167": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_168": {
@@ -525,9 +525,9 @@
             "support": 1.0
         },
         "MPDD_182": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_183": {
@@ -555,9 +555,9 @@
             "support": 2.0
         },
         "MPDD_188": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_189": {
@@ -609,9 +609,9 @@
             "support": 2.0
         },
         "MPDD_24": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_25": {
@@ -766,8 +766,8 @@
         },
         "MPDD_48": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "MPDD_49": {
@@ -783,9 +783,9 @@
             "support": 1.0
         },
         "MPDD_51": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_52": {
@@ -807,9 +807,9 @@
             "support": 1.0
         },
         "MPDD_55": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_56": {
@@ -849,9 +849,9 @@
             "support": 1.0
         },
         "MPDD_61": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_62": {
@@ -897,15 +897,15 @@
             "support": 1.0
         },
         "MPDD_69": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 1.0
-        },
-        "MPDD_7": {
             "precision": 0.5,
             "recall": 1.0,
             "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "MPDD_7": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_70": {
@@ -927,9 +927,9 @@
             "support": 1.0
         },
         "MPDD_74": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "MPDD_75": {
@@ -1005,9 +1005,9 @@
             "support": 1.0
         },
         "MPDD_86": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "MPDD_87": {
@@ -1017,15 +1017,15 @@
             "support": 1.0
         },
         "MPDD_88": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "MPDD_89": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_9": {
@@ -1053,9 +1053,9 @@
             "support": 1.0
         },
         "MPDD_93": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_94": {
@@ -1065,15 +1065,15 @@
             "support": 2.0
         },
         "MPDD_95": {
-            "precision": 0.3333333333333333,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "MPDD_96": {
-            "precision": 0.4,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 0.5714285714285714,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "MPDD_97": {
@@ -1094,22 +1094,22 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "accuracy": 0.8739837398373984,
+        "accuracy": 0.9105691056910569,
         "macro avg": {
-            "precision": 0.8327838827838827,
-            "recall": 0.8685897435897436,
-            "f1-score": 0.83861852433281,
+            "precision": 0.8919413919413919,
+            "recall": 0.9116300366300367,
+            "f1-score": 0.8937467294610152,
             "support": 246.0
         },
         "weighted avg": {
-            "precision": 0.8494579945799456,
-            "recall": 0.8739837398373984,
-            "f1-score": 0.847444831591173,
+            "precision": 0.8990514905149052,
+            "recall": 0.9105691056910569,
+            "f1-score": 0.8954316686024004,
             "support": 246.0
         }
     },
     "md_trained_on": false,
     "md_split_type": "similarity-aware",
     "md_random_split": false,
-    "eval_runtime_sec": 336.98113441467285
+    "eval_runtime_sec": 389.83083963394165
 }

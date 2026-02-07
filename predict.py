@@ -335,8 +335,10 @@ def rank_by_local_score(
     train_fisher_index: Dict[str, int],
     calibrators: Dict[str, 'ScoreCalibrator'],
     local_rank_candidates: int,
+    fusion_signals: List[str] | None = None,
 ):
-    """Tier 2: Rank union candidates by calibrated global + fisher."""
+    """Tier 2: Rank union candidates by calibrated Tier-2 signals."""
+    active_signals = set(fusion_signals or ["global", "fisher"])
     candidates = []
     for train_id in union_ids:
         s_global = 0.0
@@ -351,15 +353,25 @@ def rank_by_local_score(
                 s_fisher = float(fisher_sims[idx])
 
         scores = []
-        if calibrators is not None:
-            if 'global' in calibrators:
-                scores.append(float(calibrators['global'].predict_proba([s_global])[0]))
-            if 'fisher' in calibrators:
-                scores.append(float(calibrators['fisher'].predict_proba([s_fisher])[0]))
+        raw_scores = []
+        if "global" in active_signals:
+            raw_scores.append(s_global)
+            if calibrators is not None and "global" in calibrators:
+                scores.append(float(calibrators["global"].predict_proba([s_global])[0]))
+        if "fisher" in active_signals:
+            raw_scores.append(s_fisher)
+            if calibrators is not None and "fisher" in calibrators:
+                scores.append(float(calibrators["fisher"].predict_proba([s_fisher])[0]))
+
         if scores:
             tier2_score = float(np.mean(scores))
         else:
-            tier2_score = float(np.mean([s_global, s_fisher]))
+            # Fallback: use mean of raw similarities for whichever signals are active.
+            # Note: this is not a probability and should not be fused with GV logits.
+            if raw_scores:
+                tier2_score = float(np.mean(raw_scores))
+            else:
+                tier2_score = float(np.mean([s_global, s_fisher]))
 
         candidates.append({
             "train_id": train_id,
@@ -453,7 +465,17 @@ def classify_test_images_late_fusion(
     from tqdm import tqdm
     
     predictions = {}
-    print("Tier-2 ranking uses calibrated global+fisher (mean of probabilities).")
+
+    tier2_signals = [s for s in (fusion_signals or []) if s in {"global", "fisher"}]
+    if not tier2_signals:
+        tier2_signals = ["global", "fisher"]
+    print(
+        "Tier-2 ranking uses calibrated "
+        + "+".join(tier2_signals)
+        + " (mean of probabilities)."
+    )
+    if fusion_signals and "gv" in fusion_signals:
+        print("Tier-3 reranking uses GV power-rerank on Tier-2 distance (d=(1-p_tier2)^n).")
 
     debug_enabled = bool(debug and test_labels is not None)
     if debug and not debug_enabled:
@@ -504,40 +526,78 @@ def classify_test_images_late_fusion(
             train_fisher_index,
             calibrators,
             LOCAL_RANK_CANDIDATES,
+            fusion_signals=fusion_signals,
         )
 
+        use_gv = bool(fusion_signals and "gv" in fusion_signals)
         print(
             f"Funnel: Union {len(union_ids)} → Local {len(local_ranked)} → "
-            f"Geometric Verification {len(local_ranked)}"
+            f"Geometric Verification {len(local_ranked) if use_gv else 0}"
         )
+        cal_gv = calibrators.get("gv") if calibrators is not None else None
 
-        verified = verify_candidates(
-            test_id,
-            local_ranked,
-            test_keypoints,
-            train_keypoints,
-            test_descriptors,
-            train_descriptors,
-            test_fisher,
-            train_fisher,
-            train_labels,
-            use_lightglue,
-            method,
-            gv_matcher,
-            image_paths,
-        )
+        if use_gv:
+            verified = verify_candidates(
+                test_id,
+                local_ranked,
+                test_keypoints,
+                train_keypoints,
+                test_descriptors,
+                train_descriptors,
+                test_fisher,
+                train_fisher,
+                train_labels,
+                use_lightglue,
+                method,
+                gv_matcher,
+                image_paths,
+            )
+        else:
+            verified = [
+                {
+                    "train_id": cand["train_id"],
+                    "label": train_labels[cand["train_id"]],
+                    "local_score": cand["local_score"],
+                    "tier2_score": cand.get("tier2_score", cand["local_score"]),
+                    "n_inliers": 0,
+                }
+                for cand in local_ranked
+            ]
 
-        verified.sort(
-            key=lambda x: (
-                (
-                    int(x.get("n_inliers", 0))
-                    if int(x.get("n_inliers", 0)) >= MIN_INLIERS
-                    else 0
+        if use_gv:
+            # Paper-style reranking: d_C = (d_L)^n.
+            # Here we treat Tier-2 as a match probability, so d_L := 1 - p_tier2 ∈ [0,1].
+            # We rank by -log(d_C) = -n*log(d_L), which avoids underflow for large n.
+            for cand in verified:
+                tier2_score = cand.get("tier2_score", 0.0)
+                if not (0.0 <= float(tier2_score) <= 1.0):
+                    cand["_power_score"] = float("-inf")
+                    continue
+                p_tier2 = float(tier2_score)
+                d_l = float(np.clip(1.0 - p_tier2, 1e-12, 1.0))
+                n_inliers = int(cand.get("n_inliers", 0))
+                cand["_power_score"] = float(-max(0, n_inliers) * np.log(d_l))
+                cand["_fused_logit"] = cand["_power_score"]
+
+                if cal_gv is not None:
+                    gv_signal = float(np.log1p(max(0, n_inliers)))
+                    try:
+                        cand["_p_gv"] = float(cal_gv.predict_proba([gv_signal])[0])
+                    except Exception:
+                        pass
+
+            verified.sort(
+                key=lambda x: (
+                    float(x.get("_power_score", float("-inf"))),
+                    float(x.get("tier2_score", 0.0)),
+                    int(x.get("n_inliers", 0)),
                 ),
-                float(x.get("tier2_score", 0.0)),
-            ),
-            reverse=True,
-        )
+                reverse=True,
+            )
+        else:
+            # No GV stage: preserve Tier-2 ranking while keeping debug output keys consistent.
+            for cand in verified:
+                cand["_fused_logit"] = float(cand.get("tier2_score", 0.0))
 
         if verified:
             top_n_matches = [(c["n_inliers"], c["label"]) for c in verified[:top_n]]
@@ -600,31 +660,35 @@ def classify_test_images_late_fusion(
             pred_tier2 = None
             gt_best_inliers = None
             gt_best_tier2 = None
-            pred_effective_inliers = None
-            gt_best_effective_inliers = None
+            pred_p_gv = None
+            gt_best_p_gv = None
+            pred_fused = None
+            gt_best_fused = None
             inliers_override = False
 
             if verified:
                 pred_candidate = verified[0]
                 pred_inliers = int(pred_candidate.get("n_inliers", 0))
                 pred_tier2 = float(pred_candidate.get("tier2_score", 0.0))
-                pred_effective_inliers = (
-                    pred_inliers if pred_inliers >= MIN_INLIERS else 0
-                )
+                pred_fused = float(pred_candidate.get("_fused_logit", 0.0))
+                if use_gv and cal_gv is not None:
+                    pred_p_gv = float(pred_candidate.get("_p_gv", 0.5))
 
                 gt_candidates = [c for c in verified if c.get("label") == gt_label]
                 if gt_candidates:
                     gt_best = max(gt_candidates, key=lambda x: float(x.get("tier2_score", 0.0)))
                     gt_best_inliers = int(gt_best.get("n_inliers", 0))
                     gt_best_tier2 = float(gt_best.get("tier2_score", 0.0))
-                    gt_best_effective_inliers = (
-                        gt_best_inliers if gt_best_inliers >= MIN_INLIERS else 0
-                    )
+                    gt_best_fused = float(gt_best.get("_fused_logit", 0.0))
+                    if use_gv and cal_gv is not None:
+                        gt_best_p_gv = float(gt_best.get("_p_gv", 0.5))
                     eps = 1e-12
                     if (
-                        mispred
+                        use_gv
+                        and cal_gv is not None
+                        and mispred
                         and gt_best_tier2 > (pred_tier2 + eps)
-                        and pred_effective_inliers > gt_best_effective_inliers
+                        and pred_fused > (gt_best_fused + eps)
                     ):
                         inliers_override = True
 
@@ -635,14 +699,10 @@ def classify_test_images_late_fusion(
             pred_tier2_s = "NA" if pred_tier2 is None else f"{pred_tier2:.4f}"
             gt_best_inliers_s = "NA" if gt_best_inliers is None else str(gt_best_inliers)
             gt_best_tier2_s = "NA" if gt_best_tier2 is None else f"{gt_best_tier2:.4f}"
-            pred_eff_inliers_s = (
-                "NA" if pred_effective_inliers is None else str(pred_effective_inliers)
-            )
-            gt_best_eff_inliers_s = (
-                "NA"
-                if gt_best_effective_inliers is None
-                else str(gt_best_effective_inliers)
-            )
+            pred_p_gv_s = "NA" if pred_p_gv is None else f"{pred_p_gv:.4f}"
+            gt_best_p_gv_s = "NA" if gt_best_p_gv is None else f"{gt_best_p_gv:.4f}"
+            pred_fused_s = "NA" if pred_fused is None else f"{pred_fused:.4f}"
+            gt_best_fused_s = "NA" if gt_best_fused is None else f"{gt_best_fused:.4f}"
             tier2_pred_s = "NA" if tier2_pred is None else str(tier2_pred)
             tier2_pred_tier2_s = (
                 "NA" if tier2_pred_tier2 is None else f"{tier2_pred_tier2:.4f}"
@@ -654,8 +714,8 @@ def classify_test_images_late_fusion(
                 f"gt={gt_label} pred={pred_label} tier2_pred={tier2_pred_s} tier2_pred_tier2={tier2_pred_tier2_s} "
                 f"union_hit={union_hit} local_hit={local_hit} verified_hit={verified_hit} "
                 f"inliers_override={inliers_override} "
-                f"pred_inliers={pred_inliers_s} pred_eff_inliers={pred_eff_inliers_s} pred_tier2={pred_tier2_s} "
-                f"gt_best_inliers={gt_best_inliers_s} gt_best_eff_inliers={gt_best_eff_inliers_s} gt_best_tier2={gt_best_tier2_s}"
+                f"pred_inliers={pred_inliers_s} pred_tier2={pred_tier2_s} pred_p_gv={pred_p_gv_s} pred_fused={pred_fused_s} "
+                f"gt_best_inliers={gt_best_inliers_s} gt_best_tier2={gt_best_tier2_s} gt_best_p_gv={gt_best_p_gv_s} gt_best_fused={gt_best_fused_s}"
             )
     
     if debug_enabled:

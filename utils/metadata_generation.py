@@ -73,7 +73,11 @@ def create_unlabeled_metadata(dataset_name):
     metadata_path = dataset_dir / "processed_metadata.csv"
     df.to_csv(metadata_path, index=False)
     
-    print(f"   python main.py --count --ds {dataset_name} --automated_mode --use_geometric_verification")
+    print(
+        "Metadata saved. Note: current `--count` mode requires GT `identity` labels "
+        "to simulate the human oracle. For unlabeled datasets, a manual pair-vetting "
+        "workflow is planned but not yet integrated."
+    )
     
     return metadata_path
 

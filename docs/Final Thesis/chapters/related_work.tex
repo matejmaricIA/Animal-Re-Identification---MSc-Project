@@ -1,0 +1,34 @@
+\chapter{Related Work}
+\label{chap:related_work}
+In this chapter, we'll review existing approaches to visual animal re-identification (Re-ID) with an emphasis on methods intended to generalize across species. The literature will be organized into thematic categories, from traditional computer vision techniques to modern deep learning methods, including hybrid methods that combine the two. We also discuss key challenges in the field, such as limited data, pose varitaion and open-set indetification. We'll synthesize the findings from prior work and emphasize the gaps that this thesis is trying to address.
+
+\section{Traditional Computer Vision Approaches}
+Early animal Re-ID systems relied on hand-crafted visual feature and local descriptors. A prime example is HotSpotter\cite{6475023}, a SIFT-based\cite{Lowe2004SIFT} algorithm that identifies individuals by comparing local keypoints in images. HotSpotter uses viewwpoint-invariant SIFT descriptors and scores matches by emphasizing the most distinctive keypoints (the titular "hot spots") on an animal's coat pattern. \cite{jmse11050889} compared SIFT, SURF and SuperPoint on indetifying sunfish individuals and demonstrated that the number of matching keypoints between a pair of images is a strong indicator for the likelyhood that they contain thesame individual. These traditional local-feature methods do not require training on identity labels and are, by definition, species-agnostic, making the applicable to a wide variety of species. HotSpotter and similar algorithms have been successfully used on numerous species with distinctive markings, including zebras, giraffes, jaguars, ocelots and leopards.\cite{springerSpeciesAgnosticPatterned} The drawback, however, is that purely hand-crafted methods cannot fully exploit any available training data since their matching heuristic is fixed and may miss more subtle or global cues. 
+
+\section{Species-Specific Trait-Based Re-Identification}
+Another line of research focuses on species-specific visual traits for re-identification. Instead of analyzing the entire image or generic local patches, these approaches isolate particular biometric features unique to the species at hand, for example the ear shapes of elephants, the outline of a shark's dorsal fin, or the contour of a whale's tail (fluke), and use them for re-identification. Both traditional image analysis and deep learning have been employed to recognize such traits. For example, algorithms such as CurvRank\cite{ani12151980} and finFindR\cite{finFindR} compute and match the shapes of whale flukes or shark fins to identify individuals. These methods often don't require individual identity labels for training, rather a detector or feature extractor for the trait can be trained using only that trait's annotations, then match those features between images. The advantage of trait-specific methods is that they leverage highly distinctive features (when they are present) and can work with minimal ID labeling. However, a major limitation is that they are species-specifc so each system is tailored for identifying only one species and usually it can't be transfered to other species. This lack of generality is a significant barrier to wider use as it requires developing a new method for each studied species. This thesis is motivated by overcoming this limitation by developing a method, based on existing research, that does not depend on any single species' unique trait. 
+
+\section{Deep Learning-Based Methods}
+With rise of deep learning, a number of methods have been proposed that learn features directly from image data, without manual feature engineering. Modern deep learning approaches for animal re-ID typically employ CNNs (Convolutional Neural Networks) or related architectures to produce an embedding (feature vector) for each image, such that images of the same individual are close in feature space while those of different individuals are far apart. These can be trained either as classification (training a CNN to classify a fixed set of known individuals) or via metric learning (training the network to differentiate between same-individual vs. different individual image pairs). In general, metric learning approaches are favored for wildlife re-ID because they naturally handle open-set problems. A classification-based model treats re-ID as identifying one of $N$ known individuals, which fails when a new individual outside the training set appears. By contrast, metric-based methods learn a similarity function and can thus match new individuals by embedding comparison, without needing to retrain for new identities.\cite{springerSpeciesAgnosticPatterned}
+
+\section{Hybrid Approaches with Learned Local Features}
+A promising direction in animal re-id is to combine the strengths of traditional and deep learning methods into a hybrid pipeline. The idea is to use modern learned features from deep networks in place of the hand-crafted ones, but still employ them in a local matching and aggregation framework as in traditional approaches. A good example of this is the ALFRE-ID\cite{springerSpeciesAgnosticPatterned} pipeline (Aggregated Local Features for Re-Identification). ALFRE-ID uses a CNN extractor to extract local patch descriptors from an animal's coat pattern, then aggregates these local features into a global descriptor for the image. 
+
+\section{Key Challenges and Limitations}
+Research in animal re-identification encounters several fundamental challenges that limit real-world performance. Key issues identified in the literature are: 
+
+  \textbf{Limited labeled data.} Collecting individual-level labels is
+   labor-intensive, so datasets often contain only a handful of images per
+   subject, leading to overfitting and poor generalization.  
+
+   \textbf{Pose variation.} Animals appear under diverse viewpoints and
+   behaviors, drastically altering their visual features. Identification
+   accuracy drops when profiles or unusual poses replace frontal views.  
+
+   \textbf{Occlusions.} Vegetation, group interactions, or partial camera‑trap
+   captures often conceal distinguishing markings, hindering feature extraction.
+
+   \textbf{Open-set identification.} Field deployments must handle individuals
+   unseen during training; closed-set models misclassify such cases. Open-set
+   recognition methods highlight the need to reject unknown identities.
+

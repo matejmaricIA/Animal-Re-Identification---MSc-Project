@@ -22,12 +22,6 @@ def _build_command(dataset: str, use_md_baseline_split: bool) -> List[str]:
         "--use_global_embedding",
         #"--embedding_model",
         #"megadescriptor-l-384",
-        #"--w_global",
-        #"1.0",
-        #"--w_fisher",
-        #"1.0",
-        "--fusion_mode",
-        "late",
         "--ds",
         dataset,
     ]

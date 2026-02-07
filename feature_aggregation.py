@@ -47,7 +47,7 @@ def stack_all_descriptors(descriptors, max_samples=MAX_GMM_DESCRIPTORS, per_imag
     """
 
     #arrays = [d for d in descriptors.values() if len(d) > 0]
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(42)
     arrays = []
     for d in descriptors.values():
         if len(d) == 0:
@@ -122,13 +122,26 @@ def compute_fisher_vector(reduced_stacked_descs, gmm):
     for k in range(K):
         prob_k = responsibilities[:, k]  # Shape: (N,)
         diff = reduced_stacked_descs - means[k]  # Shape: (N, D)
+        cov_k = covariances[k]
 
         # Looking back on how the implementation of fisher vectors should be done I think that this is wrong... Must investigate furhter.
         #fisher_mean[k] = np.sum(prob_k[:, np.newaxis] * diff / np.sqrt(covariances[k]), axis=0)
         #fisher_var[k] = np.sum(prob_k[:, np.newaxis] * (diff ** 2 - covariances[k]) / (2 * covariances[k] ** 1.5), axis=0)
 
-        fisher_mean[k] = (1.0 / (N * np.sqrt(weights[k]))) * np.sum(prob_k[:, np.newaxis] * diff / np.sqrt(covariances[k]), axis=0)
-        fisher_var[k] = (1.0 / (N * np.sqrt(2 * weights[k]))) * np.sum(prob_k[:, np.newaxis] * (diff ** 2 - covariances[k]) / (2 * covariances[k] ** 1.5), axis=0)
+        fisher_mean[k] = (1.0 / (N * np.sqrt(weights[k]))) * np.sum(
+            prob_k[:, np.newaxis] * diff / np.sqrt(cov_k),
+            axis=0,
+        )
+        # Old (non-standard) second-order term kept for reference:
+        # fisher_var[k] = (1.0 / (N * np.sqrt(2 * weights[k]))) * np.sum(
+        #     prob_k[:, np.newaxis] * (diff ** 2 - cov_k) / (2 * cov_k ** 1.5),
+        #     axis=0,
+        # )
+        term = (diff * diff) / (cov_k + 1e-12) - 1.0
+        fisher_var[k] = (1.0 / (N * np.sqrt(2 * weights[k]))) * np.sum(
+            prob_k[:, np.newaxis] * term,
+            axis=0,
+        )
 
     # Flatten and concatenate mean and variance gradients
     fisher_vector = np.concatenate([fisher_mean.flatten(), fisher_var.flatten()])

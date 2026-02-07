@@ -1,0 +1,88 @@
+% =========================================================
+% main.tex (root file)
+% =========================================================
+
+\documentclass[masterthesis]{fer}
+% Add the option upload to generate the final version which is uploaded to FERWeb
+% Dodaj opciju upload za generiranje konačne verzije koja se učitava na FERWeb
+
+\usepackage{blindtext}
+\usepackage{float}
+
+\usepackage{siunitx}
+\sisetup{
+  group-separator = {,},
+  group-minimum-digits = 4
+}
+
+
+%--- THESIS INFORMATION / PODACI O RADU ----------------------------------------
+\title{Deep learning-based animal re-identification for non-invasive wildlife monitoring and conservation}
+\naslov{Duboko učenje za ponovnu identifikaciju životinja u neinvazivnom praćenju divljih vrsta i očuvanju prirode}
+\author{Matej Marić}
+\mentor{izv. prof. dr. sc. Marina Bagić Babac}
+\date{June, 2025}
+\datum{lipanj, 2025.}
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+% Title page
+\maketitle
+
+% Thesis assignment sheet (download from FERWeb)
+\zadatak{filename.pdf}
+
+% Acknowledgements -----------------------------------------
+\begin{zahvale}
+Thanks for the tea...
+\end{zahvale}
+
+% Numbered pages from here
+\mainmatter
+
+
+% Table of contents (add \listoffigures or \listoftables if needed)
+\tableofcontents
+
+% ------------------------------------------------------------
+% Include chapter files (kept in ./chapters/)
+% ------------------------------------------------------------
+\include{chapters/introduction}
+\include{chapters/related_work}
+\include{chapters/datasets_and_preprocessing}
+\include{chapters/methodology}
+%\include{chapters/feature_aggregation_and_representation}
+%\include{chapters/geometric_verification}
+\include{chapters/classification}
+\include{chapters/population_counting}
+%\include{chapters/pipeline_implementation}
+\include{chapters/experimental_setup}
+\include{chapters/results}
+\include{chapters/discussion}
+\include{chapters/conclusion_and_future_work}
+
+
+% ----------------- References ------------------------------
+\bibliography{references}
+
+% ----------------- Abstract (EN) ---------------------------
+\begin{abstract}
+Reliable methods for monitoring wildlife populations are essential for effective conservation and ecological management. This thesis addresses the challenge of developing an automated visual system capable of identifying individual animals and estimating their population size across various species, particularly when limited labeled data is available. The primary goal was to establish a practical approach that can generalize effectively without the need for extensive manual annotation or species-specific model retraining. The developed methods were validated on publicly available benchmark datasets, with emphasis on standardized and leakage-aware evaluation protocols.
+\end{abstract}
+
+\begin{keywords}
+Animal Re-identification; Wildlife Monitoring; Population Estimation; Computer Vision; Conservation
+\end{keywords}
+
+% ----------------- Sažetak (HR) -----------------------------
+\begin{sazetak}
+Pouzdane metode praćenja populacija divljih životinja ključne su za učinkovito očuvanje i ekološko upravljanje. Ovaj rad bavi se izazovom razvoja automatiziranog vizualnog sustava sposobnog za identificiranje pojedinačnih životinja i procjenu veličine njihove populacije među različitim vrstama, posebno kada je dostupa ograničen broj označenih podataka. Primarni cilj bio je uspostaviti praktičan pristup koji se može učinkovito generalizirati bez potrebe za opsežnim ručnim označavanjem ili ponovnim treniranjem modela specifičnih za vrstu. Razvijene metode validirane su na javno dostupnim skupovima podataka uz naglasak na standardizirane i na curenje podataka otporne evaluacijske protokole.
+\end{sazetak}
+
+\begin{kljucnerijeci}
+Re-identifikacija životinja; Nadzor Divljači; Procjena Populacije; Računalni Vid; Očuvanje Prirode
+\end{kljucnerijeci}
+
+\end{document}
+

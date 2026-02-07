@@ -27,6 +27,7 @@ fonttools==4.58.4
 frozenlist==1.7.0
 fsspec==2025.3.0
 gdown==5.2.0
+groundingdino @ git+https://github.com/IDEA-Research/GroundingDINO.git
 greenlet==3.2.3
 grpcio==1.73.0
 h5py==3.14.0
@@ -64,6 +65,7 @@ multidict==6.5.0
 multiprocess==0.70.16
 nest-asyncio==1.6.0
 networkx==3.5
+ninja==1.13.0
 numba==0.61.2
 numpy==2.2.6
 nvidia-cublas-cu12==12.6.4.1
@@ -112,14 +114,12 @@ pytz==2025.2
 PyYAML==6.0.2
 pyzmq==27.0.0
 referencing==0.36.2
-rembg==2.0.66
 requests==2.32.4
 rpds-py==0.25.1
-SAM-2 @ file:///home/mm-workstation/re-id/sam2
 scikit-image==0.25.2
 scikit-learn==1.7.0
 scipy==1.16.0
-segment_anything @ git+https://github.com/facebookresearch/segment-anything.git@dca509fe793f601edb92606367a655c15ac00fdf
+sam-2 @ git+https://github.com/facebookresearch/sam2.git
 setuptools==80.9.0
 six==1.17.0
 soupsieve==2.7
@@ -139,6 +139,7 @@ torchvision==0.22.1
 tornado==6.5.1
 tqdm==4.67.1
 traitlets==5.14.3
+transformers<5
 triton==3.3.1
 typing_extensions==4.14.0
 tzdata==2025.2

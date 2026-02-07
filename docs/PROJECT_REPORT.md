@@ -105,7 +105,7 @@ disk/                       # DISK submodule (local feature model) + its own scr
 ### High-level call flow
 
 1) **Load dataset metadata**: prefer `./data/<dataset>/processed_metadata.csv`, else fall back to `WildlifeReID10k` metadata at `WILD_DATASET_PATH`. [refs: `utility_functions.py:L26-L75`, `constants.py:L58-L60`, `main.py:L154-L156`, `main.py:L463-L465`]
-2) **Preprocess images**: optional Mantiuk tone mapping; optional background removal using ISNet (via `rembg`) and/or SAM/SAM2; writes processed images into a per-identity folder and updates metadata columns. [refs: `preprocessing.py:L85-L215`, `main.py:L184-L213`, `main.py:L470-L515`, `constants.py:L6-L20`]
+2) **Preprocess images**: optional Mantiuk tone mapping; optional background removal using Grounded SAM2 (GroundingDINO + SAM2); writes processed images into a per-identity folder and updates metadata columns. [refs: `preprocessing.py:L85-L215`, `main.py:L184-L213`, `main.py:L470-L515`, `constants.py:L6-L20`]
 3) **Extract local features**: writes `descriptors.h5` and `keypoints.h5`. [refs: `feature_extraction.py:L89-L150`, `feature_extraction.py:L151-L220`, `feature_extraction.py:L508-L575`, `main.py:L235-L305`, `main.py:L516-L570`]
 4) **Aggregate features**: stack descriptors (with caps), train PCA, train diagonal GMM, compute Fisher vectors per image (power + L2 norm). [refs: `feature_aggregation.py:L41-L163`, `main.py:L268-L321`, `main.py:L535-L570`, `constants.py:L37-L45`, `constants.py:L88-L91`]
 5) **Optional global embeddings**: compute or load cached embeddings from pickle. [refs: `main.py:L332-L351`, `main.py:L577-L592`, `global_embedding.py:L14-L65`, `megadescriptor.py:L10-L46`]
@@ -119,7 +119,7 @@ disk/                       # DISK submodule (local feature model) + its own scr
 flowchart TD
   A[Metadata CSV + images] --> B{Preprocess?}
   B -->|tone map| C[Mantiuk tone mapping]
-  B -->|background removal| D[ISNet/SAM/SAM2 segmentation]
+  B -->|background removal| D[Grounded SAM2 segmentation]
   C --> E[Processed images + updated metadata]
   D --> E
   E --> F[Local feature extraction\n(keypoints + descriptors -> HDF5)]
@@ -157,13 +157,13 @@ flowchart TD
 ### `preprocessing.py` - tone mapping + background removal + metadata writing
 
 - Applies Mantiuk tone mapping using OpenCV's `createTonemapMantiuk`. [refs: `preprocessing.py:L85-L96`]
-- Background removal supports multiple model types (`isnet`, `sam`, `sam2`, `combined`) controlled by `SEGMENTATION_MODEL_TYPE` in `constants.py`. [refs: `constants.py:L6-L16`, `preprocessing.py:L17-L43`, `preprocessing.py:L97-L135`]
+- Background removal uses Grounded SAM2 (GroundingDINO + SAM2) with dataset-specific prompts. [refs: `constants.py:L6-L16`, `preprocessing.py:L85-L165`, `segmentation/__init__.py:L1-L34`]
 - Writes processed images to `output_dir/<identity>/<image_id>.jpg` and stores `processed_path` / `processed_path_segmented` columns in the metadata CSV. [refs: `preprocessing.py:L136-L165`, `preprocessing.py:L167-L215`]
 
 ### `segmentation/` - dataset-specific segmentation hooks
 
 - Provides `has_segmenter(...)` and `segment_dataset(...)` wrappers used by `main.py` when `--remove_background` is set. [refs: `segmentation/__init__.py:L32-L55`, `main.py:L189-L207`, `main.py:L493-L512`]
-- Includes several dataset-specific segmentation implementations (e.g., Nyala uses `rembg` + mask cleanup; Beluga uses GrabCut). [refs: `segmentation/nyala_segmentation.py:L24-L129`, `segmentation/beluga_segmentation.py:L4-L109`]
+- Uses a single Grounded SAM2 segmenter with prompts for ATRW, ELPephants, and SeaStarReID2023. [refs: `segmentation/__init__.py:L1-L34`, `segmentation/grounded_sam2.py:L1-L220`]
 
 ### `feature_extraction.py` - local features (keypoints + descriptors -> HDF5)
 
@@ -220,13 +220,13 @@ flowchart TD
 | `timm` | Loads MegaDescriptor via hf-hub | `megadescriptor.py:L4-L36` |
 | `lightglue` | DISK extractor + LightGlue matcher (optional) | `feature_extraction.py:L29-L37`, `feature_extraction.py:L89-L150`, `geometric_verification.py:L23-L29`, `lightglue_singleton.py:L1-L8` |
 | `kornia` | KeyNetAffNetHardNet feature pipeline | `feature_extraction.py:L18-L21`, `feature_extraction.py:L151-L203` |
-| OpenCV (`cv2`) | Image IO/processing, tone mapping, GrabCut, homography RANSAC/MAGSAC | `preprocessing.py:L85-L135`, `geometric_verification.py:L188-L225`, `segmentation/beluga_segmentation.py:L4-L109` |
+| OpenCV (`cv2`) | Image IO/processing, tone mapping, mask post-processing, homography RANSAC/MAGSAC | `preprocessing.py:L85-L165`, `geometric_verification.py:L188-L225`, `segmentation/grounded_sam2.py:L1-L220` |
 | `h5py` | Store/read descriptors + keypoints | `feature_extraction.py:L13-L15`, `feature_aggregation.py:L3-L39`, `visualization_suite/io.py:L10-L12` |
 | `scikit-learn` | PCA/GMM, DBSCAN clustering, metrics | `feature_aggregation.py:L6-L103`, `evaluate.py:L1-L47`, `analyze_folder.py:L6-L55` |
 | `numpy` | Numeric arrays + similarity computations | `feature_aggregation.py:L4-L163`, `nested_importance_sampling.py:L9-L190`, `predict.py:L1-L259` |
 | `pandas` | Metadata tables + XLSX/CSV IO | `main.py:L36-L37`, `utility_functions.py:L4-L25`, `preprocessing.py:L13-L15` |
-| `rembg` (ISNet) | Background removal (ISNet model sessions) | `preprocessing.py:L5-L19`, `segmentation/nyala_segmentation.py:L31-L60` |
-| `segment_anything` | SAM automatic mask generation | `preprocessing.py:L11-L25`, `constants.py:L11-L13` |
+| `groundingdino` | Text-guided box detection for segmentation | `segmentation/grounded_sam2.py:L1-L220` |
+| `sam2` | Box-prompted segmentation model | `segmentation/grounded_sam2.py:L1-L220` |
 | `wildlife_datasets` | Dataset metadata / split analysis | `main.py:L2-L4`, `utility_functions.py:L51-L70`, `patches/elpephants_patch.py:L4-L44` |
 | `optuna` | Hyperparameter / weight searches (scripts) | `hyperparameter_optimization.py:L1-L7`, `mixture_optimization/weight_optimization.py:L26-L36` |
 | Bash | Batch experiment scripts | `run_multiple.sh:L1-L10`, `run_count_multiple.sh:L1-L11` |
@@ -291,7 +291,7 @@ Where: `apply_zscore_and_l2_train_test(...)` standardises (train mean/std) and L
 
 Where:
 - Tone mapping: OpenCV Mantiuk operator. [refs: `preprocessing.py:L85-L96`]
-- Background removal: ISNet (`rembg`) and/or SAM/SAM2 masks (largest mask is selected). [refs: `preprocessing.py:L97-L135`, `constants.py:L6-L16`]
+- Background removal: Grounded SAM2 (GroundingDINO boxes + SAM2 masks, largest mask selected). [refs: `preprocessing.py:L97-L165`, `segmentation/grounded_sam2.py:L1-L220`, `constants.py:L6-L16`]
 
 ### 9) Nested Importance Sampling (population size estimation)
 
@@ -319,7 +319,7 @@ Key flags (not exhaustive):
 
 - Default dataset root for WildlifeReID10k is hard-coded as `WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'`. [refs: `constants.py:L58-L60`, `utility_functions.py:L57-L63`]
 - PCA and GMM sizes are set in `constants.py` (`N_COMPONENTS_PCA`, `N_COMPONENTS_GMM`). [refs: `constants.py:L37-L45`]
-- SAM/SAM2 checkpoint paths are in `constants.py` and are loaded during preprocessing when the corresponding model type is enabled. [refs: `constants.py:L11-L17`, `preprocessing.py:L17-L43`]
+- GroundingDINO config/weights and SAM2 weights are set in `constants.py` and loaded on-demand by the Grounded SAM2 segmenter. [refs: `constants.py:L6-L20`, `segmentation/grounded_sam2.py:L1-L220`]
 
 ### Environment variables
 
@@ -329,7 +329,7 @@ Unknown from codebase: the pipeline does not document required environment varia
 
 ### CLI (no HTTP API)
 
-- The code exposes functionality primarily via command-line scripts (`main.py`, grid-search scripts, segmentation test scripts). [refs: `main.py:L56-L121`, `hyperparameter_grid_search.py:L1-L70`, `hyperparameter_grid_search_count.py:L31-L62`, `segmentation/simple_test.py:L206-L227`]
+- The code exposes functionality primarily via command-line scripts (`main.py`, grid-search scripts, segmentation test scripts). [refs: `main.py:L56-L121`, `hyperparameter_grid_search.py:L1-L70`, `hyperparameter_grid_search_count.py:L31-L62`, `segmentation/simple_test.py:L1-L120`]
 
 Unknown from codebase: there is no evidence of an HTTP server or web API. Checked: repo-wide search for common frameworks (`flask`, `fastapi`) and presence of typical config files (none found). (Search method: `rg` over the codebase.) [refs: `main.py:L56-L121`]
 
@@ -357,10 +357,10 @@ Unknown from codebase: there is no CI configuration checked into this repo. Chec
 
 - **`--predict` mode appears unimplemented:** `--predict` is defined but there is no `if args.predict:` branch; `--image_location` is defined but unused; README explicitly says inference is "TO DO". [refs: `main.py:L61-L66`, `README.md:L71-L84`]
 - **Unused/placeholder flags:** `--use_shape` is defined but not referenced anywhere else. [refs: `main.py:L95-L99`]
-- **Potential portability issue in dependencies:** `requirements.txt` contains an absolute local path dependency (`SAM-2 @ file:///home/.../sam2`) and editable Git installs that require network. This may prevent a clean install on another machine without modification. [refs: `requirements.txt:L55-L56`, `requirements.txt:L118-L123`]
+- **Potential portability issue in dependencies:** `requirements.txt` includes Git-based installs (e.g., GroundingDINO, SAM2, LightGlue) that require network access during install. [refs: `requirements.txt:L55-L60`, `requirements.txt:L118-L123`]
 - **Pickle and `.pth` safety:** the pipeline uses `pickle.load(...)` and `torch.load(...)`, which can execute arbitrary code if the files are untrusted. This matters if you share model/artifact files between machines/users. [refs: `utility_functions.py:L156-L167`, `main.py:L338-L343`, `feature_extraction.py:L136-L140`]
 - **Dataset split assumptions:** training mode only defines `df_train/df_test` when a `split` column exists; if absent, behavior is unclear from code (no fallback split implemented). [refs: `main.py:L215-L230`]
-- **Segmentation registry mapping looks inconsistent:** `_SEGMENTERS` maps many dataset names to `nyala_segment` even though other segmenters are imported; intent is unclear from code. [refs: `segmentation/__init__.py:L5-L29`]
+- **Segmentation prompt coverage is limited:** Grounded SAM2 is configured only for ATRW, ELPephants, and SeaStarReID2023 unless you add more prompts. [refs: `segmentation/__init__.py:L1-L34`]
 - **Geometric verification method parameterization:** counting calls `nested_importance_sampling(..., method='disk')` regardless of the chosen local-feature method, which may or may not be intended. [refs: `main.py:L610-L626`]
 
 ## Appendix A - Dependency inventory
@@ -386,7 +386,8 @@ The `disk/` submodule also includes its own `requirements.txt` listing additiona
 
 - `python analyze_folder.py <folder> --model_dir ./data/<ds>/db` (cluster images into "individuals" using DBSCAN on Fisher vectors) [refs: `analyze_folder.py:L48-L101`]
 - `python generate_visuals.py --dataset <name> --method <method> --out_dir visualizations` (visualize keypoints/descriptors/matches for random images) [refs: `generate_visuals.py:L1-L215`]
-- `python segmentation/simple_test.py <DATASET> --samples 5` (visual segmentation inspection; writes comparison images) [refs: `segmentation/simple_test.py:L141-L205`]
+- `python segmentation/simple_test.py <DATASET> --samples 5` (visual segmentation inspection; writes comparison images) [refs: `segmentation/simple_test.py:L1-L120`]
+- `python utils/segment_dataset.py --ds <DATASET> --use_mantiuk` (batch Grounded SAM2 segmentation) [refs: `utils/segment_dataset.py:L1-L60`]
 - `python hyperparameter_grid_search.py --datasets ...` (grid search over configurations by running `main.py`) [refs: `hyperparameter_grid_search.py:L25-L70`, `hyperparameter_grid_search.py:L237-L251`]
 - `python hyperparameter_grid_search_count.py --n_runs 1 --base_seed 0` (grid search for counting settings) [refs: `hyperparameter_grid_search_count.py:L31-L62`, `hyperparameter_grid_search_count.py:L110-L115`]
 - `python hyperparameter_optimization.py --trials 20` (Optuna search over GV-related hyperparameters in training-evaluation) [refs: `hyperparameter_optimization.py:L22-L152`, `hyperparameter_optimization.py:L159-L176`]
