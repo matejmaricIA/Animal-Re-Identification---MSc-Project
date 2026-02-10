@@ -98,7 +98,7 @@ python main.py --train --ds atrw \
   --gv_matcher lightglue
 ```
 
-Global-only baseline (fast; no local features/Fisher/GV):
+Global-only baseline (fast but lower accuracy, no local features/Fisher/GV):
 ```bash
 python main.py --train --ds atrw \
   --use_global_embedding --embedding_model resnet50 \
@@ -133,32 +133,26 @@ python main.py --count --ds atrw \
   --use_global_embedding --embedding_model megadescriptor-l-384 \
   --use_fisher --method ensamble \
   --count_proposal_mode calibrated \
-  --num_vertices 150 --num_neighbors 20
+  --num_vertices 20 --num_neighbors 15
 ```
 
 Global-only counting:
 ```bash
 python main.py --count --ds atrw \
   --use_global_embedding --embedding_model resnet50 \
-  --num_vertices 150 --num_neighbors 20
+  --num_vertices 20 --num_neighbors 150
 ```
 
 Fisher-only counting:
 ```bash
 python main.py --count --ds atrw \
-  --use_fisher --method disk \
-  --num_vertices 150 --num_neighbors 20
+  --use_fisher --method ensamble \
+  --num_vertices 20 --num_neighbors 150
 ```
 
-Calibration caching (count mode):
-- In `--count_proposal_mode calibrated` (default), per-signal score calibrators are trained once and cached under:
-  - `data/<ds>/count_calibrators_<hash>.pkl`
-- Use `--count_force_recalibrate` to ignore cached calibrators and retrain.
-- Use `--count_skip_calibration` to sample from raw similarities (no probability calibration).
 
 Saving count results:
-- Add `--save_count` to append a row to:
-  - `evaluations/count/population_counting_label_error_testing.xlsx`
+- Add `--save_count` to append a row to a xlsx file
 
 ### 3) Query pipeline visualization (`--visualize_query_pipeline`)
 Runs the same 3-tier funnel as training, but only for selected query images and exports per-stage assets.
@@ -181,10 +175,6 @@ python main.py --visualize_query_pipeline --ds atrw \
   --assets_out_dir "docs/pipeline_assets"
 ```
 
-Query resolution:
-- Queries can be image IDs from the dataset test split, or filenames/paths (matched by stem).
-- Comma-separated tokens are accepted: `--query_images 123,456,789`.
-
 Outputs:
 - One folder per query: `--assets_out_dir/<query_id>/`
 - Per-query manifest: `--assets_out_dir/<query_id>/assets_manifest.json`
@@ -194,13 +184,6 @@ Useful visualization flags:
 - `--assets_top_k`: number of candidates shown per ranking strip.
 - `--assets_panel_size`: tile size in pixels.
 - `--assets_overview_mode`: simplified, thesis-friendly overview assets.
-
-### 4) Batch comparisons (script)
-There is a helper script for running a predefined batch of final comparisons:
-```bash
-bash run_final_comparisons.sh
-```
-This script is intentionally argument-free: edit dataset/config lists inside `run_final_comparisons.sh`.
 
 ## CLI reference (all `main.py` flags)
 
@@ -222,7 +205,7 @@ This script is intentionally argument-free: edit dataset/config lists inside `ru
 ### Feature extraction / Fisher vectors
 | Flag | Type | Default | Description |
 |---|---:|---:|---|
-| `--method` | list[str] | `["disk"]` | Local feature method(s). Choices: `disk`, `superpoint`, `aliked`, `keynet_hardnet`, `lightglue`, `ensamble`. Pass multiple methods (e.g. `--method disk aliked`) to build a Fisher ensemble (currently intended for 2 methods). `--method ensamble` uses `disk+superpoint+aliked`. |
+| `--method` | list[str] | `["disk"]` | Local feature method(s). Choices: `disk`, `superpoint`, `aliked`, `lightglue`, `ensamble`. Pass multiple methods (e.g. `--method disk aliked`) to build a Fisher ensemble (currently intended for 2 methods). `--method ensamble` uses `disk+superpoint+aliked`. |
 | `--use_fisher` | bool | `False` | Enable Fisher vectors in **count mode**. In **train/visualize**, Fisher usage is controlled by `--fusion_signals`. |
 
 ### Global embeddings
@@ -250,14 +233,8 @@ This script is intentionally argument-free: edit dataset/config lists inside `ru
 |---|---:|---:|---|
 | `--num_vertices` | int | `10` | Number of sampled vertices in HITL-NIS. |
 | `--num_neighbors` | int | `100` | Number of sampled neighbors per vertex. |
-| `--count_proposal_mode` | str | `"calibrated"` | Proposal mode. Choices: `calibrated` (use calibrated probabilities), `power` (power-transform fused scores). |
-| `--label_error_rate` | float | `0.0` | Fraction of oracle pair labels to flip (simulates annotation noise). |
+| `--label_error_rate` | float | `0.0` | Fraction of "human" pair labels to flip (simulates annotation noise). |
 | `--count_confirm_same_votes` | int | `1` | Require K consecutive "same" votes to accept a pair as same (re-asks only when the first vote is "same"). Set `1` to disable. |
-| `--count_cal_pairs` | int | `2000` | Target number of calibration pairs for count-mode calibrators (GT simulation). |
-| `--count_cal_shortlist` | int | `150` | Shortlist size used when sampling hard negatives for count-mode calibration. |
-| `--count_cal_negs_per_query` | int | `400` | Hard negatives per calibration query for count-mode calibration. |
-| `--count_force_recalibrate` | bool | `False` | Ignore cached count calibrators and retrain them. |
-| `--count_skip_calibration` | bool | `False` | Skip count calibrator training/loading and use raw similarities. |
 | `--seed` | int | `None` | Random seed for reproducible counting and calibration sampling. |
 | `--save_count` | bool | `False` | Append a count-mode row to the XLSX results file. |
 
@@ -299,9 +276,9 @@ This script is intentionally argument-free: edit dataset/config lists inside `ru
 - `Missing 'split' information in dataset metadata.`:
   - Training/visualization requires a `split` column with `test` rows.
 - `Counting currently requires ground-truth identity labels...`:
-  - Count mode currently simulates the oracle from `identity` labels; unlabeled counting is not integrated.
+  - Count mode currently simulates the human annotation from `identity` labels, unlabeled counting is *not* currently integrated.
 - Out-of-memory while training PCA/GMM or loading descriptors:
-  - Descriptor stacking can still be heavy on large datasets; consider running on smaller subsets or ensuring enough RAM.
+  - Descriptor stacking can still be heavy on large datasets, consider running on smaller subsets or ensuring enough RAM.
 
 ## Contact
 For questions or issues, contact: `matej.maric99@gmail.com`
