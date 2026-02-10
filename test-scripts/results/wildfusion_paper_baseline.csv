@@ -1,0 +1,4 @@
+dataset,status,error,n_train,n_test,n_id_train,n_id_test,top1_acc,top5_acc,seconds
+ATRW,ok,,4340,1075,182,182,0.9906976744186047,0.998139534883721,18372.12
+ATRW,error,all samples missing on disk after path resolution,0,0,0,0,,,0.1
+ATRW,ok,,4340,1075,182,182,0.9888372093023255,0.9972093023255814,20664.91

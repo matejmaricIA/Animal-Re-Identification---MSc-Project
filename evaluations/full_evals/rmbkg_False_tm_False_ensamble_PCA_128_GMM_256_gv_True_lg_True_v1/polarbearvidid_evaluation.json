@@ -1,23 +1,23 @@
 {
-    "accuracy": 0.867816091954023,
-    "top_n_accuracy": 0.9425287356321839,
+    "accuracy": 0.8275862068965517,
+    "top_n_accuracy": 0.9712643678160919,
     "classification_metrics": {
         "PolarBearVidID_Charlotte": {
-            "precision": 0.8333333333333334,
+            "precision": 1.0,
             "recall": 0.6666666666666666,
-            "f1-score": 0.7407407407407407,
+            "f1-score": 0.8,
             "support": 15.0
         },
         "PolarBearVidID_Finja": {
-            "precision": 0.9166666666666666,
+            "precision": 1.0,
             "recall": 0.7857142857142857,
-            "f1-score": 0.8461538461538461,
+            "f1-score": 0.88,
             "support": 14.0
         },
         "PolarBearVidID_Hertha": {
-            "precision": 0.7058823529411765,
-            "recall": 0.8,
-            "f1-score": 0.75,
+            "precision": 0.6875,
+            "recall": 0.7333333333333333,
+            "f1-score": 0.7096774193548387,
             "support": 15.0
         },
         "PolarBearVidID_Larissa": {
@@ -27,69 +27,69 @@
             "support": 14.0
         },
         "PolarBearVidID_Lloyd": {
-            "precision": 0.8823529411764706,
-            "recall": 0.9375,
-            "f1-score": 0.9090909090909091,
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
             "support": 16.0
         },
         "PolarBearVidID_Milana": {
-            "precision": 1.0,
-            "recall": 0.9285714285714286,
-            "f1-score": 0.9629629629629629,
+            "precision": 0.8571428571428571,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.8571428571428571,
             "support": 14.0
         },
         "PolarBearVidID_Nana": {
-            "precision": 0.875,
-            "recall": 0.9333333333333333,
-            "f1-score": 0.9032258064516129,
+            "precision": 0.9285714285714286,
+            "recall": 0.8666666666666667,
+            "f1-score": 0.896551724137931,
             "support": 15.0
         },
         "PolarBearVidID_Nanuq": {
-            "precision": 1.0,
+            "precision": 0.7333333333333333,
             "recall": 0.7857142857142857,
-            "f1-score": 0.88,
+            "f1-score": 0.7586206896551724,
             "support": 14.0
         },
         "PolarBearVidID_Nora": {
-            "precision": 0.7647058823529411,
+            "precision": 0.8666666666666667,
             "recall": 0.9285714285714286,
-            "f1-score": 0.8387096774193549,
+            "f1-score": 0.896551724137931,
             "support": 14.0
         },
         "PolarBearVidID_Sprinter": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.6875,
+            "recall": 0.8461538461538461,
+            "f1-score": 0.7586206896551724,
             "support": 13.0
         },
         "PolarBearVidID_Tonja": {
-            "precision": 0.6428571428571429,
-            "recall": 0.6428571428571429,
-            "f1-score": 0.6428571428571429,
+            "precision": 0.7142857142857143,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.7142857142857143,
             "support": 14.0
         },
         "PolarBearVidID_Vera": {
-            "precision": 0.8888888888888888,
-            "recall": 1.0,
-            "f1-score": 0.9411764705882353,
+            "precision": 0.8,
+            "recall": 0.75,
+            "f1-score": 0.7741935483870968,
             "support": 16.0
         },
-        "accuracy": 0.867816091954023,
+        "accuracy": 0.8275862068965517,
         "macro avg": {
-            "precision": 0.8758072673513849,
-            "recall": 0.8674107142857143,
-            "f1-score": 0.8679097963554003,
+            "precision": 0.8395833333333332,
+            "recall": 0.8278540903540903,
+            "f1-score": 0.8278777713038,
             "support": 174.0
         },
         "weighted avg": {
-            "precision": 0.874093794605965,
-            "recall": 0.867816091954023,
-            "f1-score": 0.8672606154842409,
+            "precision": 0.8401067323481117,
+            "recall": 0.8275862068965517,
+            "f1-score": 0.8279151661346436,
             "support": 174.0
         }
     },
     "md_trained_on": false,
     "md_split_type": "similarity-aware",
     "md_random_split": false,
-    "eval_runtime_sec": 78.95885133743286
+    "eval_runtime_sec": 208.55783700942993
 }

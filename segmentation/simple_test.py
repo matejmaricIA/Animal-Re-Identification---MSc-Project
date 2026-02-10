@@ -1,228 +1,134 @@
 #!/usr/bin/env python3
-import os
-import cv2
 import random
 import argparse
 import sys
 from pathlib import Path
 
+import cv2
+
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-def beluga_segment(image):
-    """Beluga segmentation using actual implementation."""
-    try:
-        from segmentation.beluga_segmentation import segment
-        return segment(image)
-    except Exception as e:
-        print(f"Failed to import beluga segmentation: {e}")
-        # Fallback to simple threshold
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        _, mask = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
-        return cv2.bitwise_and(image, image, mask=mask)
+from segmentation import has_segmenter, segment_image
+from preprocessing import (
+    SOFT_MASK_SIGMA,
+    SOFT_MASK_BG,
+    SOFT_MASK_ERODE_PX,
+    SOFT_MASK_BG_BLUR_SIGMA,
+)
 
-def giraffe_segment(image):
-    """Simple giraffe segmentation - placeholder for your implementation."""
-    # TODO: Implement actual giraffe segmentation
-    return image  # Placeholder
-
-def deer_segment(image):
-    """Simple deer segmentation for MedvednicaDS - placeholder."""
-    # TODO: Implement actual deer segmentation
-    return image  # Placeholder
-
-def wild_boar_segment(image):
-    """Simple wild boar segmentation for MedvednicaDS - placeholder."""
-    # TODO: Implement actual wild boar segmentation  
-    return image  # Placeholder
-
-def cow_segment(image):
-    """Simple cow segmentation - placeholder."""
-    # TODO: Implement actual cow segmentation
-    return image  # Placeholder
-
-def panda_segment(image):
-    """Simple panda segmentation - placeholder."""
-    # TODO: Implement actual panda segmentation
-    return image  # Placeholder
-
-
-
-def nyala_segment(image):
-    """Nyala segmentation using actual implementation."""
-    try:
-        from segmentation.nyala_segmentation import segment
-        return segment(image)
-    except Exception as e:
-        print(f"Failed to import nyala segmentation: {e}")
-        # Fallback to simple processing
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        _, mask = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
-        return cv2.bitwise_and(image, image, mask=mask)
-
-def ipanda_segment(image):
-    """IPanda50 segmentation using actual implementation."""
-    try:
-        from segmentation.ipanda_segmentation import segment
-        return segment(image)
-    except Exception as e:
-        print(f"Failed to import ipanda segmentation: {e}")
-        return image
-
-def giraffe_segment(image):
-    """Giraffe segmentation using actual implementation."""
-    try:
-        from segmentation.giraffe_segmentation import segment
-        return segment(image)
-    except Exception as e:
-        print(f"Failed to import giraffe segmentation: {e}")
-        return image
-
-def hyena_segment(image):
-    """Hyena segmentation using actual implementation."""
-    try:
-        from segmentation.hyena_segmentation import segment
-        return segment(image)
-    except Exception as e:
-        print(f"Failed to import hyena segmentation: {e}")
-        return image
-
-def medvednica_segment(image):
-    """MedvednicaDS segmentation using actual implementation."""
-    try:
-        from segmentation.medvednica_segmentation import segment
-        return segment(image)
-    except Exception as e:
-        print(f"Failed to import medvednica segmentation: {e}")
-        return image
-
-# Mapping of dataset names to segmentation functions
-SEGMENTERS = {
-    'BelugaID': beluga_segment,
-    'Giraffes': giraffe_segment,
-    'roe_deer': medvednica_segment,
-    'wild_boar': medvednica_segment,
-    'CowDataset': cow_segment,
-    'IPanda50': ipanda_segment,
-    'HyenaID2022': hyena_segment,
-    'NyalaData': nyala_segment,
-}
 
 def find_random_images(dataset_name, data_root="./data", num_samples=5):
-    """Find random images from a dataset."""
     dataset_path = Path(data_root) / dataset_name
-    
-    # Common subdirectories where images might be stored
-    possible_dirs = [
-        "dataset",
-        "animal_images",  # MedvednicaDS
-        "images"
-    ]
-    
+    possible_dirs = ["dataset", "animal_images", "images"]
+
     all_images = []
     for subdir in possible_dirs:
         img_dir = dataset_path / subdir
-        if img_dir.exists():
-            # Find all image files recursively
-            for ext in ['.jpg', '.jpeg', '.JPG', '.JPEG', '.png', '.PNG']:
-                all_images.extend(list(img_dir.rglob(f"*{ext}")))
-    
+        if not img_dir.exists():
+            continue
+        for ext in [".jpg", ".jpeg", ".JPG", ".JPEG", ".png", ".PNG"]:
+            all_images.extend(list(img_dir.rglob(f"*{ext}")))
+
     if not all_images:
-        print(f"❌ No images found in {dataset_path}")
+        print(f"No images found in {dataset_path}")
         return []
-    
-    # Sample random images
+
     num_samples = min(num_samples, len(all_images))
     sampled = random.sample(all_images, num_samples)
-    
-    print(f"✅ Found {len(all_images)} images in {dataset_name}, sampling {num_samples}")
+    print(f"Found {len(all_images)} images, sampling {num_samples}")
     return sampled
 
+
 def test_segmentation(dataset_name, num_samples=5, output_dir="./segmentation_test_results"):
-    """Test segmentation on random images from a dataset."""
-    print(f"\n🧪 Testing segmentation for: {dataset_name}")
-    
-    # Check if we have a segmenter for this dataset
-    if dataset_name not in SEGMENTERS:
-        print(f"❌ No segmenter available for {dataset_name}")
-        print(f"Available datasets: {list(SEGMENTERS.keys())}")
+    print(f"\nTesting segmentation for: {dataset_name}")
+    print(
+        f"Soft mask constants: sigma={SOFT_MASK_SIGMA}, bg={SOFT_MASK_BG}, "
+        f"erode_px={SOFT_MASK_ERODE_PX}, bg_blur_sigma={SOFT_MASK_BG_BLUR_SIGMA}"
+    )
+
+    if not has_segmenter(dataset_name):
+        print(f" No segmenter available for {dataset_name}")
         return
-    
-    segmenter = SEGMENTERS[dataset_name]
-    
-    # Find random images
+
     images = find_random_images(dataset_name, num_samples=num_samples)
     if not images:
         return
-    
-    # Create output directory
+
     output_path = Path(output_dir) / dataset_name
     output_path.mkdir(parents=True, exist_ok=True)
-    
-    # Process each image
+
     for i, img_path in enumerate(images, 1):
         print(f"[{i}/{len(images)}] Processing: {img_path.name}")
-        
-        # Load image
         original = cv2.imread(str(img_path))
         if original is None:
-            print(f"    ❌ Could not load image")
+            print("     Could not load image")
             continue
-        
-        try:
-            # Apply segmentation
-            segmented = segmenter(original.copy())
-            
-            # Create side-by-side comparison
-            # Resize if needed to fit side by side
-            h, w = original.shape[:2]
-            if w > 1000:  # Resize large images
-                scale = 1000 / w
-                new_w, new_h = int(w * scale), int(h * scale)
-                original = cv2.resize(original, (new_w, new_h))
-                segmented = cv2.resize(segmented, (new_w, new_h))
-            
-            # Create comparison
-            comparison = cv2.hconcat([original, segmented])
-            
-            # Add labels
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.putText(comparison, "Original", (10, 30), font, 1, (0, 255, 0), 2)
-            cv2.putText(comparison, "Segmented", (original.shape[1] + 10, 30), font, 1, (0, 255, 0), 2)
-            cv2.putText(comparison, f"{dataset_name} - {img_path.name}", 
-                       (10, comparison.shape[0] - 10), font, 0.6, (255, 255, 255), 2)
-            
-            # Save result
-            output_file = output_path / f"{img_path.stem}_comparison.jpg"
-            cv2.imwrite(str(output_file), comparison)
-            print(f"    ✅ Saved: {output_file}")
-            
-        except Exception as e:
-            print(f"    ❌ Segmentation failed: {e}")
-    
-    print(f"\n🎯 All results saved in: {output_path}")
-    print(f"📁 Open the folder to visually inspect the segmentation results!")
+
+        hard = segment_image(dataset_name, original.copy())
+        if hard is None:
+            print("     Segmentation failed (hard mask)")
+            continue
+
+        soft = segment_image(
+            dataset_name,
+            original.copy(),
+            soft_mask_sigma=SOFT_MASK_SIGMA,
+            soft_mask_bg=SOFT_MASK_BG,
+            soft_mask_erode_px=SOFT_MASK_ERODE_PX,
+            soft_mask_bg_blur_sigma=SOFT_MASK_BG_BLUR_SIGMA,
+        )
+        if soft is None:
+            print("     Segmentation failed (soft mask)")
+            continue
+
+        h, w = original.shape[:2]
+        if w > 1000:
+            scale = 1000 / w
+            new_w, new_h = int(w * scale), int(h * scale)
+            original = cv2.resize(original, (new_w, new_h))
+            hard = cv2.resize(hard, (new_w, new_h))
+            if soft is not None:
+                soft = cv2.resize(soft, (new_w, new_h))
+
+        panels = [original, hard]
+        labels = ["Original", "HardMask"]
+        panels.append(soft)
+        labels.append("SoftMask")
+        comparison = cv2.hconcat(panels)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        x = 10
+        for j, label in enumerate(labels):
+            cv2.putText(comparison, label, (x, 30), font, 1, (0, 255, 0), 2)
+            x += panels[j].shape[1]
+        cv2.putText(
+            comparison,
+            f"{dataset_name} - {img_path.name}",
+            (10, comparison.shape[0] - 10),
+            font,
+            0.6,
+            (255, 255, 255),
+            2,
+        )
+
+        output_file = output_path / f"{img_path.stem}_comparison.jpg"
+        cv2.imwrite(str(output_file), comparison)
+        print(f"     Saved: {output_file}")
+
+    print(f"\nResults saved in: {output_path}")
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Simple segmentation testing")
-    parser.add_argument('dataset', help='Dataset name')
-    parser.add_argument('--samples', type=int, default=5, help='Number of samples')
-    parser.add_argument('--output', default='./segmentation_test_results', help='Output directory')
-    parser.add_argument('--list', action='store_true', help='List available datasets')
-    
+    parser = argparse.ArgumentParser(description="Grounded SAM2 segmentation testing")
+    parser.add_argument("dataset", help="Dataset name")
+    parser.add_argument("--samples", type=int, default=5, help="Number of samples")
+    parser.add_argument("--output", default="./segmentation_test_results", help="Output directory")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed")
     args = parser.parse_args()
-    
-    if args.list:
-        print("Available datasets:")
-        for dataset in SEGMENTERS.keys():
-            print(f"  - {dataset}")
-        return
-    
-    # Set random seed for reproducible results
-    random.seed(42)
-    
-    # Test the dataset
+
+    random.seed(args.seed)
     test_segmentation(args.dataset, args.samples, args.output)
+
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,91 @@
+\chapter{Classification}
+\label{chap:classification}
+
+This chapter describes the classification (individual identification) pipeline used in this thesis. The goal is to assign an identity label to a query image by comparing it to a labeled gallery of training images. The full configuration combines three complementary signals: global deep embeddings, aggregated local descriptors (Fisher Vectors\ref{sec:fisher_vector_computation}) and geometric verification\ref{sec:geometric_verification}. It's important to note that the sytems is modular, meaning that each component can be enabled or disabled, and all of the configurations were individually evaluated\ref{chap:results}.
+
+\section{Problem Formulation}
+\label{sec:problem_formulation}
+Given a set of labeled training images (the gallery) and an unlabeled query image, the task is to predict the identity of the query by finding the most similar individual in the gallery. Even though this is not realistic in real-world scenarios, in this thesis classification is evaluated in a closed-set protocol, meaning that test identities are restricted to those observed in training. Performance is reported with Top-1 accuracy. Top-$N$ accuracy and F1-Score.  
+
+\section{Overview: a 3-tier funnel}
+The classification system follows a \textbf{retrieve $\rightarrow$ rerank $\rightarrow$ verify} funnel inspired by WildFusion\cite{cermak2024wildfusionindividualanimalidentification} but with some modifications. The key motivation is efficiency since the most expensive stage (geometric verification) is applied only to a shortlist of high-scoring candidates, while fast global/fisher similarities provide that broad shortlist. 
+
+Depending on the enabled signals, the same structure can represent several baselines:
+(i) global-only retrieval, (ii) FV-only retrieval (inspired by ALFRED Re-ID pipeline\cite{springerSpeciesAgnosticPatterned}) and (iii) the full global + FV + GV fusion.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.95\linewidth}{
+        \vspace{3.0cm}
+        \centering
+        \textit{Placeholder for a pipeline illustration (global + Fisher + GV late fusion).}
+        \vspace{3.0cm}
+    }}
+    \caption{High-level overview of the modular classification pipeline. The figure will illustrate the three tiers: (1) union retrieval from global embeddings and Fisher vectors, (2) calibrated late fusion reranking, and (3) geometric verification based reranking.}
+    \label{fig:classification_pipeline}
+\end{figure}
+
+The three tiers are:
+\begin{enumerate}
+    \item \textbf{Tier 1 (candidate retrieval):} retrieve top candidates using global embedding similarity and FV similarity, then take the union of those two sets
+    \item \textbf{Tier 2 (calibrated late fusion):} calibrate each similarity score to a probability of being the same individual and combine them into a single ranking score
+    \item \textbf{Tier 3 (GV reranking):} compute a geometric consistency signal (inlier count) and use it to push up the ranking of the candidates that are both visually similar and geometrically plausible.
+\end{enumerate}
+
+\section{Tier 1: Candidate Retrieval}
+\label{sec:class_tier1}
+Tier 1 prodocues a high-recall shortlist cheaply. As mentioned before, two complementary representations are used:
+
+\begin{itemize}
+    \item \textbf{Global embeddings\ref{subsec:global_embeddings}}: a single vector per image, compared against others using cosine similarity and extracted using a pre-trained MegaDescriptor-L-384 model
+    \item \textbf{Fisher vectors\ref{sec:fisher_vector_computation}}: aggregated local descriptors that retain fine-grained texture information, motivated by the ALFRED Re-ID pipeline\cite{springerSpeciesAgnosticPatterned}
+\end{itemize}
+
+For a query image, the system computes cosine similarities to all gallery images separately for the modalities that are turned on (global, FV) and selects the top $B$ candidates from each list (in this thesis that parameter $B$ was set to \num{500}). The union of these sets forms the Tier 1 candidate pool. The idea behind this union strategy was to reduce the risk of missing the true match when one modality fails. If either FV or global embeddings are turned off, then naturally there is no union and the candidate pool is entirely produces by the modality that is turned on. 
+
+\section{Tier 2: Score Calibration and Fusion}
+Raw similarity values from different modalities are not directly comparable. They have different scales, different score distributions etc. Following the rationale in WildFusion\cite{cermak2024wildfusionindividualanimalidentification} this thesis applies \textbf{per-dataset similarity calibration} to map each raw similarity into an estimated probability of being the same individual:
+
+\begin{equation}
+    p_s(x,y) \approx P(\text{same} \mid s(x,y)),
+\end{equation}
+where $s(x,y)$ is a raw similarity score for a pair of images $(x,y)$ in a given modality.
+
+\subsection{Calibration Set Construction}
+Calibration requires labeled pairs. For each dataset, a subset of training images is sampled as calibration queries. Positive pairs are formed by matching each query with other images of the same identity. Negative pairs should be representative of hard confusions so when global embeddings are avaialable, negatives are sampled from the top-$B$ global shortlist of the query, which tends to produce visually similar non-matches.\cite{cermak2024wildfusionindividualanimalidentification}
+
+\subsection{Calibrators and Fusion Rules}
+Each active Tier 2 signal (global and/or FV) is calibrated independently. In practice, this is implemented as a monotonic calibration model (isotonic regression) which has been shown to work well with small datasets\cite{cermak2024wildfusionindividualanimalidentification}. The calibrated probabilities are then fused by a simple mean:
+
+\begin{equation}
+    p_{\text{tier2}}(x,y) = \frac{1}{|\mathcal{S}|}\sum_{s \in \mathcal{S}} p_s(x,y),
+\end{equation}
+where $\mathcal{S} \subseteq \{\text{global}, \text{fisher}\}$ is the set of enabled Tier 2 signals.
+This produces a single probabilistic similarity estimate used to rank the Tier 1 union candidates.
+
+\section{Tier 3: Geometric Verification Reranking}
+\label{sec:class_tier3}
+Even strong appearance similarity can produce false positives, especially for visually similar individuals. GV addresses this by enforcing spatial consistency of matched keypoints, as described in \cite{springerSpeciesAgnosticPatterned}. In this thesis, tentative matches are obtained using LightGlue and a geometric model is estimated with RANSAC/MAGSAC. The number of inliers () serves as a measure of geometric consistency.
+
+Because GV is computationally expensive, it is applied only to a small number of top-ranked Tier 2 candidates. In the thesis this was set to \num{200}. 
+If $n(x,y)$ is the inlier count between query $x$ and candidate $y$, the Tier 2 probabilities are converted to distance $d_L = 1 - p_{\text{tier2}}$ and then adjusted with a power rule\cite{springerSpeciesAgnosticPatterned}:
+\begin{equation}
+    d_C(x,y) = d_L(x,y)^{\;n(x,y)}.
+\end{equation}
+Intuition behind is that, since the distance $d_L$ is a fraction between 0 and 1, raising it to a power makes it smaller. This creates an effect by which when thery is a strong geometry ($n$ is large), $d_L$ is raised to a higher power, causing the distance $d_C$ to fall towards zero. This boosts the geometrically verified matches towards the top of the list. On the other hand, if no keypoints match ($n=0$), the geometric term provides no boost ($d_L^0 = 1$) and in these cases the system falls back to the original Tier 2 ranking.
+
+\section{End-to-end Inference}
+Putting this all together, the classification goes like this:
+\begin{enumerate}
+    \item Extract global embeddings and/or local features and computer FVs.
+    \item Train the calibrators on a small labeled subset of training data.
+    \item For each query image:
+    \begin{enumerate}
+        \item Retrieve a Tier 1 union shortlist from global and fisher similarity.
+        \item Compute calibrated Tier 2 probabilities and rank by $p_{\text{tier2}}$.
+        \item Apply GV to the top candidates and rerank by the GV power rule.
+    \end{enumerate}
+    \item Output the predicted identity (Top-1) and the Top-$N$ ranked identities for evaluation.
+\end{enumerate}
+
+This design was created to provide a practical trade-off between accuracy and compute: global and fisher signals offer fast retrieval (after the initial caching, more on this will be said in later chapters) and strong discrimination, while GV acts as a fine filter for difficult cases where similarity alone is not good enough. 

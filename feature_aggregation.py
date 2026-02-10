@@ -3,6 +3,8 @@ import pandas as pd
 import h5py
 import numpy as np
 import argparse
+import sys
+from typing import Callable
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 from constants import (
@@ -10,12 +12,76 @@ from constants import (
     N_COMPONENTS_PCA,
     MAX_GMM_DESCRIPTORS,
     MAX_DESCRIPTORS_PER_IMAGE,
+    MODEL_PATH,
+    PCA_PATH,
+    GMM_PATH,
+    FISHER_VECTORS,
 )
+from feature_extraction import (
+    extract_features,
+    extract_features_keynet_hardnet_faster,
+    extract_features_lightglue,
+)
+from utility_functions import load_stuff, save_stuff
 
 
 def descriptor_dir(base_dir: str, method: str, split: str, seg_tag: str) -> str:
     """Build path to the descriptor directory for a given split and method."""
     return os.path.join(base_dir, f"feature_descriptors_{split}_{method}_{seg_tag}")
+
+
+def feature_descriptor_dir(base_dir: str, method_name: str, split_name: str, seg_tag: str) -> str:
+    """Resolve descriptor output dir for train/test/full split conventions."""
+    if split_name in {"train", "test"}:
+        return descriptor_dir(base_dir, method_name, split_name, seg_tag)
+    if split_name == "full":
+        return f"{base_dir}/feature_descriptors_{method_name}_{seg_tag}_full/"
+    raise ValueError(f"Unsupported split_name: {split_name}")
+
+
+def ensure_local_descriptors(image_items, method_name: str, out_dir: str) -> None:
+    """Compute local descriptors/keypoints when they are not cached yet."""
+    if os.path.isdir(out_dir):
+        return
+    if method_name == "disk":
+        extract_features(image_items, MODEL_PATH, out_dir)
+    elif method_name == "keynet_hardnet":
+        extract_features_keynet_hardnet_faster(image_items, out_dir)
+    elif method_name in {"lightglue", "aliked"}:
+        extract_features_lightglue(image_items, out_dir, feature_type="aliked")
+    elif method_name == "superpoint":
+        extract_features_lightglue(image_items, out_dir, feature_type="superpoint")
+    else:
+        print(f"[ERROR] Unsupported feature method: {method_name}")
+        sys.exit(1)
+
+
+def load_or_train_fisher_vectors(
+    *,
+    ds_tag: str,
+    method_name: str,
+    cache_suffix: str,
+    descriptors: dict | None = None,
+    descriptors_loader: Callable[[], dict] | None = None,
+):
+    """Load cached Fisher vectors or train PCA/GMM and compute them."""
+    pca_path = PCA_PATH.format(ds_tag, method_name, cache_suffix)
+    gmm_path = GMM_PATH.format(ds_tag, method_name, cache_suffix)
+    fv_path = FISHER_VECTORS.format(ds_tag, method_name, cache_suffix)
+    if os.path.exists(pca_path) and os.path.exists(gmm_path) and os.path.exists(fv_path):
+        return load_stuff(pca_path, gmm_path, fv_path)
+
+    if descriptors is None:
+        if descriptors_loader is None:
+            raise ValueError("descriptors or descriptors_loader must be provided")
+        descriptors = descriptors_loader()
+
+    desc_stack = stack_all_descriptors(descriptors)
+    pca = train_pca(desc_stack)
+    gmm = train_gmm(pca.transform(desc_stack))
+    fisher_vectors = compute_fisher_vectors(descriptors, pca, gmm)
+    save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))
+    return pca, gmm, fisher_vectors
 
 
 def load_descriptors(descriptors_file):
@@ -47,7 +113,7 @@ def stack_all_descriptors(descriptors, max_samples=MAX_GMM_DESCRIPTORS, per_imag
     """
 
     #arrays = [d for d in descriptors.values() if len(d) > 0]
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(42)
     arrays = []
     for d in descriptors.values():
         if len(d) == 0:
@@ -122,13 +188,26 @@ def compute_fisher_vector(reduced_stacked_descs, gmm):
     for k in range(K):
         prob_k = responsibilities[:, k]  # Shape: (N,)
         diff = reduced_stacked_descs - means[k]  # Shape: (N, D)
+        cov_k = covariances[k]
 
         # Looking back on how the implementation of fisher vectors should be done I think that this is wrong... Must investigate furhter.
         #fisher_mean[k] = np.sum(prob_k[:, np.newaxis] * diff / np.sqrt(covariances[k]), axis=0)
         #fisher_var[k] = np.sum(prob_k[:, np.newaxis] * (diff ** 2 - covariances[k]) / (2 * covariances[k] ** 1.5), axis=0)
 
-        fisher_mean[k] = (1.0 / (N * np.sqrt(weights[k]))) * np.sum(prob_k[:, np.newaxis] * diff / np.sqrt(covariances[k]), axis=0)
-        fisher_var[k] = (1.0 / (N * np.sqrt(2 * weights[k]))) * np.sum(prob_k[:, np.newaxis] * (diff ** 2 - covariances[k]) / (2 * covariances[k] ** 1.5), axis=0)
+        fisher_mean[k] = (1.0 / (N * np.sqrt(weights[k]))) * np.sum(
+            prob_k[:, np.newaxis] * diff / np.sqrt(cov_k),
+            axis=0,
+        )
+        # Old (non-standard) second-order term kept for reference:
+        # fisher_var[k] = (1.0 / (N * np.sqrt(2 * weights[k]))) * np.sum(
+        #     prob_k[:, np.newaxis] * (diff ** 2 - cov_k) / (2 * cov_k ** 1.5),
+        #     axis=0,
+        # )
+        term = (diff * diff) / (cov_k + 1e-12) - 1.0
+        fisher_var[k] = (1.0 / (N * np.sqrt(2 * weights[k]))) * np.sum(
+            prob_k[:, np.newaxis] * term,
+            axis=0,
+        )
 
     # Flatten and concatenate mean and variance gradients
     fisher_vector = np.concatenate([fisher_mean.flatten(), fisher_var.flatten()])

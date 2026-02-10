@@ -1,6 +1,6 @@
 {
-    "accuracy": 0.9390243902439024,
-    "top_n_accuracy": 0.9715447154471545,
+    "accuracy": 0.9105691056910569,
+    "top_n_accuracy": 0.9552845528455285,
     "classification_metrics": {
         "MPDD_0": {
             "precision": 1.0,
@@ -70,8 +70,8 @@
         },
         "MPDD_108": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "MPDD_109": {
@@ -93,9 +93,9 @@
             "support": 1.0
         },
         "MPDD_112": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "MPDD_113": {
@@ -123,9 +123,9 @@
             "support": 1.0
         },
         "MPDD_117": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "MPDD_119": {
@@ -154,8 +154,8 @@
         },
         "MPDD_122": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "MPDD_123": {
@@ -207,21 +207,21 @@
             "support": 1.0
         },
         "MPDD_131": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "f1-score": 0.5714285714285714,
             "support": 3.0
         },
         "MPDD_132": {
-            "precision": 0.6666666666666666,
-            "recall": 1.0,
-            "f1-score": 0.8,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "MPDD_133": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_134": {
@@ -261,9 +261,9 @@
             "support": 2.0
         },
         "MPDD_140": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "MPDD_141": {
@@ -273,9 +273,9 @@
             "support": 1.0
         },
         "MPDD_143": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_144": {
@@ -304,8 +304,8 @@
         },
         "MPDD_148": {
             "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_149": {
@@ -315,15 +315,15 @@
             "support": 2.0
         },
         "MPDD_15": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 2.0
-        },
-        "MPDD_150": {
             "precision": 0.6666666666666666,
             "recall": 1.0,
             "f1-score": 0.8,
+            "support": 2.0
+        },
+        "MPDD_150": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_151": {
@@ -339,9 +339,9 @@
             "support": 1.0
         },
         "MPDD_153": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "MPDD_154": {
@@ -352,8 +352,8 @@
         },
         "MPDD_155": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "MPDD_156": {
@@ -375,9 +375,9 @@
             "support": 2.0
         },
         "MPDD_159": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "MPDD_16": {
@@ -501,9 +501,9 @@
             "support": 2.0
         },
         "MPDD_178": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_179": {
@@ -525,9 +525,9 @@
             "support": 1.0
         },
         "MPDD_182": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_183": {
@@ -687,9 +687,9 @@
             "support": 1.0
         },
         "MPDD_36": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "MPDD_37": {
@@ -705,9 +705,9 @@
             "support": 1.0
         },
         "MPDD_39": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "MPDD_4": {
@@ -723,9 +723,9 @@
             "support": 1.0
         },
         "MPDD_41": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "MPDD_42": {
@@ -766,8 +766,8 @@
         },
         "MPDD_48": {
             "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "MPDD_49": {
@@ -795,9 +795,9 @@
             "support": 1.0
         },
         "MPDD_53": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "MPDD_54": {
@@ -885,9 +885,9 @@
             "support": 2.0
         },
         "MPDD_67": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "MPDD_68": {
@@ -897,9 +897,9 @@
             "support": 1.0
         },
         "MPDD_69": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "MPDD_7": {
@@ -927,9 +927,9 @@
             "support": 1.0
         },
         "MPDD_74": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "MPDD_75": {
@@ -939,9 +939,9 @@
             "support": 1.0
         },
         "MPDD_76": {
-            "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 2.0
         },
         "MPDD_77": {
@@ -975,9 +975,9 @@
             "support": 2.0
         },
         "MPDD_81": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "MPDD_82": {
@@ -1029,9 +1029,9 @@
             "support": 1.0
         },
         "MPDD_9": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "MPDD_90": {
@@ -1065,15 +1065,15 @@
             "support": 2.0
         },
         "MPDD_95": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "MPDD_96": {
-            "precision": 1.0,
+            "precision": 0.6666666666666666,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "MPDD_97": {
@@ -1089,27 +1089,27 @@
             "support": 1.0
         },
         "MPDD_99": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
-        "accuracy": 0.9390243902439024,
+        "accuracy": 0.9105691056910569,
         "macro avg": {
-            "precision": 0.9249084249084248,
-            "recall": 0.9391025641025642,
-            "f1-score": 0.9268707482993198,
+            "precision": 0.8919413919413919,
+            "recall": 0.9116300366300367,
+            "f1-score": 0.8937467294610152,
             "support": 246.0
         },
         "weighted avg": {
-            "precision": 0.9281842818428183,
-            "recall": 0.9390243902439024,
-            "f1-score": 0.9270809136662795,
+            "precision": 0.8990514905149052,
+            "recall": 0.9105691056910569,
+            "f1-score": 0.8954316686024004,
             "support": 246.0
         }
     },
     "md_trained_on": false,
     "md_split_type": "similarity-aware",
     "md_random_split": false,
-    "eval_runtime_sec": 152.03369808197021
+    "eval_runtime_sec": 389.83083963394165
 }

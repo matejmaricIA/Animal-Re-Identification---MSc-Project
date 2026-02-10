@@ -1,0 +1,82 @@
+\chapter{Pipeline Implementation}
+\label{chap:pipeline}
+This chapter details the practical implementation of the entire animal re-identification pipeline, connecting feature extraction, feature aggregation, geometric verification, and the classification components into a complete end-to-end workflow. It provides insight into the project's architecture, optimization strategies and computational considerations.
+
+\section{System Overview}
+\label{sec:system_overview}
+
+The implemented pipeline consist of sequential, interconnected stages:
+
+\begin{enumerate}
+    \item \textbf{Image acquisition and pre-processing}
+    \item \textbf{Segmentation}
+    \item \textbf{Local feature extraction and description}
+    \item \textbf{Feature aggregation (Fisher Vector computation)}
+    \item  \textbf{Similarity retrieval and geometric verification}
+\end{enumerate}
+
+ The theory most of this we covered in the preceeding chapters so here we'll go indepth about how each component was implemented. The architecture itself was mostly inspired by the ALFRE-ID system describerd in \cite{springerSpeciesAgnosticPatterned} with some modifications and additions in an effort to improve on it.
+
+ Figure~\ref{fig:pipeline_overview} Za ovdje napraviti sliku koja vizualizira cijeli pipeline.
+
+\section{Software Architecture}
+\label{sec:software_architecture}
+
+The implementation is done entirely in Python, leveraging popular libraries for efficiency and reproducibility:
+
+\begin{itemize}
+    \item \textbf{PyTorch} for deep-learning based methods (local feature extraction).
+    \item \textbf{OpenCV} for image processing and pre-processing tasks.
+    \item \textbf{scikit-learn} for PCA and GMM training.
+    \item \textbf{NumPy and SciPy} for numerical computations.
+    \item \textbf{h5py} for efficient storage and retrieval of large descriptor datasets.
+\end{itemize}
+
+The codebase is modular, enabling easy experimentation and component swapping.
+
+\section{Implementation of Feature Extraction Methods}
+\label{sec:implementation_feature_extraction}
+
+Two (? Ovo možda naraste na 3) primary feature extraction pipelines were implemented:
+
+\subsection{DISK-based Extraction}
+\begin{enumerate}
+    \item Load the pre-trained DISK model \cite{tyszkiewicz2020disklearninglocalfeatures}.
+    \item Images are resized to $640\times640$ pixels and converted to grayscale.
+    \item Keypoints and descriptors are directly computed by a single forward pass.
+    \item Store resulting descriptors and keypoints efficiently.
+\end{enumerate}
+
+\subsection{KeyNet-AffNet-HardNet Extraction}
+Instead of DISK, a combination of KeyNet-AffNet-HardNet can be used for feature extraction, this method, as we will discuss in the later chapters proved to deliver slightly better results than DISK on most datasets tested, but was also slower and more memory intensive. 
+
+\begin{enumerate}
+    \item Extract initial keypoints with KeyNet \cite{Barroso2019KeyNet}.
+    \item AffNet\cite{mishkin2018repeatabilityenoughlearningaffine} performs local affine normalization of detected patches.
+    \item Generate descriptors from normalized patches using HardNet \cite{Mishchuk2017HardNet}.
+    \item Descriptors and keypoints are stored separately in HDF5 files for downstream tasks.
+\end{enumerate}
+
+For memory purposes, the number of keypoints is capped at $5000$, this number was selected as a tradeoff between speed, accuracy and memory limitations.
+\section{Feature Aggregation Implementation}
+\label{sec:fv_implementation}
+
+Feature descriptors are aggregated using PCA and GMM-based Fisher Vector representation (described previously in Chapter~\ref{sec:fisher_vector_computation}). Practical considerations in the implementation include:
+\begin{enumerate}
+    \item \textbf{Descriptor Sampling:} Random sampling of descriptors to manage computational complexity.
+    \item \textbf{PCA Training:} PCA~\cite{sklearn_api} reduces dimensionality and applies whitening.
+    \item \textbf{GMM Training:} A Gaussian Mixture Model (GMM)~\cite{sklearn_api} with diagonal covariance is fitted to PCA-reduced descriptors.
+    \item \textbf{Fisher Vector Computation:} Fisher vectors encode gradients of log-likelihoods relative to trained GMM parameters.
+\end{enumerate}
+
+\section{Similarity Retrieval and Geometric Verification}
+\label{sec:similarity_verification_implementation}
+
+The retrieval component involves two key stages:
+
+\begin{enumerate}
+    \item \textbf{Initial retrieval:} Cosine similarity between Fisher Vectors rapidly identifies potential matches.
+    \item \textbf{Geometric Verification:} Matches are further verified using RANSAC-based homography estimation (explained in detail in chapter XYZ
+\end{enumerate}
+
+The geometric verification implementation includes optimizations such as descriptor normalization and coordinate normalization to enhance RANSAC performance.

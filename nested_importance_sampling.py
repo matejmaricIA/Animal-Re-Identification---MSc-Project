@@ -1,274 +1,238 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, Sequence, Tuple, Union
+
 import numpy as np
-from typing import Dict, Tuple, Sequence, Optional, Union, Any
-
-from geometric_verification import compute_geometric_similarity
-from utils.distance_utils import fisher_distance
-from constants import MIN_INLIERS
 
 
-def cosine_similarity_matrix(vectors: Sequence[np.ndarray]) -> np.ndarray:
-    arr = np.vstack(vectors)
-    norm = np.linalg.norm(arr, axis=1, keepdims=True)
-    norm[norm == 0] = 1
-    arr = arr / norm
-    sim = arr @ arr.T
-    np.fill_diagonal(sim, 0.0)
-    sim[sim < 0] = 0.0
-    return sim
+@dataclass(frozen=True)
+class CountCalibrators:
+    """Per-signal calibrators that map raw similarities to probabilities."""
+
+    global_cal: Any | None = None
+    fisher_cal: Any | None = None
+
+
+def _l2_normalize_rows(matrix: np.ndarray) -> np.ndarray:
+    matrix = np.asarray(matrix, dtype=np.float32)
+    if matrix.size == 0:
+        return matrix
+    norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+    norms = np.where(norms == 0, 1.0, norms).astype(np.float32)
+    return matrix / norms
+
+
+def _stack_vectors(
+    vectors: Dict[str, np.ndarray] | None,
+    image_ids: Sequence[str],
+) -> np.ndarray:
+    """Stack vectors into a (N,D) float32 matrix in ``image_ids`` order."""
+
+    if not vectors:
+        return np.empty((len(image_ids), 0), dtype=np.float32)
+
+    first = next(iter(vectors.values()))
+    dim = int(np.asarray(first).reshape(-1).shape[0])
+    mat = np.zeros((len(image_ids), dim), dtype=np.float32)
+    for idx, image_id in enumerate(image_ids):
+        vec = vectors.get(image_id)
+        if vec is None:
+            continue
+        arr = np.asarray(vec, dtype=np.float32).reshape(-1)
+        if arr.shape[0] != dim:
+            raise ValueError(
+                f"Vector dim mismatch for '{image_id}': expected {dim}, got {arr.shape[0]}"
+            )
+        mat[idx] = arr
+    return _l2_normalize_rows(mat)
+
+
+def _safe_prob_from_raw_similarity(sim: np.ndarray) -> np.ndarray:
+    """Fallback mapping for raw cosine similarities to [0, 1] weights."""
+
+    sim = np.asarray(sim, dtype=np.float32)
+    return np.clip(sim, 0.0, 1.0)
 
 
 def nested_importance_sampling(
-    fisher_vectors: Dict[str, np.ndarray],
-    labels: Dict[str, int],
-    keypoints: Optional[Dict[str, np.ndarray]] = None,
-    descriptors: Optional[Dict[str, np.ndarray]] = None,
+    global_embeddings: Dict[str, np.ndarray] | None,
+    fisher_vectors: Dict[str, np.ndarray] | None,
+    image_ids: Sequence[str],
     *,
-    use_geometric: bool = True,
-    use_lightglue: bool = False,
-    method: str = "disk",
-    gv_threshold: float = 0.75,
+    oracle: Callable[[str, str], int],
+    proposal_mode: str = "calibrated",
+    calibrators: CountCalibrators | None = None,
     n_vertices: int = 100,
     n_neighbors: int = 10,
     label_error_rate: float = 0.0,
+    confirm_same_votes: int = 1,
+    seed: int | None = None,
     return_stats: bool = False,
-    automated_mode: bool = False,
-    seed: Optional[int] = None,
+    q_eps: float = 1e-12,
 ) -> Union[Tuple[float, float], Tuple[float, float, Dict[str, Any]]]:
-    """Nested Importance Sampling with *gated* human‑(label) feedback and
-    **built‑in bookkeeping** for debugging / ablation studies.
+    """Estimate population size with HITL Nested Importance Sampling (NIS).
 
-    Parameters
-    ----------
-    fisher_vectors : Dict[str, np.ndarray]
-        Image‑id → Fisher vector.
-    labels : Dict[str, int]
-        Image‑id → ground‑truth individual ID (ignored if automated_mode=True).
-    keypoints / descriptors : Dicts or ``None``
-        Required for geometric verification.
-    use_geometric : bool, default=True
-        Whether to apply the GV gate.
-    use_lightglue, method, gv_threshold : see original implementation.
-    n_vertices, n_neighbors : int
-        Outer / inner sample sizes.
-    label_error_rate : float, default=0.0
-        Probability of flipping the (otherwise perfect) label—simulates human
-        slips.
-    return_stats : bool, default=False
-        If *True*, the function also returns a dict with:
-            * ``total_pairs``   – all neighbour pairs considered
-            * ``gv_attempts``   – pairs that had enough data to run GV
-            * ``gv_passes``     – pairs that passed the GV gate
-            * ``label_queries`` – how many times we actually looked at a label
-            * ``matches``       – how many of those queries were positive (same ID)
-    automated_mode : bool, default=False
-        If True, uses only geometric verification without human labels.
-        Faster but potentially less accurate than human-in-the-loop mode.
-    seed : int or ``None``, default=None
-        Random seed for reproducible vertex and neighbour sampling.
-
-    Returns
-    -------
-    mean_est, stderr_est : floats
-        Population size estimate and its standard error.
-    stats : dict  (only if ``return_stats=True``)
-        See *return_stats* description.
+    proposal_mode:
+        - calibrated: sample neighbors from fused calibrated probabilities.
+        - power: sample neighbors from a power-transformed version of the fused
+          score that emphasizes high-confidence candidates.
     """
 
+    proposal_mode = str(proposal_mode).lower().strip()
+    if proposal_mode not in {"calibrated", "power"}:
+        raise ValueError("proposal_mode must be 'calibrated' or 'power'")
 
-    # 1. Build similarity graph & vertex proposal distribution
-    image_ids = list(fisher_vectors.keys())
-    vectors = [fisher_vectors[i] for i in image_ids]
-    sim = cosine_similarity_matrix(vectors)
+    confirm_same_votes = int(confirm_same_votes)
+    if confirm_same_votes < 1:
+        raise ValueError("confirm_same_votes must be >= 1")
 
-    degrees = sim.sum(axis=1)
-    Q = 1.0 / (1.0 + degrees)
-    Q /= Q.sum()
+    if n_vertices <= 0 or n_neighbors <= 0:
+        raise ValueError("n_vertices and n_neighbors must be > 0")
+
+    if not (0.0 <= float(label_error_rate) <= 1.0):
+        raise ValueError("label_error_rate must be in [0, 1]")
 
     rng = np.random.default_rng(seed)
-    population_estimates = []
 
-    total_pairs: int = 0
-    gv_attempts: int = 0
-    gv_passes: int = 0
-    label_queries: int = 0
-    positive_matches: int = 0
+    image_ids = [str(i) for i in image_ids]
+    n_images = len(image_ids)
+    if n_images < 2:
+        raise ValueError("Need at least 2 images for population estimation.")
 
-    # 2.   Outer vertex loop                                             #
-    outer_vertices = rng.choice(len(image_ids), size=min(n_vertices, len(image_ids)), replace=False, p=Q)
-    for u_idx in outer_vertices:
-        q = sim[u_idx].copy()
-        if q.sum() == 0.0:
-            q = np.ones_like(q)
-        q[q == 0.0] = 1e-9
-        q /= q.sum()
+    global_matrix = _stack_vectors(global_embeddings, image_ids)
+    fisher_matrix = _stack_vectors(fisher_vectors, image_ids)
 
-        neighbors = rng.choice(len(image_ids), size=min(n_neighbors, len(image_ids)), replace=False, p=q)
+    have_global = global_matrix.shape[1] > 0
+    have_fisher = fisher_matrix.shape[1] > 0
+    if not have_global and not have_fisher:
+        raise ValueError("At least one of global_embeddings or fisher_vectors must be provided.")
 
-        fb_list = []
+    Q = np.full(n_images, 1.0 / float(n_images), dtype=np.float64)
 
-        # 3. Inner neighbour loop with GV gate  
-        for v_idx in neighbors:
-            total_pairs += 1
+    oracle_calls = 0
+    unique_oracle_pairs: set[tuple[int, int]] = set()
+    confirm_triggered = 0
+    confirm_extra_votes = 0
+    contributions: list[float] = []
 
-            u_id = image_ids[u_idx]
-            v_id = image_ids[v_idx]
-            match = 0  # default feedback
+    for _ in range(n_vertices):
+        u_idx = int(rng.choice(n_images, p=Q))
+        u_id = image_ids[u_idx]
 
-            if use_geometric and keypoints is not None and descriptors is not None:
-                desc_u = descriptors.get(u_id)
-                desc_v = descriptors.get(v_id)
-                kp_u = keypoints.get(u_id)
-                kp_v = keypoints.get(v_id)
+        raw_global = None
+        raw_fisher = None
+        if have_global:
+            raw_global = global_matrix @ global_matrix[u_idx]
+        if have_fisher:
+            raw_fisher = fisher_matrix @ fisher_matrix[u_idx]
 
-                # only run GV if we have everything we need
-                if all(item is not None for item in (desc_u, desc_v, kp_u, kp_v)):
-                    gv_attempts += 1
-
-                    fd = fisher_distance(fisher_vectors[u_id], fisher_vectors[v_id])
-                    dist, n_inliers = compute_geometric_similarity(
-                        desc_u, kp_u, desc_v, kp_v, fd,
-                        use_lightglue=use_lightglue, method=method,
-                    )
-
-                    gv_pass = (dist < gv_threshold) and (n_inliers >= MIN_INLIERS)
-                    if gv_pass:
-                        gv_passes += 1
-                        
-                        if automated_mode:
-                            # Pure geometric verification with confidence weighting
-                            confidence = min(1.0, n_inliers / 20.0)  # Normalize inliers to confidence
-                            geometric_quality = 1.0 - dist  # Higher quality = lower distance
-                            
-                            # Combine geometric confidence with Fisher similarity
-                            overall_confidence = 0.6 * geometric_quality + 0.4 * confidence
-                            
-                            # Use probabilistic matching instead of hard binary
-                            match = overall_confidence if overall_confidence > 0.5 else 0
-                            if match > 0:
-                                positive_matches += 1
-                        else:
-                            # ask the human (label) only now
-                            label_queries += 1
-                            match = 1 if labels.get(u_id) == labels.get(v_id) else 0
-                            if match:
-                                positive_matches += 1
-                            # simulate annotation mistake
-                            if label_error_rate > 0.0 and rng.random() < label_error_rate:
-                                match = 1 - match
-                # else: skip GV → match stays 0
+        p_global = None
+        if raw_global is not None:
+            if calibrators is not None and calibrators.global_cal is not None:
+                p_global = calibrators.global_cal.predict_proba(raw_global)
             else:
-                # Legacy path: direct label query, no gate
-                if automated_mode:
-                    # In automated mode without GV, fall back to Fisher vector similarity
-                    fd = fisher_distance(fisher_vectors[u_id], fisher_vectors[v_id])
-                    match = 1 if fd < gv_threshold else 0  # Use similarity threshold
-                    if match:
-                        positive_matches += 1
-                else:
-                    label_queries += 1
-                    match = 1 if labels.get(u_id) == labels.get(v_id) else 0
-                    if match:
-                        positive_matches += 1
-                    if label_error_rate > 0.0 and rng.random() < label_error_rate:
-                        match = 1 - match
+                p_global = _safe_prob_from_raw_similarity(raw_global)
 
-            fb_list.append(match)
+        p_fisher = None
+        if raw_fisher is not None:
+            if calibrators is not None and calibrators.fisher_cal is not None:
+                p_fisher = calibrators.fisher_cal.predict_proba(raw_fisher)
+            else:
+                p_fisher = _safe_prob_from_raw_similarity(raw_fisher)
 
-        feedback = np.asarray(fb_list, dtype=np.float32)
+        probs = []
+        if p_global is not None:
+            probs.append(p_global)
+        if p_fisher is not None:
+            probs.append(p_fisher)
+        if not probs:
+            raise RuntimeError("Internal error: no base proposal signals available.")
 
-        # -------------------------------------------------------------- #
-        # 4.   Importance‑weighted degree estimate                      #
-        # -------------------------------------------------------------- #
-        denom = q[neighbors]
-        denom[denom == 0.0] = 1e-9
-        d_u = np.sum(feedback / denom) / n_neighbors
-        population_estimates.append((1.0 / Q[u_idx]) * (1.0 / (1.0 + d_u)))
+        p_base = np.mean(np.stack(probs, axis=0), axis=0).astype(np.float64)
+        p_base = np.clip(p_base, 0.0, 1.0)
+        p_base[u_idx] = 0.0
 
-    # Aggregate population estimates
-    estimates = np.asarray(population_estimates, dtype=np.float32)
-    mean_est = float(estimates.mean())
-    stderr_est = float(estimates.std(ddof=1) / np.sqrt(len(estimates)))
-
-    if return_stats:
-        stats = {
-            "total_pairs": total_pairs,
-            "gv_attempts": gv_attempts,
-            "gv_passes": gv_passes,
-            "label_queries": label_queries,
-            "matches": positive_matches,
-        }
-        return mean_est, stderr_est, stats
-    else:
-        return mean_est, stderr_est
-
-
-
-
-"""def nested_importance_sampling(
-    fisher_vectors: Dict[str, np.ndarray],
-    labels: Dict[str, int],
-    keypoints: Optional[Dict[str, np.ndarray]] = None,
-    descriptors: Optional[Dict[str, np.ndarray]] = None,
-    use_geometric: bool = False,
-    use_lightglue: bool = False,
-    method: str = "disk",
-    gv_threshold: float = 0.5,
-    n_vertices: int = 100,
-    n_neighbors: int = 10,
-    label_error_rate = 0.0
-) -> Tuple[float, float]:
-    image_ids = list(fisher_vectors.keys())
-    vectors = [fisher_vectors[i] for i in image_ids]
-    sim = cosine_similarity_matrix(vectors)
-
-    degrees = sim.sum(axis=1)
-    #Q = np.ones(len(image_ids))
-    #Q = Q / Q.sum()
-    Q = 1.0 / (1.0 + degrees)
-    Q = Q / Q.sum()
-
-    rng = np.random.default_rng()
-    population_estimates = []
-
-    for u_idx in rng.choice(len(image_ids), size=min(n_vertices, len(image_ids)), replace=False, p=Q):
-        q = sim[u_idx]
-        if q.sum() == 0:
-            q = np.ones_like(q)
-        q = q / q.sum()
-        neighbors = rng.choice(len(image_ids), size=min(n_neighbors, len(image_ids)), replace=False, p=q)
-
-        if use_geometric and keypoints is not None and descriptors is not None:
-            fb_list = []
-            for v in neighbors:
-                u_id = image_ids[u_idx]
-                v_id = image_ids[v]
-                desc_u = descriptors.get(u_id)
-                desc_v = descriptors.get(v_id)
-                kp_u = keypoints.get(u_id)
-                kp_v = keypoints.get(v_id)
-                if desc_u is None or desc_v is None or kp_u is None or kp_v is None:
-                    print(f"Missing data for {u_id} or {v_id}, skipping geometric verification.")
-                    match = labels.get(u_id) == labels.get(v_id)
-                else:
-                    fd = fisher_distance(fisher_vectors[u_id], fisher_vectors[v_id])
-                    dist, n_inliers = compute_geometric_similarity(
-                        desc_u, kp_u, desc_v, kp_v, fd,
-                        use_lightglue=use_lightglue, method=method,
-                    )
-                    match = dist < gv_threshold and n_inliers >= MIN_INLIERS
-                fb_list.append(1 if match else 0)
-            feedback = np.array(fb_list)
+        if proposal_mode == "power":
+            # Power trick: stronger emphasis on high-match probabilities while
+            # keeping non-zero support through q_eps.
+            proposal_scores = -np.log(np.clip(1.0 - p_base, 1e-12, 1.0))
         else:
-            feedback = np.array([
-                1 if labels.get(image_ids[u_idx]) == labels.get(image_ids[v]) else 0
-                for v in neighbors
-            ])
+            proposal_scores = p_base
 
-        denom = q[neighbors]
-        denom[denom == 0] = 1e-9
-        d_u = np.sum(feedback / denom) / n_neighbors
-        #print(np.mean(feedback))
-        population_estimates.append((1.0 / Q[u_idx]) * (1.0 / (1.0 + d_u)))
+        base_weights = proposal_scores + float(q_eps)
+        base_weights[u_idx] = 0.0
+        base_sum = float(np.sum(base_weights))
+        if not np.isfinite(base_sum) or base_sum <= 0.0:
+            base_weights = np.ones(n_images, dtype=np.float64)
+            base_weights[u_idx] = 0.0
+            base_sum = float(np.sum(base_weights))
+        q_base = base_weights / base_sum
 
-    estimates = np.array(population_estimates)
-    return estimates.mean(), estimates.std(ddof=1) / np.sqrt(len(estimates))"""
+        d_hat_accum = 0.0
+
+        def oracle_vote(left_id: str, right_id: str) -> int:
+            nonlocal oracle_calls
+            y = int(oracle(left_id, right_id))
+            if label_error_rate > 0.0 and float(rng.random()) < float(label_error_rate):
+                y = 1 - y
+            oracle_calls += 1
+            return int(y)
+
+        for _ in range(n_neighbors):
+            v_idx = int(rng.choice(n_images, p=q_base))
+            if v_idx == u_idx:
+                v_idx = int(rng.integers(0, n_images - 1))
+                if v_idx >= u_idx:
+                    v_idx += 1
+
+            q_u_v = float(q_base[v_idx])
+            if q_u_v <= 0.0 or not np.isfinite(q_u_v):
+                q_u_v = float(max(float(q_eps), float(q_base[v_idx])))
+
+            v_id = image_ids[v_idx]
+            a, b = (u_idx, v_idx) if u_idx < v_idx else (v_idx, u_idx)
+            unique_oracle_pairs.add((a, b))
+            y1 = oracle_vote(u_id, v_id)
+
+            y = y1
+            if confirm_same_votes > 1 and y1 == 1:
+                confirm_triggered += 1
+                y_confirmed = True
+                for _ in range(confirm_same_votes - 1):
+                    y_next = oracle_vote(u_id, v_id)
+                    confirm_extra_votes += 1
+                    if y_next != 1:
+                        y_confirmed = False
+                        break
+                y = int(y_confirmed)
+
+            d_hat_accum += float(y) / q_u_v
+
+        d_hat = d_hat_accum / float(n_neighbors)
+        contrib = (1.0 / float(Q[u_idx])) * (1.0 / (1.0 + d_hat))
+        contributions.append(float(contrib))
+
+    contrib_arr = np.asarray(contributions, dtype=np.float64)
+    estimate = float(np.mean(contrib_arr))
+    stderr = (
+        float(np.std(contrib_arr, ddof=1) / np.sqrt(len(contrib_arr)))
+        if len(contrib_arr) > 1
+        else 0.0
+    )
+
+    if not return_stats:
+        return estimate, stderr
+
+    stats: Dict[str, Any] = {
+        "n_images": int(n_images),
+        "n_vertices": int(n_vertices),
+        "n_neighbors": int(n_neighbors),
+        "oracle_calls": int(oracle_calls),
+        "unique_oracle_pairs": int(len(unique_oracle_pairs)),
+        "proposal_mode": proposal_mode,
+        "confirm_same_votes": int(confirm_same_votes),
+        "confirm_triggered": int(confirm_triggered),
+        "confirm_extra_votes": int(confirm_extra_votes),
+    }
+    return estimate, stderr, stats

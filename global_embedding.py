@@ -1,3 +1,5 @@
+import os
+import pickle
 import torch
 from torchvision import models
 from PIL import Image
@@ -63,4 +65,21 @@ def extract_global_embeddings(
             embedding = emb.squeeze().cpu().numpy()
         embeddings[str(img_id)] = embedding
 
+    return embeddings
+
+
+def load_or_build_global_embeddings(
+    image_paths: dict,
+    cache_path: str,
+    *,
+    model_name: str = "megadescriptor-l-384",
+) -> dict:
+    """Load cached global embeddings or compute and cache them."""
+    if os.path.exists(cache_path):
+        with open(cache_path, "rb") as file_obj:
+            return pickle.load(file_obj)
+
+    embeddings = extract_global_embeddings(image_paths, model_name=model_name)
+    with open(cache_path, "wb") as file_obj:
+        pickle.dump(embeddings, file_obj)
     return embeddings

@@ -1,50 +1,46 @@
-"""Dataset-specific segmentation utilities."""
-from typing import Callable, Dict, Optional
-import cv2
+"""Dataset-specific segmentation utilities (Grounded SAM2)."""
+from typing import Optional
 import numpy as np
-from .beluga_segmentation import segment as beluga_segment
-from .nyala_segmentation import segment as nyala_segment
-from .ipanda_segmentation import segment as ipanda_segment
-from .giraffe_segmentation import segment as giraffe_segment
-from .hyena_segmentation import segment as hyena_segment
-from .medvednica_segmentation import segment as medvednica_segment
 
 
-def _threshold_segment(image: np.ndarray) -> np.ndarray:
-    """Fallback simple threshold-based segmentation."""
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    return cv2.bitwise_and(image, image, mask=mask)
+def _normalize_name(name: str) -> str:
+    return "".join(ch for ch in str(name).lower() if ch.isalnum())
 
-# Registry of dataset name -> segmentation function
-_SEGMENTERS: Dict[str, Callable[[np.ndarray], np.ndarray]] = {
-    "belugaid": nyala_segment,
-    "atrw": nyala_segment,
-    "ipanda50": nyala_segment,
-    "nyaladata": nyala_segment,
-    "hyenaid2022": nyala_segment,
-    "giraffes": nyala_segment,
-    "cowdataset": nyala_segment,
-    "medvednicads": nyala_segment,
+
+_PROMPTS = {
+    "atrw": "tiger",
+    "elpephants": "elephant",
+    "seastarreid2023": "sea star . starfish",
+    "cowdataset": "cow . cattle",
+    "amvrakikosturtles": "turtle",
+    "polarbearvidid": "bear . polar bear",
+    "wildboar": "wild boar . boar",
+    "roedeer": "roedeer . deer",
 }
 
 
 def has_segmenter(name: str) -> bool:
-    return name.lower() in _SEGMENTERS
+    return _normalize_name(name) in _PROMPTS
 
 
-def get_segmenter(name: str) -> Optional[Callable[[np.ndarray], np.ndarray]]:
-    return _SEGMENTERS.get(name.lower())
+def get_prompt(name: str) -> Optional[str]:
+    return _PROMPTS.get(_normalize_name(name))
 
 
-def segment_image(name: str, image: np.ndarray) -> Optional[np.ndarray]:
-    seg_fn = get_segmenter(name)
-    if seg_fn is None:
+def segment_image(name: str, image: np.ndarray, **kwargs) -> Optional[np.ndarray]:
+    prompt = get_prompt(name)
+    if prompt is None:
         return None
-    return seg_fn(image)
+    from .grounded_sam2 import segment
+    return segment(image, prompt=prompt, **kwargs)
 
 
-def segment_dataset(df, output_dir: str, dataset_name: str, use_mantiuk: bool = True):
+def segment_dataset(
+    df,
+    output_dir: str,
+    dataset_name: str,
+    use_mantiuk: bool = True,
+):
     """Preprocess and segment an entire dataset using preprocessing pipeline."""
     from preprocessing import preprocess_dataset
     return preprocess_dataset(

@@ -1,0 +1,87 @@
+% =========================================================
+% main.tex (root file)
+% =========================================================
+
+\documentclass[masterthesis]{fer}
+% Add the option upload to generate the final version which is uploaded to FERWeb
+% Dodaj opciju upload za generiranje konačne verzije koja se učitava na FERWeb
+
+\usepackage{blindtext}
+\usepackage{float}
+
+\usepackage{siunitx}
+\sisetup{
+  group-separator = {,},
+  group-minimum-digits = 4
+}
+
+
+%--- THESIS INFORMATION / PODACI O RADU ----------------------------------------
+\title{Deep learning-based animal re-identification for non-invasive wildlife monitoring and conservation}
+\naslov{Duboko učenje za ponovnu identifikaciju životinja u neinvazivnom praćenju divljih vrsta i očuvanju prirode}
+\author{Matej Marić}
+\mentor{izv. prof. dr. sc. Marina Bagić Babac}
+\date{June, 2025}
+\datum{lipanj, 2025.}
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+% Title page
+\maketitle
+
+% Thesis assignment sheet (download from FERWeb)
+\zadatak{filename.pdf}
+
+% Acknowledgements -----------------------------------------
+\begin{zahvale}
+Thanks for the tea...
+\end{zahvale}
+
+% Numbered pages from here
+\mainmatter
+
+
+% Table of contents (add \listoffigures or \listoftables if needed)
+\tableofcontents
+
+% ------------------------------------------------------------
+% Include chapter files (kept in ./chapters/)
+% ------------------------------------------------------------
+\include{chapters/introduction}
+\include{chapters/related_work}
+\include{chapters/datasets_and_preprocessing}
+\include{chapters/methodology}
+%\include{chapters/feature_aggregation_and_representation}
+%\include{chapters/geometric_verification}
+\include{chapters/classification}
+\include{chapters/population_counting}
+%\include{chapters/pipeline_implementation}
+%\include{chapters/experimental_setup}
+\include{chapters/results}
+%\include{chapters/discussion}
+\include{chapters/conclusion_and_future_work}
+
+% ----------------- References ------------------------------
+\bibliography{references}
+
+% ----------------- Abstract (EN) ---------------------------
+\begin{abstract}
+Reliable wildlife population monitoring is essential for conservation and ecological management. This thesis develops a species-agnostic visual pipeline that re-identifies individual animals and supports population size estimation when only limited labeled data is available. The method combines global deep embeddings with local-feature aggregation via Fisher vectors, and optionally applies geometric verification as a final re-ranking stage to improve robustness to viewpoint, background, and near-duplicate imagery. Evaluation is performed exclusively on publicly available benchmarks from the WildlifeReID-10k collection spanning multiple species and imaging conditions. Results show that fusing global and local evidence consistently improves closed-set identification performance, and that a human-in-the-loop nested importance sampling estimator can provide practical population estimates while highlighting sensitivity to labeling errors.
+\end{abstract}
+
+\begin{keywords}
+Animal Re-identification; Wildlife Monitoring; Population Estimation; Computer Vision; Conservation
+\end{keywords}
+
+% ----------------- Sažetak (HR) -----------------------------
+\begin{sazetak}
+Pouzdano praćenje populacija divljih životinja ključno je za očuvanje prirode i ekološko upravljanje. U ovom radu razvijen je vizualni sustav neovisan o vrsti za re-identifikaciju pojedinačnih životinja i procjenu veličine populacije u uvjetima ograničene količine označenih podataka. Predloženi pristup kombinira globalne duboke ugrađene reprezentacije s agregacijom lokalnih značajki pomoću Fisherovih vektora te, po potrebi, primjenjuje geometrijsku verifikaciju kao završno ponovno rangiranje kako bi se povećala robusnost na promjene pogleda, pozadine i gotovo identične snimke. Evaluacija je provedena isključivo na javno dostupnim referentnim skupovima iz kolekcije WildlifeReID-10k koji obuhvaćaju više vrsta i različite uvjete snimanja. Rezultati pokazuju da fuzija globalnih i lokalnih signala dosljedno poboljšava uspješnost identifikacije, dok procjena populacije temeljena na interaktivnom ugniježđenom važnosnom uzorkovanju omogućuje praktične procjene uz naglašenu osjetljivost na pogreške u ljudskom označavanju.
+\end{sazetak}
+
+\begin{kljucnerijeci}
+Re-identifikacija životinja; Nadzor Divljači; Procjena Populacije; Računalni Vid; Očuvanje Prirode
+\end{kljucnerijeci}
+
+\end{document}
+

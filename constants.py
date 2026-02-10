@@ -3,17 +3,21 @@ import os
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Segmentation Model
-ISNET_MODEL_NAME = 'isnet-general-use'
-SEGMENTATION_MODEL_TYPE = 'sam'
-SAM_ISNET_IOU_THETA = 0.3  # IoU threshold for SAM with ISNet
+# Segmentation (Grounded SAM2)
+# Place GroundingDINO config + checkpoint and SAM2 checkpoint under ./models/.
+GROUNDING_DINO_CONFIG_PATH = os.path.join(
+    ROOT_DIR, "models", "GroundingDINO_SwinT_OGC.py"
+)
+GROUNDING_DINO_CHECKPOINT_PATH = os.path.join(
+    ROOT_DIR, "models", "groundingdino_swint_ogc.pth"
+)
+SAM2_CHECKPOINT_PATH = os.path.join(ROOT_DIR, "models", "sam2.1_hiera_large.pt")
+# Config path is resolved relative to the installed sam2 package if not absolute.
+SAM2_CONFIG_REL_PATH = "configs/sam2.1/sam2.1_hiera_l.yaml"
 
-SAM_MODEL_TYPE = 'vit_h'  # Options: vit_b, vit_l, vit_h
-SAM_CHECKPOINT_PATH = os.path.join(ROOT_DIR, 'models', 'sam_vit_h_4b8939.pth')  # Path to the SAM model checkpoint
-
-SAM2_MODEL_NAME = 'sam2.1_hiera_small.pt'             
-SAM2_CFG  = "configs/sam2.1/sam2.1_hiera_s.yaml"
-SAM2_CHECKPOINT_PATH = os.path.join(ROOT_DIR, 'models', SAM2_MODEL_NAME)
+# GroundingDINO thresholds
+DINO_BOX_THRESHOLD = 0.3
+DINO_TEXT_THRESHOLD = 0.25
 
 # Segmented Dataset Path
 SEGMENTED_DATASET = os.path.join(ROOT_DIR, 'data', '{}', 'segmented_dataset_{}')
@@ -52,8 +56,8 @@ TMP = './data/tmp/'
 # Evaluation results directory
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
-COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results.xlsx'
-EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_LATE_FUSION.xlsx'
+COUNT_RESULTS_XLSX = './evaluations/count/population_counting_label_error_testing.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/final_evals/final_evals_classification.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 
@@ -70,30 +74,32 @@ POOR_GEOMETRY_PENALTY = 5.0     # Penalty multiplier for poor geometric consiste
 FISHER_DISTANCE_MIN_CLAMP = 0.01     # Minimum clamp value for Fisher distance
 FISHER_DISTANCE_MAX_CLAMP = 1.0      # Maximum clamp value for Fisher distance
 NORMALIZED_THRESHOLD_DIVISOR = 100.0 # Divisor for normalizing RANSAC threshold
-GEOMETRIC_CANDIDATES = 20
+GEOMETRIC_CANDIDATES = 350
+UNION_CANDIDATES = 600
+LOCAL_RANK_CANDIDATES = 350
 
 # Geometric Verification Method Selection
-GV_METHOD = "RANSAC"  # Options: "RANSAC" or "MAGSAC"
+GV_METHOD = "MAGSAC"  # Options: "RANSAC" or "MAGSAC"
 
 # Geometric Verification Scaling Constants
-MAX_INLIERS_FOR_SCALING = 20      # Cap inliers at this value for exponential formula
+MAX_INLIERS_FOR_SCALING = 200      # Cap inliers at this value for exponential formula
 LOG_SCALING_FACTOR = 1.0          # Scaling factor for logarithmic approach
 LINEAR_COMBINATION_ALPHA = 0.7    # Weight for Fisher distance in linear combination
 SIGMOID_STEEPNESS = 0.1           # Controls sigmoid curve steepness
-SIGMOID_MIDPOINT = 20             # Midpoint for sigmoid scaling
+SIGMOID_MIDPOINT = 200             # Midpoint for sigmoid scaling
 MAX_REASONABLE_INLIERS = 50       # Expected maximum inliers for normalization
 
 
 
-MAX_GMM_DESCRIPTORS = 2000000
+MAX_GMM_DESCRIPTORS = 4000000
 # Cap descriptors contributed by each image when stacking for PCA/GMM training.
-MAX_DESCRIPTORS_PER_IMAGE = 5000
+MAX_DESCRIPTORS_PER_IMAGE = 2500
 
 # Tradeoff between geomtric verification and fisher similarity
 ALPHA = 0.35
 
 #Max number of extracted keypoints
-MAX_KEYPOINTS = 5000
+MAX_KEYPOINTS = 2500
 
 # Default weights for combining Fisher vectors from multiple feature
 # extraction methods when using the ``ensamble`` option.

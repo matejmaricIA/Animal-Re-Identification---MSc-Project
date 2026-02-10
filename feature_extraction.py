@@ -51,38 +51,36 @@ def _parse_image_item(item):
 
 
 class ImageDataset(torch.utils.data.Dataset):
-        def __init__(self, paths, max_size=None):
-            self.paths = paths
-            self.max_size = max_size
+    def __init__(self, paths, max_size=None):
+        self.paths = paths
+        self.max_size = max_size
 
-        def __len__(self):
-            return len(self.paths)
+    def __len__(self):
+        return len(self.paths)
 
-        def __getitem__(self, index):
-            img_id, path = _parse_image_item(self.paths[index])
-            img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-            if img is None:
-                raise FileNotFoundError(path)
-            if self.max_size is not None:
-                h, w = img.shape[:2]
-                max_dim = max(h, w)
-                if max_dim > self.max_size:
-                    scale = self.max_size / float(max_dim)
-                    new_size = (int(w * scale), int(h * scale))
-                    img = cv2.resize(img, new_size, interpolation=cv2.INTER_AREA)
-            tens = torch.from_numpy(img).float().unsqueeze(0) / 255.0
-            return img_id, tens
+    def __getitem__(self, index):
+        img_id, path = _parse_image_item(self.paths[index])
+        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        if img is None:
+            raise FileNotFoundError(path)
 
-        def __len__(self):
-            return len(self.paths)
+        h, w = img.shape[:2]
+        scale_x = 1.0
+        scale_y = 1.0
 
-        def __getitem__(self, index):
-            img_id, path = _parse_image_item(self.paths[index])
-            img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-            if img is None:
-                raise FileNotFoundError(path)
-            tens = torch.from_numpy(img).float().unsqueeze(0) / 255.0
-            return img_id, tens
+        max_size = self.max_size
+        if max_size is not None and max_size > 0:
+            max_dim = max(h, w)
+            if max_dim > max_size:
+                scale = max_size / float(max_dim)
+                new_w = max(1, int(round(w * scale)))
+                new_h = max(1, int(round(h * scale)))
+                img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+                scale_x = new_w / float(w)
+                scale_y = new_h / float(h)
+
+        tens = torch.from_numpy(img).float().unsqueeze(0) / 255.0
+        return img_id, tens, (scale_x, scale_y)
 
 
 def get_image_paths(df, remove_background = True):
@@ -213,10 +211,10 @@ def extract_features_keynet_hardnet_faster(
     image_paths,
     output_dir,
     num_features = MAX_KEYPOINTS,
-    batch_size = 1,
+    batch_size = 16,
     num_workers = 0,
     use_half = True,
-    image_max_size = 640,
+    image_max_size = 1024,
     memory_debug = True,
     skip_on_oom = True,
     save_failed_list = True,
@@ -235,7 +233,9 @@ def extract_features_keynet_hardnet_faster(
     if use_half and device.type == "cuda":
         lfeat = lfeat.half()
         
-    dataset = ImageDataset(image_paths)
+    # Resize to cap the long edge (speed/memory); later we rescale keypoints back
+    # to original coordinates so GV thresholds remain meaningful.
+    dataset = ImageDataset(image_paths, max_size=image_max_size)
 
     loader = torch.utils.data.DataLoader(
         dataset,
@@ -267,7 +267,7 @@ def extract_features_keynet_hardnet_faster(
     
     with h5py.File(desc_h5_path, "w") as desc_h5, h5py.File(kp_h5_path, "w") as kp_h5:
         for batch_idx, batch in enumerate(tqdm.tqdm(loader, desc="KeyNetAffNetHardNet")):
-            for img_id, tens in batch:
+            for img_id, tens, (scale_x, scale_y) in batch:
                 # Initialize variables for cleanup
                 tens_gpu = None
                 lafs = None
@@ -286,6 +286,11 @@ def extract_features_keynet_hardnet_faster(
                     # Convert to numpy immediately and move to CPU
                     desc_np = descs.squeeze(0).cpu().numpy().astype(np.float32)
                     keypoints_np = lafs[0, :, :, 2].cpu().numpy().astype(np.float32)
+
+                    # Map keypoints back to original image coordinates.
+                    if scale_x != 1.0 or scale_y != 1.0:
+                        keypoints_np[:, 0] /= np.float32(scale_x)
+                        keypoints_np[:, 1] /= np.float32(scale_y)
                     
                     # Skip if no keypoints detected
                     if desc_np.shape[0] == 0:
@@ -320,6 +325,11 @@ def extract_features_keynet_hardnet_faster(
                             
                             desc_np = descs_cpu.squeeze(0).cpu().numpy().astype(np.float32)
                             keypoints_np = lafs_cpu[0, :, :, 2].cpu().numpy().astype(np.float32)
+
+                            # Map keypoints back to original image coordinates.
+                            if scale_x != 1.0 or scale_y != 1.0:
+                                keypoints_np[:, 0] /= np.float32(scale_x)
+                                keypoints_np[:, 1] /= np.float32(scale_y)
                             
                             if desc_np.shape[0] > 0:
                                 desc_h5.create_dataset(img_id, data=desc_np, compression="gzip")
@@ -451,66 +461,7 @@ def extract_features_keynet_hardnet_faster(
     #    'failed_list': failed_images
     #}
 
-def extract_features_keynet_hardnet_faster_deprecated(
-    image_paths,
-    output_dir,
-    num_features = MAX_KEYPOINTS,
-    batch_size = 1,
-    num_workers = 8,
-    use_half = True,
-    image_max_size = 640
-):
-    """Extract KeyNet+AffNet+HardNet features.
 
-    A small dataloader is used to load images in parallel which reduces
-    overhead when a large number of files is processed.
-    """
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    lfeat = KeyNetAffNetHardNet(num_features=num_features).to(device).eval()
-
-    if use_half:
-        lfeat = lfeat.half()
-        
-    dataset = ImageDataset(image_paths)
-
-    loader = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        pin_memory=True,
-        collate_fn=lambda x: x,  # return list of tuples
-    )
-        
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    desc_h5_path = Path(output_dir) / "descriptors.h5"
-    kp_h5_path = Path(output_dir) / "keypoints.h5"
-    
-    dtype = torch.float16 if use_half else torch.float32
-    
-    with h5py.File(desc_h5_path, "w") as desc_h5, h5py.File(kp_h5_path, "w") as kp_h5:
-        for batch in tqdm.tqdm(loader, desc="KeyNetAffNetHardNet"):
-            for img_id, tens in batch:
-                tens = tens.to(device, dtype=dtype)
-                
-                with torch.inference_mode():
-                    lafs, _, descs = lfeat(tens.unsqueeze(0))
-                    
-                desc_np = descs.squeeze(0).cpu().numpy().astype(np.float32)
-                
-                if desc_np.shape[0] == 0:
-                    continue
-
-                keypoints_np = lafs[0, :, :, 2].cpu().numpy().astype(np.float32)
-                
-                desc_h5.create_dataset(img_id, data=desc_np, compression="gzip")
-                kp_h5.create_dataset(img_id, data=keypoints_np, compression="gzip")
-                
-                del tens, lafs, descs
-                torch.cuda.empty_cache()
-                
-    print(f"KeyNet+AffNet+HardNet features saved to {desc_h5_path}")
-    print(f"KeyNet+AffNet+HardNet keypoints saved to {kp_h5_path}")
 
 def extract_features_lightglue(
     image_paths,

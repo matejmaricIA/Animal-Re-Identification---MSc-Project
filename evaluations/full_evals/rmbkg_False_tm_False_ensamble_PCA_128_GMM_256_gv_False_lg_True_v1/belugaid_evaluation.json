@@ -1,11 +1,11 @@
 {
-    "accuracy": 0.35552075176194203,
-    "top_n_accuracy": 0.5160532498042286,
+    "accuracy": 0.6656225528582616,
+    "top_n_accuracy": 0.7314017227877838,
     "classification_metrics": {
         "whale001": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale002": {
@@ -15,9 +15,9 @@
             "support": 1.0
         },
         "whale003": {
-            "precision": 0.6,
-            "recall": 0.5,
-            "f1-score": 0.5454545454545454,
+            "precision": 0.8333333333333334,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.8333333333333334,
             "support": 6.0
         },
         "whale004": {
@@ -27,45 +27,45 @@
             "support": 3.0
         },
         "whale005": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 2.0
-        },
-        "whale006": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
-            "support": 1.0
+            "support": 2.0
         },
-        "whale007": {
-            "precision": 0.4,
-            "recall": 0.5714285714285714,
-            "f1-score": 0.47058823529411764,
-            "support": 7.0
-        },
-        "whale008": {
-            "precision": 0.5,
-            "recall": 0.4,
-            "f1-score": 0.4444444444444444,
-            "support": 5.0
-        },
-        "whale009": {
-            "precision": 0.25,
-            "recall": 0.2857142857142857,
-            "f1-score": 0.26666666666666666,
-            "support": 7.0
-        },
-        "whale010": {
-            "precision": 0.3333333333333333,
-            "recall": 0.4,
-            "f1-score": 0.36363636363636365,
-            "support": 15.0
-        },
-        "whale011": {
+        "whale006": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
+            "support": 1.0
+        },
+        "whale007": {
+            "precision": 1.0,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.9230769230769231,
+            "support": 7.0
+        },
+        "whale008": {
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1-score": 0.8,
+            "support": 5.0
+        },
+        "whale009": {
+            "precision": 0.8333333333333334,
+            "recall": 0.7142857142857143,
+            "f1-score": 0.7692307692307693,
+            "support": 7.0
+        },
+        "whale010": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
+            "support": 15.0
+        },
+        "whale011": {
+            "precision": 0.4,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 3.0
         },
         "whale012": {
@@ -75,9 +75,9 @@
             "support": 2.0
         },
         "whale013": {
-            "precision": 0.21052631578947367,
-            "recall": 0.4,
-            "f1-score": 0.27586206896551724,
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1-score": 0.8,
             "support": 10.0
         },
         "whale014": {
@@ -87,9 +87,9 @@
             "support": 1.0
         },
         "whale015": {
-            "precision": 0.5714285714285714,
-            "recall": 0.6,
-            "f1-score": 0.5853658536585366,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.8888888888888888,
             "support": 20.0
         },
         "whale016": {
@@ -105,15 +105,15 @@
             "support": 1.0
         },
         "whale018": {
-            "precision": 0.5,
-            "recall": 0.25,
-            "f1-score": 0.3333333333333333,
+            "precision": 0.3333333333333333,
+            "recall": 0.75,
+            "f1-score": 0.46153846153846156,
             "support": 4.0
         },
         "whale019": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale020": {
@@ -129,9 +129,9 @@
             "support": 1.0
         },
         "whale022": {
-            "precision": 0.9,
-            "recall": 0.9,
-            "f1-score": 0.9,
+            "precision": 0.9090909090909091,
+            "recall": 1.0,
+            "f1-score": 0.9523809523809523,
             "support": 10.0
         },
         "whale023": {
@@ -141,21 +141,21 @@
             "support": 1.0
         },
         "whale024": {
-            "precision": 0.5714285714285714,
-            "recall": 0.8,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.9090909090909091,
+            "recall": 1.0,
+            "f1-score": 0.9523809523809523,
             "support": 10.0
         },
         "whale025": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "whale026": {
             "precision": 1.0,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "whale027": {
@@ -165,21 +165,21 @@
             "support": 5.0
         },
         "whale028": {
-            "precision": 0.6363636363636364,
-            "recall": 0.5833333333333334,
-            "f1-score": 0.6086956521739131,
+            "precision": 1.0,
+            "recall": 0.9166666666666666,
+            "f1-score": 0.9565217391304348,
             "support": 12.0
         },
         "whale029": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale030": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale031": {
@@ -189,15 +189,15 @@
             "support": 1.0
         },
         "whale032": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale033": {
-            "precision": 0.5,
+            "precision": 0.6,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.75,
             "support": 3.0
         },
         "whale034": {
@@ -207,51 +207,51 @@
             "support": 6.0
         },
         "whale035": {
-            "precision": 0.21739130434782608,
-            "recall": 0.625,
-            "f1-score": 0.3225806451612903,
+            "precision": 0.4375,
+            "recall": 0.875,
+            "f1-score": 0.5833333333333334,
             "support": 8.0
         },
         "whale036": {
-            "precision": 0.5,
-            "recall": 0.5333333333333333,
-            "f1-score": 0.5161290322580645,
+            "precision": 1.0,
+            "recall": 0.8666666666666667,
+            "f1-score": 0.9285714285714286,
             "support": 15.0
         },
         "whale037": {
-            "precision": 0.4,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.36363636363636365,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 6.0
         },
         "whale038": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale039": {
-            "precision": 0.5,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.4,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "whale040": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "whale041": {
-            "precision": 0.375,
-            "recall": 0.6,
-            "f1-score": 0.46153846153846156,
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1-score": 0.8,
             "support": 5.0
         },
         "whale042": {
-            "precision": 0.3333333333333333,
-            "recall": 0.5,
-            "f1-score": 0.4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale043": {
@@ -260,34 +260,28 @@
             "f1-score": 1.0,
             "support": 1.0
         },
-        "whale044": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "whale045": {
-            "precision": 0.2857142857142857,
+            "precision": 0.6666666666666666,
             "recall": 0.5,
-            "f1-score": 0.36363636363636365,
+            "f1-score": 0.5714285714285714,
             "support": 4.0
         },
         "whale047": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "f1-score": 0.4,
             "support": 2.0
         },
         "whale049": {
             "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 6.0
         },
         "whale050": {
-            "precision": 0.5,
-            "recall": 0.8571428571428571,
-            "f1-score": 0.631578947368421,
+            "precision": 0.7777777777777778,
+            "recall": 1.0,
+            "f1-score": 0.875,
             "support": 7.0
         },
         "whale052": {
@@ -297,9 +291,9 @@
             "support": 1.0
         },
         "whale053": {
-            "precision": 0.6666666666666666,
-            "recall": 0.75,
-            "f1-score": 0.7058823529411765,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 8.0
         },
         "whale054": {
@@ -309,21 +303,21 @@
             "support": 1.0
         },
         "whale055": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.7142857142857143,
+            "recall": 1.0,
+            "f1-score": 0.8333333333333334,
             "support": 5.0
         },
         "whale056": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "whale057": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale058": {
@@ -333,15 +327,15 @@
             "support": 1.0
         },
         "whale059": {
-            "precision": 0.5555555555555556,
-            "recall": 0.625,
-            "f1-score": 0.5882352941176471,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 8.0
         },
         "whale060": {
-            "precision": 0.25,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.2857142857142857,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "whale061": {
@@ -351,9 +345,9 @@
             "support": 2.0
         },
         "whale062": {
-            "precision": 0.3333333333333333,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.4444444444444444,
+            "precision": 0.9375,
+            "recall": 1.0,
+            "f1-score": 0.967741935483871,
             "support": 15.0
         },
         "whale063": {
@@ -363,9 +357,9 @@
             "support": 1.0
         },
         "whale064": {
-            "precision": 0.3333333333333333,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.3333333333333333,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "whale065": {
@@ -375,63 +369,63 @@
             "support": 2.0
         },
         "whale066": {
-            "precision": 0.5909090909090909,
-            "recall": 0.7222222222222222,
-            "f1-score": 0.65,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 18.0
         },
         "whale067": {
-            "precision": 0.7,
-            "recall": 0.7,
-            "f1-score": 0.7,
+            "precision": 0.8333333333333334,
+            "recall": 1.0,
+            "f1-score": 0.9090909090909091,
             "support": 10.0
         },
         "whale068": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale069": {
-            "precision": 0.3333333333333333,
+            "precision": 0.6666666666666666,
             "recall": 0.8,
-            "f1-score": 0.47058823529411764,
+            "f1-score": 0.7272727272727273,
             "support": 5.0
         },
         "whale070": {
-            "precision": 1.0,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "whale071": {
             "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "whale072": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 0.25,
-            "f1-score": 0.3333333333333333,
+            "f1-score": 0.4,
             "support": 4.0
         },
         "whale073": {
-            "precision": 0.5294117647058824,
-            "recall": 0.8181818181818182,
-            "f1-score": 0.6428571428571429,
+            "precision": 0.9166666666666666,
+            "recall": 1.0,
+            "f1-score": 0.9565217391304348,
             "support": 11.0
         },
         "whale074": {
-            "precision": 0.6666666666666666,
-            "recall": 0.6666666666666666,
+            "precision": 0.5,
+            "recall": 1.0,
             "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "whale075": {
-            "precision": 0.7142857142857143,
-            "recall": 0.5555555555555556,
-            "f1-score": 0.625,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 9.0
         },
         "whale076": {
@@ -441,9 +435,9 @@
             "support": 1.0
         },
         "whale077": {
-            "precision": 0.2727272727272727,
-            "recall": 0.25,
-            "f1-score": 0.2608695652173913,
+            "precision": 0.8461538461538461,
+            "recall": 0.9166666666666666,
+            "f1-score": 0.88,
             "support": 12.0
         },
         "whale078": {
@@ -453,9 +447,9 @@
             "support": 1.0
         },
         "whale079": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale080": {
@@ -471,9 +465,9 @@
             "support": 2.0
         },
         "whale082": {
-            "precision": 0.4,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.36363636363636365,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 12.0
         },
         "whale083": {
@@ -483,33 +477,33 @@
             "support": 1.0
         },
         "whale084": {
-            "precision": 0.25,
-            "recall": 0.25,
-            "f1-score": 0.25,
+            "precision": 0.5,
+            "recall": 0.75,
+            "f1-score": 0.6,
             "support": 4.0
         },
         "whale085": {
-            "precision": 0.5,
-            "recall": 1.0,
-            "f1-score": 0.6666666666666666,
-            "support": 1.0
-        },
-        "whale086": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
+            "support": 1.0
+        },
+        "whale086": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale087": {
-            "precision": 0.25,
-            "recall": 0.4,
-            "f1-score": 0.3076923076923077,
+            "precision": 0.8333333333333334,
+            "recall": 1.0,
+            "f1-score": 0.9090909090909091,
             "support": 5.0
         },
         "whale088": {
-            "precision": 0.3333333333333333,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.3333333333333333,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "whale089": {
@@ -525,9 +519,9 @@
             "support": 1.0
         },
         "whale091": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.4,
+            "recall": 0.5,
+            "f1-score": 0.4444444444444444,
             "support": 4.0
         },
         "whale092": {
@@ -537,15 +531,15 @@
             "support": 2.0
         },
         "whale093": {
-            "precision": 0.43478260869565216,
-            "recall": 0.47619047619047616,
-            "f1-score": 0.45454545454545453,
+            "precision": 0.875,
+            "recall": 1.0,
+            "f1-score": 0.9333333333333333,
             "support": 21.0
         },
         "whale094": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale095": {
@@ -555,21 +549,21 @@
             "support": 1.0
         },
         "whale096": {
-            "precision": 0.375,
+            "precision": 0.6,
             "recall": 1.0,
-            "f1-score": 0.5454545454545454,
+            "f1-score": 0.75,
             "support": 3.0
         },
         "whale097": {
             "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "whale098": {
-            "precision": 0.3333333333333333,
-            "recall": 0.25,
-            "f1-score": 0.2857142857142857,
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1-score": 0.6666666666666666,
             "support": 4.0
         },
         "whale099": {
@@ -591,21 +585,21 @@
             "support": 1.0
         },
         "whale102": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale103": {
-            "precision": 0.4,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.5714285714285714,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale104": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale105": {
@@ -615,21 +609,21 @@
             "support": 1.0
         },
         "whale106": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale107": {
-            "precision": 0.5555555555555556,
-            "recall": 0.8333333333333334,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.8571428571428571,
+            "recall": 1.0,
+            "f1-score": 0.9230769230769231,
             "support": 6.0
         },
         "whale108": {
-            "precision": 0.7,
-            "recall": 0.875,
-            "f1-score": 0.7777777777777778,
+            "precision": 0.8888888888888888,
+            "recall": 1.0,
+            "f1-score": 0.9411764705882353,
             "support": 8.0
         },
         "whale109": {
@@ -639,27 +633,27 @@
             "support": 4.0
         },
         "whale110": {
-            "precision": 0.5714285714285714,
-            "recall": 0.5,
-            "f1-score": 0.5333333333333333,
+            "precision": 0.8888888888888888,
+            "recall": 1.0,
+            "f1-score": 0.9411764705882353,
             "support": 8.0
         },
         "whale111": {
-            "precision": 0.75,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8571428571428571,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "whale112": {
-            "precision": 0.75,
+            "precision": 1.0,
             "recall": 0.8571428571428571,
-            "f1-score": 0.8,
+            "f1-score": 0.9230769230769231,
             "support": 7.0
         },
         "whale113": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.7142857142857143,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.7692307692307693,
             "support": 6.0
         },
         "whale114": {
@@ -669,9 +663,9 @@
             "support": 1.0
         },
         "whale115": {
-            "precision": 0.5,
-            "recall": 0.4444444444444444,
-            "f1-score": 0.47058823529411764,
+            "precision": 0.9,
+            "recall": 1.0,
+            "f1-score": 0.9473684210526315,
             "support": 9.0
         },
         "whale116": {
@@ -681,15 +675,15 @@
             "support": 3.0
         },
         "whale117": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "whale118": {
-            "precision": 0.6666666666666666,
-            "recall": 0.5714285714285714,
-            "f1-score": 0.6153846153846154,
+            "precision": 0.7777777777777778,
+            "recall": 1.0,
+            "f1-score": 0.875,
             "support": 7.0
         },
         "whale119": {
@@ -699,21 +693,21 @@
             "support": 1.0
         },
         "whale120": {
-            "precision": 0.25,
+            "precision": 0.5,
             "recall": 0.5,
-            "f1-score": 0.3333333333333333,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "whale121": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "whale122": {
-            "precision": 0.2,
-            "recall": 0.25,
-            "f1-score": 0.2222222222222222,
+            "precision": 0.5,
+            "recall": 0.75,
+            "f1-score": 0.6,
             "support": 4.0
         },
         "whale123": {
@@ -730,14 +724,14 @@
         },
         "whale125": {
             "precision": 1.0,
-            "recall": 0.25,
-            "f1-score": 0.4,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 4.0
         },
         "whale126": {
-            "precision": 0.16666666666666666,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.2222222222222222,
+            "precision": 1.0,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.9090909090909091,
             "support": 6.0
         },
         "whale127": {
@@ -747,9 +741,9 @@
             "support": 1.0
         },
         "whale128": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale129": {
@@ -759,15 +753,15 @@
             "support": 1.0
         },
         "whale130": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale131": {
-            "precision": 0.6666666666666666,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.6666666666666666,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "whale132": {
@@ -778,26 +772,26 @@
         },
         "whale133": {
             "precision": 1.0,
-            "recall": 0.2857142857142857,
-            "f1-score": 0.4444444444444444,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 7.0
         },
         "whale134": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale135": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "whale136": {
-            "precision": 0.25,
-            "recall": 0.7142857142857143,
-            "f1-score": 0.37037037037037035,
+            "precision": 1.0,
+            "recall": 0.8571428571428571,
+            "f1-score": 0.9230769230769231,
             "support": 7.0
         },
         "whale137": {
@@ -807,15 +801,15 @@
             "support": 1.0
         },
         "whale138": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale139": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale140": {
@@ -831,15 +825,15 @@
             "support": 1.0
         },
         "whale142": {
-            "precision": 1.0,
+            "precision": 0.4,
             "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "f1-score": 0.5,
             "support": 3.0
         },
         "whale143": {
-            "precision": 0.3333333333333333,
-            "recall": 0.375,
-            "f1-score": 0.35294117647058826,
+            "precision": 0.625,
+            "recall": 0.625,
+            "f1-score": 0.625,
             "support": 8.0
         },
         "whale144": {
@@ -867,9 +861,9 @@
             "support": 1.0
         },
         "whale148": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 0.5714285714285714,
+            "recall": 1.0,
+            "f1-score": 0.7272727272727273,
             "support": 4.0
         },
         "whale149": {
@@ -879,21 +873,21 @@
             "support": 1.0
         },
         "whale151": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale152": {
-            "precision": 0.375,
-            "recall": 0.5,
-            "f1-score": 0.42857142857142855,
+            "precision": 0.8333333333333334,
+            "recall": 0.8333333333333334,
+            "f1-score": 0.8333333333333334,
             "support": 6.0
         },
         "whale153": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 6.0
         },
         "whale154": {
@@ -903,21 +897,21 @@
             "support": 1.0
         },
         "whale155": {
-            "precision": 0.5384615384615384,
-            "recall": 0.7,
-            "f1-score": 0.6086956521739131,
+            "precision": 0.9,
+            "recall": 0.9,
+            "f1-score": 0.9,
             "support": 10.0
         },
         "whale156": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "whale157": {
-            "precision": 0.25,
-            "recall": 0.4,
-            "f1-score": 0.3076923076923077,
+            "precision": 0.7142857142857143,
+            "recall": 1.0,
+            "f1-score": 0.8333333333333334,
             "support": 5.0
         },
         "whale158": {
@@ -939,21 +933,21 @@
             "support": 1.0
         },
         "whale161": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale162": {
-            "precision": 1.0,
-            "recall": 0.25,
-            "f1-score": 0.4,
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
             "support": 4.0
         },
         "whale163": {
             "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale164": {
@@ -975,33 +969,33 @@
             "support": 1.0
         },
         "whale167": {
-            "precision": 0.25,
-            "recall": 0.5,
-            "f1-score": 0.3333333333333333,
+            "precision": 0.4,
+            "recall": 1.0,
+            "f1-score": 0.5714285714285714,
             "support": 2.0
         },
         "whale168": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale169": {
-            "precision": 0.8333333333333334,
-            "recall": 0.8333333333333334,
-            "f1-score": 0.8333333333333334,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 6.0
         },
         "whale170": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale171": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale172": {
@@ -1011,27 +1005,27 @@
             "support": 1.0
         },
         "whale173": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "whale174": {
-            "precision": 0.16666666666666666,
-            "recall": 0.25,
-            "f1-score": 0.2,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 4.0
         },
         "whale175": {
-            "precision": 0.5,
+            "precision": 0.2222222222222222,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.36363636363636365,
             "support": 2.0
         },
         "whale176": {
-            "precision": 0.3333333333333333,
+            "precision": 0.25,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 0.4,
             "support": 1.0
         },
         "whale177": {
@@ -1071,9 +1065,9 @@
             "support": 1.0
         },
         "whale183": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale184": {
@@ -1089,9 +1083,9 @@
             "support": 1.0
         },
         "whale186": {
-            "precision": 0.3333333333333333,
-            "recall": 0.25,
-            "f1-score": 0.2857142857142857,
+            "precision": 0.4,
+            "recall": 0.5,
+            "f1-score": 0.4444444444444444,
             "support": 4.0
         },
         "whale187": {
@@ -1107,39 +1101,39 @@
             "support": 1.0
         },
         "whale189": {
-            "precision": 0.15384615384615385,
-            "recall": 0.16666666666666666,
-            "f1-score": 0.16,
+            "precision": 0.9,
+            "recall": 0.75,
+            "f1-score": 0.8181818181818182,
             "support": 12.0
         },
         "whale190": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale192": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale193": {
             "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "whale194": {
-            "precision": 0.4,
-            "recall": 0.5,
-            "f1-score": 0.4444444444444444,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 4.0
         },
         "whale195": {
-            "precision": 0.375,
-            "recall": 0.6,
-            "f1-score": 0.46153846153846156,
+            "precision": 0.5714285714285714,
+            "recall": 0.8,
+            "f1-score": 0.6666666666666666,
             "support": 5.0
         },
         "whale196": {
@@ -1149,27 +1143,27 @@
             "support": 2.0
         },
         "whale197": {
-            "precision": 0.2,
-            "recall": 0.25,
-            "f1-score": 0.2222222222222222,
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1-score": 0.6666666666666666,
             "support": 4.0
         },
         "whale198": {
-            "precision": 0.3333333333333333,
-            "recall": 0.5,
-            "f1-score": 0.4,
-            "support": 2.0
-        },
-        "whale199": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
-            "support": 1.0
+            "support": 2.0
         },
-        "whale200": {
+        "whale199": {
             "precision": 0.5,
             "recall": 1.0,
             "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "whale200": {
+            "precision": 0.25,
+            "recall": 1.0,
+            "f1-score": 0.4,
             "support": 1.0
         },
         "whale201": {
@@ -1185,27 +1179,27 @@
             "support": 1.0
         },
         "whale203": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale204": {
-            "precision": 0.3333333333333333,
-            "recall": 0.5,
-            "f1-score": 0.4,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale205": {
-            "precision": 0.5,
-            "recall": 0.75,
-            "f1-score": 0.6,
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.8888888888888888,
             "support": 4.0
         },
         "whale206": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "whale208": {
@@ -1215,21 +1209,21 @@
             "support": 2.0
         },
         "whale210": {
-            "precision": 0.5,
+            "precision": 0.6666666666666666,
             "recall": 0.5,
-            "f1-score": 0.5,
+            "f1-score": 0.5714285714285714,
             "support": 4.0
         },
         "whale211": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale212": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale213": {
@@ -1239,39 +1233,39 @@
             "support": 1.0
         },
         "whale214": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
             "support": 3.0
         },
         "whale215": {
-            "precision": 0.5,
-            "recall": 0.25,
-            "f1-score": 0.3333333333333333,
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1-score": 0.6666666666666666,
             "support": 4.0
         },
         "whale216": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale217": {
             "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale218": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 5.0
         },
         "whale219": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale220": {
@@ -1281,9 +1275,9 @@
             "support": 2.0
         },
         "whale221": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale222": {
@@ -1305,27 +1299,27 @@
             "support": 1.0
         },
         "whale225": {
-            "precision": 1.0,
+            "precision": 0.3333333333333333,
             "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.4,
             "support": 2.0
         },
         "whale228": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale229": {
-            "precision": 0.5,
-            "recall": 0.25,
-            "f1-score": 0.3333333333333333,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 4.0
         },
         "whale230": {
-            "precision": 0.3333333333333333,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.3333333333333333,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "whale231": {
@@ -1335,15 +1329,15 @@
             "support": 1.0
         },
         "whale232": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "whale233": {
-            "precision": 0.25,
-            "recall": 0.2,
-            "f1-score": 0.2222222222222222,
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1-score": 0.75,
             "support": 5.0
         },
         "whale234": {
@@ -1353,9 +1347,9 @@
             "support": 2.0
         },
         "whale235": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale236": {
@@ -1365,15 +1359,15 @@
             "support": 1.0
         },
         "whale237": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale238": {
-            "precision": 0.4,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.5,
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1-score": 0.75,
             "support": 3.0
         },
         "whale239": {
@@ -1395,9 +1389,9 @@
             "support": 2.0
         },
         "whale242": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.5,
             "support": 3.0
         },
         "whale243": {
@@ -1407,15 +1401,15 @@
             "support": 1.0
         },
         "whale244": {
-            "precision": 0.2,
-            "recall": 0.25,
-            "f1-score": 0.2222222222222222,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 4.0
         },
         "whale245": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "whale246": {
@@ -1431,9 +1425,9 @@
             "support": 1.0
         },
         "whale248": {
-            "precision": 0.4,
-            "recall": 0.5,
-            "f1-score": 0.4444444444444444,
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.8571428571428571,
             "support": 4.0
         },
         "whale249": {
@@ -1443,15 +1437,15 @@
             "support": 1.0
         },
         "whale250": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale251": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale252": {
@@ -1461,21 +1455,21 @@
             "support": 1.0
         },
         "whale253": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale254": {
             "precision": 1.0,
-            "recall": 0.2,
-            "f1-score": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 5.0
         },
         "whale255": {
-            "precision": 0.6,
-            "recall": 1.0,
-            "f1-score": 0.75,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "whale256": {
@@ -1485,9 +1479,9 @@
             "support": 1.0
         },
         "whale257": {
-            "precision": 0.3333333333333333,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.3333333333333333,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "whale258": {
@@ -1497,9 +1491,9 @@
             "support": 1.0
         },
         "whale259": {
-            "precision": 0.2,
-            "recall": 0.25,
-            "f1-score": 0.2222222222222222,
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
             "support": 4.0
         },
         "whale260": {
@@ -1509,9 +1503,9 @@
             "support": 1.0
         },
         "whale261": {
-            "precision": 0.25,
-            "recall": 0.25,
-            "f1-score": 0.25,
+            "precision": 0.6666666666666666,
+            "recall": 0.5,
+            "f1-score": 0.5714285714285714,
             "support": 4.0
         },
         "whale262": {
@@ -1531,12 +1525,6 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
-        },
-        "whale265": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "whale267": {
             "precision": 0.0,
@@ -1563,15 +1551,15 @@
             "support": 1.0
         },
         "whale272": {
-            "precision": 0.6666666666666666,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "whale273": {
-            "precision": 0.16666666666666666,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.2222222222222222,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "whale274": {
@@ -1581,21 +1569,21 @@
             "support": 1.0
         },
         "whale275": {
-            "precision": 0.16666666666666666,
-            "recall": 0.5,
-            "f1-score": 0.25,
-            "support": 2.0
-        },
-        "whale276": {
-            "precision": 0.2,
-            "recall": 0.5,
-            "f1-score": 0.2857142857142857,
-            "support": 2.0
-        },
-        "whale277": {
             "precision": 1.0,
             "recall": 0.5,
             "f1-score": 0.6666666666666666,
+            "support": 2.0
+        },
+        "whale276": {
+            "precision": 0.4,
+            "recall": 1.0,
+            "f1-score": 0.5714285714285714,
+            "support": 2.0
+        },
+        "whale277": {
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "f1-score": 0.4,
             "support": 2.0
         },
         "whale278": {
@@ -1617,9 +1605,9 @@
             "support": 2.0
         },
         "whale281": {
-            "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "whale282": {
@@ -1641,9 +1629,9 @@
             "support": 2.0
         },
         "whale285": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale286": {
@@ -1671,15 +1659,15 @@
             "support": 1.0
         },
         "whale290": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale291": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale293": {
@@ -1689,15 +1677,15 @@
             "support": 1.0
         },
         "whale294": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.2,
+            "recall": 0.5,
+            "f1-score": 0.2857142857142857,
             "support": 2.0
         },
         "whale295": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale296": {
@@ -1707,33 +1695,33 @@
             "support": 2.0
         },
         "whale297": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale298": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale299": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.4,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale300": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale301": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale302": {
@@ -1761,27 +1749,27 @@
             "support": 1.0
         },
         "whale307": {
-            "precision": 0.4,
-            "recall": 0.5,
-            "f1-score": 0.4444444444444444,
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
             "support": 8.0
         },
         "whale308": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale309": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.4,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale310": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale311": {
@@ -1791,27 +1779,27 @@
             "support": 1.0
         },
         "whale312": {
-            "precision": 0.4,
-            "recall": 0.4,
-            "f1-score": 0.4,
+            "precision": 0.7142857142857143,
+            "recall": 1.0,
+            "f1-score": 0.8333333333333334,
             "support": 5.0
         },
         "whale313": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale314": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale315": {
-            "precision": 0.6,
+            "precision": 0.75,
             "recall": 1.0,
-            "f1-score": 0.75,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "whale316": {
@@ -1821,9 +1809,9 @@
             "support": 2.0
         },
         "whale317": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "whale318": {
@@ -1845,9 +1833,9 @@
             "support": 1.0
         },
         "whale321": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.4,
             "support": 3.0
         },
         "whale322": {
@@ -1869,9 +1857,9 @@
             "support": 1.0
         },
         "whale325": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale326": {
@@ -1887,9 +1875,9 @@
             "support": 1.0
         },
         "whale328": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale329": {
@@ -1899,9 +1887,9 @@
             "support": 1.0
         },
         "whale330": {
-            "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "whale331": {
@@ -1923,15 +1911,15 @@
             "support": 1.0
         },
         "whale334": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale335": {
-            "precision": 0.125,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.2222222222222222,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale336": {
@@ -1941,27 +1929,27 @@
             "support": 1.0
         },
         "whale338": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale339": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "f1-score": 0.4,
             "support": 2.0
         },
         "whale340": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale341": {
-            "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "whale342": {
@@ -1969,12 +1957,6 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
-        },
-        "whale343": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "whale344": {
             "precision": 0.0,
@@ -1989,15 +1971,15 @@
             "support": 1.0
         },
         "whale347": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale348": {
-            "precision": 0.2,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.3333333333333333,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "whale349": {
@@ -2007,15 +1989,15 @@
             "support": 1.0
         },
         "whale350": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale351": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale352": {
@@ -2025,21 +2007,21 @@
             "support": 1.0
         },
         "whale353": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale354": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale355": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.8,
             "support": 3.0
         },
         "whale356": {
@@ -2055,9 +2037,9 @@
             "support": 1.0
         },
         "whale358": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale359": {
@@ -2067,9 +2049,9 @@
             "support": 1.0
         },
         "whale360": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 2.0
         },
         "whale361": {
@@ -2091,9 +2073,9 @@
             "support": 1.0
         },
         "whale364": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale365": {
@@ -2103,33 +2085,33 @@
             "support": 1.0
         },
         "whale366": {
-            "precision": 0.125,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.18181818181818182,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "whale367": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 1.0
-        },
-        "whale368": {
             "precision": 0.5,
             "recall": 1.0,
             "f1-score": 0.6666666666666666,
             "support": 1.0
         },
+        "whale368": {
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
+            "support": 1.0
+        },
         "whale369": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.25,
+            "recall": 1.0,
+            "f1-score": 0.4,
             "support": 1.0
         },
         "whale370": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale371": {
@@ -2139,15 +2121,15 @@
             "support": 1.0
         },
         "whale372": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale373": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale374": {
@@ -2155,12 +2137,6 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
-        },
-        "whale376": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "whale378": {
             "precision": 0.0,
@@ -2193,9 +2169,9 @@
             "support": 1.0
         },
         "whale385": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale386": {
@@ -2211,21 +2187,21 @@
             "support": 1.0
         },
         "whale389": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "whale391": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 1.0
         },
-        "whale391": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 1.0
-        },
         "whale392": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale393": {
@@ -2235,21 +2211,21 @@
             "support": 1.0
         },
         "whale394": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale395": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 0.5,
-            "f1-score": 0.4,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale396": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "f1-score": 0.4,
             "support": 2.0
         },
         "whale398": {
@@ -2271,33 +2247,33 @@
             "support": 1.0
         },
         "whale402": {
-            "precision": 0.3333333333333333,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.5,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale403": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale404": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale405": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale406": {
-            "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "whale407": {
@@ -2307,9 +2283,9 @@
             "support": 1.0
         },
         "whale408": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale409": {
@@ -2325,9 +2301,9 @@
             "support": 1.0
         },
         "whale411": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale412": {
@@ -2337,15 +2313,15 @@
             "support": 1.0
         },
         "whale414": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale415": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale417": {
@@ -2355,9 +2331,9 @@
             "support": 1.0
         },
         "whale418": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale419": {
@@ -2379,9 +2355,9 @@
             "support": 1.0
         },
         "whale422": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale423": {
@@ -2397,27 +2373,27 @@
             "support": 1.0
         },
         "whale425": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "whale426": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 1.0
         },
-        "whale426": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 1.0
-        },
         "whale427": {
-            "precision": 0.3333333333333333,
+            "precision": 0.25,
             "recall": 0.5,
-            "f1-score": 0.4,
+            "f1-score": 0.3333333333333333,
             "support": 2.0
         },
         "whale428": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale429": {
@@ -2433,15 +2409,15 @@
             "support": 1.0
         },
         "whale431": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale432": {
-            "precision": 0.3333333333333333,
-            "recall": 0.5,
-            "f1-score": 0.4,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale433": {
@@ -2451,9 +2427,9 @@
             "support": 1.0
         },
         "whale434": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale435": {
@@ -2463,9 +2439,9 @@
             "support": 1.0
         },
         "whale436": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale437": {
@@ -2475,15 +2451,15 @@
             "support": 1.0
         },
         "whale438": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale439": {
-            "precision": 0.5,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.5714285714285714,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1-score": 0.8571428571428571,
             "support": 3.0
         },
         "whale440": {
@@ -2516,12 +2492,6 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "whale446": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "whale447": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2529,9 +2499,9 @@
             "support": 1.0
         },
         "whale448": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale450": {
@@ -2547,9 +2517,9 @@
             "support": 1.0
         },
         "whale452": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale453": {
@@ -2583,9 +2553,9 @@
             "support": 1.0
         },
         "whale459": {
-            "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale460": {
@@ -2601,9 +2571,9 @@
             "support": 1.0
         },
         "whale462": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale463": {
@@ -2623,6 +2593,12 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
+        },
+        "whale466": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "whale467": {
             "precision": 0.0,
@@ -2655,21 +2631,27 @@
             "support": 1.0
         },
         "whale472": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale473": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1-score": 0.5,
+            "support": 2.0
+        },
+        "whale474": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
-            "support": 2.0
+            "support": 0.0
         },
         "whale475": {
-            "precision": 0.25,
-            "recall": 0.25,
-            "f1-score": 0.25,
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1-score": 0.6666666666666666,
             "support": 4.0
         },
         "whale476": {
@@ -2685,9 +2667,9 @@
             "support": 1.0
         },
         "whale478": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale479": {
@@ -2703,9 +2685,9 @@
             "support": 1.0
         },
         "whale482": {
-            "precision": 1.0,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale483": {
@@ -2715,9 +2697,9 @@
             "support": 1.0
         },
         "whale484": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale485": {
@@ -2727,9 +2709,9 @@
             "support": 1.0
         },
         "whale486": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.25,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.2857142857142857,
             "support": 3.0
         },
         "whale487": {
@@ -2738,10 +2720,16 @@
             "f1-score": 0.0,
             "support": 1.0
         },
+        "whale489": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
+        },
         "whale490": {
-            "precision": 1.0,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.5,
+            "precision": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "f1-score": 0.6666666666666666,
             "support": 3.0
         },
         "whale491": {
@@ -2757,9 +2745,9 @@
             "support": 1.0
         },
         "whale493": {
-            "precision": 0.5,
-            "recall": 0.5,
-            "f1-score": 0.5,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale494": {
@@ -2775,9 +2763,9 @@
             "support": 1.0
         },
         "whale496": {
-            "precision": 0.6666666666666666,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale497": {
@@ -2793,21 +2781,21 @@
             "support": 1.0
         },
         "whale500": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale501": {
-            "precision": 1.0,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "whale503": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale504": {
@@ -2817,21 +2805,21 @@
             "support": 1.0
         },
         "whale505": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale506": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale507": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale508": {
@@ -2841,21 +2829,21 @@
             "support": 1.0
         },
         "whale509": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 1.0
-        },
-        "whale510": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
+            "support": 1.0
+        },
+        "whale510": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale511": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "whale512": {
@@ -2871,9 +2859,9 @@
             "support": 1.0
         },
         "whale514": {
-            "precision": 0.5,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale515": {
@@ -2887,6 +2875,12 @@
             "recall": 1.0,
             "f1-score": 1.0,
             "support": 1.0
+        },
+        "whale518": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "whale519": {
             "precision": 0.0,
@@ -2931,15 +2925,15 @@
             "support": 1.0
         },
         "whale529": {
-            "precision": 0.2,
-            "recall": 1.0,
-            "f1-score": 0.3333333333333333,
-            "support": 1.0
-        },
-        "whale530": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
+            "support": 1.0
+        },
+        "whale530": {
+            "precision": 0.25,
+            "recall": 1.0,
+            "f1-score": 0.4,
             "support": 1.0
         },
         "whale533": {
@@ -2961,9 +2955,9 @@
             "support": 1.0
         },
         "whale537": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "whale538": {
@@ -2978,12 +2972,6 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "whale541": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "whale542": {
             "precision": 0.0,
             "recall": 0.0,
@@ -2991,9 +2979,9 @@
             "support": 1.0
         },
         "whale543": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale544": {
@@ -3045,9 +3033,9 @@
             "support": 1.0
         },
         "whale555": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale556": {
@@ -3069,15 +3057,15 @@
             "support": 1.0
         },
         "whale559": {
-            "precision": 0.4,
+            "precision": 0.5,
             "recall": 1.0,
-            "f1-score": 0.5714285714285714,
+            "f1-score": 0.6666666666666666,
             "support": 2.0
         },
         "whale560": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale561": {
@@ -3087,15 +3075,15 @@
             "support": 1.0
         },
         "whale562": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.2857142857142857,
+            "recall": 1.0,
+            "f1-score": 0.4444444444444444,
             "support": 2.0
         },
         "whale563": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale565": {
@@ -3129,9 +3117,9 @@
             "support": 1.0
         },
         "whale571": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "whale572": {
@@ -3141,15 +3129,15 @@
             "support": 1.0
         },
         "whale573": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale574": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale575": {
@@ -3159,9 +3147,9 @@
             "support": 1.0
         },
         "whale576": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale577": {
@@ -3189,9 +3177,9 @@
             "support": 1.0
         },
         "whale581": {
-            "precision": 1.0,
-            "recall": 0.5,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1-score": 0.8,
             "support": 2.0
         },
         "whale583": {
@@ -3213,9 +3201,9 @@
             "support": 1.0
         },
         "whale586": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale587": {
@@ -3243,16 +3231,10 @@
             "support": 1.0
         },
         "whale593": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
-        },
-        "whale597": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "whale598": {
             "precision": 1.0,
@@ -3267,9 +3249,9 @@
             "support": 1.0
         },
         "whale601": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale602": {
@@ -3297,9 +3279,9 @@
             "support": 1.0
         },
         "whale607": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale608": {
@@ -3321,15 +3303,15 @@
             "support": 1.0
         },
         "whale611": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 1.0
-        },
-        "whale612": {
             "precision": 0.5,
             "recall": 1.0,
             "f1-score": 0.6666666666666666,
+            "support": 1.0
+        },
+        "whale612": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "whale613": {
@@ -3339,9 +3321,9 @@
             "support": 1.0
         },
         "whale614": {
-            "precision": 0.25,
+            "precision": 0.2,
             "recall": 1.0,
-            "f1-score": 0.4,
+            "f1-score": 0.3333333333333333,
             "support": 1.0
         },
         "whale615": {
@@ -3381,15 +3363,15 @@
             "support": 1.0
         },
         "whale628": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.6666666666666666,
             "support": 1.0
         },
         "whale630": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale631": {
@@ -3399,9 +3381,9 @@
             "support": 1.0
         },
         "whale633": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale634": {
@@ -3489,9 +3471,9 @@
             "support": 1.0
         },
         "whale654": {
-            "precision": 0.5,
-            "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "whale655": {
@@ -3537,9 +3519,9 @@
             "support": 1.0
         },
         "whale665": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale666": {
@@ -3555,9 +3537,9 @@
             "support": 1.0
         },
         "whale670": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale672": {
@@ -3590,7 +3572,7 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "whale678": {
+        "whale677": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
@@ -3614,12 +3596,6 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "whale683": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "whale684": {
             "precision": 0.0,
             "recall": 0.0,
@@ -3627,9 +3603,9 @@
             "support": 1.0
         },
         "whale686": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale689": {
@@ -3639,9 +3615,9 @@
             "support": 1.0
         },
         "whale690": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale691": {
@@ -3651,15 +3627,15 @@
             "support": 1.0
         },
         "whale693": {
-            "precision": 0.5,
+            "precision": 0.3333333333333333,
             "recall": 1.0,
-            "f1-score": 0.6666666666666666,
+            "f1-score": 0.5,
             "support": 1.0
         },
         "whale694": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale696": {
@@ -3669,9 +3645,9 @@
             "support": 1.0
         },
         "whale697": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale698": {
@@ -3687,9 +3663,9 @@
             "support": 1.0
         },
         "whale700": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale701": {
@@ -3699,16 +3675,28 @@
             "support": 1.0
         },
         "whale702": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1.0
+        },
+        "whale705": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
-            "support": 1.0
+            "support": 0.0
         },
         "whale707": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
+        },
+        "whale709": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "whale713": {
             "precision": 0.0,
@@ -3717,9 +3705,9 @@
             "support": 1.0
         },
         "whale717": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale720": {
@@ -3733,6 +3721,12 @@
             "recall": 0.0,
             "f1-score": 0.0,
             "support": 1.0
+        },
+        "whale723": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 0.0
         },
         "whale726": {
             "precision": 0.0,
@@ -3765,27 +3759,15 @@
             "support": 1.0
         },
         "whale740": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "whale745": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
-            "support": 1.0
-        },
-        "whale741": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
-        "whale743": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
-        "whale745": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
             "support": 1.0
         },
         "whale746": {
@@ -3795,28 +3777,22 @@
             "support": 1.0
         },
         "whale748": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale749": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale752": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
-        },
-        "whale753": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
         },
         "whale755": {
             "precision": 0.0,
@@ -3842,12 +3818,6 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "whale762": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "whale763": {
             "precision": 0.0,
             "recall": 0.0,
@@ -3866,16 +3836,10 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "whale769": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 0.0
-        },
         "whale770": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 1.0
         },
         "whale776": {
@@ -3890,22 +3854,22 @@
             "f1-score": 0.0,
             "support": 1.0
         },
-        "accuracy": 0.35552075176194203,
+        "accuracy": 0.6656225528582616,
         "macro avg": {
-            "precision": 0.19713449050088994,
-            "recall": 0.2191246681987423,
-            "f1-score": 0.19425577981563763,
+            "precision": 0.42215121759514285,
+            "recall": 0.47853434208574397,
+            "f1-score": 0.43349879620980414,
             "support": 1277.0
         },
         "weighted avg": {
-            "precision": 0.3326257428557295,
-            "recall": 0.35552075176194203,
-            "f1-score": 0.3241154291775114,
+            "precision": 0.6225809418546301,
+            "recall": 0.6656225528582616,
+            "f1-score": 0.6276212012624505,
             "support": 1277.0
         }
     },
     "md_trained_on": true,
     "md_split_type": "random",
     "md_random_split": true,
-    "eval_runtime_sec": 855.9951496124268
+    "eval_runtime_sec": 612.9394257068634
 }

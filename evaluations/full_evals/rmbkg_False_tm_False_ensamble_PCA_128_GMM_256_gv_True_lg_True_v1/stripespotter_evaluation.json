@@ -1,6 +1,6 @@
 {
     "accuracy": 0.975609756097561,
-    "top_n_accuracy": 0.9939024390243902,
+    "top_n_accuracy": 0.9817073170731707,
     "classification_metrics": {
         "01_036": {
             "precision": 1.0,
@@ -33,9 +33,9 @@
             "support": 2.0
         },
         "01_460": {
-            "precision": 1.0,
+            "precision": 0.875,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.9333333333333333,
             "support": 7.0
         },
         "01_579": {
@@ -99,9 +99,9 @@
             "support": 4.0
         },
         "04_008": {
-            "precision": 1.0,
+            "precision": 0.9,
             "recall": 1.0,
-            "f1-score": 1.0,
+            "f1-score": 0.9473684210526315,
             "support": 9.0
         },
         "08_034": {
@@ -117,9 +117,9 @@
             "support": 3.0
         },
         "08_085": {
-            "precision": 0.8333333333333334,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.9090909090909091,
+            "f1-score": 1.0,
             "support": 5.0
         },
         "08_100": {
@@ -148,8 +148,8 @@
         },
         "09_200": {
             "precision": 1.0,
-            "recall": 0.6666666666666666,
-            "f1-score": 0.8,
+            "recall": 1.0,
+            "f1-score": 1.0,
             "support": 3.0
         },
         "09_212": {
@@ -177,9 +177,9 @@
             "support": 3.0
         },
         "10_005": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
             "support": 1.0
         },
         "OP04_225": {
@@ -189,9 +189,9 @@
             "support": 3.0
         },
         "OP05_546": {
-            "precision": 0.6666666666666666,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.8,
+            "f1-score": 1.0,
             "support": 2.0
         },
         "OP05_625": {
@@ -274,20 +274,20 @@
         },
         "accuracy": 0.975609756097561,
         "macro avg": {
-            "precision": 0.9444444444444444,
-            "recall": 0.9388888888888889,
-            "f1-score": 0.9394516594516594,
+            "precision": 0.9283333333333333,
+            "recall": 0.9240740740740742,
+            "f1-score": 0.9254874560137719,
             "support": 164.0
         },
         "weighted avg": {
-            "precision": 0.9847560975609756,
+            "precision": 0.9769817073170731,
             "recall": 0.975609756097561,
-            "f1-score": 0.9782229965156796,
+            "f1-score": 0.9752607683288042,
             "support": 164.0
         }
     },
     "md_trained_on": true,
     "md_split_type": "random",
     "md_random_split": true,
-    "eval_runtime_sec": 111.55532479286194
+    "eval_runtime_sec": 271.3369491100311
 }

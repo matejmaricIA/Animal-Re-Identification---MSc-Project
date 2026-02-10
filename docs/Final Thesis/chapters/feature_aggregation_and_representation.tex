@@ -1,0 +1,54 @@
+\chapter{Feature Aggregation and Representation}
+\label{chap:feature_aggregation}
+This chapter describes the process of aggregating local feature descriptors extracted from animal images into compact global representations suitable for efficient comparison and re-identification. As described in \cite{springerSpeciesAgnosticPatterned} Fisher Vectors (FV) were utilized, built on PCA and Gaussian Mixture Models (GMMs).
+
+\section{Training PCA and GMM models}
+\label{sec:pca_gmm_training}
+
+Feature descriptors extracted from images can be high-dimensional and noisy. Thus, dimensionality reduction and normalization are performed to improve efficiency and accuracy.
+
+Initially PCA is applied to decorrelate and reduce the dimensionality of the descriptors. PCA projects the original descriptors onto a lower-dimensional subspace defined by the principal eigenvectors of the covariance matrix computed from the descriptors. This is also important later on for the computation of fisher vectors because they produce very large descriptors.\cite{springerSpeciesAgnosticPatterned}
+
+After dimensionality reduction, a Gaussian Mixture Model (GMM) is trained on the reduced descriptors. A GMM models the descriptor distribution as a weighted sum of $K$ Gaussian components, each parameterized by mean vectors $\{\mu_k\}$, covariance matrices $\{\Sigma_k\}$, and weights $\{\pi_k\}$. Specifically, a GMM is defined as:
+\begin{equation}
+    p(x) = \sum_{k=1}^{K}\pi_k \mathcal{N}(x|\mu_k,\Sigma_k),
+\end{equation}
+
+where $\mathcal{N}(x|\mu_k,\Sigma_k)$ denotes the probability density function of the $k$-th Gaussian component. This codebook (the trained GMM) captures the visual vocabulary and statistical distribution of the reduced descriptors from the training images.\cite{springerSpeciesAgnosticPatterned}
+
+In simpler terms, PCA finds the directions in which the descriptor values vary the most and keeps only those, so each feature becomes a shorter, uncorrelated vector that is faster to store and compare. Then we model how these compact vectors are distributed. GMM model assumes that the whole set of vectors can be grouped into a number of smooth clusters, each cluster described by it's mean, spread and relative weight in the mixture. Together, these clusters form a codebook meaning that every new descriptor can be represented as a weighted combination of the nearest clusters, giving us both a compressed encoding and a way to compute similarity for matching or classification which is of crucial importance in re-identification task. 
+
+\section{Fisher Vector Computation}
+\label{sec:fisher_vector_computation}
+Fisher vectors (FV) are an image representation technique that captures statistical deviations of local features from a visual vocabulary (codebook) modeled by GMM. FV measures how features differ from typical patterns in a reference GMM and they encode both first-order differences (mean shifts) and second-order differences (variance changes) in feature distribution. The output is a high-dimensional vector that acts as a "signature" of an image's unique feature distribution. Basically, given a set of descriptors extracted from a single image, FV encodes how these descriptors deviate from the trained GMM parameters. Fisher Vectors represent the gradients of the log-likelihood function with respect to the GMM parameters. Formally, given an image with descriptors $X = \{x_t\}_{t=1}^{T}$ where $\lambda$ is a vector of GMM parameters and $u_\lambda$ is a probability density function modeling the distribution of the data. 
+
+This gradient is formally knows as the score function\cite{springerSpeciesAgnosticPatterned}. It measures the sensitivity of the log-likelihood to changes in the model parameters, essentially indicating how to adjust the GMM to better fit the observed features. 
+
+\begin{equation}
+G_\lambda^X = L_\lambda \log u_\lambda(X),
+\end{equation}
+
+When constructing a FV for an image, a set of local features is assumed to be independent which means that the final descriptor can be constructed as a sum of Fisher Vectors for each local feature:\cite{springerSpeciesAgnosticPatterned}
+
+\begin{equation}
+G{_\lambda^{X}} = \sum_{t = 1}^{T} L_{\lambda} \nabla_{\lambda} \log u_{\lambda}(x_t)
+\end{equation}
+
+The matrix $L_\lambda$ is derived from the Fisher Information Matrix and is used to "whiten" or to normalize the gradients\cite{article}, making them more discriminative and suitable for use in classification later on.
+
+Following the standard practice, this vector is computed separately for means and variances, resulting in a final vector of dimension $2KD$, where $K$ is the number of Gaussian components and $D$ the dimensionality of the PCA-reduced descriptors. L2 and power normalization have also been applied since they have been shown\cite{10.1007/978-3-642-15561-1_11} to generally improve the performance of the method.
+
+FV have also been chosen because they have been shown to perform better that bag-of-words approaches.\cite{5540009}
+
+\section{Parameter Choices and Rationale}
+\label{sec:parameter_choices}
+
+Several key parameters influenced the effectiveness of Fisher Vectors for the re-identification task during the development:
+
+\begin{itemize}
+    \item \textbf{Number of PCA components ($N_{PCA}$):} A balance between dimensionality reduction and retention of discriminative information.
+    \item \textbf{Number of GMM components ($N_{GMM}$):} Controls the granularity of the visual codebook. More components typically yield richer representations but increase computational complexity.
+    \item \textbf{Maximum descriptors sampled ($MAX\_GMM\_DESCRIPTORS$):} Limits the number of descriptors sampled for training PCA and GMM to manage memory usage and computational load.
+\end{itemize}
+
+These parameters were empirically determined based on experimenting and computational constraints. Specifically, the PCA dimension was selected to retain approximately 95\% of descriptor variance. The number of GMM components was chosen to balance accuracy and computational efficiency. The best results were achieved, with $96$ PCA components, $256$ GMM components and $200,000$ descriptors. The larger number of maximal components could perhaps prove better results but computational constraints were a limiting factor.
