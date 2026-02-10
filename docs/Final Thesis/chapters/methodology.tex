@@ -1,131 +1,163 @@
 \chapter{Methodology}
 \label{chap:methodology}
 
-This chapter describes the core stages of the proposed animal re-identification pipeline: preprocessing, feature extraction (global and local), aggregation of local descriptors into Fisher vectors, and geometric verification used as an additional consistency check and scoring signal.
+This chapter describes the core stages of the proposed animal re-identification pipeline, used in both the classifcation mode and counting mode: preprocessing, feature extraction (global and local), aggregation of local descriptors into Fisher vectors (FV) and geometric verification used as an additional consistency check and for scoring.
+
 
 \section{Preprocessing}
-\label{sec:preprocessing}
-Wildlife imagery is captured under uncontrolled conditions and therefore exhibits large variability in illumination, background clutter, and occlusion. Preprocessing is used to reduce nuisance variation and to make the subsequent feature extraction steps more robust and consistent across datasets. In this thesis, preprocessing is applied optionally and evaluated empirically to quantify its impact.
+Wildlife images are rarely captured under controlled conditions, illumination can vary significantly, there can be backgroud clutter and/or occlusion. Preprocessing is used to reduce the variation and potential background bias.
 
-\subsection{Mantiuk tone mapping}
-\label{subsec:mantiuk}
-Camera trap and field images commonly contain clipped highlights, deep shadows, or strong local illumination changes. Tone mapping compresses the dynamic range and enhances local contrast, making subtle patterns on the animal body more visible. Following the recommendation in \cite{springerSpeciesAgnosticPatterned}, this thesis uses Mantiuk tone mapping as an optional preprocessing step.
+\subsection{Mantiuk Tone Mapping}
+Tone mapping compresses the dynamic range and enhances local contrast, making subtle patterns on the animal body more visible. Following the recommendation in \cite{springerSpeciesAgnosticPatterned}, this thesis uses Mantiuk tone mapping as an optional preprocessing step.
 
 \subsection{Segmentation with Grounded SAM2}
-\label{subsec:segmentation}
-Even after cropping, the background can dominate local feature extraction in wildlife imagery (vegetation, rocks, repetitive textures), which can lead to background bias and spurious matches. To reduce this effect, a segmentation-based pipeline is used to isolate the animal body and suppress background pixels. The pipeline first localizes the animal using a text-prompted detector (GroundingDINO) and then produces a pixel-level mask using Segment Anything Model 2 (SAM2). The mask is applied with soft edges (soft masking) to avoid introducing artificial boundaries that could create non-existent keypoints.
+Even if the images in a dataset are cropped, backgroud can still dominate local or global feature extraction which can lead to background bias. To eliminate this effect, a segmentation-based pipeline is used to isolate the animal from the background. The pipeline first localizes the animal using a text prompted dectector (GroundingDINO)\cite{groundingdino} and then produces a pixel level mask using Segment Anything Model 2 (SAM2)\cite{ravi2024sam2}. The mask is applied with soft edges to avoid introducing shart boundaries that could create non-existent keypoints.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\linewidth]{Figures/segmentation_pipeline_vis.JPG}
-    \caption{Overview of the segmentation-based preprocessing pipeline used for background suppression.}
+    \caption{Overview of the segmentation-based preprocessing pipeline used for background removal.}
     \label{fig:segmentation_pipeline}
 \end{figure}
 
-Segmentation is applied only when judged beneficial, since some datasets already provide high-quality crops, bounding boxes, or segmentation masks.
+Segmentation was not applied to all datasets in this thesis since some already came segmented or, in case of CTai, were already cropped so tightly that it was deemed unnecessary. 
 
 \section{Feature Extraction}
 \label{sec:feature_extraction}
-Feature extraction converts an image into a representation that can be compared across observations. In animal re-identification, this representation must be robust to pose changes, partial occlusions, illumination variation, and background clutter. This thesis uses two complementary families of features: global embeddings and local features.
+Feature extraction is a critical component of animal Re-Identification pipelines, converting raw image data into a representation that can be compared across observations. This thesis uses two complementary families of features: global embeddings and local features.
 
 \subsection{Why combine global and local features?}
-Global embeddings summarize the entire image crop into a single vector and provide an efficient retrieval signal. Local features, on the other hand, represent an image as a set of keypoints and descriptors and can capture fine-grained details and geometric consistency. Combining global and local evidence is an effective strategy: global features provide robust coarse similarity, while local matching can disambiguate hard cases and reduce false positives by verifying spatial consistency \cite{cermak2024wildfusion}.
+Global embeddings summarize the entire image into a single vector and provide a fast, strong retrieval signal. Local features, on the other hand, represent an image as a set of keypoints and descriptors, which can capture fine-grained details and allow geometric consistency checks. These two feature families are evaluated both independently and in combination in later experiments.
 
-\subsection{Global embeddings (MegaDescriptor-L-384)}
+\subsection{Global Embeddings}
 \label{subsec:global_embeddings}
-Global embeddings represent an image as a fixed-length vector produced by a pre-trained network. In this thesis, MegaDescriptor-L-384 is used as the primary global embedding model \cite{čermák2023wildlifedatasetsopensourcetoolkitanimal}. The model is applied to the cropped animal region (optionally after preprocessing from Section \ref{sec:preprocessing}) and the resulting embedding vectors are compared using cosine similarity. This provides a strong baseline similarity signal that is efficient to compute and can be fused with local matching evidence \cite{cermak2024wildfusion}.
 
-\subsection{Local features and an ensemble of extractors}
-\label{subsec:local_features}
-Local features model an image as a set of keypoints and associated descriptors. Matching local features between two images provides an interpretable similarity signal and enables geometric verification (Section \ref{sec:geometric_verification}). Modern learning-based local feature extractors are particularly suitable for wildlife data because they can be robust to illumination changes and background clutter.
+Global embeddings are a fixed-length feature vector produced by a pre-trained neural network (MD). Two images can then be compared by measuring the distance or similarity between their embeddings (in this thesis, cosine similarity is used).
 
-In this thesis, local features are extracted using three learning-based methods: SuperPoint, DISK, and ALIKED. They all produce 2D keypoint locations and a descriptor vector for each keypoint, but each method is trained and constructed differently, which leads to different behavior in practice.
+For global embeddings, I used MegaDescriptor-L-384\cite{čermák2023wildlifedatasetsopensourcetoolkitanimal}, a large Swin Transformer model trained specifically for animal re-identification. It was trained on 29 publicly available datasets from WildlifeDatasets collection\cite{čermák2023wildlifedatasetsopensourcetoolkitanimal}. This provides a strong baseline similarity signal that is efficient and fast to compute and can be fused with the results of local methods.\cite{cermak2024wildfusionindividualanimalidentification}
+
+\subsection{Local Features}
+\label{subsec:local_feature_detection}
+Local features model an image as a set of keypoints and associated descriptors. Matching local features between two images can give a similarity signal and also enables geometric verification. In practice, this is a two-step process: first keypoints are detected, and then each keypoint is described with a feature vector.
+
+In this thesis, I used three modern learning-based local feature extractors:
+SuperPoint\cite{DeTone2018SuperPoint}, DISK\cite{tyszkiewicz2020disklearninglocalfeatures},
+and ALIKED\cite{zhao2023alikedlighterkeypointdescriptor}. Although each method performs
+well individually, experiments showed that they are complementary, so they were also used
+as an ensemble. These methods were selected because they work well out-of-the-box without
+dataset-specific fine-tuning, while learning-based local features generally provide stronger
+matching performance than classical handcrafted alternatives such as SIFT\cite{Lowe2004SIFT}.
+
+Once keypoints are detected, we compute descriptors that summarize the appearance of the local region around each keypoint. An effective descriptor should be discriminative (distinguishing one region from another) and robust (invariant to geometric transformations).
 
 \subsubsection{SuperPoint}
-SuperPoint \cite{DeTone2018SuperPoint} uses a single fully-convolutional network with two heads: one head produces a per-pixel interest-point score map, and the other produces a per-pixel descriptor map. It is trained without manual keypoint labels by warping images with random homographies and enforcing that detections and descriptors remain consistent under those warps (the paper’s Homographic Adaptation step improves repeatability on real images).
-
-\textbf{Output:} 2D keypoint locations (selected from the score map) and a descriptor vector for each keypoint. In the paper, the descriptor dimensionality used in experiments is $D=256$.
+SuperPoint\cite{DeTone2018SuperPoint} uses a single convolutional network with two heads:
+one predicts interest-point scores and the other predicts dense local descriptors.
+It is trained in a self-supervised manner using synthetic homographic warps, which encourages
+both detector repeatability and descriptor consistency under viewpoint changes.
 
 \subsubsection{DISK}
-DISK \cite{tyszkiewicz2020disklearninglocalfeatures} is built around the fact that “choose sparse keypoints, then match them” involves discrete decisions that are awkward to optimize with standard losses. Their solution is to treat detection and matching as a probabilistic policy and train it with policy-gradient reinforcement learning to increase the expected number of correct matches. Architecturally, the network produces (i) a detection map and (ii) a dense descriptor tensor; keypoints are sampled from the detection map and descriptors are read out at those locations.
-
-\textbf{Output:} a set of keypoints and a descriptor vector per keypoint; in the paper the descriptor dimension is $N=128$ (with descriptors taken from the descriptor tensor at the sampled keypoints).
+DISK (DIScrete Keypoints)\cite{tyszkiewicz2020disklearninglocalfeatures} is an end-to-end
+trainable framework that jointly learns keypoint detection and description. Its training
+objective directly optimizes matching quality across image pairs, making it well suited for
+retrieval and re-identification settings where reliable correspondence is required.
 
 \subsubsection{ALIKED}
-ALIKED \cite{zhao2023aliked} follows the common “score-map + descriptor” pattern, but changes how descriptors are built to better handle geometric changes while staying efficient. Instead of computing a full dense descriptor map everywhere, it detects keypoints from a score map (with their differentiable keypoint detection module) and then computes descriptors only at those keypoints. Its Sparse Deformable Descriptor Head (SDDH) learns offsets (supporting positions) around each keypoint and samples features at those learned positions to form the descriptor, rather than relying on a fixed sampling grid.
+ALIKED\cite{zhao2023alikedlighterkeypointdescriptor} is a lightweight learned detector-descriptor
+model designed for efficient local feature extraction. It uses a deformable transformation
+strategy to better adapt to geometric variation while keeping inference computationally practical.
+In this thesis, ALIKED provides a strong speed-accuracy trade-off and complements SuperPoint and
+DISK in the ensemble setting.
 
-\textbf{Output:} 2D keypoint locations and a descriptor vector per keypoint; the paper reports a configurable descriptor dimension (\texttt{dim}) with common models using \texttt{dim}=128.
 
-\subsection{Local matching similarity}
-Local descriptors are compared by matching keypoints between images. In this thesis, matching is performed with LightGlue \cite{lindenberger2023lightgluelocalfeaturematching}. Concretely, for each image pair we provide LightGlue with the extracted keypoint coordinates and their descriptors (from SuperPoint/DISK/ALIKED) and obtain a set of tentative correspondences (index pairs of matching keypoints). We then use these correspondences in two ways: (i) as direct local evidence (how many correspondences we can establish), and (ii) as input to geometric verification (Section \ref{sec:geometric_verification}), where RANSAC estimates a transformation and counts inliers. The resulting local similarity signal can also be fused with global embedding similarity \cite{cermak2024wildfusion}.
+\subsection{Local Matching}
+Local descriptors are compared by matching keypoints between images. In this thesis, matching is performed with LightGlue\cite{lindenberger2023lightgluelocalfeaturematching}. Concretely, for each image pair LightGlue is provided with the extracted keypoint coordinates and their descriptors (from SuperPoint/DISK/ALIKED) and it outputs a set of tentative matches (index pairs of matching keypoints). We then use those matches as input to geometric verification (Section~\ref{sec:geometric_verification}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{Figures/visualize_matches.png}
+    \caption{Example local feature matches between two images with backgrounds removed. Limited to 10 keypoints for visual clarity.}
+    \label{fig:visualize_matches}
+\end{figure}
 
 \section{Feature Aggregation and Representation}
 \label{sec:feature_aggregation}
-Local feature matching is powerful but computationally expensive when comparing many query images against a large database. To enable efficient large-scale comparison, this thesis also aggregates sets of local descriptors into a single fixed-length representation using Fisher Vectors (FV) \cite{springerSpeciesAgnosticPatterned}. The FV representation is built on PCA for dimensionality reduction and a Gaussian Mixture Model (GMM) that serves as a visual vocabulary.
+Local feature matching is powerful but computationally expensive when comparing many query images against a large database. To enable efficient large-scale comparison, this thesis also aggregates sets of local descriptors into a single fixed-length representation using Fisher Vectors (FV)\cite{5540009}. The FV representation is built on PCA (Principal Component Analysis) for dimensionality reduction and GMM (Gaussian Mixture Model) that servers as a visual vocabulary\cite{springerSpeciesAgnosticPatterned}.
+
 
 \subsection{Training PCA and GMM models}
 \label{sec:pca_gmm_training}
-Feature descriptors extracted from images can be high-dimensional and noisy. Dimensionality reduction and normalization are therefore performed to improve efficiency and robustness.
 
-Initially PCA is applied to decorrelate and reduce the dimensionality of the descriptors. PCA projects the original descriptors onto a lower-dimensional subspace defined by the principal eigenvectors of the covariance matrix computed from the descriptors. This is also important later for the computation of Fisher vectors, because FV representations can become very high-dimensional \cite{springerSpeciesAgnosticPatterned}.
+Feature descriptors extracted from images can be high-dimensional and noisy. Thus, dimensionality reduction and normalization are performed to improve efficiency and accuracy.
+
+Initially PCA is applied to decorrelate and reduce the dimensionality of the descriptors. PCA projects the original descriptors onto a lower-dimensional subspace defined by the principal eigenvectors of the covariance matrix computed from the descriptors. This is also important later on for the computation of fisher vectors because they produce very large descriptors.\cite{springerSpeciesAgnosticPatterned}
 
 After dimensionality reduction, a Gaussian Mixture Model (GMM) is trained on the reduced descriptors. A GMM models the descriptor distribution as a weighted sum of $K$ Gaussian components, each parameterized by mean vectors $\{\mu_k\}$, covariance matrices $\{\Sigma_k\}$, and weights $\{\pi_k\}$. Specifically, a GMM is defined as:
 \begin{equation}
     p(x) = \sum_{k=1}^{K}\pi_k \mathcal{N}(x|\mu_k,\Sigma_k),
 \end{equation}
-where $\mathcal{N}(x|\mu_k,\Sigma_k)$ denotes the probability density function of the $k$-th Gaussian component. This codebook captures the visual vocabulary and statistical distribution of the reduced descriptors from the training images \cite{springerSpeciesAgnosticPatterned}.
 
-In simpler terms, PCA keeps only the most informative directions of variation so that each feature becomes a shorter, uncorrelated vector that is faster to store and compare. A GMM then models the distribution of these vectors as a mixture of $K$ smooth clusters, each described by its mean, covariance, and weight. Together, these clusters form a codebook that supports compact image representations for matching and classification.
+where $\mathcal{N}(x|\mu_k,\Sigma_k)$ denotes the probability density function of the $k$-th Gaussian component. This codebook (the trained GMM) captures the visual vocabulary and statistical distribution of the reduced descriptors from the training images.\cite{springerSpeciesAgnosticPatterned}
 
-\subsection{Fisher Vector computation}
+In simpler terms, PCA finds the directions in which the descriptor values vary the most and keeps only those, so each feature becomes a shorter, uncorrelated vector that is faster to store and compare. Then we model how these compact vectors are distributed. GMM model assumes that the whole set of vectors can be grouped into a number of smooth clusters, each cluster described by it's mean, spread and relative weight in the mixture. Together, these clusters form a codebook meaning that every new descriptor can be represented as a weighted combination of the nearest clusters, giving us both a compressed encoding and a way to compute similarity for matching or classification which is of crucial importance in re-identification task. 
+
+\subsection{Fisher Vector Computation}
 \label{sec:fisher_vector_computation}
-Fisher vectors capture how the distribution of local descriptors in an image deviates from a reference GMM. They encode both first-order statistics (mean shifts) and second-order statistics (variance changes) and yield a single high-dimensional vector representation per image. Formally, given descriptors $X = \{x_t\}_{t=1}^{T}$ and GMM parameters $\lambda$, the FV is derived from the gradient (score) of the log-likelihood:
-\begin{equation}
-G_\lambda^X = \nabla_{\lambda} \log u_\lambda(X),
-\end{equation}
-where $u_\lambda(\cdot)$ is the GMM likelihood function.
+Fisher vectors (FV) are an image representation technique that captures statistical deviations of local features from a visual vocabulary (codebook) modeled by GMM. FV measures how features differ from typical patterns in a reference GMM and they encode both first-order differences (mean shifts) and second-order differences (variance changes) in feature distribution. The output is a high-dimensional vector that acts as a "signature" of an image's unique feature distribution. Basically, given a set of descriptors extracted from a single image, FV encodes how these descriptors deviate from the trained GMM parameters. Fisher Vectors represent the gradients of the log-likelihood function with respect to the GMM parameters. Formally, given an image with descriptors $X = \{x_t\}_{t=1}^{T}$ where $\lambda$ is a vector of GMM parameters and $u_\lambda$ is a probability density function modeling the distribution of the data. 
 
-When constructing a FV for an image, local descriptors are typically treated as independent, which allows the score to decompose as a sum over descriptors \cite{springerSpeciesAgnosticPatterned}:
+This gradient is formally knows as the score function\cite{springerSpeciesAgnosticPatterned}. It measures the sensitivity of the log-likelihood to changes in the model parameters, essentially indicating how to adjust the GMM to better fit the observed features. 
+
 \begin{equation}
-G_{\lambda}^{X} = \sum_{t = 1}^{T} \nabla_{\lambda} \log u_{\lambda}(x_t).
+G_\lambda^X = L_\lambda \log u_\lambda(X),
 \end{equation}
 
-In practice, the gradients are normalized using the Fisher Information Matrix, which acts as a whitening transform and improves discriminability \cite{article}. Following standard practice, the FV is computed separately for the GMM means and variances, resulting in a final vector of dimension $2KD$, where $K$ is the number of Gaussian components and $D$ the dimensionality of the PCA-reduced descriptors. L2 and power normalization are applied since they have been shown to improve performance \cite{10.1007/978-3-642-15561-1_11}.
+When constructing a FV for an image, a set of local features is assumed to be independent which means that the final descriptor can be constructed as a sum of Fisher Vectors for each local feature:\cite{springerSpeciesAgnosticPatterned}
 
-Fisher vectors have also been chosen because they have been shown to perform better than bag-of-words approaches in large-scale retrieval settings \cite{5540009}.
+\begin{equation}
+G{_\lambda^{X}} = \sum_{t = 1}^{T} L_{\lambda} \nabla_{\lambda} \log u_{\lambda}(x_t)
+\end{equation}
 
-\subsection{Parameter choices and rationale}
+The matrix $L_\lambda$ is derived from the Fisher Information Matrix and is used to "whiten" or to normalize the gradients\cite{article}, making them more discriminative and suitable for use in classification later on.
+
+Following the standard practice, this vector is computed separately for means and variances, resulting in a final vector of dimension $2KD$, where $K$ is the number of Gaussian components and $D$ the dimensionality of the PCA-reduced descriptors. L2 and power normalization have also been applied since they have been shown\cite{10.1007/978-3-642-15561-1_11} to generally improve the performance of the method.
+
+FV have also been chosen because they have been shown to perform better that bag-of-words approaches.\cite{5540009}
+
+\subsection{Parameter Choices and Rationale}
 \label{sec:parameter_choices}
-Several key parameters influence the effectiveness of Fisher vectors for the re-identification task:
+
+Several key parameters influenced the effectiveness of Fisher Vectors for the re-identification task during the development:
 
 \begin{itemize}
-    \item \textbf{Number of PCA components ($N_{PCA}$):} Balances dimensionality reduction and retention of discriminative information.
+    \item \textbf{Number of PCA components ($N_{PCA}$):} A balance between dimensionality reduction and retention of discriminative information.
     \item \textbf{Number of GMM components ($N_{GMM}$):} Controls the granularity of the visual codebook. More components typically yield richer representations but increase computational complexity.
-    \item \textbf{Maximum descriptors sampled ($MAX\_GMM\_DESCRIPTORS$):} Limits the number of descriptors used for training PCA and GMM to manage memory usage and computational load.
 \end{itemize}
 
-These parameters were selected empirically based on experiments and computational constraints. The best results were achieved with $96$ PCA components, $256$ GMM components and $200,000$ sampled descriptors.
+These parameters were empirically determined based on experimenting and computational constraints. Specifically, the PCA dimension was selected to retain approximately 95\% of descriptor variance. The number of GMM components was chosen to balance accuracy and computational efficiency. The best results were achieved, with $96$ PCA components, $256$ GMM components.
 
 \section{Geometric Verification}
 \label{sec:geometric_verification}
-Geometric verification (GV) enforces spatial consistency of tentative keypoint matches. In wildlife imagery, descriptor similarity alone can produce spurious correspondences due to repeated textures, clutter, or partial views. GV reduces such false positives by checking whether matches agree with a plausible geometric transformation between the two images \cite{springerSpeciesAgnosticPatterned}.
+Geometric verification is used to make sure that matched keypoints between images truly correspond to the same physical locations on an animal reducing false positives that arise from visual similarites alone. This step is crucial in refining the initial matches obtained through descriptor-based feature matching by enforcing spatial consistency.\cite{springerSpeciesAgnosticPatterned}
 
-\subsection{Establishing initial correspondences}
-Initial correspondences are established through descriptor matching using LightGlue \cite{lindenberger2023lightgluelocalfeaturematching}. The output is a set of tentative keypoint pairs between the query and the candidate image.
+\subsection{Theoretical Foundation}
+Local feature descriptors such as DISK\cite{tyszkiewicz2020disklearninglocalfeatures} or KeyNet combined with AffNet and HardNet \cite{keynet, mishkin2018repeatabilityenoughlearningaffine, Mishchuk2017HardNet}, offer robust initial matches based on visual similarity. However, matches that are generated purely from descriptor similarity may include mistakes, especially in visually cluttered or repetitive environments common in wildlife images. Geometric verification, as suggested in \cite{springerSpeciesAgnosticPatterned}, addresses this by validating matches through spatial coherence checks. 
 
-\subsection{Robust transformation estimation}
-The core of GV is robust estimation of a transformation between the two images using RANSAC. RANSAC iteratively samples minimal subsets of correspondences, fits a candidate transformation (homography), and classifies matches as inliers if they agree with the model within a reprojection threshold. This yields an inlier set that represents geometrically consistent matches.
+\subsection{Establishing Initial Correspondences}
+Initial correspondences are established trough descriptor matching using LightGlue\cite{lindenberger2023lightgluelocalfeaturematching}, an attention-based method. Initially methods like Lowe's ratio test were considered but matching with LightGlue proved significantly faster and more accurate, effectively eliminating the need for traditional filtering methods.
 
-\subsection{Using geometric verification as a scoring signal}
-In this thesis, GV is used not only as a hard filter but also as an additional similarity signal that can be fused with appearance-based distances. The number of inliers (and optionally the inlier ratio) quantifies geometric consistency and complements feature-based similarity \cite{springerSpeciesAgnosticPatterned,cermak2024wildfusion}:
-\begin{itemize}
-    \item \textbf{Inlier count:} Number of correspondences that agree with the estimated transformation; higher counts suggest more reliable matches.
-    \item \textbf{Inlier ratio:} Normalizes the inlier count by the total number of tentative matches,
-    $$
-    r = \frac{|I|}{|C|},
-    $$
-    where $|I|$ denotes the inlier count and $|C|$ the total correspondences.
-    \item \textbf{Combined scoring:} Integrates geometric consistency with appearance-based distances (e.g., Fisher vector distance) to leverage both spatial and visual information.
-\end{itemize}
+\subsection{Transformation Estimation}
+The core of GV involves estimating a homography transformation between matched keypoints using RANSAC (Random Sample Consensus). RANSAC iteratively samples minimal subsets of correspondences, computes candidate transformations and evaluates their agreement with the remaining matches. Matches that fall within a defined spatial threshold are considered inliers. 
 
-Penalizing low inlier counts discourages accepting borderline matches and improves robustness, especially on datasets where backgrounds and repeated textures are common.
+\subsection{Scoring and Verification}
+Matches are assessed primarily by their inlier count, the number of matches consistent with the estimated homography, and their spatial distribution:
+
+    \begin{itemize}
+        \item \textbf{Inlier count:} Number of correspondences that agree with the estimated transformation; higher counts suggest more reliable matches.
+        \item \textbf{Inlier ration: } Normalizes the inlier count by the total number of tentative matches,
+  $$
+  r = \frac{|I|}{|C|},
+  $$
+  where $|I|$ denotes the inlier count and $|C|$ the total correspondences.
+        \item \textbf{Combined scoring:} Integrates geometric consistency with descriptor similarity (fisher vector distances or global distances) to leverage both spatial and appearance information.
+    \end{itemize}
+Penalties for low inlier counts or poor geometric coherence discourage accepting borderline matches, improving the overall system reliability and accuracy.

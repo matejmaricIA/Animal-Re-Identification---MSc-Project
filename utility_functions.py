@@ -306,20 +306,6 @@ def load_stuff(pca_path, gmm_path, fisher_vectors_path):
     return pca, gmm, fisher
 
 
-"""
-def load_dataset(subset, root = WILD_DATASET_PATH):
-        print(root)
-        ds = WildlifeReID10k(root, check_files=False)
-        df = ds.metadata.copy()
-        if subset != 'full':
-            print(f"Filtering to subset: {subset}")
-            df = df[df["dataset"].str.lower() == subset.lower()].copy()
-            if df.empty:
-                print(f"Subset '{subset}' not found.")
-                sys.exit(1)
-        return df
-"""
-
 def combine_fisher_vectors(fv_list, weights):
     """Combine multiple Fisher vector dictionaries with given weights."""
     if len(fv_list) != len(weights):

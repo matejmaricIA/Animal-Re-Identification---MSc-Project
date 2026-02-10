@@ -56,8 +56,8 @@ TMP = './data/tmp/'
 # Evaluation results directory
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
-COUNT_RESULTS_XLSX = './evaluations/count/population_counting_results_UPDATED.xlsx'
-EVAL_RESULTS_XLSX = './evaluations/classification/classification_results_LATE_FUSION_tier3_GV_CAL.xlsx'
+COUNT_RESULTS_XLSX = './evaluations/count/population_counting_label_error_testing.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/final_evals/final_evals_classification.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 
@@ -74,19 +74,19 @@ POOR_GEOMETRY_PENALTY = 5.0     # Penalty multiplier for poor geometric consiste
 FISHER_DISTANCE_MIN_CLAMP = 0.01     # Minimum clamp value for Fisher distance
 FISHER_DISTANCE_MAX_CLAMP = 1.0      # Maximum clamp value for Fisher distance
 NORMALIZED_THRESHOLD_DIVISOR = 100.0 # Divisor for normalizing RANSAC threshold
-GEOMETRIC_CANDIDATES = 200
+GEOMETRIC_CANDIDATES = 350
 UNION_CANDIDATES = 600
-LOCAL_RANK_CANDIDATES = 200
+LOCAL_RANK_CANDIDATES = 350
 
 # Geometric Verification Method Selection
 GV_METHOD = "MAGSAC"  # Options: "RANSAC" or "MAGSAC"
 
 # Geometric Verification Scaling Constants
-MAX_INLIERS_FOR_SCALING = 20      # Cap inliers at this value for exponential formula
+MAX_INLIERS_FOR_SCALING = 200      # Cap inliers at this value for exponential formula
 LOG_SCALING_FACTOR = 1.0          # Scaling factor for logarithmic approach
 LINEAR_COMBINATION_ALPHA = 0.7    # Weight for Fisher distance in linear combination
 SIGMOID_STEEPNESS = 0.1           # Controls sigmoid curve steepness
-SIGMOID_MIDPOINT = 20             # Midpoint for sigmoid scaling
+SIGMOID_MIDPOINT = 200             # Midpoint for sigmoid scaling
 MAX_REASONABLE_INLIERS = 50       # Expected maximum inliers for normalization
 
 

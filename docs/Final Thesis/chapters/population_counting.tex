@@ -1,14 +1,15 @@
 \chapter{Population Size Estimation}
 
-Here I will, in detail, describe hte process of population counting.
+This chapter describes the population size estimation component of the thesis. The goal is to estimate the number of unique individuals in a large image collection using the re-identification methods introduced in previous chapters while avoiding exhaustive pairwise comparison between all images.
 
 \section{Introduction}
 
 While individual animal re-identification provides the foundation for wildlife monitoring, the ultimate goal in many conservation and ecological applications is estimating population sizes. Traditional clustering approaches for population estimation often produce inaccurate results when applied to re-identification systems, particularly when the underlying pairwise similarities are noisy or unreliable~\cite{perez2024humanintheloopvisualreidpopulation}.
 
-In this chapter I present the implementation and adaptation of Nested Importance Sampling (NIS) for population size estimation, originally proposed by Perez et al.~\cite{perez2024humanintheloopvisualreidpopulation}. The method provides a statistically principled approach to estimate the number of unique individuals in a dataset by leveraging pairwise similarity scores from the re-identification system developed in previous chapters. Critically, this work extends the original framework by implementing a fully automated variant that eliminates the need for human annotation during the estimation process.
+Perez et al.\cite{perez2024humanintheloopvisualreidpopulation} proposed a statistically focused alternative: \emph{Human-in-the-Loop Nested Importance Sampling} (HITL-NIS). Instead of attempting to fully cluster the dataset, the method estimates the cluster count directly by adaptively sampling a small number of image pair for vetting by an "oracle" (a human annotator that decies wheter a pair of images is of a same individual). For the purposes of their research and for the purposes of this thesis as well, human annotation was simulated by just taking the GT values from the publicly available datasets on which this was tested. Since the original paper didn't address the very real concern of human error during annotation, in this thesis I introduced a simulated variable of \emph{human labeling error} to test how it affects the estimator. The results of this analysis are presented in the next chapter, in this chapter I'll mostly focus on the theoretical background and implementation. 
 
 \section{Theoretical Foundation}
+\label{sec:theoretical_foundation}
 
 \subsection{Population Size as Connected Components}
 
@@ -25,136 +26,145 @@ This elegant formulation arises from the observation that the graph $G$ consists
 
 This formulation provides the foundation for statistical estimation: instead of computing all pairwise similarities explicitly, we can sample vertices and estimate their degrees, then use importance sampling to obtain an unbiased estimate of the population size.
 
-\subsection{Nested Importance Sampling Framework}
 
-The NIS framework operates through a two-stage sampling process designed to efficiently estimate the population size while minimizing the number of pairwise comparisons required:
+\subsection{Two-Stage Estimation: Nested Monte Carlo and Nested Importance Sampling}
+\label{sec:nis_theory}
 
-\begin{enumerate}
-\item \textbf{Outer sampling}: Sample $N$ vertices from the graph according to a proposal distribution $Q(u) \propto \frac{1}{1 + \hat{d}(u)}$, where $\hat{d}(u)$ is the estimated degree based on approximate pairwise similarities.
-
-\item \textbf{Inner sampling}: For each sampled vertex $u_i$, sample $M$ neighbors according to $q_{u_i}(v) \propto \hat{s}(u_i, v)$, where $\hat{s}(u, v)$ is the approximate similarity between images $u$ and $v$.
-\end{enumerate}
-
-The population estimate is then computed as:
+The most direct Monte Carlo approach samples vertices uniformly:
 
 \begin{equation}
-\widehat{\text{CC}}_{\text{NIS}}(G) = \frac{1}{N} \sum_{i=1}^{N} \frac{1}{Q(u_i)} \times \frac{1}{1 + \hat{d}(u_i)}
+\mathrm{CC}(G) = n\, \mathbb{E}_{u\sim \mathrm{Unif}(\{1,\dots,n\})}\left[\frac{1}{1+d(u)}\right].
+\label{eq:cc_uniform_expectation}
+\end{equation}
+
+For a sampled vertex \(u\), its degree can be estimated by sampling candidate neighbors \(v\) the annotator whether an edge exists (are they the same individual in this case). Nested Monte Carlo (Nested-MC) does this with uniform neighbor sampling. Nested importance sampling (NIS) replaces uniform sampling with proposal distributions designed to reduce variance. The paper suggests an outer proposal \(Q\) that oversamples low-degree vertices and an inner proposal \(q\) that oversamples likely neighbors\cite{perez2024humanintheloopvisualreidpopulation}.
+
+In it's general form, NIS estimator can be written like:
+\begin{equation}
+\widehat{\mathrm{CC}}_{\mathrm{NIS}}(G)=
+\frac{1}{N}\sum_{i=1}^{N}
+\left(
+\frac{1}{Q(u_i)}\cdot
+\frac{1}{1+\widehat{d}(u_i)}
+\right),
+\qquad u_i\sim Q(u).
 \label{eq:nis_estimator}
 \end{equation}
 
-where $\hat{d}(u_i)$ is estimated through the inner sampling process~\cite{perez2024human}.
-
-The key insight behind this approach is that the proposal distribution $Q(u)$ biases sampling towards isolated vertices (those with low degrees), as these contribute most significantly to the cluster count. Similarly, the inner sampling distribution biases towards sampling nodes that are likely to be connected, maximizing the information gained from each pairwise query.
-
-\section{Automated Adaptation with Geometric Verification}
-
-\subsection{Motivation for Automation}
-
-The original NIS framework relies on human annotation to verify whether pairs of images contain the same individual~\cite{perez2024humanintheloopvisualreidpopulation}. While this approach provides high accuracy, it presents practical limitations for large-scale deployments where manual annotation becomes prohibitively expensive or where expert annotators are unavailable. To address these limitations, this work develops a fully automated variant that leverages geometric verification as described in Chapter~\ref{chap:geometric_verification}.
-
-\subsection{Similarity Computation}
-
-The approximate pairwise similarities $\hat{s}(u,v)$ are derived from the fused Fisher vector representations computed in the feature aggregation stage (Chapter~\ref{chap:feature_aggregation}). Cosine similarity is computed between normalized feature vectors and converted to a probability distribution using softmax normalization with temperature parameter $\tau = 0.5$:
+The degree estimator for a sampled vertex \(u\) uses importance weighting over neighbors:
 
 \begin{equation}
-\hat{s}(u,v) = \frac{e^{\hat{c}(u,v)/\tau}}{\sum_v e^{\hat{c}(u,v)/\tau}}
+\widehat{d}(u)=\frac{1}{M}\sum_{j=1}^{M}\frac{s(u,v_j)}{q_u(v_j)},
+\qquad v_j\sim q_u(v),
+\label{eq:degree_estimator}
 \end{equation}
 
-where $\hat{c}(u,v) = \frac{\Phi(x_u) \cdot \Phi(x_v)}{||\Phi(x_u)||_2 ||\Phi(x_v)||_2}$ represents the normalized cosine similarity between feature vectors.
 
-\subsection{Automated Verification Process}
+where \(s(u,v)\in\{0,1\}\) is the \emph{true} edge indicator.
+ In HITL settings, \(s(u,v)\) is revealed by a human annotater and in this thesis it is 
+ simulated from ground-truth values during experiments.
 
-Instead of relying on human verification of pairwise similarities, the automated system employs a gated verification process that combines Fisher vector distances with geometric verification. The process operates as follows:
+\begin{figure}[t]
+\centering
+% Recommended figure: a simple schematic of the HITL-NIS loop.
+% If a diagram is created later, place it in Figures/ and include here:
+% \includegraphics[width=0.95\linewidth]{Figures/nis_overview.pdf}
+\fbox{\parbox{0.93\linewidth}{\centering
+\vspace{0.8em}
+\textbf{Recommended Figure.} HITL-NIS overview: outer vertex sampling \(\rightarrow\)
+inner neighbor proposal \(\rightarrow\) oracle query \(\rightarrow\)
+importance-weighted degree estimate \(\widehat{d}(u)\) \(\rightarrow\)
+component-count contribution \(\rightarrow\) average + confidence interval.
+\vspace{0.8em}}}
+\caption{Schematic of Human-in-the-Loop Nested Importance Sampling used for population-size estimation.}
+\label{fig:nis_overview}
+\end{figure}
 
-\begin{enumerate}
-\item \textbf{Initial filtering}: For each sampled pair $(u, v)$, verify that sufficient keypoints and descriptors are available for geometric verification.
+\section{HITL-NIS Implementation}
+\label{sec:counting_implementation}
 
-\item \textbf{Geometric verification}: Apply the geometric verification pipeline (Chapter~\ref{chap:geometric_verification}) to compute geometric distance and inlier count.
+This section describes how population counting was implemented in this thesis and how it differs from the description in the original paper.
 
-\item \textbf{Confidence assessment}: Combine geometric quality metrics with Fisher vector similarity to produce an overall confidence score:
+\subsection{Graph and Annotator Abstraction}
+The counting pipeline represents the dataset by a list of image identifier \(\{id_i\}_{i=1}^{n}\). The graph \(G\) is never constructed explicitly, instead the algorithm queries an "annotator" function \(\mathcal{O}(id_u,id_v)\in\{0,1\}\) that returns whether two images belong to the same individual. As mentioned before, in the experiments for this thesis, \(\mathcal{O}\) is simulated using ground-truth identity labels.
 
-\begin{align}
-\text{confidence} &= \min\left(1.0, \frac{n_{\text{inliers}}}{20.0}\right) \\
-\text{geometric\_quality} &= 1.0 - d_{\text{geometric}} \\
-\text{overall\_confidence} &= 0.6 \times \text{geometric\_quality} + 0.4 \times \text{confidence}
-\end{align}
+\subsection{Cheap Proposal Signals: Global Embeddings and Fisher Vectors}
+\label{sec:counting_signals}
 
-\item \textbf{Binary decision}: Accept the pair as a match if the overall confidence exceeds 0.5 and the number of inliers meets the minimum threshold.
-\end{enumerate}
+Human annotation is "expensive" since it requiers a human in real development, so the method relies on cheap embedding signals to prioritize which pairs to query. As with classification, two base signals are supported.
 
-This automated approach eliminates the need for human annotation while maintaining the statistical framework of the original NIS method.
-
-\section{Advantages and Limitations}
-
-\subsection{Advantages}
-
-The automated NIS approach offers several key advantages over traditional clustering methods:
-
-\begin{enumerate}
-\item \textbf{Statistical guarantees}: Unlike heuristic clustering approaches, the NIS framework provides asymptotically unbiased population estimates with confidence intervals, enabling principled uncertainty quantification.
-
-\item \textbf{Minimal supervision}: The automated mode eliminates the need for human annotation during population estimation, making it practical for large-scale deployments where expert annotation is unavailable or prohibitively expensive.
-
-\item \textbf{Robustness}: The method handles noisy pairwise similarities better than traditional clustering approaches by explicitly modeling uncertainty through the sampling framework.
-
-\item \textbf{Scalability}: Computational complexity scales as $N \times M$ rather than $n^2$, where $N$ and $M$ are sampling parameters and $n$ is the total number of images, enabling application to large datasets.
-\end{enumerate}
-
-\subsection{Limitations and Bias Considerations}
-
-The automated approach introduces several sources of bias that must be acknowledged:
-
-\begin{enumerate}
-\item \textbf{Geometric verification bias}: The reliance on geometric verification may systematically exclude certain types of valid matches, particularly:
 \begin{itemize}
-    \item Images with significant pose variations where keypoint correspondences are sparse
-    \item Low-texture regions with insufficient keypoints for reliable geometric estimation
-    \item Cases where the homography model is inappropriate for the underlying transformation
+    \item \textbf{Global embedding similarity}: a single global feature vector is extracted per image (MD) and after L2 normalization cosine similarity is computed
+    \item \textbf{FV similarity}: local descriptors are aggregated into FVs as described in Chapter\ref{sec:feature_aggregation} and again after L2 normalization, cosine similarity is computed
 \end{itemize}
 
-\item \textbf{Feature quality dependence}: The method's accuracy is fundamentally limited by the quality of the underlying Fisher vector representations and local feature extraction. Poor feature extraction can lead to both false positives and false negatives in the verification process.
+These signals are used \emph{only} for proposal distributions, the estimator ultimately depends on annotator verified edge indicators.
 
-\item \textbf{Threshold sensitivity}: The automated matching decisions depend on carefully tuned thresholds (geometric distance threshold, minimum inlier count, confidence threshold) that may not generalize across different species or imaging conditions.
+\subsection{Calibrating Scores to Probabilities for Sampling}
+\label{sec:counting_calibration}
+Raw cosine similarities are not calibrated and aren't comparable across signals. To obtain a proposal distribution that is closer to the ideal \(q_u(v)\propto s(u,v)\), the implementation support per signal calibration \(s_{\text{raw}}(u,v)\mapsto \widehat{p}(\text{same}\mid s_{\text{raw}})\) using monotone calibrators (isotonic regression, optionally with PCHIP interpolation for tie handling). Calibration pair are constructed from GT identities (this, ofcourse, means that it increases the human effort needed to label the calibration pairs, but only by about 1000-2000 pairs). 
 
-\item \textbf{Systematic underestimation}: By requiring geometric consistency, the automated mode may systematically underestimate population sizes when valid matches are rejected due to overly restrictive geometric constraints. This represents a conservative bias that prioritizes precision over recall.
-\end{enumerate}
+To better match the distribution of pairs encountered during counting, negative calibration pairs are samples as hard negatives from a shortlist of high-similarity candidates, rather than uniformly at random. This is important because the decision boundary between ``same'' and ``different'' is most important among the near neighbors where the model is uncertain. 
 
-\subsection{Bias-Variance Trade-off}
+At runtime, calibrated probabilities from the available signals are fused by averaging:
 
-The automated approach represents a fundamental trade-off between bias and variance. While the original human-in-the-loop method provides nearly unbiased estimates (assuming perfect human annotation), it requires substantial manual effort. The automated variant introduces systematic bias through the geometric verification gate but enables deployment at scale without human intervention.
+\begin{equation}
+\widehat{p}_{\text{base}}(u,v)=\frac{1}{S}\sum_{m=1}^{S}\widehat{p}_m(u,v),
+\label{eq:base_fused_probability}
+\end{equation}
 
-This trade-off is particularly relevant in conservation applications where obtaining population estimates—even if slightly biased—may be more valuable than having no estimates at all due to the prohibitive cost of manual annotation.
+where \(S\in\{1,2\}\) depending on whether global embeddings and/or Fisher vectors are enabled.
+
+\subsection{Outer Sampling Choice}
+
+The original paper proposes an importance-weighted outer distribution \(Q(u)\propto 1/(1+\widehat{d}(u))\), 
+where \(\widehat{d}(u)\) is estimated from approximate similarities~\cite{perez2024humanintheloopvisualreidpopulation}. 
+This can reduce estimator variance by oversampling low-degree vertices that contribute more to \(\mathrm{CC}(G)\).
+
+In this thesis, the outer sampling is set to \textbf{uniform} \(Q(u)=1/n\). The motivation is that constructing a reliable approximation to \(Q(u)\) would require 
+estimating \(\sum_{v\neq u}\widehat{s}(u,v)\) for \emph{all} \(u\), which can approach \(O(n^2)\) computation/memory. By keeping \(Q\) uniform, the method retains the same ubiased estimator structure while focusing variance reduction on the inner neighbor proposal \(q\) which delivers the main savings in human effort. 
+
+\subsection{Complexity and Diagnostics}
+
+The total human query budget is \(N\times M\) (plus optional confirmation votes; see Section~\ref{sec:labeling_error}). For each run, the implementation reports:
+the estimate \(\widehat{K}\) and a 95\% confidence interval. 
+
+\section{Human Labeling Error}
+\label{sec:labeling_error}
+
+HITL-NIS assumes that a human annotator correctly labels each of the presented pairs. It's self evident that in practice this is a very wrong assumption. Human judgments will always be imperfect, especially for visually similar individuals and if the annotator is someone that's generally not very familiar with the animal species in question. This is not just a small issue, this directly violates the clique-graph assumptio behind equation\ref{eq:connected_components} because it introduces wrong edges. This is very harmful. Pairwise comparisons in a large dataset are dominated by non-matches, this means that even a small FP rate (incorrect labeling) can introduce made up edges that inflate \(\widehat{d}(u)\). Since the estimator uses \(1/(1+\widehat{d}(u))\), such errors can drastically decrease the estimated count (bias the population estimate downwad by effectively merging identities). This bias is not captured by confidence intervals since that accounts only for Monte Carlo sampling variance. This was not at all addresse in the original paper and I'll now discuss how I attempted to address it.  
+
+\subsection{Explicit Noise Modeling}
+\label{sec:error_sweeps}
+
+To quantify the robustness of the method, I simulated a human error parameter by exposing the system to a paramter that introduces a random error in ranges from 2\% to 30\%. As expected, without any method to address this, the results of counting become completely unreliable at a 2\% error rate already. These result are reported in the next chapter. 
+
+\subsection{Confirmation by Repeated Voting}
+\label{sec:confirmation_votes}
+
+False positives are more damaging than false negatives for cluster counting. To reduce false positives while limiting extrac human annotation cost, a following confirmation strategy was implemented:
+
+\begin{quote}
+    If the first human vote is ``different'', accept it immediately. If the first vote is ``same'', re-query teh \emph{same pair} and accept ``same'' only if it is returned \(K\) times consecutively.
+\end{quote}
+
+This method adds cost only for candidate matches (which are relatively rare), while reducing the probability that a single mistaken ``same'' response merges identities wrongly. The trade-off between robustness and additional human annotator calls is evaluated in the next chapter. 
 
 \section{Parameter Configuration}
+\label{sec:counting_parameters}
 
-The implementation includes several key parameters that influence the bias-variance trade-off:
+The implementation exposes parameters that control estimator variance, query budget, and robustness:
 
 \begin{itemize}
-\item \textbf{$N$ (n\_vertices)}: Number of vertices sampled in the outer loop (default: 100)
-\item \textbf{$M$ (n\_neighbors)}: Number of neighbors sampled per vertex (default: 10) 
-\item \textbf{$\theta$ (gv\_threshold)}: Distance threshold for geometric verification acceptance (default: 0.75)
-\item \textbf{$I_{\min}$ (min\_inliers)}: Minimum number of RANSAC inliers required for acceptance
+    \item \textbf{\(N\)}: number of sampled outer-loop vertices
+    \item \textbf{\(M\)}: number of sampled neighbors per vertex
+
+    \item \textbf{Simulated label error}: human mistake probability \(p\).
+    \item \textbf{Positive confirmation}: number of consecutive ``same''
+     votes required to accept a match.
 \end{itemize}
 
-These parameters represent a trade-off between computational efficiency and estimation accuracy. Higher sampling rates ($N$, $M$) generally produce more reliable estimates at increased computational cost, while more restrictive geometric thresholds ($\theta$, $I_{\min}$) reduce false positive matches but may increase systematic underestimation bias.
+Increasing \(N\) and \(M\) reduces estimator variance but increases human annotator calls. Increasing the 
+confirmation parameter improves robustness to false positives but also increases human annotator calls.
 
-\section{Integration with the Re-ID Pipeline}
-
-The population estimation module integrates seamlessly with the re-identification pipeline developed in previous chapters:
-
-\begin{enumerate}
-\item \textbf{Input}: Fused feature representations from the feature aggregation stage (Chapter~\ref{chap:feature_aggregation})
-\item \textbf{Optional inputs}: Keypoints and descriptors for geometric verification (Chapter~\ref{chap:geometric_verification})
-\item \textbf{Processing}: NIS-based sampling and automated verification
-\item \textbf{Output}: Population estimate with standard error and detailed verification statistics
-\end{enumerate}
-
-This integration allows the system to provide both individual re-identification capabilities and population-level statistics from the same underlying feature representations, maximizing the utility of the computational pipeline.
-
-\section{Summary}
-
-This chapter presented the implementation of automated population size estimation using Nested Importance Sampling. The approach extends the original human-in-the-loop framework~\cite{perez2024humanintheloopvisualreidpopulation} by replacing human annotation with geometric verification, enabling fully automated deployment while maintaining the statistical rigor of the importance sampling framework.
-
-While the automated approach introduces systematic bias through the geometric verification gate, it provides a practical solution for large-scale population estimation where human annotation is unavailable or prohibitively expensive. The method's effectiveness is evaluated experimentally in the following chapters, with particular attention to quantifying the trade-offs between automation and accuracy across different animal species and imaging conditions.
-
-
+\

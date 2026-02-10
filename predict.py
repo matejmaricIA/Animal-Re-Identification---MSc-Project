@@ -435,6 +435,161 @@ def verify_candidates(
         })
     return results
 
+
+def classify_single_image_late_fusion(
+    test_id: str,
+    test_global_emb: Dict[str, np.ndarray],
+    train_global_emb: Dict[str, np.ndarray],
+    test_fisher: Dict[str, np.ndarray],
+    train_fisher: Dict[str, np.ndarray],
+    test_keypoints: Dict[str, np.ndarray],
+    train_keypoints: Dict[str, np.ndarray],
+    test_descriptors: Dict[str, np.ndarray],
+    train_descriptors: Dict[str, np.ndarray],
+    train_labels: Dict[str, str],
+    calibrators: Dict[str, "ScoreCalibrator"],
+    shortlist_size: int = UNION_CANDIDATES,
+    local_rank_candidates: int = LOCAL_RANK_CANDIDATES,
+    use_lightglue: bool = True,
+    method: str = "disk",
+    gv_matcher: str | None = None,
+    image_paths: Dict[str, str] | None = None,
+    fusion_signals: List[str] | None = None,
+    top_n: int = 5,
+) -> Dict[str, object]:
+    """Run the same late-fusion funnel as batch classification for one query image."""
+    train_global_ids, train_global_matrix = _prepare_matrix(train_global_emb)
+    train_fisher_ids, train_fisher_matrix = _prepare_matrix(train_fisher)
+    train_global_index = {img_id: i for i, img_id in enumerate(train_global_ids)}
+    train_fisher_index = {img_id: i for i, img_id in enumerate(train_fisher_ids)}
+
+    union_ids, global_sims, fisher_sims = retrieve_candidates_union(
+        test_id,
+        test_global_emb,
+        train_global_ids,
+        train_global_matrix,
+        test_fisher,
+        train_fisher_ids,
+        train_fisher_matrix,
+        shortlist_size,
+    )
+
+    global_ranked = []
+    if global_sims is not None:
+        top_idx = np.argsort(global_sims)[::-1][:shortlist_size]
+        for idx in top_idx:
+            train_id = train_global_ids[int(idx)]
+            global_ranked.append(
+                {
+                    "train_id": train_id,
+                    "score": float(global_sims[int(idx)]),
+                    "label": train_labels.get(train_id),
+                }
+            )
+
+    fisher_ranked = []
+    if fisher_sims is not None:
+        top_idx = np.argsort(fisher_sims)[::-1][:shortlist_size]
+        for idx in top_idx:
+            train_id = train_fisher_ids[int(idx)]
+            fisher_ranked.append(
+                {
+                    "train_id": train_id,
+                    "score": float(fisher_sims[int(idx)]),
+                    "label": train_labels.get(train_id),
+                }
+            )
+
+    tier2_ranked = rank_by_local_score(
+        union_ids,
+        global_sims,
+        fisher_sims,
+        train_global_index,
+        train_fisher_index,
+        calibrators,
+        local_rank_candidates,
+        fusion_signals=fusion_signals,
+    )
+    for cand in tier2_ranked:
+        cand["label"] = train_labels.get(cand["train_id"])
+
+    use_gv = bool(fusion_signals and "gv" in set(fusion_signals))
+    cal_gv = calibrators.get("gv") if calibrators is not None else None
+    if use_gv:
+        tier3_ranked = verify_candidates(
+            test_id,
+            tier2_ranked,
+            test_keypoints,
+            train_keypoints,
+            test_descriptors,
+            train_descriptors,
+            test_fisher,
+            train_fisher,
+            train_labels,
+            use_lightglue,
+            method,
+            gv_matcher,
+            image_paths,
+        )
+        for cand in tier3_ranked:
+            tier2_score = cand.get("tier2_score", 0.0)
+            if not (0.0 <= float(tier2_score) <= 1.0):
+                cand["_power_score"] = float("-inf")
+                cand["_fused_logit"] = float("-inf")
+                continue
+            p_tier2 = float(tier2_score)
+            d_l = float(np.clip(1.0 - p_tier2, 1e-12, 1.0))
+            n_inliers = int(cand.get("n_inliers", 0))
+            cand["_power_score"] = float(-max(0, n_inliers) * np.log(d_l))
+            cand["_fused_logit"] = cand["_power_score"]
+            if cal_gv is not None:
+                gv_signal = float(np.log1p(max(0, n_inliers)))
+                try:
+                    cand["_p_gv"] = float(cal_gv.predict_proba([gv_signal])[0])
+                except Exception:
+                    pass
+
+        tier3_ranked.sort(
+            key=lambda x: (
+                float(x.get("_power_score", float("-inf"))),
+                float(x.get("tier2_score", 0.0)),
+                int(x.get("n_inliers", 0)),
+            ),
+            reverse=True,
+        )
+    else:
+        tier3_ranked = [
+            {
+                "train_id": cand["train_id"],
+                "label": train_labels.get(cand["train_id"]),
+                "local_score": float(cand.get("local_score", 0.0)),
+                "tier2_score": float(cand.get("tier2_score", cand.get("local_score", 0.0))),
+                "n_inliers": 0,
+                "_fused_logit": float(cand.get("tier2_score", cand.get("local_score", 0.0))),
+            }
+            for cand in tier2_ranked
+        ]
+
+    if tier3_ranked:
+        predicted_class = tier3_ranked[0].get("label")
+        top_n_matches = [
+            (int(c.get("n_inliers", 0)), str(c.get("label"))) for c in tier3_ranked[:top_n]
+        ]
+    else:
+        predicted_class = None
+        top_n_matches = []
+
+    return {
+        "test_id": test_id,
+        "predicted_class": predicted_class,
+        "top_n": top_n_matches,
+        "global_ranked": global_ranked,
+        "fisher_ranked": fisher_ranked,
+        "union_ids": union_ids,
+        "tier2_ranked": tier2_ranked,
+        "tier3_ranked": tier3_ranked,
+    }
+
 def classify_test_images_late_fusion(
     test_global_emb: Dict[str, np.ndarray],
     train_global_emb: Dict[str, np.ndarray],
@@ -552,19 +707,6 @@ def classify_test_images_late_fusion(
                 gv_matcher,
                 image_paths,
             )
-        else:
-            verified = [
-                {
-                    "train_id": cand["train_id"],
-                    "label": train_labels[cand["train_id"]],
-                    "local_score": cand["local_score"],
-                    "tier2_score": cand.get("tier2_score", cand["local_score"]),
-                    "n_inliers": 0,
-                }
-                for cand in local_ranked
-            ]
-
-        if use_gv:
             # Paper-style reranking: d_C = (d_L)^n.
             # Here we treat Tier-2 as a match probability, so d_L := 1 - p_tier2 ∈ [0,1].
             # We rank by -log(d_C) = -n*log(d_L), which avoids underflow for large n.
@@ -595,6 +737,16 @@ def classify_test_images_late_fusion(
                 reverse=True,
             )
         else:
+            verified = [
+                {
+                    "train_id": cand["train_id"],
+                    "label": train_labels[cand["train_id"]],
+                    "local_score": cand["local_score"],
+                    "tier2_score": cand.get("tier2_score", cand["local_score"]),
+                    "n_inliers": 0,
+                }
+                for cand in local_ranked
+            ]
             # No GV stage: preserve Tier-2 ranking while keeping debug output keys consistent.
             for cand in verified:
                 cand["_fused_logit"] = float(cand.get("tier2_score", 0.0))

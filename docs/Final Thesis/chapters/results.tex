@@ -1,7 +1,210 @@
-\chapter{Results}
+\chapter{Experiments and Results}
 \label{chap:results}
+
+This chapter presents the final experimental evaluation of the proposed system. The experiments are divided into two parts:
+(i) evaluation of the \textbf{classification (re-identification) pipeline}, and
+(ii) evaluation of \textbf{population size estimation} using Human-in-the-Loop Nested Importance Sampling (HITL-NIS) 
+introduced in Chapter~\ref{chap:population_counting}.
+
+\section{Classification Pipeline Evaluation}
+\label{sec:results_classification}
+
+\subsection{Experimental protocol}
+All classification experiments follow the closed-set identification protocol described in 
+Chapter~\ref{chap:dataset}. A query image from the test split is assigned an identity label by 
+comparing it to the labeled training split. Unless stated otherwise, the experiments use the same 
+train/test split protocol as used in the MegaDescriptor baseline training for leakage control (\textbf{*} datasets). 
+
+\subsection{Compared methods and ablations}
+\label{sec:results_classification_methods}
+
+The following methods are compared:
 \begin{itemize}
-    \item Rezultati klasifikacije (top-1, top-n acc), rezultati prebrojavanja individualnih životinja, rezultati prebrojavanja na mom datasetu
-    \item Vizualizacije, tablice
-    \item Usporedba utjecaja hiperparametara testiranih
+    \item \textbf{MegaDescriptor baseline (Global only).} A strong baseline that uses only global 
+    deep embeddings from the WildlifeDatasets toolkit~\cite{čermák2023wildlifedatasetsopensourcetoolkitanimal}. 
+    In this thesis, the MegaDescriptor-L-384 model is used when reporting ``Global only'' results.
+    \item \textbf{WildFusion baseline.} A calibrated fusion method proposed by 
+    Čermák et al.~\cite{cermak2024wildfusionindividualanimalidentification}. We report the baseline values from 
+    their pipeline runs for the same datasets and splits where available.
+    \item \textbf{Ours (Fisher).} Using only Fisher Vector similarity (Chapter~\ref{chap:feature_aggregation}) as
+     the matching signal.
+    \item \textbf{Ours (Global+Fisher).} Late fusion of global embedding similarity and Fisher similarity.
+    \item \textbf{Ours (Fisher+GV).} A two-tier pipeline using Fisher similarity to shortlist candidates, 
+    followed by geometric verification (GV) re-ranking.
+    \item \textbf{Ours (Global+Fisher+GV).} The full three-tier pipeline combining global embeddings, 
+    Fisher similarity, and geometric verification.
+\end{itemize}
+
+To keep the comparison focused, we do not report each individual local feature extractor variant
+ (e.g., DISK vs SuperPoint vs ALIKED) separately in the final table.
+  Instead, for each dataset we report the Fisher-based configuration used in the corresponding fused pipeline runs.
+
+\subsection{Metrics and runtime reporting}
+\label{sec:results_classification_metrics}
+
+Performance is reported using \textbf{Top-1 accuracy}, \textbf{Top-5 accuracy}, and \textbf{F1 score}.
+ Runtimes are reported as wall-clock minutes for the end-to-end evaluation run as logged by the scripts;
+  results are therefore indicative of practical cost, including data loading and any cached feature reuse.
+
+\subsection{Results}
+\label{sec:results_classification_table}
+
+Table~\ref{tab:classification_results_final} summarizes the final results. For each dataset and metric, 
+the best value among the available methods is highlighted in \textbf{bold}. Each cell reports the metric value (in \%)
+ followed by runtime in minutes in parentheses. Missing results are left as ``--''. An additional ``Average'' block
+ reports mean Top-1 and Top-5 across datasets (average F1 is left for later completion).
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l c c c c c c}
+\hline
+\textbf{Dataset} & \textbf{Metric} &
+\textbf{Global} &
+\textbf{WildFusion} &
+\textbf{Fisher} &
+\textbf{G+F} &
+\textbf{F+GV} &
+\textbf{G+F+GV}\\
+\hline
+ATRW & Top-1 & 95.81 (0.13) & \textbf{99.07} (352.37) & 97.21 (6.18) & 97.49 (6.24) & 98.05 (82.79) & 98.23 (82.39) \\
+ & Top-5 & 97.30 (0.13) & \textbf{99.72} (352.37) & 99.16 (6.18) & 98.98 (6.24) & 99.07 (82.79) & 99.07 (82.39) \\
+ & F1 & 95.67 (0.13) & \textbf{98.95} (352.37) & 97.02 (6.18) & 97.44 (6.24) & 97.94 (82.79) & 98.15 (82.39) \\
+\hline
+CowDataset & Top-1 & 82.93 (0.04) & 98.92 (269.57) & 90.79 (0.76) & 91.87 (0.80) & 96.48 (24.99) & \textbf{100.00} (24.92) \\
+ & Top-5 & 90.79 (0.04) & 99.19 (269.57) & 96.75 (0.76) & 96.48 (0.80) & \textbf{100.00} (24.99) & \textbf{100.00} (24.92) \\
+ & F1 & 86.59 (0.04) & 99.00 (269.57) & 91.08 (0.76) & 92.28 (0.80) & 96.51 (24.99) & \textbf{100.00} (24.92) \\
+\hline
+Chicks4FreeID & Top-1 & 84.70 (0.02) & 92.40 (73.70) & 78.20 (1.30) & 84.10 (1.30) & 88.80 (10.30) & \textbf{93.53} (10.20) \\
+ & Top-5 & 95.30 (0.02) & \textbf{98.20} (73.70) & 94.70 (1.30) & \textbf{98.20} (1.30) & 95.30 (10.30) & 97.06 (10.20) \\
+ & F1 & 84.30 (0.02) & 92.00 (73.70) & 77.10 (1.30) & 83.80 (1.30) & 88.40 (10.30) & \textbf{92.21} (10.20) \\
+\hline
+CZoo & Top-1 & 98.82 (0.05) & \textbf{99.53} (131.08) & 76.12 (2.83) & 99.05 (2.82) & 88.18 (29.48) & 98.58 (29.49) \\
+ & Top-5 & 98.82 (0.05) & \textbf{100.00} (131.08) & 90.54 (2.83) & 99.05 (2.82) & 95.98 (29.48) & 99.29 (29.49) \\
+ & F1 & 98.82 (0.05) & \textbf{99.53} (131.08) & 75.68 (2.83) & 99.05 (2.82) & 88.00 (29.48) & 98.58 (29.49) \\
+\hline
+ELPephants & Top-1 & 13.66 (0.06) & 49.31 (308.05) & 20.79 (4.42) & 21.58 (4.40) & 46.53 (61.22) & \textbf{52.08} (54.49) \\
+ & Top-5 & 21.78 (0.06) & 57.03 (308.05) & 31.49 (4.42) & 32.48 (4.40) & \textbf{67.13} (61.22) & 61.98 (54.49) \\
+ & F1 & 11.58 (0.06) & 45.19 (308.05) & 18.21 (4.42) & 19.26 (4.40) & 42.65 (61.22) & \textbf{47.16} (54.49) \\
+\hline
+SealID & Top-1 & 78.42 (0.05) & \textbf{97.60} (174.64) & 65.23 (2.71) & 79.38 (2.40) & 81.53 (33.08) & 85.13 (21.96) \\
+ & Top-5 & 79.62 (0.05) & \textbf{98.56} (174.64) & 80.58 (2.71) & 82.73 (2.40) & 89.69 (33.08) & 88.97 (21.96) \\
+ & F1 & 77.86 (0.05) & \textbf{97.67} (174.64) & 64.59 (2.71) & 78.47 (2.40) & 80.58 (33.08) & 84.40 (21.96) \\
+\hline
+SeaStarReID2023 & Top-1 & 47.91 (0.05) & \textbf{80.47} (192.20) & 68.84 (3.51) & 62.79 (3.32) & 77.21 (19.35) & 77.21 (18.82) \\
+ & Top-5 & 73.49 (0.05) & \textbf{90.70} (192.20) & 85.58 (3.51) & 82.79 (3.32) & 85.58 (19.35) & 85.58 (18.82) \\
+ & F1 & 45.71 (0.05) & \textbf{79.09} (192.20) & 67.92 (3.51) & 60.70 (3.32) & 76.40 (19.35) & 76.85 (18.82) \\
+\hline
+Average & Top-1 & 71.75 (0.06) & \textbf{88.18} (214.52) & 71.03 (3.10) & 76.61 (3.04) & 82.40 (37.32) & 86.39 (34.61) \\
+ & Top-5 & 79.58 (0.06) & \textbf{91.91} (214.52) & 82.69 (3.10) & 84.39 (3.04) & 90.39 (37.32) & 90.28 (34.61) \\
+ & F1 & 71.51 (0.06) & \textbf{87.35} (214.52) & 70.23 (3.10) & 75.86 (3.04) & 81.50 (37.32) & 85.34 (34.61) \\
+\hline
+\end{tabular}
+\caption{Final classification results. Values are reported as \% (runtime in minutes). Best value per dataset/metric is in \textbf{bold}. ``Global'' refers to MegaDescriptor-L-384 embeddings~\cite{čermák2023wildlifedatasetsopensourcetoolkitanimal}. WildFusion values are reported where available~\cite{cermak2024wildfusionindividualanimalidentification}.}
+\label{tab:classification_results_final}
+\end{table}
+
+\subsection{Discussion}
+
+Several consistent patterns emerge:
+\begin{itemize}
+    \item \textbf{WildFusion is the strongest overall baseline, but our full pipeline is competitive.} WildFusion achieves the best mean Top-1 and Top-5 across datasets and is best on most benchmarks, while the full three-tier pipeline (\textbf{G+F+GV}) is best on CowDataset and ELPephants and achieves the best Top-1 and F1 on Chicks4FreeID.
+    \item \textbf{Geometric verification is most valuable on the hardest datasets.} On ELPephants, the full three-tier pipeline (\textbf{G+F+GV}) substantially improves Top-1 and F1 compared to using global embeddings or Fisher similarity alone, supporting the intuition that local geometric consistency is essential when global similarity is unreliable.
+    \item \textbf{Accuracy gains come with large runtime costs.} Global-only evaluation completes in seconds, Fisher-based evaluation in minutes, while adding GV increases runtimes by an order of magnitude (e.g., \(\sim\)10--80 minutes for \textbf{G+F+GV}). The WildFusion pipeline is substantially more expensive in wall-clock time in our runs (typically \(\sim\)70--300 minutes), highlighting a practical trade-off between peak accuracy and evaluation throughput.
+\end{itemize}
+
+\section{Population Counting Evaluation}
+\label{sec:results_counting}
+
+\subsection{Experimental protocol}
+We evaluate population size estimation using the HITL-NIS implementation described in Chapter~\ref{chap:population_counting}.
+ To quantify the sensitivity to human mistakes, we simulate oracle label error by flipping pairwise oracle
+  answers with probability \(p\) (Chapter~\ref{chap:population_counting}, Section~\ref{sec:labeling_error}). 
+  Unless stated otherwise, runs use \(N=50\) sampled vertices and \(M=500\) sampled neighbors per vertex.
+  We report results for strict confirmation with \(K=2\) consecutive ``same'' votes (Table~\ref{tab:counting_error_sweep})
+   and additionally for \(K=1\) to show how quickly counting degrades under weaker confirmation (Table~\ref{tab:counting_error_sweep_k1}).
+   ELPephants uses higher sampling budgets (\(K=2\): \(N=100, M=1500\); \(K=1\): \(N=250, M=1500\)).
+
+In preliminary sweeps we observed that the choice of proposal variant did not lead to consistent differences in the final estimate at the reported budgets. For clarity, we therefore report a single configuration corresponding to the \emph{raw-score} proposal setting, and focus on the effect of oracle label noise.
+
+\subsection{Results}
+Table~\ref{tab:counting_error_sweep} reports the estimated number of individuals as a function of the simulated oracle error rate \(p\) for \(K=2\).
+Table~\ref{tab:counting_error_sweep_k1} reports the same sweep for \(K=1\).
+For interpretability, the point estimate is rounded to the nearest integer and each entry additionally reports the corresponding 95\% confidence interval as \([L, H]\).
+Entries are highlighted in \textbf{bold} when the ground-truth population size (GT) falls within the reported interval.
+Missing results are left blank where unavailable.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{l r c c c c c c c c}
+\hline
+\textbf{Dataset} & \textbf{\#images} & \textbf{GT} &
+\(\mathbf{p=0.00}\) & \(\mathbf{0.02}\) & \(\mathbf{0.05}\) & \(\mathbf{0.10}\) & \(\mathbf{0.15}\) & \(\mathbf{0.30}\) &
+\textbf{Runtime (s)}\\
+\hline
+ATRW & 5415 & 182 & \textbf{278 [132, 425]} & \textbf{212 [124, 300]} & \textbf{178 [116, 240]} & 72 [58, 86] & 39 [34, 45] & 11 [10, 12] & 11.4 \\
+\hline
+CowDataset & 1388 & 12 & \textbf{12 [11, 13]} & \textbf{13 [11, 14]} & \textbf{13 [12, 14]} & \textbf{13 [12, 14]} & \textbf{12 [11, 14]} & 8 [7, 9] & 6.3 \\
+\hline
+Chicks4FreeID & 1086 & 48 & \textbf{50 [43, 58]} & \textbf{50 [42, 57]} & \textbf{47 [41, 54]} & 39 [34, 43] & 27 [24, 30] & 10 [9, 11] & 19.8 \\
+\hline
+CZoo & 2109 & 24 & \textbf{24 [23, 26]} & \textbf{25 [23, 27]} & \textbf{26 [24, 27]} & \textbf{25 [23, 27]} & \textbf{22 [20, 24]} & 13 [11, 14] & 34.3 \\
+\hline
+ELPephants & 2078 & 274 & \textbf{334 [267, 401]} & \textbf{320 [259, 381]} & 178 [157, 199] & 78 [73, 83] & 40 [38, 43] & 11 [10, 12] & 38.7 \\
+\hline
+SealID & 2080 & 57 & \textbf{56 [45, 68]} & \textbf{65 [47, 83]} & \textbf{53 [43, 62]} & 45 [37, 54] & 33 [29, 38] & 13 [11, 15] & 28.0 \\
+\hline
+SeaStarReID2023 & 2077 & 91 & \textbf{106 [85, 128]} & \textbf{106 [87, 126]} & \textbf{93 [79, 106]} & 59 [52, 66] & 37 [33, 41] & 11 [10, 12] & 35.0 \\
+\hline
+\end{tabular}
+}%
+\caption{Population counting under simulated oracle error rate \(p\) using HITL-NIS with positive confirmation \(K=2\). Each cell reports the rounded estimate and the 95\% confidence interval \([L,H]\). \textbf{Bold} indicates that GT falls within the interval. Runtime is mean wall-clock seconds per run.}
+\label{tab:counting_error_sweep}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{l r c c c c c c c c}
+\hline
+\textbf{Dataset} & \textbf{\#images} & \textbf{GT} &
+\(\mathbf{p=0.00}\) & \(\mathbf{0.02}\) & \(\mathbf{0.05}\) & \(\mathbf{0.10}\) & \(\mathbf{0.15}\) & \(\mathbf{0.30}\) &
+\textbf{Runtime (s)}\\
+\hline
+ATRW & 5415 & 182 & \textbf{278 [132, 425]} & 40 [33, 46] & 18 [16, 20] & 10 [9, 11] & 7 [6, 7] & 3 [3, 4] & 11.5 \\
+\hline
+CowDataset & 1388 & 12 & \textbf{12 [11, 13]} & 10 [9, 11] & 8 [7, 9] & 6 [5, 7] & 5 [4, 5] & 3 [2, 4] & 7.4 \\
+\hline
+Chicks4FreeID & 1086 & 48 & \textbf{50 [43, 58]} & 25 [22, 28] & 15 [13, 16] & 9 [8, 10] & 6 [5, 7] & 3 [3, 4] & 6.6 \\
+\hline
+CZoo & 2109 & 24 & \textbf{24 [23, 26]} & 19 [17, 20] & 13 [12, 15] & 9 [8, 10] & 7 [6, 8] & 4 [3, 5] & 7.5 \\
+\hline
+ELPephants & 2078 & 274 & 342 [298, 386] & 42 [41, 44] & 19 [18, 20] & 10 [9, 10] & 7 [6, 7] & 3 [3, 4] & 28.7 \\
+\hline
+SealID & 2080 & 57 & \textbf{56 [45, 68]} & 29 [25, 34] & 17 [15, 20] & 11 [9, 12] & 8 [7, 8] & 4 [3, 5] & 7.6 \\
+\hline
+SeaStarReID2023 & 2077 & 91 & \textbf{106 [85, 128]} & 36 [32, 40] & 18 [16, 20] & 10 [9, 11] & 7 [6, 7] & 3 [3, 4] & 7.7 \\
+\hline
+\end{tabular}
+}%
+\caption{Population counting under simulated oracle error rate \(p\) using HITL-NIS with positive confirmation \(K=1\). Each cell reports the rounded estimate and the 95\% confidence interval \([L,H]\). \textbf{Bold} indicates that GT falls within the interval. Runtime is mean wall-clock seconds per run.}
+\label{tab:counting_error_sweep_k1}
+\end{table}
+
+\subsection{Discussion}
+
+The results illustrate the core failure mode discussed in Chapter~\ref{chap:population_counting}:
+\begin{itemize}
+    \item \textbf{\(K=2\) is substantially more robust to labeling noise than \(K=1\).} With strict confirmation (\(K=2\)), several datasets remain correct up to \(p \approx 0.05\) (and up to \(p \approx 0.15\) on CowDataset and CZoo), before collapsing around \(p \ge 0.10\). In contrast, \(K=1\) typically fails already at \(p=0.02\), illustrating how quickly HITL-NIS can degrade without confirmation.
+    \item \textbf{Failure is dominated by false ``same'' votes.} As \(p\) increases, estimates collapse toward very small values across datasets, consistent with the analysis in Chapter~\ref{chap:population_counting}: erroneous merges cause the sampler to underestimate the number of individuals.
+    \item \textbf{Robustness comes at a runtime/oracle-cost premium.} Requiring a second confirmation vote increases oracle calls and runtimes (especially on larger datasets), but provides a dramatic gain in tolerance to realistic human error rates. In real deployments, the dominant cost would be human annotation time rather than compute.
 \end{itemize}

@@ -1,9 +1,9 @@
 \chapter{Datasets}
 \label{chap:dataset}
-Accurate and generalizable animal re-identification (Re-ID) system depends on the quality and diversity of datasets used for development and evaluation. This thesis evaluates the proposed approach on publicly available datasets, mostly from WildlifeReID-10k dataset collection\cite{adam2025wildlifereid10k}
+Accurate and generalizable animal re-identification (Re-ID) system depends on the quality and diversity of datasets used for development and evaluation. This thesis evaluates the proposed approach on publicly available datasets, mostly from WildlifeReID-10k dataset collection\cite{adam2025wildlifereid10kwildlifereidentificationdataset}
 
 \section{WildlifeReID-10k}
-WildlifeReID-10k\cite{adam2025wildlifereid10k} is a benchmark dataset collection explicitly curated for evaluating animal Re-ID methods across a variety of species. The primary goal of this dataset is to enable systematic benchmarking of general-purpose animal Re-ID methods. It aggregates \num{37} existing datasets into a unified format to enable easy evaluation. In total, WildlifeReID contains \num{140488} images of \num{10772} unique individuals spanning \num{33} species. The methods described in this thesis were tested on \num{7} datasets from that collection: ATRW (tigers), CowDataset (cows), ElPephants (elephants), CTai (chimps), Chicks4FreeID (chickens), SealID (seals) and SeaStarReID2023 (sea stars). They were chosen because they provide the range of challenges of re-identification and the testing on all \num{37} datasets would be too computationally expensive.  
+WildlifeReID-10k\cite{adam2025wildlifereid10kwildlifereidentificationdataset} is a benchmark dataset collection explicitly curated for evaluating animal Re-ID methods across a variety of species. The primary goal of this dataset is to enable systematic benchmarking of general-purpose animal Re-ID methods. It aggregates \num{37} existing datasets into a unified format to enable easy evaluation. In total, WildlifeReID contains \num{140488} images of \num{10772} unique individuals spanning \num{33} species. The methods described in this thesis were tested on \num{7} datasets from that collection: ATRW (tigers), CowDataset (cows), ElPephants (elephants), CTai (chimps), Chicks4FreeID (chickens), SealID (seals) and SeaStarReID2023 (sea stars). They were chosen because they provide the range of challenges of re-identification and the testing on all \num{37} datasets would be too computationally expensive.  
 
 \begin{figure}[H]
     \centering
@@ -13,9 +13,9 @@ WildlifeReID-10k\cite{adam2025wildlifereid10k} is a benchmark dataset collection
 \end{figure}
 
 \subsection{Train/Test Leakage Issues and Split Protocols}
-A central (and often not addressed) issue in animal Re-ID evaluation is train-to-test leakage caused by visually almost identical images (for example, consecutive video frames or images from camera traps taken in very quick succession during a single observation) ending up in both train and test sets. There are also mistakes in the datasets, so in some cases there are literal duplicates present. Because of this random splits often result in overly optimistic results that do not reflect real-world generalization.\cite{adam2025wildlifereid10k}
+A central (and often not addressed) issue in animal Re-ID evaluation is train-to-test leakage caused by visually almost identical images (for example, consecutive video frames or images from camera traps taken in very quick succession during a single observation) ending up in both train and test sets. There are also mistakes in the datasets, so in some cases there are literal duplicates present. Because of this random splits often result in overly optimistic results that do not reflect real-world generalization.\cite{adam2025wildlifereid10kwildlifereidentificationdataset}
 
-To address this, WildlifeReID-10k proposes two split strategies\cite{adam2025wildlifereid10k}:
+To address this, WildlifeReID-10k proposes two split strategies\cite{adam2025wildlifereid10kwildlifereidentificationdataset}:
 
 \begin{itemize}
     \item \textbf{Time-aware splits}: some of the datasets come with timestamps and this is used to split the images chronologically per identity using a cut-off date so that images from the same encounter do not leak across splits
@@ -54,3 +54,4 @@ Another issue with Re-ID datasets is that they are typically highly imbalanced.
     \caption{Class balance (number of images per individual) for the datasets used.}
     \label{fig:class_balance_compact_grid}
 \end{figure}
+

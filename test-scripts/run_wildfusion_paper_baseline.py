@@ -77,6 +77,7 @@ class DatasetResult:
     n_id_test: int
     top1_acc: float
     top5_acc: float
+    f1_score: float
     seconds: float
 
 
@@ -90,6 +91,7 @@ CSV_COLUMNS = [
     "n_id_test",
     "top1_acc",
     "top5_acc",
+    "f1_score",
     "seconds",
 ]
 
@@ -101,6 +103,38 @@ def log(msg: str) -> None:
 def _compute_topk_accuracy(y_true: np.ndarray, y_pred_topk: np.ndarray) -> float:
     hits = [y_true[i] in y_pred_topk[i] for i in range(len(y_true))]
     return float(np.mean(hits)) if hits else float("nan")
+
+
+def _weighted_f1_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Compute weighted F1-score without sklearn.
+
+    Weighted F1 = sum_c support(c) * F1(c) / sum_c support(c),
+    where support(c) is the number of true samples of class c.
+    """
+
+    y_true = np.asarray(y_true)
+    y_pred = np.asarray(y_pred)
+    if y_true.shape[0] == 0:
+        return float("nan")
+
+    labels = np.unique(y_true.astype(str))
+    total = float(len(y_true))
+    weighted = 0.0
+
+    for label in labels:
+        t = (y_true.astype(str) == label)
+        p = (y_pred.astype(str) == label)
+        tp = float(np.sum(t & p))
+        fp = float(np.sum((~t) & p))
+        fn = float(np.sum(t & (~p)))
+
+        precision = tp / (tp + fp) if (tp + fp) > 0.0 else 0.0
+        recall = tp / (tp + fn) if (tp + fn) > 0.0 else 0.0
+        f1 = (2.0 * precision * recall / (precision + recall)) if (precision + recall) > 0.0 else 0.0
+        support = float(np.sum(t))
+        weighted += support * f1
+
+    return float(weighted / total)
 
 
 def _normalize_path(value: str) -> str:
@@ -587,6 +621,7 @@ def _evaluate_dataset(
 
         preds_top1 = KnnClassifier(k=1, database_labels=database.labels_string)(scores)
         top1_acc = float(np.mean(preds_top1 == query.labels_string))
+        f1 = _weighted_f1_score(np.asarray(query.labels_string), np.asarray(preds_top1))
 
         k = min(5, n_id_train) if n_id_train > 0 else 1
         preds_top5 = TopkClassifier(k=k, database_labels=database.labels_string)(scores)
@@ -603,6 +638,7 @@ def _evaluate_dataset(
             n_id_test=n_id_test,
             top1_acc=top1_acc,
             top5_acc=top5_acc,
+            f1_score=f1,
             seconds=round(elapsed, 2),
         )
 
@@ -620,6 +656,7 @@ def _evaluate_dataset(
             n_id_test=0,
             top1_acc=float("nan"),
             top5_acc=float("nan"),
+            f1_score=float("nan"),
             seconds=round(elapsed, 2),
         )
 

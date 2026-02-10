@@ -7,7 +7,7 @@ from constants import *
 from tqdm import tqdm
 from pathlib import Path
 import pandas as pd
-from segmentation import segment_image, has_segmenter
+from segmentation import segment_image, has_segmenter, segment_dataset
 
 
 # Soft mask controls (feathered edge) to avoid harsh black boundaries that attract keypoints.
@@ -138,6 +138,71 @@ def preprocess_dataset(
     merged_df.to_csv(metadata_path, index=False)
 
     return merged_df
+
+
+def prepare_processed_dataset(
+    dataset_name: str,
+    df_raw: pd.DataFrame,
+    *,
+    remove_background: bool = False,
+    use_mantiuk: bool = False,
+    require_processed_paths: bool = False,
+    log_prefix: str = "",
+) -> tuple[pd.DataFrame, str, str]:
+    """Load cached processed metadata or build it via preprocessing/segmentation."""
+    prefix = f"{log_prefix} " if log_prefix else ""
+    sub_dir = f"./data/{dataset_name}"
+    os.makedirs(sub_dir, exist_ok=True)
+
+    if df_raw is None:
+        raise ValueError(f"{prefix}Missing dataset metadata (df_raw).")
+
+    df_raw = df_raw.copy()
+    df_raw["image_id"] = df_raw["image_id"].astype(str)
+    csv_path = f"{sub_dir}/processed_metadata.csv"
+    output_dir = f"{sub_dir}/segmented_dataset" if remove_background else f"{sub_dir}/dataset"
+
+    df = None
+    missing_cols = []
+    if os.path.exists(csv_path):
+        df = pd.read_csv(csv_path, dtype={"image_id": str})
+        if require_processed_paths:
+            required_cols = ["processed_path_segmented"] if remove_background else ["processed_path"]
+            missing_cols = [
+                col
+                for col in required_cols
+                if col not in df.columns or df[col].isna().all()
+            ]
+
+    if require_processed_paths:
+        needs_preprocess = bool(missing_cols) or not os.path.exists(csv_path) or not os.path.exists(output_dir)
+    else:
+        needs_preprocess = not (os.path.exists(csv_path) and os.path.exists(output_dir))
+
+    if needs_preprocess:
+        if remove_background and has_segmenter(dataset_name) and not os.path.exists(output_dir):
+            if prefix:
+                print(f"{prefix}Segmenting dataset...")
+            df = segment_dataset(
+                df_raw.copy(),
+                f"{output_dir}/",
+                dataset_name,
+                use_mantiuk=use_mantiuk,
+            )
+        else:
+            df = preprocess_dataset(
+                df_raw.copy(),
+                f"{output_dir}/",
+                dataset_name,
+                use_mantiuk=use_mantiuk,
+                remove_background=remove_background,
+            )
+        df.to_csv(csv_path, index=False)
+    elif df is None:
+        df = pd.read_csv(csv_path, dtype={"image_id": str})
+
+    df["image_id"] = df["image_id"].astype(str)
+    return df, csv_path, output_dir
         
 def preprocess_inference(
     image_paths,

@@ -31,7 +31,7 @@ Notes:
 ### 2) Training/evaluation (feature extraction + retrieval-style evaluation)
 
 ```bash
-python main.py --train --ds ATRW --method keynet_hardnet --use_geometric_verification --use_lightglue --save_eval
+python main.py --train --ds ATRW --method keynet_hardnet --use_lightglue --fusion_signals fisher gv --save_eval
 ```
 
 [refs: `README.md:L42-L69`, `main.py:L56-L121`, `main.py:L140-L409`, `predict.py:L17-L260`, `evaluate.py:L8-L47`]
@@ -228,7 +228,7 @@ flowchart TD
 | `groundingdino` | Text-guided box detection for segmentation | `segmentation/grounded_sam2.py:L1-L220` |
 | `sam2` | Box-prompted segmentation model | `segmentation/grounded_sam2.py:L1-L220` |
 | `wildlife_datasets` | Dataset metadata / split analysis | `main.py:L2-L4`, `utility_functions.py:L51-L70`, `patches/elpephants_patch.py:L4-L44` |
-| `optuna` | Hyperparameter / weight searches (scripts) | `hyperparameter_optimization.py:L1-L7`, `mixture_optimization/weight_optimization.py:L26-L36` |
+| `optuna` | Hyperparameter searches (scripts) | `hyperparameter_optimization.py:L1-L7` |
 | Bash | Batch experiment scripts | `run_multiple.sh:L1-L10`, `run_count_multiple.sh:L1-L11` |
 
 ## Core algorithms / theories explained simply (tied to code)
@@ -311,7 +311,7 @@ Key flags (not exhaustive):
 - `--ds <name>` dataset selector [refs: `main.py:L63-L65`]
 - preprocessing: `--use_mantiuk`, `--remove_background` [refs: `main.py:L67-L69`, `preprocessing.py:L85-L135`]
 - local features: `--method {disk,keynet_hardnet,lightglue,ensamble}` [refs: `main.py:L70-L71`, `main.py:L240-L255`]
-- geometric verification: `--use_geometric_verification`, `--use_lightglue`, `--gv_method {RANSAC,MAGSAC}`, `--gv_threshold` [refs: `main.py:L71-L83`, `constants.py:L63-L84`]
+- geometric verification: `--use_lightglue`, `--gv_matcher {ratio,lightglue,loftr}`, `--gv_features {disk,superpoint,aliked}` plus include `gv` in `--fusion_signals` [refs: `main.py`, `constants.py:L63-L84`]
 - counting sampler sizes: `--num_vertices`, `--num_neighbors`, `--seed` [refs: `main.py:L73-L75`, `main.py:L98-L99`]
 - fusion: `--use_global_embedding`, `--embedding_model`, `--w_fisher`, `--w_global`, `--use_fisher/--no-use_fisher` [refs: `main.py:L84-L98`, `mixture_optimization/block_normalization.py:L82-L119`]
 

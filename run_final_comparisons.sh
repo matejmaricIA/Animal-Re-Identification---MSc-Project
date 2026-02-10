@@ -12,7 +12,7 @@ set -o pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
-OUT_CSV="evaluations/classifications/final_comparisons.csv"
+OUT_CSV="evaluations/classifications/final_comparisons_gv_350.csv"
 LOG_DIR="evaluations/classifications/logs"
 TMP_WF_CSV="/tmp/wildfusion_final_comparisons_tmp.csv"
 CSV_HEADER="timestamp,source,dataset,config,status,accuracy,top5_accuracy,f1_score,runtime_minutes,error,n_train,n_test,n_id_train,n_id_test,seconds,command"
@@ -51,35 +51,36 @@ prepare_output_csv() {
 
 # Edit these lists directly to run any combination you want.
 MAIN_DATASETS=(
-  #atrw
-  #cowdataset
-  #elpephants
+  sealid
+  atrw
+  cowdataset
+  elpephants
   czoo
-  #chicks4freeid
-  #sealid
-  #seastarreid2023
+  chicks4freeid
+  seastarreid2023
 )
 
 # WildFusion list is intentionally separate and hardcoded.
 WILDFUSION_DATASETS=(
-  atrw
-  #cowdataset
-  #elpephants
-  czoo
   #chicks4freeid
   #sealid
   #seastarreid2023
+  #cowdataset
+  #elpephants
+  #czoo
+  #atrw
 )
 
 CONFIGS=(
   fisher_only
   fisher_gv_power
   global_fisher
-  fisher_disk
-  fisher_aliked
-  fisher_superpoint
+  #fisher_disk
+  #fisher_aliked
+  #fisher_superpoint
   global_only
   global_fisher_gv_power
+  global_gv
 )
 
 prepare_output_csv
@@ -193,6 +194,7 @@ status = "error"
 error = ""
 top1 = ""
 top5 = ""
+f1 = ""
 seconds = ""
 n_train = ""
 n_test = ""
@@ -214,6 +216,7 @@ else:
                 error = str(last.get("error", ""))
                 top1 = last.get("top1_acc", "")
                 top5 = last.get("top5_acc", "")
+                f1 = last.get("f1_score", "")
                 seconds = last.get("seconds", "")
                 n_train = last.get("n_train", "")
                 n_test = last.get("n_test", "")
@@ -238,7 +241,7 @@ row = [
     status,
     top1,
     top5,
-    "",
+    f1,
     runtime_minutes,
     error,
     n_train,
@@ -259,7 +262,7 @@ dataset_main_flags() {
   MAIN_FLAGS=()
   case "${ds,,}" in
     atrw)
-      MAIN_FLAGS+=(--use_md_baseline_split --use_mantiuk --remove_background)
+      MAIN_FLAGS+=(--use_mantiuk --remove_background)
       ;;
     cowdataset)
       MAIN_FLAGS+=(--use_mantiuk --remove_background)
@@ -268,12 +271,12 @@ dataset_main_flags() {
       MAIN_FLAGS+=(--use_mantiuk --remove_background)
       ;;
     czoo)
-      MAIN_FLAGS+=(--use_md_baseline_split)
       ;;
     chicks4freeid)
+    MAIN_FLAGS+=(--use_mantiuk)
       ;;
     sealid)
-      MAIN_FLAGS+=(--use_md_baseline_split)
+    MAIN_FLAGS+=(--use_mantiuk)
       ;;
     seastarreid2023)
       MAIN_FLAGS+=(--remove_background)
@@ -286,7 +289,7 @@ dataset_wildfusion_flags() {
   WF_FLAGS=()
   case "${ds,,}" in
     atrw)
-      WF_FLAGS+=(--segmented --use-md-baseline-split)
+      WF_FLAGS+=(--segmented)
       ;;
     cowdataset)
       WF_FLAGS+=(--segmented)
@@ -295,12 +298,10 @@ dataset_wildfusion_flags() {
       WF_FLAGS+=(--segmented)
       ;;
     czoo)
-      WF_FLAGS+=(--use-md-baseline-split)
       ;;
     chicks4freeid)
       ;;
     sealid)
-      WF_FLAGS+=(--use-md-baseline-split)
       ;;
     seastarreid2023)
       WF_FLAGS+=(--segmented)
@@ -316,7 +317,7 @@ config_flags() {
       CFG_FLAGS+=(--use_fisher --method ensamble --fusion_signals fisher)
       ;;
     fisher_gv_power)
-      CFG_FLAGS+=(--use_fisher --method ensamble --use_geometric_verification --use_lightglue --fusion_signals fisher gv)
+      CFG_FLAGS+=(--use_fisher --method ensamble --use_lightglue --fusion_signals fisher gv)
       ;;
     global_fisher)
       CFG_FLAGS+=(--use_global_embedding --use_fisher --method ensamble --fusion_signals global fisher)
@@ -332,13 +333,13 @@ config_flags() {
       ;;
     # Supported if you add them to CONFIGS:
     global_fisher_gv_power|fisher_global_gv)
-      CFG_FLAGS+=(--use_global_embedding --use_fisher --method ensamble --use_geometric_verification --use_lightglue --fusion_signals global fisher gv)
+      CFG_FLAGS+=(--use_global_embedding --use_fisher --method ensamble --use_lightglue --fusion_signals global fisher gv)
       ;;
     global_only)
       CFG_FLAGS+=(--use_global_embedding --fusion_signals global)
       ;;
     global_gv)
-      CFG_FLAGS+=(--use_global_embedding --use_geometric_verification --use_lightglue --fusion_signals global gv)
+      CFG_FLAGS+=(--use_global_embedding --use_lightglue --fusion_signals global gv)
       ;;
     *)
       echo "[WARN] Unknown config: $cfg"
@@ -353,6 +354,18 @@ for ds in "${MAIN_DATASETS[@]}"; do
   dataset_main_flags "$ds"
   for cfg in "${CONFIGS[@]}"; do
     config_flags "$cfg"
+
+    # Override for cowdataset: force superpoint instead of ensemble
+    if [[ "${ds,,}" == "cowdataset" ]]; then
+      for i in "${!CFG_FLAGS[@]}"; do
+        if [[ "${CFG_FLAGS[i]}" == "ensamble" ]]; then
+          CFG_FLAGS[i]="superpoint"
+        fi
+      done
+      # Also ensure GV uses superpoint if GV is active
+      CFG_FLAGS+=(--gv_features superpoint)
+    fi
+
     version="final_${ds}_${cfg}"
     log_path="$LOG_DIR/main_${ds}_${cfg}.log"
 
