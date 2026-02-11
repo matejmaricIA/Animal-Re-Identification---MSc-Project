@@ -297,7 +297,7 @@ Runtime is mean wall-clock **seconds** per run.
 |---|---:|---:|---|
 | `--fusion_signals` | list[str] | `["global","fisher","gv"]` | Signals used by the classification funnel. Tier-2 uses calibrated probabilities of `global` and/or `fisher` (mean). Tier-3 runs if `gv` is included. |
 | `--calibration_method` | str | `"isotonic_pchip"` | Calibration method for converting similarities to probabilities. Choices: `isotonic_pchip`, `logistic`, `isotonic`. |
-| `--calib_size` | int | `200` | Calibration query count used when building calibration pairs (training/visualization). |
+| `--calib_ids` | int | `10` | WildFusion-style calibration: number of identities used for calibration (pairs = `calib_ids^2`). |
 
 ### Geometric verification (GV)
 | Flag | Type | Default | Description |

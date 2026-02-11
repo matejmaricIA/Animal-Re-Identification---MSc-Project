@@ -1,20 +1,28 @@
 import numpy as np
 from typing import Dict, List
 from calibration import ScoreCalibrator
-from calibration import build_calibration_pairs, build_calibration_pairs_stratified, compute_calibration_scores
+from calibration import (
+    build_calibration_pairs,
+    build_calibration_pairs_stratified,
+    build_calibration_pairs_ids,
+    compute_calibration_scores,
+)
 from geometric_verification import compute_geometric_similarity
 from tqdm import tqdm
 
-NEGATIVES_PER_QUERY = 200
 def train_calibrators_two_stage(
-    train_labels, global_emb, fisher_vectors,
-    keypoints, descriptors,
-    cal_size=50, shortlist_size=300,
-    use_lightglue=True, method='disk',
-    calibration_method='isotonic_pchip',
+    train_labels,
+    global_emb,
+    fisher_vectors,
+    keypoints,
+    descriptors,
+    calib_ids: int = 10,
+    use_lightglue: bool = True,
+    method: str = "disk",
+    calibration_method: str = "isotonic_pchip",
     fusion_signals: List[str] | None = None,
     gv_matcher: str | None = None,
-):
+) -> Dict[str, ScoreCalibrator]:
     """Train calibrators for late fusion (Tier-2 + optional GV fusion).
 
     - Tier-2 signals (global/fisher) are calibrated as probabilities and then
@@ -22,31 +30,24 @@ def train_calibrators_two_stage(
     - GV is calibrated as a probability from a GV evidence signal
       (currently log1p(n_inliers)) and fused downstream.
 
-    The calibration pairs are sampled to reflect shortlist difficulty when
-    global embeddings are available, using hard negatives from a global
-    shortlist.
+    Calibration pairs follow a WildFusion-style scheme: sample ``calib_ids``
+    identities with >=2 images, pick 2 images per identity (query/database),
+    and use the full cross product (pairs ~= ``calib_ids²``).
     """
 
     if fusion_signals is None:
         fusion_signals = ["global", "fisher"]
 
-    # Build calibration pairs (hard negatives when possible).
-    try:
-        if global_emb:
-            query_ids, db_ids, pair_labels = build_calibration_pairs_stratified(
-                train_labels,
-                global_emb,
-                cal_size=cal_size,
-                shortlist_size=shortlist_size,
-                n_negatives=NEGATIVES_PER_QUERY,
-            )
-        else:
-            raise ValueError("global_emb missing; cannot build stratified pairs")
-    except Exception as e:
-        print(f"[Calibration] Stratified sampling failed ({e}); falling back to random pairs.")
-        query_ids, db_ids, pair_labels = build_calibration_pairs(
-            train_labels, cal_size=cal_size, max_negatives_per_query=NEGATIVES_PER_QUERY
+    # Build WildFusion-style calibration pairs (~calib_ids^2).
+    query_ids, db_ids, pair_labels = build_calibration_pairs_ids(
+        train_labels, calib_ids=int(calib_ids), seed=42
+    )
+    if not pair_labels or len(set(pair_labels)) < 2:
+        print(
+            "[Calibration] Skipping calibration: need >=2 identities with >=2 images "
+            "to generate both positive and negative pairs."
         )
+        return {}
     pair_labels = np.asarray(pair_labels)
 
     calibrators: Dict[str, ScoreCalibrator] = {}
@@ -117,7 +118,7 @@ def train_calibrators_two_stage(
                     neg_idx.append(i)
 
             total_available = len(pos_idx) + len(neg_idx)
-            max_gv_pairs = min(total_available, max(200, 10 * int(cal_size)))
+            max_gv_pairs = min(total_available, max(200, 20 * int(calib_ids)))
             if total_available == 0 or max_gv_pairs <= 0:
                 print("[Calibration] GV skipped: no valid pairs with keypoints/descriptors.")
             else:

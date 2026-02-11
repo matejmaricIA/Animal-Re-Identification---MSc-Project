@@ -74,9 +74,9 @@ POOR_GEOMETRY_PENALTY = 5.0     # Penalty multiplier for poor geometric consiste
 FISHER_DISTANCE_MIN_CLAMP = 0.01     # Minimum clamp value for Fisher distance
 FISHER_DISTANCE_MAX_CLAMP = 1.0      # Maximum clamp value for Fisher distance
 NORMALIZED_THRESHOLD_DIVISOR = 100.0 # Divisor for normalizing RANSAC threshold
-GEOMETRIC_CANDIDATES = 350
+GEOMETRIC_CANDIDATES = 10
 UNION_CANDIDATES = 600
-LOCAL_RANK_CANDIDATES = 350
+LOCAL_RANK_CANDIDATES = 10
 
 # Geometric Verification Method Selection
 GV_METHOD = "MAGSAC"  # Options: "RANSAC" or "MAGSAC"

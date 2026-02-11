@@ -1,6 +1,44 @@
 \chapter{Conclusion and Future Work}
 \label{chap:conclusion}
+
+\section{Conclusion}
+
+This thesis presented a unified, species-agnostic pipeline for animal re-identification and population size estimation from camera trap imagery. The system combines global deep embeddings with scalable local-feature aggregation (Fisher vectors) and optional geometric verification, and uses these signals both for closed-set identification and for the Human-in-the-Loop Nested Importance Sampling (HITL-NIS) estimator for population counting~\cite{perez2024humanintheloopvisualreidpopulation}. Across diverse benchmarks, the proposed approach matches WildFusion closely on most datasets while being substantially faster in our runs, and provides a practical bridge from identification to downstream counting (Chapter~\ref{chap:results}).
+
+\subsection{Summary of accomplishments}
+
+The main outcomes of the work are:
 \begin{itemize}
-    \item Summary of contributions and findings.
-    \item Potential extensions and open questions.
+    \item \textbf{A modular three-tier re-identification pipeline.} We implemented a retrieval-based system that can operate as (i) Global-only matching, (ii) Global+Fisher late fusion, or (iii) a full Global+Fisher+GV re-ranking pipeline (Chapters~\ref{chap:feature_aggregation} and~\ref{chap:geometric_verification}).
+    \item \textbf{A low-supervision calibration strategy for fusion.} Inspired by WildFusion, we used a small identity-based calibration set to fit the Tier-2 fusion calibrators, reducing manual effort to on the order of \(\mathcal{O}(I^2)\) pair labels for \(I\) chosen identities (Chapter~\ref{chap:classification}).
+    \item \textbf{End-to-end experimental evaluation and runtime accounting.} Final results were produced with consistent protocols and reported with practical wall-clock runtimes (Chapter~\ref{chap:results}).
+    \item \textbf{Population estimation with explicit human error modeling.} We extended HITL-NIS evaluation by simulating oracle mistakes and showing how confirmation strictness \(K\) governs robustness to realistic annotation noise (Chapter~\ref{chap:results}).
 \end{itemize}
+
+\subsection{Key findings}
+
+Two observations are particularly important for deployments:
+\begin{itemize}
+    \item \textbf{Accuracy and efficiency can be balanced by deferring expensive local reasoning.} In the classification experiments, the Global+Fisher backbone already provides a strong baseline at low cost, while geometric verification can be reserved for final re-ranking when additional precision is needed (Table~\ref{tab:classification_results_final}).
+    \item \textbf{Counting quality is bounded by re-identification quality and oracle reliability.} HITL-NIS operates on pair proposals derived from similarity signals; if the underlying re-ID is weak, the sampler wastes oracle queries on uninformative pairs and the estimator can become unstable or confidently wrong. This effect is most visible on ELPephants, the hardest dataset in our evaluation (Chapter~\ref{chap:results}). Furthermore, even strong re-ID signals degrade quickly when oracle labels are noisy, and requiring repeated confirmation (\(K=2\)) is a simple and effective safeguard (Tables~\ref{tab:counting_error_sweep} and~\ref{tab:counting_error_sweep_k1}). These results are consistent with broader findings that identification errors can introduce systematic bias in camera-trap population studies~\cite{johansson2020identificationerrors}.
+\end{itemize}
+
+\section{Future work}
+
+\subsection{Broader benchmarking and robustness}
+
+The most direct extension is to evaluate the system on additional datasets and field deployments, including more challenging conditions (night imagery, motion blur, occlusion, heavy background clutter) and more open-world settings. In practice, open-set behavior matters: camera trap streams typically contain previously unseen individuals, and future work should integrate explicit unknown-handling (e.g., thresholding calibrated scores, or using novelty detection) and measure performance under identity churn over time.
+
+\subsection{Improving the global backbone and fusion}
+
+The global embedding model is a critical component: it drives retrieval, affects shortlist quality, and strongly influences counting. Future work can improve generalization by (i) fine-tuning the global backbone on additional public re-ID datasets or curated camera-trap corpora, (ii) using self-supervised pretraining on large-scale wildlife imagery, and (iii) exploring domain adaptation strategies that reduce sensitivity to camera viewpoint and illumination changes. On the fusion side, calibration can be made more data-efficient by actively selecting informative identities/pairs for labeling, or by incorporating uncertainty-aware calibration to better handle ambiguous pairs.
+
+\subsection{From photographed individuals to true abundance and density}
+
+As evaluated in this thesis, the counting pipeline estimates the number of \emph{unique individuals present in the image collection} (i.e., those that were detected and photographed). In many ecological applications, the target quantity is instead \emph{true abundance} or \emph{density} in a study area, which requires modeling imperfect detection and sampling design. A promising direction is to combine re-identification with capture--recapture methodology: with a field of camera traps, re-ID can provide encounter histories for each individual across space and time, which can then be analyzed using spatial capture--recapture (SCR/SECR) models to estimate density while accounting for undetected animals~\cite{royle2013spatialcapture,efford2004density,borchers2008secr}.
+
+When individual recognition is not possible (or only partially reliable), alternative estimators can be considered. For example, the Random Encounter Model estimates density from camera-trap encounter rates without individual identification, given assumptions about animal movement speed and the camera detection zone~\cite{rowcliffe2008rem}. Similarly, repeated-count models such as N-mixture models estimate abundance from replicated counts while explicitly modeling detection probability~\cite{royle2004nmix}. A practical research roadmap is to integrate these statistical models with the thesis pipeline by treating re-ID outputs as probabilistic identity assignments and propagating uncertainty (including misidentification) into the downstream abundance/density estimator, rather than assuming error-free identity.
+
+\subsection{How to validate population estimates in practice}
+
+Finally, a complete end-to-end validation should be carried out with a realistic deployment protocol. In a controlled study, one can (i) place a spatial array of camera traps with known effort, (ii) collect a limited amount of auxiliary ground truth (e.g., manual re-ID for a subset, GPS-collared individuals, or independent survey data), (iii) run the re-ID system to produce encounter histories and calibrated match probabilities, and (iv) compare abundance/density estimates under multiple assumptions about detection and misidentification. Complementing field trials with simulation (synthetic animal movement and camera detection processes) would make it possible to measure estimator bias/variance across operating regimes and guide principled choices of annotation effort, confirmation \(K\), and sampling budgets.

@@ -280,7 +280,7 @@ def run_training_for_dataset(
         fisher_vectors=fv_tr,
         keypoints=train_keypoints,
         descriptors=train_dict,
-        cal_size=args.calib_size,
+        calib_ids=args.calib_ids,
         calibration_method=args.calibration_method,
         use_lightglue=args.use_lightglue,
         method=gv_features,
@@ -309,7 +309,7 @@ def run_training_for_dataset(
         debug=args.debug,
         dataset_name=dataset_name,
         calibration_method=args.calibration_method,
-        calib_size=args.calib_size,
+        calib_ids=args.calib_ids,
     )
 
     metrics = evaluate_predictions(preds, test_labels)
@@ -337,7 +337,7 @@ def run_training_for_dataset(
             "Use GV": use_gv_signal,
             "Geom. Candidates": GEOMETRIC_CANDIDATES,
             "Calibration Method": args.calibration_method,
-            "Calibration Size": args.calib_size,
+            "Calibration IDs": int(args.calib_ids),
             "Run Time (minutes)": round((float(metrics["eval_runtime_sec"]) / 60), 2),
             "Accuracy": round(float(metrics["accuracy"]), 4),
             "Top-5 Accuracy": round(float(metrics["top_n_accuracy"]), 4),
@@ -656,7 +656,7 @@ def run_query_visualization_for_dataset(
         fisher_vectors=fv_tr,
         keypoints=train_keypoints,
         descriptors=train_dict,
-        cal_size=args.calib_size,
+        calib_ids=args.calib_ids,
         calibration_method=args.calibration_method,
         use_lightglue=args.use_lightglue,
         method=gv_features,

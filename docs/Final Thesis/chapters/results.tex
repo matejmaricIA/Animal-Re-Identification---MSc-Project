@@ -85,9 +85,9 @@ CZoo & Top-1 & 98.82 (0.05) & \textbf{99.53} (131.08) & 76.12 (2.83) & 99.05 (2.
  & Top-5 & 98.82 (0.05) & \textbf{100.00} (131.08) & 90.54 (2.83) & 99.05 (2.82) & 95.98 (29.48) & 99.29 (29.49) \\
  & F1 & 98.82 (0.05) & \textbf{99.53} (131.08) & 75.68 (2.83) & 99.05 (2.82) & 88.00 (29.48) & 98.58 (29.49) \\
 \hline
-ELPephants & Top-1 & 13.66 (0.06) & 49.31 (308.05) & 20.79 (4.42) & 21.58 (4.40) & 46.53 (61.22) & \textbf{52.08} (54.49) \\
- & Top-5 & 21.78 (0.06) & 57.03 (308.05) & 31.49 (4.42) & 32.48 (4.40) & \textbf{67.13} (61.22) & 61.98 (54.49) \\
- & F1 & 11.58 (0.06) & 45.19 (308.05) & 18.21 (4.42) & 19.26 (4.40) & 42.65 (61.22) & \textbf{47.16} (54.49) \\
+ELPephants & Top-1 & 13.66 (0.06) & 49.31 (308.05) & 20.79 (4.17) & 21.58 (4.20) & 46.73 (97.71) & \textbf{54.46} (87.70) \\
+ & Top-5 & 21.78 (0.06) & 57.03 (308.05) & 31.49 (4.17) & 32.48 (4.20) & \textbf{68.12} (97.71) & 64.95 (87.70) \\
+ & F1 & 11.58 (0.06) & 45.19 (308.05) & 18.21 (4.17) & 19.26 (4.20) & 42.87 (97.71) & \textbf{49.71} (87.70) \\
 \hline
 SealID & Top-1 & 78.42 (0.05) & \textbf{97.60} (174.64) & 65.23 (2.71) & 79.38 (2.40) & 81.53 (33.08) & 85.13 (21.96) \\
  & Top-5 & 79.62 (0.05) & \textbf{98.56} (174.64) & 80.58 (2.71) & 82.73 (2.40) & 89.69 (33.08) & 88.97 (21.96) \\
@@ -97,9 +97,9 @@ SeaStarReID2023 & Top-1 & 47.91 (0.05) & \textbf{80.47} (192.20) & 68.84 (3.51) 
  & Top-5 & 73.49 (0.05) & \textbf{90.70} (192.20) & 85.58 (3.51) & 82.79 (3.32) & 85.58 (19.35) & 85.58 (18.82) \\
  & F1 & 45.71 (0.05) & \textbf{79.09} (192.20) & 67.92 (3.51) & 60.70 (3.32) & 76.40 (19.35) & 76.85 (18.82) \\
 \hline
-Average & Top-1 & 71.75 (0.06) & \textbf{88.18} (214.52) & 71.03 (3.10) & 76.61 (3.04) & 82.40 (37.32) & 86.39 (34.61) \\
- & Top-5 & 79.58 (0.06) & \textbf{91.91} (214.52) & 82.69 (3.10) & 84.39 (3.04) & 90.39 (37.32) & 90.28 (34.61) \\
- & F1 & 71.51 (0.06) & \textbf{87.35} (214.52) & 70.23 (3.10) & 75.86 (3.04) & 81.50 (37.32) & 85.34 (34.61) \\
+Average & Top-1 & 71.75 (0.06) & \textbf{88.18} (214.52) & 71.03 (3.07) & 76.61 (3.01) & 82.43 (42.53) & 86.73 (39.35) \\
+ & Top-5 & 79.58 (0.06) & \textbf{91.91} (214.52) & 82.69 (3.07) & 84.39 (3.01) & 90.53 (42.53) & 90.70 (39.35) \\
+ & F1 & 71.51 (0.06) & \textbf{87.35} (214.52) & 70.23 (3.07) & 75.86 (3.01) & 81.53 (42.53) & 85.70 (39.35) \\
 \hline
 \end{tabular}
 \caption{Final classification results. Values are reported as \% (runtime in minutes). Best value per dataset/metric is in \textbf{bold}. ``Global'' refers to MegaDescriptor-L-384 embeddings~\cite{čermák2023wildlifedatasetsopensourcetoolkitanimal}. WildFusion values are reported where available~\cite{cermak2024wildfusionindividualanimalidentification}.}
@@ -110,9 +110,10 @@ Average & Top-1 & 71.75 (0.06) & \textbf{88.18} (214.52) & 71.03 (3.10) & 76.61 
 
 Several consistent patterns emerge:
 \begin{itemize}
-    \item \textbf{WildFusion is the strongest overall baseline, but our full pipeline is competitive.} WildFusion achieves the best mean Top-1 and Top-5 across datasets and is best on most benchmarks, while the full three-tier pipeline (\textbf{G+F+GV}) is best on CowDataset and ELPephants and achieves the best Top-1 and F1 on Chicks4FreeID.
-    \item \textbf{Geometric verification is most valuable on the hardest datasets.} On ELPephants, the full three-tier pipeline (\textbf{G+F+GV}) substantially improves Top-1 and F1 compared to using global embeddings or Fisher similarity alone, supporting the intuition that local geometric consistency is essential when global similarity is unreliable.
-    \item \textbf{Accuracy gains come with large runtime costs.} Global-only evaluation completes in seconds, Fisher-based evaluation in minutes, while adding GV increases runtimes by an order of magnitude (e.g., \(\sim\)10--80 minutes for \textbf{G+F+GV}). The WildFusion pipeline is substantially more expensive in wall-clock time in our runs (typically \(\sim\)70--300 minutes), highlighting a practical trade-off between peak accuracy and evaluation throughput.
+    \item \textbf{The proposed three-tier pipeline tracks WildFusion closely on most datasets, with a much better runtime--accuracy trade-off.} In mean Top-1 and F1, \textbf{G+F+GV} is within \(\sim\)1--2 pp of WildFusion (Table~\ref{tab:classification_results_final}), but is substantially faster in our runs (39.35 min on average vs.\ 214.52 min for WildFusion).
+    \item \textbf{WildFusion is strongest on SealID and SeaStarReID2023, while both approaches saturate on easier benchmarks.} WildFusion remains clearly stronger on SealID (Top-1: 97.60\% vs.\ 85.13\%) and is also better on SeaStarReID2023 (80.47\% vs.\ 77.21\%). On ATRW and CZoo both pipelines are near saturation, so the differences are comparatively small.
+    \item \textbf{ELPephants is the hardest dataset tested, and our full pipeline performs best.} On ELPephants, even the best configuration reaches only 54.46\% Top-1, but \textbf{G+F+GV} improves over WildFusion by \(\sim\)5 pp in Top-1 (54.46\% vs.\ 49.31\%) and \(\sim\)4.5 pp in F1 (49.71\% vs.\ 45.19\%). The large gap to Global-only (13.66\% Top-1) and Fisher-only (20.79\% Top-1), together with the strong Top-5 from F+GV (68.12\%), highlights that explicit local evidence and geometric consistency are essential on this benchmark. Despite using GV, our run is still far faster than WildFusion (87.70 vs.\ 308.05 minutes).
+    \item \textbf{This structure is directly reusable for population estimation.} The HITL-NIS counting estimator evaluated in Section~\ref{sec:results_counting} operates directly on the same Global/Fisher similarity signals reported here, making it practical to run many oracle-in-the-loop iterations with a lightweight backbone (e.g., \textbf{G+F} averages 3.01 minutes). GV can then be reserved for final identification runs when additional accuracy is needed.
 \end{itemize}
 
 \section{Population Counting Evaluation}
@@ -202,9 +203,10 @@ SeaStarReID2023 & 2077 & 91 & \textbf{106 [85, 128]} & 36 [32, 40] & 18 [16, 20]
 
 \subsection{Discussion}
 
-The results illustrate the core failure mode discussed in Chapter~\ref{chap:population_counting}:
+Tables~\ref{tab:counting_error_sweep} and~\ref{tab:counting_error_sweep_k1} illustrate how the HITL-NIS estimator behaves as a function of the simulated oracle error rate \(p\), and how this interacts with confirmation strictness \(K\) and the underlying quality of the re-identification signal:
 \begin{itemize}
-    \item \textbf{\(K=2\) is substantially more robust to labeling noise than \(K=1\).} With strict confirmation (\(K=2\)), several datasets remain correct up to \(p \approx 0.05\) (and up to \(p \approx 0.15\) on CowDataset and CZoo), before collapsing around \(p \ge 0.10\). In contrast, \(K=1\) typically fails already at \(p=0.02\), illustrating how quickly HITL-NIS can degrade without confirmation.
-    \item \textbf{Failure is dominated by false ``same'' votes.} As \(p\) increases, estimates collapse toward very small values across datasets, consistent with the analysis in Chapter~\ref{chap:population_counting}: erroneous merges cause the sampler to underestimate the number of individuals.
-    \item \textbf{Robustness comes at a runtime/oracle-cost premium.} Requiring a second confirmation vote increases oracle calls and runtimes (especially on larger datasets), but provides a dramatic gain in tolerance to realistic human error rates. In real deployments, the dominant cost would be human annotation time rather than compute.
+    \item \textbf{Oracle noise causes a characteristic ``collapse'' toward underestimation.} As \(p\) increases, most datasets rapidly transition from plausible estimates to very small counts with tight confidence intervals. This is a direct consequence of the extreme class imbalance among candidate pairs: there are far more ``different'' pairs than ``same'' pairs, so flipping answers with probability \(p\) injects many false positive edges, which in turn induces erroneous merges and therefore underestimates the number of individuals.
+    \item \textbf{Confirmation is critical: \(K=2\) delays failure substantially.} Requiring two consecutive ``same'' votes dramatically reduces the probability of accepting a spurious edge (approximately from \(p\) to \(p^2\) under independence), which is why \(K=2\) remains correct up to \(p \approx 0.05\) on several datasets (and up to \(p \approx 0.15\) on CowDataset and CZoo), whereas \(K=1\) typically fails already at \(p=0.02\).
+    \item \textbf{Counting quality depends on Re-ID quality.} HITL-NIS does not operate on ground-truth identity structure directly; it relies on the underlying similarity model to propose informative candidate pairs. When re-identification is reliable, the sampler concentrates oracle queries on genuinely ambiguous neighborhoods, producing stable degree estimates and confidence intervals that contain GT for moderate \(p\). Conversely, when Re-ID is weak, proposals become noisy and the estimator either becomes highly variable (wide CIs) or confidently wrong (collapsed estimates). This explains the behavior on ELPephants: in classification the best Top-1 is only \(\sim 54\%\) (Table~\ref{tab:classification_results_final}), and even with increased sampling budgets (Section~\ref{sec:results_counting}, protocol for ELPephants) the \(K=1\) setting fails to include GT already at \(p=0\), while \(K=2\) succeeds only at very low error rates and then collapses quickly as \(p\) increases.
+    \item \textbf{Robustness carries an oracle-cost premium.} Increasing \(K\) improves tolerance to realistic human error rates but increases the required number of oracle interactions and therefore runtime (especially for larger datasets). In practice, the dominant cost is expected to be annotator time rather than computation, which makes confirmation-based strategies an important design choice for deployments.
 \end{itemize}

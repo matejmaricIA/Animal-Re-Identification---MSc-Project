@@ -7,6 +7,7 @@ from scipy.interpolate import PchipInterpolator
 from typing import Any, Dict, Tuple, List
 import pickle
 import random
+from collections import defaultdict
 
 class ScoreCalibrator:
     """Calibrate raw similarity scores to P(same individual)."""
@@ -195,6 +196,65 @@ def build_calibration_pairs_stratified(
             db_ids.append(n_id)
             pair_labels.append(0)
     
+    return query_ids, db_ids, pair_labels
+
+
+def build_calibration_pairs_ids(
+    train_labels: Dict[str, str],
+    *,
+    calib_ids: int = 10,
+    seed: int = 42,
+) -> Tuple[List[str], List[str], List[int]]:
+    """Build calibration pairs from identity labels (WildFusion-style).
+
+    We sample ``calib_ids`` identities that have at least two images. For each selected
+    identity, we pick two distinct images and split them into:
+      - 1 query image
+      - 1 database image
+
+    We then generate all pairs in ``cal_q × cal_db``, yielding approximately
+    ``calib_ids²`` labeled pairs (1 positive per identity, rest negatives).
+    """
+
+    calib_ids = int(calib_ids)
+    if calib_ids <= 0:
+        return [], [], []
+
+    rng = random.Random(seed)
+
+    ids_to_images: dict[str, list[str]] = defaultdict(list)
+    for image_id, identity in (train_labels or {}).items():
+        ids_to_images[str(identity)].append(str(image_id))
+
+    eligible = [ident for ident, imgs in ids_to_images.items() if len(imgs) >= 2]
+    if len(eligible) < 2:
+        return [], [], []
+
+    rng.shuffle(eligible)
+    selected = eligible[: min(calib_ids, len(eligible))]
+    if len(selected) < 2:
+        return [], [], []
+
+    cal_q_ids: list[str] = []
+    cal_db_ids: list[str] = []
+    cal_identities: list[str] = []
+
+    for ident in selected:
+        imgs = ids_to_images[ident]
+        q_id, db_id = rng.sample(imgs, k=2)
+        cal_q_ids.append(q_id)
+        cal_db_ids.append(db_id)
+        cal_identities.append(ident)
+
+    query_ids: list[str] = []
+    db_ids: list[str] = []
+    pair_labels: list[int] = []
+    for q_id, q_ident in zip(cal_q_ids, cal_identities):
+        for db_id, db_ident in zip(cal_db_ids, cal_identities):
+            query_ids.append(q_id)
+            db_ids.append(db_id)
+            pair_labels.append(1 if q_ident == db_ident else 0)
+
     return query_ids, db_ids, pair_labels
 
 

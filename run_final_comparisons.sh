@@ -12,10 +12,11 @@ set -o pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
-OUT_CSV="evaluations/classifications/final_comparisons_gv_350.csv"
+OUT_CSV="evaluations/classifications/final_comparisons_new_ids.csv"
 LOG_DIR="evaluations/classifications/logs"
 TMP_WF_CSV="/tmp/wildfusion_final_comparisons_tmp.csv"
 CSV_HEADER="timestamp,source,dataset,config,status,accuracy,top5_accuracy,f1_score,runtime_minutes,error,n_train,n_test,n_id_train,n_id_test,seconds,command"
+CALIB_IDS=10
 
 mkdir -p "$(dirname "$OUT_CSV")" "$LOG_DIR"
 rm -f "$TMP_WF_CSV"
@@ -56,8 +57,9 @@ MAIN_DATASETS=(
   cowdataset
   elpephants
   czoo
-  chicks4freeid
   seastarreid2023
+  chicks4freeid
+  
 )
 
 # WildFusion list is intentionally separate and hardcoded.
@@ -72,15 +74,15 @@ WILDFUSION_DATASETS=(
 )
 
 CONFIGS=(
-  fisher_only
-  fisher_gv_power
+  #fisher_only
+  #fisher_gv_power
   global_fisher
   #fisher_disk
   #fisher_aliked
   #fisher_superpoint
-  global_only
+  #global_only
   global_fisher_gv_power
-  global_gv
+  #global_gv
 )
 
 prepare_output_csv
@@ -273,7 +275,7 @@ dataset_main_flags() {
     czoo)
       ;;
     chicks4freeid)
-    MAIN_FLAGS+=(--use_mantiuk)
+    MAIN_FLAGS+=()
       ;;
     sealid)
     MAIN_FLAGS+=(--use_mantiuk)
@@ -376,6 +378,7 @@ for ds in "${MAIN_DATASETS[@]}"; do
       --save_eval
       --debug
       --version "$version"
+      --calib_ids "$CALIB_IDS"
       "${MAIN_FLAGS[@]}"
       "${CFG_FLAGS[@]}"
     )
@@ -416,6 +419,7 @@ else
       test-scripts/run_wildfusion_paper_baseline.py
       --ds "$ds"
       --results-csv "$TMP_WF_CSV"
+      --calib-ids "$CALIB_IDS"
       "${WF_FLAGS[@]}"
     )
     wf_cmd_str="HF_HUB_OFFLINE=1 ${wf_cmd[*]}"

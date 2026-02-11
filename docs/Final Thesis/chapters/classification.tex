@@ -52,7 +52,12 @@ Raw similarity values from different modalities are not directly comparable. The
 where $s(x,y)$ is a raw similarity score for a pair of images $(x,y)$ in a given modality.
 
 \subsection{Calibration Set Construction}
-Calibration requires labeled pairs. For each dataset, a subset of training images is sampled as calibration queries. Positive pairs are formed by matching each query with other images of the same identity. Negative pairs should be representative of hard confusions so when global embeddings are avaialable, negatives are sampled from the top-$B$ global shortlist of the query, which tends to produce visually similar non-matches.\cite{cermak2024wildfusionindividualanimalidentification}
+Calibration requires labeled pairs, but the goal is to keep the required supervision minimal. Following WildFusion~\cite{cermak2024wildfusionindividualanimalidentification}, the calibration set is constructed from a tiny subset of the training split. We sample \(I\) identities that have at least two images (in this thesis \(I=\num{10}\)). For each selected identity we pick two distinct images and split them into a calibration query set and a calibration database set (one image per identity in each). We then label all pairs in the cross product of these sets, yielding
+\[
+N_{\text{pairs}} = I^2,\qquad N_{+}=I,\qquad N_{-}=I(I-1),
+\]
+i.e.\ \num{100} labeled pairs for \(I=\num{10}\) (10 positive and 90 negative).
+In a deployment setting, this supervision can be obtained either by assigning identity labels to the selected \(2I=\num{20}\) images (which implicitly determines the \(I^2\) pair labels), or by directly annotating the \num{100} image pairs as ``same''/``different''. The remainder of the pipeline runs without additional supervision.
 
 \subsection{Calibrators and Fusion Rules}
 Each active Tier 2 signal (global and/or FV) is calibrated independently. In practice, this is implemented as a monotonic calibration model (isotonic regression) which has been shown to work well with small datasets\cite{cermak2024wildfusionindividualanimalidentification}. The calibrated probabilities are then fused by a simple mean:
@@ -78,7 +83,7 @@ Intuition behind is that, since the distance $d_L$ is a fraction between 0 and 1
 Putting this all together, the classification goes like this:
 \begin{enumerate}
     \item Extract global embeddings and/or local features and computer FVs.
-    \item Train the calibrators on a small labeled subset of training data.
+    \item Train per-signal calibrators on a tiny labeled subset of training data (\(I=\num{10}\) identities \(\Rightarrow\) \num{100} labeled pairs).
     \item For each query image:
     \begin{enumerate}
         \item Retrieve a Tier 1 union shortlist from global and fisher similarity.

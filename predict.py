@@ -341,37 +341,35 @@ def rank_by_local_score(
     active_signals = set(fusion_signals or ["global", "fisher"])
     candidates = []
     for train_id in union_ids:
+        scores = []
+        raw_scores = []
         s_global = 0.0
-        s_fisher = 0.0
-        if global_sims is not None:
+        if "global" in active_signals and global_sims is not None:
             idx = train_global_index.get(train_id)
             if idx is not None:
                 s_global = float(global_sims[idx])
-        if fisher_sims is not None:
+                raw_scores.append(s_global)
+                if calibrators is not None and "global" in calibrators:
+                    scores.append(float(calibrators["global"].predict_proba([s_global])[0]))
+
+        s_fisher = 0.0
+        if "fisher" in active_signals and fisher_sims is not None:
             idx = train_fisher_index.get(train_id)
             if idx is not None:
                 s_fisher = float(fisher_sims[idx])
-
-        scores = []
-        raw_scores = []
-        if "global" in active_signals:
-            raw_scores.append(s_global)
-            if calibrators is not None and "global" in calibrators:
-                scores.append(float(calibrators["global"].predict_proba([s_global])[0]))
-        if "fisher" in active_signals:
-            raw_scores.append(s_fisher)
-            if calibrators is not None and "fisher" in calibrators:
-                scores.append(float(calibrators["fisher"].predict_proba([s_fisher])[0]))
+                raw_scores.append(s_fisher)
+                if calibrators is not None and "fisher" in calibrators:
+                    scores.append(float(calibrators["fisher"].predict_proba([s_fisher])[0]))
 
         if scores:
             tier2_score = float(np.mean(scores))
         else:
-            # Fallback: use mean of raw similarities for whichever signals are active.
-            # Note: this is not a probability and should not be fused with GV logits.
             if raw_scores:
-                tier2_score = float(np.mean(raw_scores))
+                # Fallback: map raw similarities to a probability-like score in [0, 1].
+                # This keeps Tier-3 reranking stable when calibration is unavailable.
+                tier2_score = float(np.mean(np.clip(raw_scores, 0.0, 1.0)))
             else:
-                tier2_score = float(np.mean([s_global, s_fisher]))
+                tier2_score = 0.0
 
         candidates.append({
             "train_id": train_id,
@@ -612,7 +610,7 @@ def classify_test_images_late_fusion(
     debug: bool = False,
     dataset_name: str | None = None,
     calibration_method: str | None = None,
-    calib_size: int | None = None,
+    calib_ids: int | None = None,
 ):
     """
     3-Tier Funnel classification (Retrieve → Local Rank → Geometric Verify).
@@ -895,7 +893,7 @@ def classify_test_images_late_fusion(
                     "fusion_mode": "late",
                     "fusion_signals": " ".join(fusion_signals or []),
                     "calibration_method": calibration_method or "",
-                    "calib_size": "" if calib_size is None else int(calib_size),
+                    "calib_ids": "" if calib_ids is None else int(calib_ids),
                     "queries": int(debug_total),
                     "union_hit_rate": float(union_rate),
                     "local_hit_rate": float(local_rate),
