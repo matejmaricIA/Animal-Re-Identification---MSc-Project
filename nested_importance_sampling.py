@@ -73,10 +73,6 @@ def nested_importance_sampling(
 ) -> Union[Tuple[float, float], Tuple[float, float, Dict[str, Any]]]:
     """Estimate population size with HITL Nested Importance Sampling (NIS).
 
-    proposal_mode:
-        - calibrated: sample neighbors from fused calibrated probabilities.
-        - power: sample neighbors from a power-transformed version of the fused
-          score that emphasizes high-confidence candidates.
     """
 
     proposal_mode = str(proposal_mode).lower().strip()

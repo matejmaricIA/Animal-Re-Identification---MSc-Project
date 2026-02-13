@@ -7,6 +7,7 @@ from scipy.interpolate import PchipInterpolator
 from typing import Any, Dict, Tuple, List
 import pickle
 import random
+from collections import defaultdict
 
 class ScoreCalibrator:
     """Calibrate raw similarity scores to P(same individual)."""
@@ -70,11 +71,7 @@ class ScoreCalibrator:
 
 
 class FusionCalibrator:
-    """Learn how to fuse multiple calibrated match probabilities into P(match).
-
-    Intended use: fuse Tier-2 probability with GV probability.
-    Input features are typically logits: [logit(p_tier2), logit(p_gv)].
-    """
+    """Learn how to fuse multiple calibrated match probabilities into P(match)."""
 
     def __init__(self, max_iter: int = 1000):
         self.model = LogisticRegression(max_iter=max_iter)
@@ -97,104 +94,53 @@ class FusionCalibrator:
         return self.model.intercept_
 
 
-def build_calibration_pairs(
+def build_calibration_pairs_ids(
     train_labels: Dict[str, str],
-    cal_size: int = 50,
-    max_negatives_per_query: int = 100,
+    *,
+    calib_ids: int = 10,
     seed: int = 42,
 ) -> Tuple[List[str], List[str], List[int]]:
-    """
-    Build calibration pairs from training labels.
-    
-    Returns:
-        query_ids, db_ids, labels (1=same, 0=different)
-    """
+    """Build calibration pairs from identity labels (inspired by WildFusion)"""
+
+    calib_ids = int(calib_ids)
+    if calib_ids <= 0:
+        return [], [], []
+
     rng = random.Random(seed)
 
-    image_ids = sorted(str(k) for k in train_labels.keys())
+    ids_to_images: dict[str, list[str]] = defaultdict(list)
+    for image_id, identity in (train_labels or {}).items():
+        ids_to_images[str(identity)].append(str(image_id))
 
-    # Sample calibration query images
-    cal_q_ids = rng.sample(image_ids, min(cal_size, len(image_ids)))
-    
-    query_ids, db_ids, pair_labels = [], [], []
-    
-    for q_id in cal_q_ids:
-        q_identity = train_labels[q_id]
-        
-        # Positives: same identity (excluding self)
-        positives = [i for i in image_ids if train_labels[i] == q_identity and i != q_id]
-        
-        # Negatives: different identity
-        negatives = [i for i in image_ids if train_labels[i] != q_identity]
-        negatives = rng.sample(negatives, min(max_negatives_per_query, len(negatives)))
-        
-        for p_id in positives:
-            query_ids.append(q_id)
-            db_ids.append(p_id)
-            pair_labels.append(1)
-        
-        for n_id in negatives:
-            query_ids.append(q_id)
-            db_ids.append(n_id)
-            pair_labels.append(0)
-    
-    return query_ids, db_ids, pair_labels
+    eligible = [ident for ident, imgs in ids_to_images.items() if len(imgs) >= 2]
+    if len(eligible) < 2:
+        return [], [], []
 
-def build_calibration_pairs_stratified(
-    train_labels,
-    global_emb,
-    cal_size=50,
-    shortlist_size=300,
-    n_negatives=100,
-    seed: int = 42,
-):
-    """
-    Build calibration pairs that match inference distribution:
-    - Positives: all same-identity pairs
-    - Negatives: sampled from top-K global shortlist (hard negatives)
-    """
-    query_ids, db_ids, pair_labels = [], [], []
-    
-    # Precompute global embeddings matrix
-    all_ids = sorted(str(k) for k in global_emb.keys())
-    emb_matrix = np.stack([global_emb[i] for i in all_ids])
-    emb_matrix = emb_matrix / (np.linalg.norm(emb_matrix, axis=1, keepdims=True) + 1e-9)
-    
-    rng = random.Random(seed)
-    cal_q_ids = rng.sample(all_ids, min(cal_size, len(all_ids)))
-    
-    for q_id in cal_q_ids:
-        q_identity = train_labels[q_id]
-        q_emb = global_emb[q_id] / (np.linalg.norm(global_emb[q_id]) + 1e-9)
-        
-        # Positives (same identity)
-        positives = [i for i in all_ids if train_labels[i] == q_identity and i != q_id]
-        for p_id in positives:
+    rng.shuffle(eligible)
+    selected = eligible[: min(calib_ids, len(eligible))]
+    if len(selected) < 2:
+        return [], [], []
+
+    cal_q_ids: list[str] = []
+    cal_db_ids: list[str] = []
+    cal_identities: list[str] = []
+
+    for ident in selected:
+        imgs = ids_to_images[ident]
+        q_id, db_id = rng.sample(imgs, k=2)
+        cal_q_ids.append(q_id)
+        cal_db_ids.append(db_id)
+        cal_identities.append(ident)
+
+    query_ids: list[str] = []
+    db_ids: list[str] = []
+    pair_labels: list[int] = []
+    for q_id, q_ident in zip(cal_q_ids, cal_identities):
+        for db_id, db_ident in zip(cal_db_ids, cal_identities):
             query_ids.append(q_id)
-            db_ids.append(p_id)
-            pair_labels.append(1)
-        
-        # Negatives: sample from global shortlist (hard negatives!)
-        global_sims = np.dot(emb_matrix, q_emb)
-        shortlist_idx = np.argsort(-global_sims, kind="mergesort")[:shortlist_size]
-        
-        # Filter to different identities
-        hard_negatives = [
-            all_ids[i] for i in shortlist_idx 
-            if train_labels[all_ids[i]] != q_identity
-        ]
-        
-        # Sample negatives
-        selected_negs = rng.sample(
-            hard_negatives, 
-            min(n_negatives, len(hard_negatives))
-        )
-        
-        for n_id in selected_negs:
-            query_ids.append(q_id)
-            db_ids.append(n_id)
-            pair_labels.append(0)
-    
+            db_ids.append(db_id)
+            pair_labels.append(1 if q_ident == db_ident else 0)
+
     return query_ids, db_ids, pair_labels
 
 
@@ -287,15 +233,7 @@ def train_count_calibrators_gt(
 ) -> Tuple[Dict[str, "ScoreCalibrator"], Dict[str, Any]]:
     """Train per-signal score calibrators for counting (GT simulation).
 
-    The goal is to map raw similarity signals to probabilities P(same|signal),
-    enabling WildFusion-style late fusion for sampling proposals in HITL-NIS.
-
-    Returns
-    -------
-    calibrators : dict
-        Keys among {'global','fisher','local'}.
-    info : dict
-        Basic diagnostics about the calibration set.
+    Deprecated. Not used.
     """
 
     local_evidence = str(local_evidence).lower().strip()

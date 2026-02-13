@@ -153,7 +153,12 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=None, help='Random seed for reproducible counting')
     parser.add_argument('--calibration_method', type=str, default='isotonic_pchip', choices=['isotonic_pchip', 'logistic', 'isotonic'], help='Calibration method to use')
     parser.add_argument('--fusion_signals', type=str, nargs = '+', default=['global', 'fisher', 'gv'], choices=['global', 'fisher', 'gv'], help='Signals to fuse')
-    parser.add_argument('--calib_size', type=int, default=200, help='Size of the calibration set')
+    parser.add_argument(
+        '--calib_ids',
+        type=int,
+        default=10,
+        help='WildFusion-style calibration: number of identities used for calibration (pairs=calib_ids^2).',
+    )
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     parser.add_argument(
         '--query_image',

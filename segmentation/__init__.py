@@ -7,7 +7,7 @@ def _normalize_name(name: str) -> str:
     return "".join(ch for ch in str(name).lower() if ch.isalnum())
 
 
-_PROMPTS = {
+_RAW_PROMPTS = {
     "atrw": "tiger",
     "elpephants": "elephant",
     "seastarreid2023": "sea star . starfish",
@@ -16,7 +16,17 @@ _PROMPTS = {
     "polarbearvidid": "bear . polar bear",
     "wildboar": "wild boar . boar",
     "roedeer": "roedeer . deer",
+    "atrw_fewshot": "tiger",
+    "elpephants_fewshot": "elephant",
+    "seastarreid2023_fewshot": "sea star . starfish",
+    "cowdataset_fewshot": "cow . cattle",
+    "amvrakikosturtles_fewshot": "turtle",
+    "polarbearvidid_fewshot": "bear . polar bear",
+    "wildboar_fewshot": "wild boar . boar",
+    "roedeer_fewshot": "roedeer . deer",
 }
+
+_PROMPTS = {_normalize_name(name): prompt for name, prompt in _RAW_PROMPTS.items()}
 
 
 def has_segmenter(name: str) -> bool:

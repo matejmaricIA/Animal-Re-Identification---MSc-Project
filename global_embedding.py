@@ -19,23 +19,7 @@ def extract_global_embeddings(
     model_name: str = "resnet50",
     device: Optional[torch.device] = None,
 ) -> Dict[str, np.ndarray]:
-    """Extract global image embeddings using a pre-trained model.
-
-    Parameters
-    ----------
-    image_paths: Dict[str, str]
-        Mapping from image identifier to file path.
-    model_name: str
-        Name of the pre-trained model to use. Supports "resnet50" and
-        "megadescriptor-l-384".
-    device: torch.device, optional
-        Device on which to run the model. Defaults to GPU if available.
-
-    Returns
-    -------
-    Dict[str, np.ndarray]
-        Mapping from image identifier to embedding vector.
-    """
+    """Extract global image embeddings using a pre-trained model."""
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

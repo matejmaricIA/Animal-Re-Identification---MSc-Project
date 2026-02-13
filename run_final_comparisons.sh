@@ -12,10 +12,11 @@ set -o pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
-OUT_CSV="evaluations/classifications/final_comparisons_gv_350.csv"
+OUT_CSV="evaluations/classifications/final_comparisons_fewshot.csv"
 LOG_DIR="evaluations/classifications/logs"
 TMP_WF_CSV="/tmp/wildfusion_final_comparisons_tmp.csv"
 CSV_HEADER="timestamp,source,dataset,config,status,accuracy,top5_accuracy,f1_score,runtime_minutes,error,n_train,n_test,n_id_train,n_id_test,seconds,command"
+CALIB_IDS=10
 
 mkdir -p "$(dirname "$OUT_CSV")" "$LOG_DIR"
 rm -f "$TMP_WF_CSV"
@@ -51,36 +52,37 @@ prepare_output_csv() {
 
 # Edit these lists directly to run any combination you want.
 MAIN_DATASETS=(
-  sealid
-  atrw
-  cowdataset
-  elpephants
-  czoo
-  chicks4freeid
-  seastarreid2023
+  #sealid_fewshot
+  atrw_fewshot
+  cowdataset_fewshot
+  elpephants_fewshot
+  czoo_fewshot
+  seastarreid2023_fewshot
+  chicks4freeid_fewshot
+  
 )
 
 # WildFusion list is intentionally separate and hardcoded.
 WILDFUSION_DATASETS=(
-  #chicks4freeid
-  #sealid
-  #seastarreid2023
-  #cowdataset
-  #elpephants
-  #czoo
-  #atrw
+  chicks4freeid_fewshot
+  sealid_fewshot
+  seastarreid2023_fewshot
+  cowdataset_fewshot
+  elpephants_fewshot
+  czoo_fewshot
+  atrw_fewshot
 )
 
 CONFIGS=(
   fisher_only
   fisher_gv_power
   global_fisher
-  #fisher_disk
-  #fisher_aliked
-  #fisher_superpoint
+  fisher_disk
+  fisher_aliked
+  fisher_superpoint
   global_only
   global_fisher_gv_power
-  global_gv
+  #global_gv
 )
 
 prepare_output_csv
@@ -261,24 +263,24 @@ dataset_main_flags() {
   local ds="$1"
   MAIN_FLAGS=()
   case "${ds,,}" in
-    atrw)
+    atrw|atrw_fewshot)
       MAIN_FLAGS+=(--use_mantiuk --remove_background)
       ;;
-    cowdataset)
+    cowdataset|cowdataset_fewshot)
       MAIN_FLAGS+=(--use_mantiuk --remove_background)
       ;;
-    elpephants|elpephant)
+    elpephants|elpephant|elpephants_fewshot)
       MAIN_FLAGS+=(--use_mantiuk --remove_background)
       ;;
-    czoo)
+    czoo|czoo_fewshot)
       ;;
-    chicks4freeid)
+    chicks4freeid|chicks4freeid_fewshot)
+    MAIN_FLAGS+=()
+      ;;
+    sealid|sealid_fewshot)
     MAIN_FLAGS+=(--use_mantiuk)
       ;;
-    sealid)
-    MAIN_FLAGS+=(--use_mantiuk)
-      ;;
-    seastarreid2023)
+    seastarreid2023|seastarreid2023_fewshot)
       MAIN_FLAGS+=(--remove_background)
       ;;
   esac
@@ -288,22 +290,22 @@ dataset_wildfusion_flags() {
   local ds="$1"
   WF_FLAGS=()
   case "${ds,,}" in
-    atrw)
+    atrw_fewshot)
       WF_FLAGS+=(--segmented)
       ;;
-    cowdataset)
+    cowdataset_fewshot)
       WF_FLAGS+=(--segmented)
       ;;
-    elpephants|elpephant)
+    elpephants|elpephant|elpephants_fewshot)
       WF_FLAGS+=(--segmented)
       ;;
-    czoo)
+    czoo|czoo_fewshot)
       ;;
-    chicks4freeid)
+    chicks4freeid|chicks4freeid_fewshot)
       ;;
-    sealid)
+    sealid|sealid_fewshot)
       ;;
-    seastarreid2023)
+    seastarreid2023|seastarreid2023_fewshot)
       WF_FLAGS+=(--segmented)
       ;;
   esac
@@ -376,6 +378,7 @@ for ds in "${MAIN_DATASETS[@]}"; do
       --save_eval
       --debug
       --version "$version"
+      --calib_ids "$CALIB_IDS"
       "${MAIN_FLAGS[@]}"
       "${CFG_FLAGS[@]}"
     )
@@ -416,6 +419,7 @@ else
       test-scripts/run_wildfusion_paper_baseline.py
       --ds "$ds"
       --results-csv "$TMP_WF_CSV"
+      --calib-ids "$CALIB_IDS"
       "${WF_FLAGS[@]}"
     )
     wf_cmd_str="HF_HUB_OFFLINE=1 ${wf_cmd[*]}"

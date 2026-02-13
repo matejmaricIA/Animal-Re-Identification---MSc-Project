@@ -8,13 +8,8 @@ from constants import (
     INLIER_THRESHOLD, 
     MIN_MATCHES, 
     MIN_INLIERS,
-    INSUFFICIENT_MATCHES_PENALTY,
-    POOR_GEOMETRY_PENALTY,
-    FISHER_DISTANCE_MIN_CLAMP,
-    FISHER_DISTANCE_MAX_CLAMP,
-    NORMALIZED_THRESHOLD_DIVISOR, MAX_INLIERS_FOR_SCALING,
+    NORMALIZED_THRESHOLD_DIVISOR,
     ALPHA,
-    GV_METHOD
 )
 from utils.distance_utils import fisher_distance
 
@@ -110,6 +105,7 @@ def normalize_coordinates(coords):
     
     return coords_normalized
 
+# Old, deprecated way to match features, safe to delete.
 def match_features_by_descriptors(desc1, desc2, kp1, kp2, ratio_threshold=RATIO_THRESHOLD):
     """Match features based on descriptor similarity"""
     if len(desc1) == 0 or len(desc2) == 0:
@@ -394,22 +390,6 @@ def compute_local_evidence(
     image1=None,
     loftr_pretrained: str = "outdoor",
 ):
-    """Compute local evidence for a pair (u, v).
-
-    Returns
-    -------
-    n_inliers : int
-        Number of RANSAC inliers after matching keypoints.
-    n_conf_matches : int
-        Number of descriptor matches whose cosine similarity is >= ``local_mu``.
-
-    Notes
-    -----
-    - For the ratio and LightGlue matchers, confidences are computed from
-      descriptor cosine similarity (not the matcher internal confidence).
-    - For the LoFTR matcher, descriptor-level confidences are unavailable in the
-      current wrapper, so ``n_conf_matches`` is returned as 0.
-    """
 
     if query_desc is None or db_desc is None or query_kp is None or db_kp is None:
         return 0, 0

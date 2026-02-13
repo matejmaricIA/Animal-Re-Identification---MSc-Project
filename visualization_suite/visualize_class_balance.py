@@ -26,7 +26,7 @@ DEFAULT_DATASETS = [
     "atrw",
     "cowdataset",
     "elpephants",
-    "ctai",
+    "czoo",
     "chicks4freeid",
     "sealid",
     "seastarreid2023",
@@ -401,7 +401,7 @@ def build_examples_grid(
 ) -> None:
     images: list[np.ndarray] = []
     titles: list[str] = []
-    rng = np.random.default_rng(seed)
+    rng = np.random.default_rng(0)
 
     for dataset_name in datasets:
         df = metadata_map[dataset_name]

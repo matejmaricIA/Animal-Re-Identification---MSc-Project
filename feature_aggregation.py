@@ -19,7 +19,7 @@ from constants import (
 )
 from feature_extraction import (
     extract_features,
-    extract_features_keynet_hardnet_faster,
+    #extract_features_keynet_hardnet_faster,
     extract_features_lightglue,
 )
 from utility_functions import load_stuff, save_stuff
@@ -45,9 +45,9 @@ def ensure_local_descriptors(image_items, method_name: str, out_dir: str) -> Non
         return
     if method_name == "disk":
         extract_features(image_items, MODEL_PATH, out_dir)
-    elif method_name == "keynet_hardnet":
-        extract_features_keynet_hardnet_faster(image_items, out_dir)
-    elif method_name in {"lightglue", "aliked"}:
+    #elif method_name == "keynet_hardnet":
+    #    extract_features_keynet_hardnet_faster(image_items, out_dir)
+    elif method_name in {"lightglue", "aliked"}: # lightglue left even though it's technically wrong.
         extract_features_lightglue(image_items, out_dir, feature_type="aliked")
     elif method_name == "superpoint":
         extract_features_lightglue(image_items, out_dir, feature_type="superpoint")
