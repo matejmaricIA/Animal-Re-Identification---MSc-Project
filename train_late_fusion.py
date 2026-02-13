@@ -2,8 +2,8 @@ import numpy as np
 from typing import Dict, List
 from calibration import ScoreCalibrator
 from calibration import (
-    build_calibration_pairs,
-    build_calibration_pairs_stratified,
+    #build_calibration_pairs,
+    #build_calibration_pairs_stratified,
     build_calibration_pairs_ids,
     compute_calibration_scores,
 )
@@ -204,9 +204,9 @@ def train_calibrators(
     
     
     # Build calibration pairs
-    query_ids, db_ids, pair_labels = build_calibration_pairs(
-        train_labels, cal_size=cal_size
-    )
+    #query_ids, db_ids, pair_labels = build_calibration_pairs(
+    #    train_labels, cal_size=cal_size
+    #)
     pair_labels = np.array(pair_labels)
     
     # Compute raw scores

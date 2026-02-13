@@ -83,6 +83,12 @@ Utilities:
   ```bash
   python segmentation/simple_test.py <DATASET> --samples 5
   ```
+- Create few-shot metadata variants (keeps original split labels, caps train images per identity):
+  ```bash
+  python utils/create_fewshot_datasets.py --datasets atrw sealid --max_train_per_identity 3
+  ```
+  Then train normally, e.g. `python main.py --train --ds atrw_fewshot`.
+  By default test split is unchanged; optionally cap it with `--max_test_per_identity`.
 
 ## Running
 
