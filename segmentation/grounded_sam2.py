@@ -5,6 +5,13 @@ from typing import Optional
 import cv2
 import numpy as np
 
+# This environment often runs without outbound internet. GroundingDINO relies on
+# HuggingFace (e.g., bert-base-uncased tokenizer/model) which should be resolved
+# from the local cache; force offline mode to avoid slow retries/crashes.
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
+
 from constants import (
     GROUNDING_DINO_CONFIG_PATH,
     GROUNDING_DINO_CHECKPOINT_PATH,
@@ -177,6 +184,7 @@ def _predict_boxes(image_bgr: np.ndarray, prompt: str, box_threshold: float, tex
 
     model = _load_grounding_dino()
     image_transformed = _prepare_dino_image(image_bgr)
+    device = _get_device()
 
     caption = prompt.strip()
     if not caption.endswith("."):
@@ -188,6 +196,7 @@ def _predict_boxes(image_bgr: np.ndarray, prompt: str, box_threshold: float, tex
         caption=caption,
         box_threshold=box_threshold,
         text_threshold=text_threshold,
+        device=device,  # GroundingDINO predict defaults to CUDA; force match _load_grounding_dino().
     )
     return _boxes_to_xyxy(boxes, image_bgr.shape[:2])
 

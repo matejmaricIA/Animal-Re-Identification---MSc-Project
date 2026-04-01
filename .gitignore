@@ -93,6 +93,7 @@ notebooks/mantiuk_sweep.ipynb
 
 # Large generated artifacts / local research assets
 docs/papers/
+docs/thesis.pdf
 visualization_suite/output/
 evaluations/classifications/
 evaluations/full_evals/

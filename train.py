@@ -14,6 +14,7 @@ from constants import (
     EVAL_RESULTS_XLSX,
     GEOMETRIC_CANDIDATES,
     MD_DATASET_SPLITS,
+    N_COMPONENTS_PCA,
     UNION_CANDIDATES,
 )
 from evaluate import evaluate_predictions, save_evaluation_results
@@ -72,7 +73,7 @@ def run_training_for_dataset(
         df_raw,
         remove_background=args.remove_background,
         use_mantiuk=args.use_mantiuk,
-        require_processed_paths=False,
+        require_processed_paths=True,
     )
 
     if use_md_baseline_split:
@@ -188,6 +189,10 @@ def run_training_for_dataset(
     base_dir = f"./data/{ds_tag}"
     os.makedirs(base_dir, exist_ok=True)
 
+    pca_dim = int(getattr(args, "pca_dim", N_COMPONENTS_PCA))
+    # Always include PCA dim to avoid reusing old cached PCA/GMM/FVs.
+    pca_cache_suffix = f"{seg_tag}_pca{pca_dim}"
+
     fusion_signals_set = set(args.fusion_signals or [])
     use_fisher_signal = bool(train_use_fisher)
     use_gv_signal = "gv" in fusion_signals_set
@@ -214,8 +219,9 @@ def run_training_for_dataset(
                 pca_m, gmm_m, fv_tr_m = load_or_train_fisher_vectors(
                     ds_tag=ds_tag,
                     method_name=m,
-                    cache_suffix=seg_tag,
+                    cache_suffix=pca_cache_suffix,
                     descriptors=train_dict_m,
+                    pca_dim=pca_dim,
                 )
                 fv_te_m = compute_fisher_vectors(test_dict_m, pca_m, gmm_m)
                 fv_tr_list.append(fv_tr_m)
@@ -238,8 +244,9 @@ def run_training_for_dataset(
             pca, gmm, fv_tr = load_or_train_fisher_vectors(
                 ds_tag=ds_tag,
                 method_name=feature_method,
-                cache_suffix=seg_tag,
+                cache_suffix=pca_cache_suffix,
                 descriptors=train_dict,
+                pca_dim=pca_dim,
             )
             fv_te = compute_fisher_vectors(test_dict, pca, gmm)
 
@@ -385,7 +392,7 @@ def run_query_visualization_for_dataset(
         df_raw,
         remove_background=args.remove_background,
         use_mantiuk=args.use_mantiuk,
-        require_processed_paths=False,
+        require_processed_paths=True,
     )
 
     if use_md_baseline_split:
@@ -559,6 +566,10 @@ def run_query_visualization_for_dataset(
     base_dir = f"./data/{ds_tag}"
     os.makedirs(base_dir, exist_ok=True)
 
+    pca_dim = int(getattr(args, "pca_dim", N_COMPONENTS_PCA))
+    # Always include PCA dim to avoid reusing old cached PCA/GMM/FVs.
+    pca_cache_suffix = f"{seg_tag}_pca{pca_dim}"
+
     fusion_signals_set = set(args.fusion_signals or [])
     use_fisher_signal = bool(train_use_fisher)
     use_gv_signal = "gv" in fusion_signals_set
@@ -585,8 +596,9 @@ def run_query_visualization_for_dataset(
                 pca_m, gmm_m, fv_tr_m = load_or_train_fisher_vectors(
                     ds_tag=ds_tag,
                     method_name=m,
-                    cache_suffix=seg_tag,
+                    cache_suffix=pca_cache_suffix,
                     descriptors=train_dict_m,
+                    pca_dim=pca_dim,
                 )
                 fv_te_m = compute_fisher_vectors(test_dict_m, pca_m, gmm_m)
                 fv_tr_list.append(fv_tr_m)
@@ -608,8 +620,9 @@ def run_query_visualization_for_dataset(
             pca, gmm, fv_tr = load_or_train_fisher_vectors(
                 ds_tag=ds_tag,
                 method_name=feature_method,
-                cache_suffix=seg_tag,
+                cache_suffix=pca_cache_suffix,
                 descriptors=train_dict,
+                pca_dim=pca_dim,
             )
             fv_te = compute_fisher_vectors(test_dict, pca, gmm)
 

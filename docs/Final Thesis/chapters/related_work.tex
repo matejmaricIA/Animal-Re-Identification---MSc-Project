@@ -1,92 +1,41 @@
 \chapter{Related Work}
 \label{chap:related_work}
-Animal re-identification (Re-ID) aims to recognize individual animals across re-encounters using visual appearance.
-In contrast to many human re-ID deployments, wildlife monitoring typically operates in \textbf{open-set} conditions (new individuals continually appear), with \textbf{limited labeled data}, strong \textbf{pose/background variation}, and frequent \textbf{occlusions} (e.g., vegetation and partial camera-trap captures). A comprehensive review of the early progression from hand-crafted pipelines to deep learning approaches is provided by Schneider et al.~\cite{re-id-overview}. This chapter focuses on (i) \textbf{species-agnostic} methods that can transfer across taxa, (ii) \textbf{hybrid and fusion} pipelines that combine global and local evidence, and (iii) work connecting re-ID to \textbf{population size estimation} with humans in the loop.
+In this chapter, I will go over existing approaches to visual animal re-identification (Re-ID) with an emphasis on methods intended to generalize across species. The literature will be organized into thematic categories, from traditional computer vision techniques to modern deep learning methods, including hybrid methods that combine the two. I'll also discuss key challenges in the field, such as limited and/or low quality data, pose variation and open-set identification. I'll synthesize the findings from prior work and emphasize the gaps that this thesis is trying to address.
 
-\section{Local Feature Matching and Classical Pipelines}
-Early animal re-ID systems relied on hand-crafted local descriptors and explicit matching.
-HotSpotter~\cite{6475023} is a representative example: it detects keypoints, describes them with SIFT~\cite{Lowe2004SIFT}, and identifies individuals by aggregating evidence from distinctive local matches (``hot spots'').
-Because these pipelines do not require training on identity labels, they are inherently \textbf{species-agnostic} and remain attractive when labeled data is scarce.
-Recent work has also revisited the strong baseline of ``match-count'' style similarity: \cite{jmse11050889} compares SIFT/SURF to learned local features (SuperPoint~\cite{DeTone2018SuperPoint}) and shows that the number of reliable keypoint correspondences can be a powerful signal for individual identity.
-
-The limitation of purely hand-crafted pipelines is that their matching heuristic is fixed: they often under-utilize global context and can be brittle under extreme viewpoint changes, scale differences, motion blur, or background clutter. Nevertheless, the underlying principle of \textbf{geometric consistency} remains central in modern systems: learned local descriptors (e.g., DISK~\cite{tyszkiewicz2020disklearninglocalfeatures} or SuperPoint~\cite{DeTone2018SuperPoint}) and learned matchers (e.g., LightGlue~\cite{lindenberger2023lightgluelocalfeaturematching}) can be integrated into the same geometric verification framework that classical pipelines used.
+\section{Traditional Computer Vision Approaches}
+Early animal Re-ID systems relied on hand-crafted visual features and local descriptors. A prime example is HotSpotter~\cite{6475023}, a SIFT-based~\cite{Lowe2004SIFT} algorithm that identifies individuals by comparing local keypoints in images. HotSpotter uses viewpoint-invariant SIFT descriptors and scores matches by emphasizing the most distinctive keypoints (the titular "hot spots") on an animal's coat pattern. ~\cite{jmse11050889} compared SIFT, SURF and SuperPoint on identifying sunfish individuals and demonstrated that the number of matching keypoints between a pair of images is a strong indicator for the likelihood that they contain the same individual. These traditional local-feature methods do not require training on identity labels and are, by definition, species-agnostic, making them applicable to a wide variety of species. HotSpotter and similar algorithms have been successfully used on numerous species with distinctive markings, including zebras, giraffes, jaguars, ocelots and leopards.~\cite{springerSpeciesAgnosticPatterned} The drawback, however, is that purely hand-crafted methods cannot fully exploit any available training data since their matching heuristic is fixed and may miss more subtle or global cues. 
 
 \section{Species-Specific Trait-Based Re-Identification}
-Another line of research targets species-specific biometric traits (e.g., elephant ears, shark fins, whale flukes).
-Instead of generic features, these methods isolate a task-relevant structure and perform shape- or template-based matching.
-For example, CurvRank~\cite{ani12151980} and finFindR~\cite{finFindR} match fin/fluke contours to identify individuals.
-Trait-based approaches often require \textbf{less identity-labeled data} (a detector/segmenter for the trait can be trained independently), and they can achieve high performance when the trait is consistently visible.
-However, they are typically \textbf{not transferable}: each pipeline must be redesigned for a new species and imaging setup. This lack of generality is a major barrier in practice, where conservation projects often span multiple species and camera-trap deployments.
+Another line of research focuses on species-specific visual traits for re-identification. Instead of analyzing the entire image or generic local patches, these approaches isolate particular biometric features unique to the species at hand, for example the ear shapes of elephants, the outline of a shark's dorsal fin, or the contour of a whale's tail (fluke), and use them for re-identification. Both traditional image analysis and deep learning have been employed to recognize such traits. For example, algorithms such as CurvRank~\cite{ani12151980} and finFindR~\cite{finFindR} compute and match the shapes of whale flukes or shark fins to identify individuals. These methods often don't require individual identity labels for training, rather a detector or feature extractor for the trait can be trained using only that trait's annotations, then match those features between images. The advantage of trait-specific methods is that they leverage highly distinctive features (when they are present) and can work with minimal ID labeling. However, a major limitation is that they are species-specific so each system is tailored for identifying only one species and usually it can't be transferred to other species. This lack of generality is a significant barrier to wider use as it requires developing a new method for each studied species. This thesis is motivated by overcoming this limitation by developing a method, based on existing research, that does not depend on any single species' unique traits. 
 
-\section{Deep Embedding Models and Species-Agnostic Benchmarks}
-Deep learning approaches replace explicit matching heuristics with learned representations.
-Most modern systems map an image to an embedding vector such that images of the same individual are nearby, while different individuals are far apart.
-Training can be done either as closed-set classification (over a fixed set of identities) or via metric learning; the latter is generally preferred for wildlife monitoring because it naturally supports open-set retrieval.
+\section{Deep Learning-Based Methods}
+With the rise of deep learning, a number of methods have been proposed that learn features directly from image data, without manual feature engineering. Modern deep learning approaches for animal re-ID typically employ CNNs (Convolutional Neural Networks) or related architectures to produce an embedding (feature vector) for each image, such that images of the same individual are close in feature space while those of different individuals are far apart. These can be trained either as classification (training a CNN to classify a fixed set of known individuals) or via metric learning (training the network to differentiate between same-individual vs. different individual image pairs). In general, metric learning approaches are favored for wildlife re-ID because they naturally handle open-set problems. A classification-based model treats re-ID as identifying one of $N$ known individuals, which fails when a new individual outside the training set appears. By contrast, metric-based methods learn a similarity function and can thus match new individuals by embedding comparison, without needing to retrain for new identities.~\cite{springerSpeciesAgnosticPatterned} Recent progress in this area has been accelerated by large-scale multidataset training and more standardized benchmarking. The WildlifeDatasets toolkit~\cite{čermák2023wildlifedatasetsopensourcetoolkitanimal} provides an easy and unified access to a wide array of re-ID datasets, enabling reproducible evaluation across species. MegaDescriptor is a model trained on these datasets that out-of-the-box provides a strong backbone for re-ID tasks. At the same time, large-scale training introduced an evaluation pitfall that is not discussed enough in the literature and that is excessive data leakage due to appearance of near-duplicates in the datasets. 
 
-Recent progress has been accelerated by large-scale multi-dataset training and standardized benchmarking.
-The WildlifeDatasets toolkit~\cite{čermák2023wildlifedatasetsopensourcetoolkitanimal} provides unified access to diverse animal re-ID datasets and splits, enabling reproducible evaluation across species.
-Within this ecosystem, MegaDescriptor-style models provide strong \textbf{species-agnostic} global embeddings that can be used in a zero-shot retrieval setting.
-At the same time, large-scale training introduces an evaluation pitfall that is often under-discussed in the literature: if training data overlaps with evaluation benchmarks (or if near-duplicates leak across splits), reported accuracy can be overly optimistic. This thesis explicitly highlights split consistency and leakage risks when comparing methods across datasets and baselines.
+\section{Hybrid Approaches with Learned Local Features}
+A promising direction in animal re-id is to combine the strengths of traditional and deep learning methods into a hybrid pipeline. The idea is to use modern learned features from deep networks in place of the hand-crafted ones, but still employ them in a local matching and aggregation framework as in traditional approaches. A good example of this is the ALFRE-ID~\cite{springerSpeciesAgnosticPatterned} pipeline (Aggregated Local Features for Re-Identification). ALFRE-ID uses a CNN extractor to extract local patch descriptors from an animal's coat pattern, then aggregates these local features into a global descriptor for the image. 
 
-\section{Hybrid Local-Global Representations and Fusion}
-Hybrid approaches attempt to combine the robustness of global embeddings with the discriminative detail of local evidence.
-Nepovinnykh et al.~\cite{springerSpeciesAgnosticPatterned} propose a species-agnostic patterned re-ID pipeline that aggregates deep local features to form a more invariant representation, bridging classical local matching and modern deep embeddings.
+WildFusion~\cite{cermak2024wildfusionindividualanimalidentification} takes a different approach by combining global deep similarity and local matching similarity using calibration to make these scores comparable. Their results have shown that calibrated fusion can substantially improve accuracy across diverse benchmarks. The trade-off is computational cost, which motivated this thesis to create a faster system while preserving accuracy. 
 
-A closely related line of work treats re-ID as a \textbf{score fusion} problem.
-WildFusion~\cite{cermak2024wildfusionindividualanimalidentification} fuses multiple similarity scores (e.g., global deep similarity and local matching similarity) using explicit \textbf{calibration} to make scores comparable across matchers and datasets. Their results show that calibrated fusion can substantially improve mean accuracy across diverse benchmarks. The trade-off is computational cost: combining multiple heavy matchers and calibration steps can be expensive, which motivates research into cheaper pipelines that still preserve complementary evidence.
+\section{Population Estimation}
+Individual identification is something that lends itself naturally to the task of estimating animal populations. Perez et al~\cite{perez2024humanintheloopvisualreidpopulation} propose Human-in-the-Loop Importance Sampling (HITL-NIS), an estimator grounded in statistics that queries a human annotator for a relatively small number of same/different pair judgements to estimate the number of individuals without fully clustering the dataset. However, human annotation is never perfect and Johansson et al.~\cite{Johansson_Samelius_Wikberg_Chapron_Mishra_Low_2020} show that identification errors in camera trap workflows can drastically bias population estimates, emphasizing the need to account for human mistakes. This thesis directly builds on this gap by evaluating HITL-NIS under simulated annotation noise to judge the robustness of the system. 
 
-\section{Robustness to Background Bias and Part Alignment}
-A recurring real-world failure mode is that models exploit spurious correlations: background, lighting, and camera placement may correlate with identity labels in a dataset, but do not generalize.
-Yu et al.~\cite{yu2024elephant} explicitly frame this as the ``elephant in the room'': they demonstrate that robust animal re-ID requires aligning informative animal parts and reducing reliance on background context. Their approach performs \textbf{unsupervised part-based feature alignment}, improving robustness under pose changes and clutter without requiring dense part annotations.
-This perspective is also consistent with practical preprocessing choices used in many pipelines, such as detector-based cropping or segmentation, which aim to increase invariance by focusing the model on the animal itself.
 
-\section{Human-in-the-Loop Re-ID and Population Estimation}
-Individual identification is often a means to an end: population monitoring and conservation decisions.
-Perez et al.~\cite{perez2024humanintheloopvisualreidpopulation} propose \emph{Human-in-the-Loop Nested Importance Sampling} (HITL-NIS), a statistically grounded estimator that queries an oracle (a human annotator) for a small number of same/different pair judgments to estimate the number of individuals without fully clustering the dataset.
-This framing makes explicit that annotation is a limited resource and that uncertainty should be propagated into the estimate.
 
-However, in field deployments, oracle decisions are not perfect.
-Johansson et al.~\cite{johansson2020identificationerrors} show that identification errors in camera-trap workflows can systematically bias population estimates, emphasizing the need to account for human mistakes rather than assuming error-free supervision.
-This thesis directly builds on this gap by evaluating HITL-NIS under \textbf{simulated oracle label noise} to quantify robustness as a function of error rate and confirmation strictness.
+\section{Key Challenges and Limitations}
+Research in animal re-identification encounters several fundamental challenges that limit real-world performance. Key issues identified in the literature are: 
 
-\section{Synthesis and Positioning}
-Table~\ref{tab:related_work_comparison} summarizes representative families of approaches and the main challenges they target.
-\begin{table}[H]
-\centering
-\scriptsize
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.15}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{l l p{5.5cm} p{5.5cm} l}
-\hline
-\textbf{Method family} & \textbf{Signal} & \textbf{Addresses} & \textbf{Main gaps} & \textbf{Focus}\\
-\hline
-Local-feature matching (e.g., HotSpotter~\cite{6475023}) & SIFT/keypoints~\cite{Lowe2004SIFT} & Label-free, species-agnostic matching; geometric consistency; strong on patterned species & Weak global context; brittle under severe pose/occlusion/background; expensive pairwise matching at scale & Re-ID\\
-\hline
-Trait-based pipelines (e.g., CurvRank~\cite{ani12151980}, finFindR~\cite{finFindR}) & Shape/contours & Minimal ID labeling; high precision when trait is visible & Species-specific; limited transfer to new species/cameras; requires trait visibility & Re-ID\\
-\hline
-Global embeddings (e.g., WildlifeDatasets/MegaDescriptor~\cite{čermák2023wildlifedatasetsopensourcetoolkitanimal}) & Deep global features & Strong zero-shot baseline; scalable retrieval; species-agnostic training on many datasets & Susceptible to background bias; may miss fine-grained local cues; risk of evaluation leakage if training/eval overlap & Re-ID\\
-\hline
-Aggregated deep local features~\cite{springerSpeciesAgnosticPatterned} & Deep local descriptors + aggregation & Better captures fine markings; improved invariance via local evidence & Requires careful design/training; still sensitive to background/pose without explicit alignment & Re-ID\\
-\hline
-Calibrated fusion (WildFusion~\cite{cermak2024wildfusionindividualanimalidentification}) & Global + local matchers & Leverages complementary signals; strong average accuracy via calibration & High compute cost; calibration requires supervision; deployment complexity & Re-ID\\
-\hline
-Part alignment for robustness~\cite{yu2024elephant} & Unsupervised part-based alignment & Reduces reliance on background; improves robustness to pose and clutter & Additional modeling complexity; still requires good localization signals & Re-ID\\
-\hline
-HITL-NIS~\cite{perez2024humanintheloopvisualreidpopulation} & Oracle queries + importance sampling & Population estimation with limited supervision; uncertainty-aware estimation & Sensitive to oracle errors; needs careful design of confirmation/sampling to reduce variance & Counting\\
-\hline
-\end{tabular}
-}%
-\caption{High-level comparison of representative approaches in animal re-identification and population estimation.}
-\label{tab:related_work_comparison}
-\end{table}
+  \textbf{Limited labeled data.} Collecting individual-level labels is
+   labor-intensive, so datasets often contain only a handful of images per
+   subject, leading to overfitting and poor generalization.  
 
-\subsection{Contributions of this thesis}
-Positioned within this landscape, this thesis contributes:
-\begin{itemize}
-    \item A \textbf{unified, species-agnostic} pipeline that connects individual re-identification to downstream \textbf{population size estimation} within a single project and evaluation protocol.
-    \item A \textbf{hybrid local-global design} that fuses global embeddings with Fisher-vector local evidence and optional geometric verification, aiming to approach strong fusion baselines while reducing runtime.
-    \item \textbf{Transparent runtime reporting} and discussion of practical trade-offs, highlighting that high-performing fusion methods (e.g., WildFusion) can be substantially more expensive to run end-to-end.
-    \item An explicit emphasis on \textbf{evaluation hygiene}, including discussion of split consistency and the risk of underreported \textbf{data leakage} when training data overlaps with benchmark evaluations.
-    \item An extension of HITL-NIS evaluation to account for \textbf{human labeling errors}, quantifying how population estimates degrade as oracle reliability decreases and motivating confirmation-based strategies.
-\end{itemize}
+   \textbf{Pose variation.} Animals appear under diverse viewpoints and
+   behaviors, drastically altering their visual features. Identification
+   accuracy drops when profiles or unusual poses replace frontal views.  
+
+   \textbf{Occlusions.} Vegetation, group interactions, or partial camera trap
+   captures often conceal distinguishing markings, hindering feature extraction.
+
+   \textbf{Open-set identification.} Field deployments must handle individuals
+   unseen during training; closed-set models misclassify such cases. Open-set
+   recognition methods highlight the need to reject unknown identities.
+

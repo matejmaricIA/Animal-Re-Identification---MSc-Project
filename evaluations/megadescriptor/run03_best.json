@@ -1,0 +1,15 @@
+{
+  "closed_set": {
+    "db_images": 110848,
+    "db_classes": 10236,
+    "test_known_images": 22081,
+    "top1_acc": 0.3815950364566822,
+    "top5_acc": 0.6145102123998007
+  },
+  "open_set": {
+    "test_new_images": 7559,
+    "max_sim_known_mean": 0.998060405254364,
+    "max_sim_unknown_mean": 0.9975098967552185,
+    "unknown_detection_auc": 0.42963724241333273
+  }
+}

@@ -57,6 +57,12 @@ if __name__ == '__main__':
     parser.add_argument('--remove_background', action='store_true', help='Remove background during preprocessing')
     parser.add_argument('--version', type=str, default='1', help='Identifier for the current method version')
     parser.add_argument(
+        '--pca_dim',
+        type=int,
+        default=N_COMPONENTS_PCA,
+        help='PCA output dimensionality for Fisher-vector local descriptors.',
+    )
+    parser.add_argument(
         '--method',
         type=str,
         nargs='+',
@@ -259,7 +265,7 @@ if __name__ == '__main__':
     # create a configuration tag for saving evaluation results
     tag = (
         f"rmbkg_{args.remove_background}_tm_{args.use_mantiuk}_{method_tag}"
-        f"_PCA_{N_COMPONENTS_PCA}_GMM_{N_COMPONENTS_GMM}"
+        f"_PCA_{args.pca_dim}_GMM_{N_COMPONENTS_GMM}"
         f"_gv_{use_gv_signal}_lg_{args.use_lightglue}"
         f"_v{args.version}"
     )
@@ -410,8 +416,9 @@ if __name__ == '__main__':
                     _, _, fv_m = load_or_train_fisher_vectors(
                         ds_tag=ds_tag,
                         method_name=m,
-                        cache_suffix=f"{seg_tag}_full",
+                        cache_suffix=f"{seg_tag}_pca{int(args.pca_dim)}_full",
                         descriptors_loader=_load_full_desc,
+                        pca_dim=int(args.pca_dim),
                     )
                     fv_list.append(fv_m)
                 fisher_vectors = combine_fisher_vectors(fv_list, ENSEMBLE_WEIGHTS)
@@ -422,11 +429,14 @@ if __name__ == '__main__':
                     ensure_local_descriptors(full_image_items, method, feat_dir_fisher)
                     return load_descriptors(os.path.join(feat_dir_fisher, "descriptors.h5"))
 
+                cache_suffix = f"{seg_tag}_pca{int(args.pca_dim)}_full"
+
                 _, _, fisher_vectors = load_or_train_fisher_vectors(
                     ds_tag=ds_tag,
                     method_name=method,
-                    cache_suffix=f"{seg_tag}_full",
+                    cache_suffix=cache_suffix,
                     descriptors_loader=_load_full_desc_single,
+                    pca_dim=int(args.pca_dim),
                 )
 
         # --- Global embeddings (optional signal) ---

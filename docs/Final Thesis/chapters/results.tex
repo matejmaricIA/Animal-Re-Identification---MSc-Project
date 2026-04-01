@@ -3,7 +3,7 @@
 
 In this chapter I will go over the final experimental evaluation of the proposed system. The experiments are divided into two parts:
 (i) evaluation of the \textbf{classification (re-id) pipeline}, and
-(ii) evaluation of the \textbf{population size estimateion pipeline} introduced in the Chapter~\ref{chap:population_size}.
+(ii) evaluation of the \textbf{population size estimation pipeline} introduced in the Chapter~\ref{chap:population_size}.
 
 \section{Classification Pipeline Evaluation}
 \label{sec:results_class}
@@ -12,7 +12,7 @@ In this chapter I will go over the final experimental evaluation of the proposed
 All classification experiments follow the closed-set identification protocol described in 
 Chapter~\ref{chap:dataset}. A query image from the test split is assigned an identity label by 
 comparing it to the labeled training split. The experiments use the same 
-train/test split protocol as used in the MegaDescriptor baseline training for leakage control (\textbf{*} datasets) for datasets that MD was trianed on and for the rest time-aware splits or similarity-aware splits when time-aware wasn't available. 
+train/test split protocol as used in the MegaDescriptor baseline training for leakage control (\textbf{*} datasets) for datasets that MD was trained on and for the rest time-aware splits or similarity-aware splits when time-aware wasn't available. 
 
 The following methods are compared:
 \begin{itemize}
@@ -21,7 +21,7 @@ The following methods are compared:
     In this thesis, the MegaDescriptor-L-384 model is used when reporting ``Global only'' results.
     \item \textbf{WildFusion baseline.} A calibrated fusion method proposed by 
     Čermák et al.~\cite{cermak2024wildfusionindividualanimalidentification}.
-    \item \textbf{This thesis (Fisher).} Using only Fisher Vector similarity (Chapter~\ref{chap:feature_aggregation}) as
+    \item \textbf{This thesis (Fisher).} Using only Fisher Vector similarity (Chapter~\ref{chap:methodology}) as
      the matching signal.
     \item \textbf{This thesis (Global+Fisher).} Late fusion of global embedding similarity and Fisher similarity.
     \item \textbf{This thesis (Fisher+GV).} A two-tier pipeline using Fisher similarity to shortlist candidates, 
@@ -34,21 +34,24 @@ To keep the comparison focused, I don't report each individual local feature ext
  (DISK vs SuperPoint vs ALIKED) separately in the final table, but rather an ensemble of all three is tested.
 
 \subsection{Metrics and Runtime}
-Performance is reported using Top-1 accuracy, Top-5 accuracy and F1 score. Runtimes are reported in minutes for end-to-end evaluation logged by the evaluation scripts. 
+Performance is reported using Top-1 accuracy, Top-5 accuracy and F1score. Runtimes are reported in minutes for end-to-end evaluation logged by the evaluation scripts. 
 
 \subsection{Results}
 \label{sec:results_classification_table}
 
 Table~\ref{tab:classification_results_final} summarizes the final results. For each dataset and metric, 
 the best value among the available methods is highlighted in \textbf{bold}. Each cell reports the metric value (in \%)
- and runtime is reported in minutes (first row per dataset).
+ and runtime is reported once per dataset (first row) in minutes.
 
-\begin{table}[H]
-\centering
+\begingroup
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.05}
-\begin{tabular}{l l c c c c c c}
+\setlength{\LTleft}{\fill}
+\setlength{\LTright}{\fill}
+\begin{longtable}{l l c c c c c c}
+\caption{Final classification results. Accuracies are reported as \% and runtimes in minutes. Best value per dataset/metric is in \textbf{bold}. ``Global'' refers to MegaDescriptor-L-384 embeddings~\cite{čermák2023wildlifedatasetsopensourcetoolkitanimal}. * marks the datasets on which MD was trained on.}
+\label{tab:classification_results_final}\\
 \hline
 \textbf{Dataset} & \textbf{Metric} &
 \textbf{Global} &
@@ -58,6 +61,21 @@ the best value among the available methods is highlighted in \textbf{bold}. Each
 \textbf{F+GV} &
 \textbf{G+F+GV}\\
 \hline
+\endfirsthead
+
+\hline
+\multicolumn{8}{l}{\small\itshape Table \thetable\ (continued)}\\
+\hline
+\textbf{Dataset} & \textbf{Metric} &
+\textbf{Global} &
+\textbf{WildFusion} &
+\textbf{Fisher} &
+\textbf{G+F} &
+\textbf{F+GV} &
+\textbf{G+F+GV}\\
+\hline
+\endhead
+
 ATRW* & \textit{Runtime (min)} & 0.13 & 352.37 & 6.18 & 6.24 & 82.39 & 82.79 \\
  & Top-1 & 95.81 & \textbf{99.07} & 97.21 & 97.49 & 98.05 & 98.23 \\
  & Top-5 & 97.30 & \textbf{99.72} & 99.16 & 98.98 & 99.07 & 99.07 \\
@@ -98,10 +116,8 @@ Average & \textit{Runtime (min)} & 0.06 & 214.52 & 3.07 & 3.01 & 39.35 & 42.53 \
  & Top-5 & 79.58 & \textbf{91.91} & 82.69 & 84.39 & 90.53 & 90.70 \\
  & F1 & 71.51 & \textbf{87.35} & 70.23 & 75.86 & 81.53 & 85.70 \\
 \hline
-\end{tabular}
-\caption{Final classification results. Accuracies are reported as \% and runtimes in minutes. Best value per dataset/metric is in \textbf{bold}. ``Global'' refers to MegaDescriptor-L-384 embeddings~\cite{čermák2023wildlifedatasetsopensourcetoolkitanimal}. * marks the datasets on which MD was trained on.}
-\label{tab:classification_results_final}
-\end{table}
+\end{longtable}
+\endgroup
 
 
 \subsection{Discussion}
@@ -196,6 +212,6 @@ Entries are highlighted in \textbf{bold} when the ground-truth population size (
 Tables~\ref{tab:counting_error_sweep} and~\ref{tab:counting_error_sweep_k1} show how the HITL-NIS estimator behaves as a function of the simulated human annotation error rate \(p\) and how it reacts to the increased confirmation strictness \(K\) and the underlying quality of the re-id signal:
 \begin{itemize}
     \item \textbf{Human annotation noise causes a collapse towards underestimation.} As the chance of error increases, datasets rapidly fall from realistic estimates to very small counts with tight confidence intervals. This is a direct consequence of the extreme class imbalance among candidate pairs since there are far more ``different'' pairs than ``same'' pairs, so flipping answers with a probability \(p\) creates many false positive edges which create non-existent merges and underestimate the number of individuals.
-    \item \textbf{Confirmation is critical, but still not a realistic assumption.} With \(K=2\) (meaning two confirmations needed) the collapse is significantly delayed, with some datasets giving a solid population estimation range with labeling error at 15\% (CowDataset, CZoo). It can be noted from the table~\ref{tab:counting_error_sweep} that datasets with a lower number of GT individuals tend to collapse slower than the ones with larger number (ATRW). Maybe even more important to mention it that this introduction of a random error rate is a rather naive assumption that labeling events are independent and that the person labeling the pairs always has a same chance of making an error. Intuitively it makes sense to me that a person making an error on a labeling pair would have a bigger change to repeat that error the second time around. 
+    \item \textbf{Confirmation is critical, but still not a realistic assumption.} With \(K=2\) (meaning two confirmations needed) the collapse is significantly delayed, with some datasets giving a solid population estimation range with labeling error at 15\% (CowDataset, CZoo). It can be noted from the table~\ref{tab:counting_error_sweep} that datasets with a lower number of GT individuals tend to collapse slower than the ones with larger number (ATRW). More importantly, it is worth to mention that this introduction of a random error rate is a rather naive assumption that labeling events are independent and that the person labeling the pairs always has the same chance of making an error. Intuitively it makes sense to me that a person making an error on a labeling pair would have a bigger chance to repeat that same error the second time around. 
     \item \textbf{Counting quality depends on Re-ID quality.} HITL-NIS relies on the underlying similarity model to propose informative candidate pairs so naturally, when re-identification is reliable, the process tends to perform better. For example, at \(K = 0\) ElPephants dataset was tested with the same \(N\) and \(M\) parameters as the rest of the datasets and even at error rate of 0\% the confidence interval did not include the GT, only when increasing the \(N\) and \(M\) in table~\ref{tab:counting_error_sweep} to 150 and 1500 respectively did it achieve somewhat usable results. This means that for that dataset, with the current system, the annotator would have to manually label ~220,000 pairs of images to get a reliable result (this is without counting on the repeated queries for the pairs labeled as ``same''), which is still just around ~5\% of the total possible pairs. 
 \end{itemize}

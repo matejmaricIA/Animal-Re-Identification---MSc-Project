@@ -1,9 +1,9 @@
 \chapter{Datasets}
 \label{chap:dataset}
-Accurate and generalizable animal re-identification (Re-ID) system depends on the quality and diversity of datasets used for development and evaluation. This thesis evaluates the proposed approach on publicly available datasets, mostly from WildlifeReID-10k dataset collection\cite{adam2025wildlifereid10kwildlifereidentificationdataset}
+An accurate and generalizable animal re-identification (Re-ID) system depends on the quality and diversity of datasets used for development and evaluation. This thesis evaluates the proposed approach on publicly available datasets, mostly from WildlifeReID-10k dataset collection~\cite{adam2025wildlifereid10kwildlifereidentificationdataset}
 
 \section{WildlifeReID-10k}
-WildlifeReID-10k\cite{adam2025wildlifereid10kwildlifereidentificationdataset} is a benchmark dataset collection explicitly curated for evaluating animal Re-ID methods across a variety of species. The primary goal of this dataset is to enable systematic benchmarking of general-purpose animal Re-ID methods. It aggregates \num{37} existing datasets into a unified format to enable easy evaluation. In total, WildlifeReID contains \num{140488} images of \num{10772} unique individuals spanning \num{33} species. The methods described in this thesis were tested on \num{7} datasets from that collection: ATRW (tigers), CowDataset (cows), ElPephants (elephants), CTai (chimps), Chicks4FreeID (chickens), SealID (seals) and SeaStarReID2023 (sea stars). They were chosen because they provide the range of challenges of re-identification and the testing on all \num{37} datasets would be too computationally expensive.  
+WildlifeReID-10k~\cite{adam2025wildlifereid10kwildlifereidentificationdataset} is a benchmark dataset collection explicitly curated for evaluating animal Re-ID methods across a variety of species. The primary goal of this dataset is to enable systematic benchmarking of general-purpose animal Re-ID methods. It aggregates \num{37} existing datasets into a unified format to enable easy evaluation. In total, WildlifeReID contains \num{140488} images of \num{10772} unique individuals spanning \num{33} species. The methods described in this thesis were tested on \num{7} datasets from that collection: ATRW (tigers), CowDataset (cows), ElPephants (elephants), czoo (chimps), Chicks4FreeID (chickens), SealID (seals) and SeaStarReID2023 (sea stars). They were chosen because they provide the range of challenges of re-identification and the testing on all \num{37} datasets would be too computationally expensive.  
 
 \begin{figure}[H]
     \centering
@@ -13,17 +13,28 @@ WildlifeReID-10k\cite{adam2025wildlifereid10kwildlifereidentificationdataset} is
 \end{figure}
 
 \subsection{Train/Test Leakage Issues and Split Protocols}
-A central (and often not addressed) issue in animal Re-ID evaluation is train-to-test leakage caused by visually almost identical images (for example, consecutive video frames or images from camera traps taken in very quick succession during a single observation) ending up in both train and test sets. There are also mistakes in the datasets, so in some cases there are literal duplicates present. Because of this random splits often result in overly optimistic results that do not reflect real-world generalization.\cite{adam2025wildlifereid10kwildlifereidentificationdataset}
-
-To address this, WildlifeReID-10k proposes two split strategies\cite{adam2025wildlifereid10kwildlifereidentificationdataset}:
+A central (and often not addressed) issue in animal Re-ID evaluation is train-to-test leakage caused by visually almost identical images (for example, consecutive video frames or images from camera traps taken in very quick succession during a single observation) ending up in both train and test sets. From the literature review I conducted, this issue is rarely addressed or even mentioned but, it is responsible for a significant inflation of the evaluation results. Authors of some datasets like ElPephants~\cite{Korschens_2019_ICCV} report labeling noise (mistakes in labeling).
+To address the data leak problem, WildlifeReID-10k proposes two split strategies~\cite{adam2025wildlifereid10kwildlifereidentificationdataset}:
 
 \begin{itemize}
     \item \textbf{Time-aware splits}: some of the datasets come with timestamps and this is used to split the images chronologically per identity using a cut-off date so that images from the same encounter do not leak across splits
-    \item \textbf{Similarity-aware splits}: when timestamps are not available, an embedding model DINOv2\cite{oquab2024dinov2learningrobustvisual} is used to cluster the images, leveraging the fact that near duplicates should lie close in the embedding space
+    \item \textbf{Similarity-aware splits}: when timestamps are not available, an embedding model DINOv2~\cite{oquab2024dinov2learningrobustvisual} is used to cluster the images, leveraging the fact that near-duplicates should lie close in the embedding space
 \end{itemize}
 
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{Figures/atrw_data_leak.png}
+    \caption{Example of extreme train/test leakage: near-duplicate images (sometimes differing only by a slightly different crop) can appear across splits, leading to overly optimistic evaluation results if not controlled for.}
+    \label{fig:atrw_data_leak}
+\end{figure}
+
+
 \subsection{MegaDescriptor Training Leakage}
-In this thesis I used the MegaDescriptor-L-384 (MD) model for extracting of global embeddings from images, this model was trained on a subset of datasets from WildlifeReID-10k so for those datasets in evaluation I disregarded the time-aware/similarity-aware splits and used the exact same splits that the model was trained on to avoid additional data leaks. Those datasets are: ATRW, CTai and SealID and in later parts of the thesis will be marked with \textbf{*} to signify this. The Exception to this is the ELPephants\cite{Korschens_2019_ICCV} dataset which uses a random split.
+In this thesis I used the MegaDescriptor-L-384 (MD) model to extract global embeddings from images, this model was trained on a subset of datasets from WildlifeReID-10k so for those datasets in evaluation I disregarded the time-aware/similarity-aware splits and used the exact same splits that the model was trained on to avoid additional data leaks. Those datasets are: ATRW, Czoo and SealID and in later parts of the thesis will be marked with \textbf{*} to signify this. The exception to this is the ELPephants~\cite{Korschens_2019_ICCV} dataset which uses a random split.
+
+
 
 \subsection{Datasets Overview}
 \begin{table}[H]
@@ -32,18 +43,29 @@ In this thesis I used the MegaDescriptor-L-384 (MD) model for extracting of glob
 \hline
 \textbf{Dataset} & \textbf{\# images} & \textbf{\# individuals} & \textbf{ratio} & \textbf{split type}\\
 \hline
-ATRW* & 5,415 & 182 & 29.8 & Original MD split \\
-CTai* & 4,662 & 71 & 65.7 & Original MD split \\
-SealID* & 2,080 & 57 & 36.5 & Original MD split \\
-CowDataset & 1,485 & 13 & 114.2 & Time-aware split \\
-Chicks4FreeID & 1,146 & 50 & 22.9 & Similarity-aware split \\
-SeaStarReID2023 & 2,187 & 95 & 23.0 & Time-aware split \\
-ELPephants & 2078 & 276 & 7.5 & Random split \\
+ATRW*~\cite{Li_2020} & 5,415 & 182 & 29.8 & Original MD split \\
+CZoo*~\cite{inproceedings} & 4,662 & 71 & 65.7 & Original MD split \\
+SealID*~\cite{s22197602} & 2,080 & 57 & 36.5 & Original MD split \\
+CowDataset~\cite{10.1371/journal.pone.0275435} & 1,485 & 13 & 114.2 & Time-aware split \\
+Chicks4FreeID~\cite{ani15010001} & 1,146 & 50 & 22.9 & Similarity-aware split \\
+SeaStarReID2023~\cite{wahltinez2024opensource} & 2,187 & 95 & 23.0 & Time-aware split \\
+ELPephants~\cite{Korschens_2019_ICCV} & 2078 & 276 & 7.5 & Random split \\
 \hline
 \end{tabular}
 \caption{Datasets used for evaluation in this thesis.}
 \label{tab:datasets_used}
 \end{table}
+
+\subsection{ELPephants dataset}
+ELPephants~\cite{Korschens_2019_ICCV} is substantially more challenging than most of the other benchmarks used in this thesis. Unlike species with distinctive, stable coat patterns (e.g., tigers or seals), elephants do not have strong fur/coat texture cues. Instead, their appearance is dominated by large smooth surfaces (skin, ears, trunk) that can look very similar across individuals, and the same individual can also look quite different across images depending on pose, illumination, and whether the animal is covered in mud, dust, or water. This makes ELPephants a useful stress-test for methods that rely on local evidence and geometric consistency.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{Figures/elephants_train_SAFE.pdf}
+    \caption{Examples from the ELPephants dataset illustrating the difficulty of re-identification due to strong appearance changes across images (pose, lighting, and dirt/mud coverage). These images are all of one individual.}
+    \label{fig:elephant_split_examples}
+\end{figure}
+
 
 \subsection{Class balance visualizations}
 Another issue with Re-ID datasets is that they are typically highly imbalanced.
@@ -54,4 +76,6 @@ Another issue with Re-ID datasets is that they are typically highly imbalanced.
     \caption{Class balance (number of images per individual) for the datasets used.}
     \label{fig:class_balance_compact_grid}
 \end{figure}
+
+
 
