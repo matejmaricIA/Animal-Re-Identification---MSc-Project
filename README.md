@@ -128,6 +128,33 @@ Important training notes:
   - Include `fisher` to compute/use Fisher vectors.
   - Include `gv` to enable geometric verification reranking.
 
+### 1b) Training MegaDescriptor from scratch (WReID10k v7)
+This repo also includes a self-contained trainer (no `wildlife-tools` dependency) that trains a MegaDescriptor-style Swin-L-384 embedding model with ArcFace on WildlifeReID-10k.
+
+1) Build leakage-aware `train/val/test_known/test_new` splits (80/10/10 + open-set identities):
+```bash
+./venv/bin/python utils/build_wreid10k_splits_80_10_10.py \
+  --input data/wildlifedatasets/wildlifereid-10k/versions/7/metadata.csv \
+  --output data/wreid10k_splits_80_10_10.csv
+```
+
+2) Train (ImageNet initialization; may download timm weights on first run):
+```bash
+./venv/bin/python utils/train_megadescriptor_scratch.py \
+  --splits-csv data/wreid10k_splits_80_10_10.csv \
+  --wreid-root data/wildlifedatasets/wildlifereid-10k/versions/7 \
+  --out-dir models/megadescriptor_scratch/run01 \
+  --epochs 30 --batch-size 64 --lr 1e-3
+```
+
+3) Evaluate closed-set and open-set (prototype-based cosine classifier):
+```bash
+./venv/bin/python utils/eval_megadescriptor_open_closed.py \
+  --splits-csv data/wreid10k_splits_80_10_10.csv \
+  --wreid-root data/wildlifedatasets/wildlifereid-10k/versions/7 \
+  --ckpt models/megadescriptor_scratch/run01/ckpt_best.pt
+```
+
 ### 2) Population counting (`--count`)
 Counting estimates the number of unique individuals using HITL-NIS.
 

@@ -61,6 +61,7 @@ def load_or_train_fisher_vectors(
     ds_tag: str,
     method_name: str,
     cache_suffix: str,
+    pca_dim: int = N_COMPONENTS_PCA,
     descriptors: dict | None = None,
     descriptors_loader: Callable[[], dict] | None = None,
 ):
@@ -77,7 +78,7 @@ def load_or_train_fisher_vectors(
         descriptors = descriptors_loader()
 
     desc_stack = stack_all_descriptors(descriptors)
-    pca = train_pca(desc_stack)
+    pca = train_pca(desc_stack, n_components=int(pca_dim))
     gmm = train_gmm(pca.transform(desc_stack))
     fisher_vectors = compute_fisher_vectors(descriptors, pca, gmm)
     save_stuff(pca, gmm, fisher_vectors, (pca_path, gmm_path, fv_path))

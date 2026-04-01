@@ -57,7 +57,7 @@ TMP = './data/tmp/'
 EVALUATION_DIR = './evaluations/full_evals'
 # XLSX file for saving population counting results
 COUNT_RESULTS_XLSX = './evaluations/count/population_counting_label_error_testing.xlsx'
-EVAL_RESULTS_XLSX = './evaluations/final_evals/final_evals_classification.xlsx'
+EVAL_RESULTS_XLSX = './evaluations/final_evals/classification_superpoint_pca.xlsx'
 
 WILD_DATASET_PATH = './data/wildlifedatasets/wildlifereid-10k/versions/7'
 

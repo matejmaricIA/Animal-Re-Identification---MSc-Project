@@ -122,7 +122,7 @@ def _draw_keypoints(
     image: np.ndarray,
     keypoints: np.ndarray,
     *,
-    max_points: int = 300,
+    max_points: int = 350,
     point_radius: int = 3,
     ring_radius: int = 4,
 ) -> np.ndarray:
@@ -131,9 +131,26 @@ def _draw_keypoints(
     if len(pts) == 0:
         return out
     pts = _sample_points(pts, max_points, seed=42)
+
+    # Darken the base image slightly so keypoints pop on busy textures.
+    out = cv2.addWeighted(out, 0.82, np.zeros_like(out), 0.18, 0.0)
+
+    # Glow layer for a more pronounced (presentation-friendly) keypoint visualization.
+    glow = np.zeros_like(out)
+    glow_color = (255, 255, 0)  # cyan (BGR)
+    glow_r = int(max(6, ring_radius * 3))
     for x, y in pts:
-        cv2.circle(out, (int(x), int(y)), int(point_radius), (0, 220, 255), -1, cv2.LINE_AA)
-        cv2.circle(out, (int(x), int(y)), int(ring_radius), (40, 120, 220), 1, cv2.LINE_AA)
+        cv2.circle(glow, (int(x), int(y)), glow_r, glow_color, -1, cv2.LINE_AA)
+    sigma = float(max(2.0, ring_radius * 1.4))
+    glow = cv2.GaussianBlur(glow, (0, 0), sigmaX=sigma, sigmaY=sigma)
+    out = cv2.addWeighted(out, 1.0, glow, 0.35, 0.0)
+
+    # Crisp rings + centers on top of the glow.
+    for x, y in pts:
+        p = (int(x), int(y))
+        cv2.circle(out, p, int(ring_radius + 2), (0, 0, 0), 2, cv2.LINE_AA)
+        cv2.circle(out, p, int(ring_radius), (245, 245, 245), 2, cv2.LINE_AA)
+        cv2.circle(out, p, int(point_radius), glow_color, -1, cv2.LINE_AA)
     return out
 
 
@@ -788,6 +805,53 @@ def _resolve_union_entries(result: dict) -> list[dict]:
     return entries
 
 
+def _resolve_union_entries_display(result: dict, *, top_k: int) -> list[dict]:
+    """Resolve a *display* union: Global top-K + Fisher top-K (deduped, ordered)."""
+    k = max(0, int(top_k))
+    global_ranked = result.get("global_ranked", []) or []
+    fisher_ranked = result.get("fisher_ranked", []) or []
+
+    global_top = [str(x.get("train_id")) for x in global_ranked[:k] if x.get("train_id") is not None]
+    fisher_top = [str(x.get("train_id")) for x in fisher_ranked[:k] if x.get("train_id") is not None]
+    union_ids = list(dict.fromkeys(global_top + fisher_top))
+
+    global_map = {str(x.get("train_id")): x for x in global_ranked if x.get("train_id") is not None}
+    fisher_map = {str(x.get("train_id")): x for x in fisher_ranked if x.get("train_id") is not None}
+    tier2_map = {str(x.get("train_id")): x for x in result.get("tier2_ranked", []) or [] if x.get("train_id") is not None}
+    global_set = set(global_top)
+    fisher_set = set(fisher_top)
+
+    entries: list[dict] = []
+    for tid in union_ids:
+        src_g = tid in global_set
+        src_f = tid in fisher_set
+        source = "G+F" if src_g and src_f else ("G" if src_g else ("F" if src_f else "-"))
+
+        tier2_item = tier2_map.get(tid, {})
+        g_item = global_map.get(tid, {})
+        f_item = fisher_map.get(tid, {})
+
+        tier2_raw = tier2_item.get("tier2_score", None)
+        tier2_score = float(tier2_raw) if tier2_raw is not None else None
+        g_raw = g_item.get("score", None)
+        g_score = float(g_raw) if g_raw is not None else None
+        f_raw = f_item.get("score", None)
+        f_score = float(f_raw) if f_raw is not None else None
+        label = tier2_item.get("label", g_item.get("label", f_item.get("label")))
+
+        entries.append(
+            {
+                "train_id": tid,
+                "source": source,
+                "global_score": g_score,
+                "fisher_score": f_score,
+                "tier2_score": tier2_score,
+                "label": label,
+            }
+        )
+    return entries
+
+
 def _fmt_score(val: float | None, precision: int = 3) -> str:
     if val is None:
         return "-"
@@ -930,7 +994,9 @@ def build_assets_from_funnel(
         train_image_paths=train_processed_paths,
         title="Tier-1 Global shortlist",
         detail_fn=(
-            (lambda e: f"sim={float(e.get('score', 0.0)):.3f}  {_correctness_label(e)}")
+            # In overview mode we keep text minimal (scores may be on different scales
+            # across signals and can distract in slides).
+            (lambda e: f"{_correctness_label(e)}")
             if overview_mode
             else (lambda e: f"score={float(e.get('score', 0.0)):.3f}")
         ),
@@ -948,7 +1014,7 @@ def build_assets_from_funnel(
         train_image_paths=train_processed_paths,
         title="Tier-1 Fisher shortlist",
         detail_fn=(
-            (lambda e: f"sim={float(e.get('score', 0.0)):.3f}  {_correctness_label(e)}")
+            (lambda e: f"{_correctness_label(e)}")
             if overview_mode
             else (lambda e: f"score={float(e.get('score', 0.0)):.3f}")
         ),
@@ -958,10 +1024,13 @@ def build_assets_from_funnel(
     )
     assets["tier1_fisher_strip"] = _save_image(out_dir / "asset_tier1_fisher_strip.png", fisher_strip)
 
-    union_entries = _resolve_union_entries(result)
-    union_entries_overview = _with_correctness(union_entries, query_class)
+    # Union strip (presentation-friendly): show Global top-K + Fisher top-K (deduped).
+    # This makes the union stage visually match the idea of "K from each signal".
+    union_entries_full = _resolve_union_entries(result)
+    union_entries_display = _resolve_union_entries_display(result, top_k=top_k)
+    union_entries_overview = _with_correctness(union_entries_display, query_class)
     tier2_fusion_entries = []
-    union_map = {str(x.get("train_id")): x for x in union_entries}
+    union_map = {str(x.get("train_id")): x for x in union_entries_full}
     for item in result.get("tier2_ranked", []):
         tid = str(item.get("train_id"))
         merged = dict(union_map.get(tid, {"train_id": tid, "source": "-", "global_score": None, "fisher_score": None}))
@@ -981,7 +1050,7 @@ def build_assets_from_funnel(
         train_image_paths=train_processed_paths,
         title="Tier-1 Union shortlist",
         detail_fn=(
-            (lambda e: f"t2={_fmt_score(e.get('tier2_score'))}  {_correctness_label(e)}")
+            (lambda e: f"{_correctness_label(e)}")
             if overview_mode
             else (
                 lambda e: (
@@ -993,7 +1062,7 @@ def build_assets_from_funnel(
             )
         ),
         panel_size=panel_size,
-        top_k=top_k,
+        top_k=max(0, len(union_entries_overview)),
         overview_mode=overview_mode,
     )
     assets["tier1_union_strip"] = _save_image(out_dir / "asset_tier1_union_strip.png", union_strip)

@@ -8,6 +8,9 @@
 
 \usepackage{blindtext}
 \usepackage{float}
+\usepackage{longtable}
+\usepackage{graphicx}
+
 
 \usepackage{siunitx}
 \sisetup{
@@ -17,12 +20,13 @@
 
 
 %--- THESIS INFORMATION / PODACI O RADU ----------------------------------------
+\brojrada{1253}
 \title{Deep learning-based animal re-identification for non-invasive wildlife monitoring and conservation}
 \naslov{Duboko učenje za ponovnu identifikaciju životinja u neinvazivnom praćenju divljih vrsta i očuvanju prirode}
 \author{Matej Marić}
 \mentor{izv. prof. dr. sc. Marina Bagić Babac}
-\date{June, 2025}
-\datum{lipanj, 2025.}
+\date{February, 2026}
+\datum{Veljača, 2026.}
 %-------------------------------------------------------------------------------
 
 \begin{document}
@@ -31,11 +35,11 @@
 \maketitle
 
 % Thesis assignment sheet (download from FERWeb)
-\zadatak{filename.pdf}
+%\zadatak{zadatak.pdf}
 
 % Acknowledgements -----------------------------------------
 \begin{zahvale}
-Thanks for the tea...
+Zahvalio bih svima na potpori, ali ponajviše samome sebi.
 \end{zahvale}
 
 % Numbered pages from here
@@ -52,14 +56,9 @@ Thanks for the tea...
 \include{chapters/related_work}
 \include{chapters/datasets_and_preprocessing}
 \include{chapters/methodology}
-%\include{chapters/feature_aggregation_and_representation}
-%\include{chapters/geometric_verification}
 \include{chapters/classification}
 \include{chapters/population_counting}
-%\include{chapters/pipeline_implementation}
-%\include{chapters/experimental_setup}
 \include{chapters/results}
-%\include{chapters/discussion}
 \include{chapters/conclusion_and_future_work}
 
 % ----------------- References ------------------------------
@@ -67,7 +66,7 @@ Thanks for the tea...
 
 % ----------------- Abstract (EN) ---------------------------
 \begin{abstract}
-Reliable wildlife population monitoring is essential for conservation and ecological management. This thesis develops a species-agnostic visual pipeline that re-identifies individual animals and supports population size estimation when only limited labeled data is available. The method combines global deep embeddings with local-feature aggregation via Fisher vectors, and optionally applies geometric verification as a final re-ranking stage to improve robustness to viewpoint, background, and near-duplicate imagery. Evaluation is performed exclusively on publicly available benchmarks from the WildlifeReID-10k collection spanning multiple species and imaging conditions. Results show that fusing global and local evidence consistently improves closed-set identification performance, and that a human-in-the-loop nested importance sampling estimator can provide practical population estimates while highlighting sensitivity to labeling errors.
+Reliable methods for monitoring wildlife populations are essential for effective conservation and ecological management. This thesis addresses the challenge of developing an automated visual system capable of identifying individual animals and estimating their population size across various species, particularly when limited labeled data is available. The primary goal was to establish a practical approach that can generalize effectively without the need for extensive manual annotation or species-specific model retraining. The method combines global deep embeddings with local feature aggregation using Fisher Vectors and optionally applies geometric verification as a final re-ranking stage to improve robustness. Evaluation is performed on publicly available benchmarks from the WildlifeReID-10k collection spanning multiple species. Results show that fusing global and local evidence consistently improves closed-set identification performance and that a human-in-the-loop based estimator, combined with these global and local methods, can provide practical population estimates while highlighting sensitivity to labeling errors.
 \end{abstract}
 
 \begin{keywords}
@@ -76,12 +75,12 @@ Animal Re-identification; Wildlife Monitoring; Population Estimation; Computer V
 
 % ----------------- Sažetak (HR) -----------------------------
 \begin{sazetak}
-Pouzdano praćenje populacija divljih životinja ključno je za očuvanje prirode i ekološko upravljanje. U ovom radu razvijen je vizualni sustav neovisan o vrsti za re-identifikaciju pojedinačnih životinja i procjenu veličine populacije u uvjetima ograničene količine označenih podataka. Predloženi pristup kombinira globalne duboke ugrađene reprezentacije s agregacijom lokalnih značajki pomoću Fisherovih vektora te, po potrebi, primjenjuje geometrijsku verifikaciju kao završno ponovno rangiranje kako bi se povećala robusnost na promjene pogleda, pozadine i gotovo identične snimke. Evaluacija je provedena isključivo na javno dostupnim referentnim skupovima iz kolekcije WildlifeReID-10k koji obuhvaćaju više vrsta i različite uvjete snimanja. Rezultati pokazuju da fuzija globalnih i lokalnih signala dosljedno poboljšava uspješnost identifikacije, dok procjena populacije temeljena na interaktivnom ugniježđenom važnosnom uzorkovanju omogućuje praktične procjene uz naglašenu osjetljivost na pogreške u ljudskom označavanju.
+Pouzdane metode praćenja populacija divljih životinja ključne su za učinkovito očuvanje i ekološko upravljanje. Ovaj rad bavi se izazovom razvoja automatiziranog vizualnog sustava sposobnog za identificiranje pojedinačnih životinja i procjenu veličine njihove populacije među različitim vrstama, posebno kada je dostupan ograničen broj označenih podataka. Primarni cilj bio je uspostaviti praktičan pristup koji se može učinkovito generalizirati bez potrebe za opsežnim ručnim označavanjem ili ponovnim treniranjem modela specifičnih za vrstu. Predloženi pristup kombinira globalne duboke značajke s agregacijom lokalnih značajki pomoću Fisherovih vektora te, po potrebi, primjenjuje geometrijsku verifikaciju za ponovno rangiranje kandidata kako bi se povećala robusnost. Evaluacija je provedena na javno dostupnim skupovima podataka iz kolekcije WildlifeReID-10k koja obuhvaća više vrsta životinja. Rezultati pokazuju da kombinacija globalnih i lokalnih signala poboljšava uspješnost re-identifikacije, dok procjena populacije temeljena na uzorkovanju i označavanju samo manjeg dijela ukupnih parova slika u skupu podataka omogućuje kvalitetne procjene uz naglašenu osjetljivost na pogreške u označavanju.
 \end{sazetak}
 
 \begin{kljucnerijeci}
 Re-identifikacija životinja; Nadzor Divljači; Procjena Populacije; Računalni Vid; Očuvanje Prirode
 \end{kljucnerijeci}
-
 \end{document}
+
 
