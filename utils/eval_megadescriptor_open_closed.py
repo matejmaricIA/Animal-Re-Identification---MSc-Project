@@ -215,9 +215,10 @@ def _topk_acc(
 
 
 def _roc_auc(scores_known: np.ndarray, scores_unknown: np.ndarray) -> float:
-    # Treat "unknown" as positive class (1) so AUC reflects unknown detection.
+    # Treat "unknown" as positive class (1). Because higher max similarity means
+    # "more likely known", flip the sign so larger scores mean "more likely unknown".
     y = np.concatenate([np.zeros_like(scores_known), np.ones_like(scores_unknown)])
-    s = np.concatenate([scores_known, scores_unknown])
+    s = -np.concatenate([scores_known, scores_unknown])
     order = np.argsort(s)
     y = y[order]
     # Rank-sum AUC

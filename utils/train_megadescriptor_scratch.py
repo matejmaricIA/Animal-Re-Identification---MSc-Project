@@ -195,6 +195,7 @@ class TrainConfig:
     embed_dim: int
     imagenet_init: bool
     batch_size: int
+    accum_steps: int
     epochs: int
     lr: float
     weight_decay: float
@@ -239,7 +240,60 @@ def _make_label_map(df_train: pd.DataFrame) -> Dict[str, int]:
 
 
 @torch.no_grad()
-def _eval_val(model: MegaDescriptorScratch, loader: DataLoader, device: torch.device, amp: bool) -> Dict[str, float]:
+def _embed_dataset(
+    model: MegaDescriptorScratch,
+    loader: DataLoader,
+    device: torch.device,
+    amp: bool,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    model.eval()
+    emb_chunks = []
+    label_chunks = []
+
+    for x, y in loader:
+        x = x.to(device, non_blocking=True)
+        y = y.to(device, non_blocking=True)
+        with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=bool(amp and device.type == "cuda")):
+            emb, _ = model(x, None)
+        emb_chunks.append(emb.float())
+        label_chunks.append(y)
+
+    return torch.cat(emb_chunks, dim=0), torch.cat(label_chunks, dim=0)
+
+
+@torch.no_grad()
+def _retrieval_top1_accuracy(
+    ref_emb: torch.Tensor,
+    ref_y: torch.Tensor,
+    query_emb: torch.Tensor,
+    query_y: torch.Tensor,
+    *,
+    chunk_size: int = 256,
+) -> float:
+    total = int(query_y.numel())
+    if total == 0:
+        return float("nan")
+
+    correct = 0
+    ref_t = ref_emb.t().contiguous()
+    for start in range(0, total, int(chunk_size)):
+        stop = min(start + int(chunk_size), total)
+        sims = query_emb[start:stop] @ ref_t
+        nn_idx = sims.argmax(dim=1)
+        pred = ref_y[nn_idx]
+        correct += int((pred == query_y[start:stop]).sum().item())
+
+    return float(correct) / float(total)
+
+
+@torch.no_grad()
+def _eval_val(
+    model: MegaDescriptorScratch,
+    loader: DataLoader,
+    ref_loader: DataLoader,
+    device: torch.device,
+    amp: bool,
+) -> Dict[str, float]:
     model.eval()
     total = 0
     correct_margin = 0
@@ -269,11 +323,17 @@ def _eval_val(model: MegaDescriptorScratch, loader: DataLoader, device: torch.de
     acc_nomargin = float(correct_nomargin) / float(total) if total else float("nan")
     avg_loss_margin = float(loss_sum_margin) / float(total) if total else float("nan")
     avg_loss_nomargin = float(loss_sum_nomargin) / float(total) if total else float("nan")
+
+    ref_emb, ref_y = _embed_dataset(model, ref_loader, device, amp)
+    val_emb, val_y = _embed_dataset(model, loader, device, amp)
+    val_retrieval_top1 = _retrieval_top1_accuracy(ref_emb, ref_y, val_emb, val_y)
+
     return {
         "val_acc_margin": acc_margin,
         "val_acc_nomargin": acc_nomargin,
         "val_loss_margin": avg_loss_margin,
         "val_loss_nomargin": avg_loss_nomargin,
+        "val_retrieval_top1": val_retrieval_top1,
     }
 
 
@@ -290,6 +350,7 @@ def _save_checkpoint(
     label_to_index: Dict[str, int],
     scaler: torch.amp.GradScaler | None = None,
     best_val_loss: float | None = None,
+    best_val_retrieval_acc: float | None = None,
 ) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     ckpt_path = out_dir / f"ckpt_{tag}.pt"
@@ -301,6 +362,7 @@ def _save_checkpoint(
         "scheduler": scheduler.state_dict() if scheduler is not None else None,
         "scaler": scaler.state_dict() if scaler is not None else None,
         "best_val_loss": float(best_val_loss) if best_val_loss is not None else None,
+        "best_val_retrieval_acc": float(best_val_retrieval_acc) if best_val_retrieval_acc is not None else None,
         "config": asdict(cfg),
         "label_to_index": label_to_index,
         "backbone_name": model.backbone_name,
@@ -320,8 +382,9 @@ def main() -> None:
     parser.add_argument("--embed-dim", type=int, default=384)
     parser.add_argument("--imagenet-init", action="store_true", default=True)
     parser.add_argument("--no-imagenet-init", dest="imagenet_init", action="store_false")
-    parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--epochs", type=int, default=30)
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--accum-steps", type=int, default=4, help="Gradient accumulation steps; effective batch = batch_size * accum_steps.")
+    parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight-decay", type=float, default=1e-4)
     parser.add_argument("--momentum", type=float, default=0.9)
@@ -347,6 +410,7 @@ def main() -> None:
         embed_dim=int(args.embed_dim),
         imagenet_init=bool(args.imagenet_init),
         batch_size=int(args.batch_size),
+        accum_steps=max(1, int(args.accum_steps)),
         epochs=int(args.epochs),
         lr=float(args.lr),
         weight_decay=float(args.weight_decay),
@@ -376,7 +440,10 @@ def main() -> None:
 
     label_to_index = _make_label_map(df_train)
     num_classes = len(label_to_index)
-    print(f"[DATA] train images={len(df_train)} val images={len(df_val)} classes(train)={num_classes}")
+    print(
+        f"[DATA] train images={len(df_train)} val images={len(df_val)} classes(train)={num_classes} "
+        f"batch={cfg.batch_size} accum_steps={cfg.accum_steps} effective_batch={cfg.batch_size * cfg.accum_steps}"
+    )
 
     image_size = 384
     train_tf, val_tf = _build_transforms(image_size)
@@ -387,6 +454,13 @@ def main() -> None:
         wreid_root=wreid_root,
         label_to_index=label_to_index,
         transform=train_tf,
+        skip_missing=cfg.skip_missing,
+    )
+    train_ref_ds = WReIDSplitDataset(
+        df_train,
+        wreid_root=wreid_root,
+        label_to_index=label_to_index,
+        transform=val_tf,
         skip_missing=cfg.skip_missing,
     )
     # For val, drop labels not in train mapping (open-set is not expected in val anyway).
@@ -415,6 +489,14 @@ def main() -> None:
         pin_memory=(device.type == "cuda"),
         drop_last=False,
     )
+    train_ref_loader = DataLoader(
+        train_ref_ds,
+        batch_size=cfg.batch_size,
+        shuffle=False,
+        num_workers=cfg.num_workers,
+        pin_memory=(device.type == "cuda"),
+        drop_last=False,
+    )
 
     model = MegaDescriptorScratch(
         backbone_name=cfg.backbone,
@@ -437,6 +519,7 @@ def main() -> None:
     ce = nn.CrossEntropyLoss()
 
     best_val_loss = float("inf")
+    best_val_retrieval_acc = float("-inf")
     step = 0
     start_epoch = 1
 
@@ -472,10 +555,12 @@ def main() -> None:
         start_epoch = int(payload.get("epoch", 0)) + 1
         if payload.get("best_val_loss") is not None:
             best_val_loss = float(payload["best_val_loss"])
+        if payload.get("best_val_retrieval_acc") is not None:
+            best_val_retrieval_acc = float(payload["best_val_retrieval_acc"])
 
         print(
             f"[RESUME] Loaded {resume_path} | start_epoch={start_epoch} "
-            f"step={step} best_val_loss={best_val_loss:.4f}"
+            f"step={step} best_val_loss={best_val_loss:.4f} best_val_retrieval_acc={best_val_retrieval_acc:.4f}"
         )
 
     for epoch in range(start_epoch, cfg.epochs + 1):
@@ -483,6 +568,7 @@ def main() -> None:
         t0 = time.time()
         running = 0.0
         n_seen = 0
+        optimizer.zero_grad(set_to_none=True)
 
         pbar = tqdm(
             train_loader,
@@ -494,15 +580,18 @@ def main() -> None:
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
 
-            optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=bool(cfg.amp and device.type == "cuda")):
                 _emb, logits = model(x, y)
                 loss = ce(logits, y)
-            scaler.scale(loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
+            scaler.scale(loss / float(cfg.accum_steps)).backward()
 
-            step += 1
+            should_step = (batch_idx % cfg.accum_steps == 0) or (batch_idx == len(train_loader))
+            if should_step:
+                scaler.step(optimizer)
+                scaler.update()
+                optimizer.zero_grad(set_to_none=True)
+                step += 1
+
             running += float(loss.item()) * int(y.numel())
             n_seen += int(y.numel())
             if args.log_every > 0 and (batch_idx % int(args.log_every) == 0):
@@ -512,18 +601,19 @@ def main() -> None:
         scheduler.step()
 
         train_loss = float(running) / float(n_seen) if n_seen else float("nan")
-        metrics = _eval_val(model, val_loader, device, amp=cfg.amp)
+        metrics = _eval_val(model, val_loader, train_ref_loader, device, amp=cfg.amp)
         dt = time.time() - t0
 
         lr = float(optimizer.param_groups[0]["lr"])
         print(
             f"[E{epoch:03d}] lr={lr:.6g} train_loss={train_loss:.4f} "
             f"val_loss={metrics['val_loss_nomargin']:.4f} val_acc={metrics['val_acc_nomargin']:.4f} "
+            f"val_retrieval_top1={metrics['val_retrieval_top1']:.4f} "
             f"(margin_acc={metrics['val_acc_margin']:.4f}) "
             f"time={dt:.1f}s"
         )
 
-        # Always save last; save best by val acc.
+        # Always save last; save best by cosine 1-NN retrieval on the validation split.
         _save_checkpoint(
             out_dir,
             tag="last",
@@ -536,9 +626,11 @@ def main() -> None:
             label_to_index=label_to_index,
             scaler=scaler,
             best_val_loss=best_val_loss,
+            best_val_retrieval_acc=best_val_retrieval_acc,
         )
-        if metrics["val_loss_nomargin"] < best_val_loss:
+        if metrics["val_retrieval_top1"] > best_val_retrieval_acc:
             best_val_loss = float(metrics["val_loss_nomargin"])
+            best_val_retrieval_acc = float(metrics["val_retrieval_top1"])
             best_path = _save_checkpoint(
                 out_dir,
                 tag="best",
@@ -551,10 +643,14 @@ def main() -> None:
                 label_to_index=label_to_index,
                 scaler=scaler,
                 best_val_loss=best_val_loss,
+                best_val_retrieval_acc=best_val_retrieval_acc,
             )
             print(f"[SAVE] best checkpoint: {best_path}")
 
-    print(f"[DONE] out_dir={out_dir} best_val_loss={best_val_loss:.4f}")
+    print(
+        f"[DONE] out_dir={out_dir} best_val_loss={best_val_loss:.4f} "
+        f"best_val_retrieval_acc={best_val_retrieval_acc:.4f}"
+    )
 
 
 if __name__ == "__main__":
