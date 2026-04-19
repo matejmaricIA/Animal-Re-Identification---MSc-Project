@@ -16,11 +16,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
+import random
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -28,7 +30,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, Sampler
 from torchvision import transforms as T
 import timm
 from tqdm import tqdm
@@ -95,6 +97,8 @@ class WReIDSplitDataset(Dataset):
 
         if not self._rows:
             raise ValueError("Dataset is empty after filtering (missing files or labels).")
+
+        self.labels = [int(y) for _, y in self._rows]
 
     def __len__(self) -> int:
         return len(self._rows)
@@ -186,6 +190,66 @@ class MegaDescriptorScratch(nn.Module):
         return emb, logits
 
 
+class IdentityBalancedBatchSampler(Sampler[List[int]]):
+    """Sample P identities with K images per identity in each batch."""
+
+    def __init__(self, labels: List[int], *, batch_size: int, instances_per_identity: int) -> None:
+        if int(instances_per_identity) <= 1:
+            raise ValueError("instances_per_identity must be > 1 for identity-balanced sampling.")
+        if int(batch_size) % int(instances_per_identity) != 0:
+            raise ValueError("batch_size must be divisible by instances_per_identity.")
+
+        self.labels = [int(x) for x in labels]
+        self.batch_size = int(batch_size)
+        self.instances_per_identity = int(instances_per_identity)
+        self.identities_per_batch = self.batch_size // self.instances_per_identity
+
+        self.index_by_label: Dict[int, List[int]] = {}
+        for idx, label in enumerate(self.labels):
+            self.index_by_label.setdefault(int(label), []).append(int(idx))
+
+        total_groups = 0
+        for indices in self.index_by_label.values():
+            total_groups += int(math.ceil(max(len(indices), self.instances_per_identity) / float(self.instances_per_identity)))
+        self.num_batches = max(1, total_groups // self.identities_per_batch)
+
+    def __len__(self) -> int:
+        return int(self.num_batches)
+
+    def __iter__(self):
+        grouped_indices: Dict[int, List[List[int]]] = {}
+        available_labels: List[int] = []
+
+        for label, indices in self.index_by_label.items():
+            idxs = list(indices)
+            if len(idxs) < self.instances_per_identity:
+                idxs.extend(random.choices(idxs, k=self.instances_per_identity - len(idxs)))
+
+            random.shuffle(idxs)
+            remainder = len(idxs) % self.instances_per_identity
+            if remainder:
+                idxs.extend(random.choices(idxs, k=self.instances_per_identity - remainder))
+
+            chunks = [
+                idxs[i : i + self.instances_per_identity]
+                for i in range(0, len(idxs), self.instances_per_identity)
+            ]
+            if chunks:
+                grouped_indices[int(label)] = chunks
+                available_labels.append(int(label))
+
+        produced = 0
+        while len(available_labels) >= self.identities_per_batch and produced < self.num_batches:
+            selected = random.sample(available_labels, self.identities_per_batch)
+            batch: List[int] = []
+            for label in selected:
+                batch.extend(grouped_indices[label].pop())
+                if not grouped_indices[label]:
+                    available_labels.remove(label)
+            yield batch
+            produced += 1
+
+
 @dataclass(frozen=True)
 class TrainConfig:
     splits_csv: str
@@ -196,6 +260,7 @@ class TrainConfig:
     imagenet_init: bool
     batch_size: int
     accum_steps: int
+    instances_per_identity: int
     epochs: int
     lr: float
     weight_decay: float
@@ -384,6 +449,12 @@ def main() -> None:
     parser.add_argument("--no-imagenet-init", dest="imagenet_init", action="store_false")
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--accum-steps", type=int, default=4, help="Gradient accumulation steps; effective batch = batch_size * accum_steps.")
+    parser.add_argument(
+        "--instances-per-identity",
+        type=int,
+        default=1,
+        help="If >1, use identity-balanced batches with this many images per identity.",
+    )
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight-decay", type=float, default=1e-4)
@@ -411,6 +482,7 @@ def main() -> None:
         imagenet_init=bool(args.imagenet_init),
         batch_size=int(args.batch_size),
         accum_steps=max(1, int(args.accum_steps)),
+        instances_per_identity=max(1, int(args.instances_per_identity)),
         epochs=int(args.epochs),
         lr=float(args.lr),
         weight_decay=float(args.weight_decay),
@@ -442,7 +514,8 @@ def main() -> None:
     num_classes = len(label_to_index)
     print(
         f"[DATA] train images={len(df_train)} val images={len(df_val)} classes(train)={num_classes} "
-        f"batch={cfg.batch_size} accum_steps={cfg.accum_steps} effective_batch={cfg.batch_size * cfg.accum_steps}"
+        f"batch={cfg.batch_size} accum_steps={cfg.accum_steps} effective_batch={cfg.batch_size * cfg.accum_steps} "
+        f"instances_per_identity={cfg.instances_per_identity}"
     )
 
     image_size = 384
@@ -473,14 +546,27 @@ def main() -> None:
         skip_missing=cfg.skip_missing,
     )
 
-    train_loader = DataLoader(
-        train_ds,
-        batch_size=cfg.batch_size,
-        shuffle=True,
-        num_workers=cfg.num_workers,
-        pin_memory=(device.type == "cuda"),
-        drop_last=True,
-    )
+    if cfg.instances_per_identity > 1:
+        train_batch_sampler = IdentityBalancedBatchSampler(
+            train_ds.labels,
+            batch_size=cfg.batch_size,
+            instances_per_identity=cfg.instances_per_identity,
+        )
+        train_loader = DataLoader(
+            train_ds,
+            batch_sampler=train_batch_sampler,
+            num_workers=cfg.num_workers,
+            pin_memory=(device.type == "cuda"),
+        )
+    else:
+        train_loader = DataLoader(
+            train_ds,
+            batch_size=cfg.batch_size,
+            shuffle=True,
+            num_workers=cfg.num_workers,
+            pin_memory=(device.type == "cuda"),
+            drop_last=True,
+        )
     val_loader = DataLoader(
         val_ds,
         batch_size=cfg.batch_size,
