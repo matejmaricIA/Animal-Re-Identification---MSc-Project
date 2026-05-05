@@ -9,6 +9,7 @@ This is a self-contained trainer (no wildlife-tools dependency) that:
 
 Notes:
 - MegaDescriptor-L-384 is a Swin-L @ 384px model in the public release; default backbone here matches that.
+- The default no-projection head keeps the public model's 1536-D pooled Swin-L feature dimensionality.
 - Labels are namespaced as "{dataset}|{identity}" to avoid collisions across datasets.
 """
 
@@ -140,7 +141,8 @@ class ArcMarginProduct(nn.Module):
         self.mm = float(np.sin(np.pi - self.m) * self.m)
 
     def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-        # x: normalized features (B, D), weight: (C, D)
+        # x may be raw backbone features; ArcFace needs cosine-normalized features.
+        x = F.normalize(x, p=2, dim=1)
         cosine = F.linear(x, F.normalize(self.weight, p=2, dim=1))
         sine = torch.sqrt(torch.clamp(1.0 - cosine * cosine, min=0.0))
         phi = cosine * self.cos_m - sine * self.sin_m
@@ -160,13 +162,14 @@ class MegaDescriptorScratch(nn.Module):
         embed_dim: int,
         num_classes: int,
         imagenet_init: bool,
+        projection_head: str,
         arc_s: float,
         arc_m: float,
     ) -> None:
         super().__init__()
         self.backbone_name = str(backbone_name)
-        self.embed_dim = int(embed_dim)
         self.num_classes = int(num_classes)
+        self.projection_head = str(projection_head).lower()
 
         self.backbone = timm.create_model(
             self.backbone_name,
@@ -178,7 +181,20 @@ class MegaDescriptorScratch(nn.Module):
         if in_dim <= 0:
             raise ValueError(f"Could not determine backbone num_features for {self.backbone_name}")
 
-        self.head = L2NormHead(in_dim, self.embed_dim)
+        self.backbone_feature_dim = in_dim
+        if self.projection_head == "none":
+            if int(embed_dim) != in_dim:
+                raise ValueError(
+                    f"--embed-dim must be {in_dim} when --projection-head none "
+                    f"for backbone {self.backbone_name}; got {embed_dim}."
+                )
+            self.embed_dim = in_dim
+            self.head = nn.Identity()
+        elif self.projection_head == "linear_l2":
+            self.embed_dim = int(embed_dim)
+            self.head = L2NormHead(in_dim, self.embed_dim)
+        else:
+            raise ValueError(f"Unsupported projection_head: {projection_head}")
         self.arc = ArcMarginProduct(self.embed_dim, self.num_classes, s=float(arc_s), m=float(arc_m))
 
     def forward(self, x: torch.Tensor, y: torch.Tensor | None = None) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -258,6 +274,7 @@ class TrainConfig:
     backbone: str
     embed_dim: int
     imagenet_init: bool
+    projection_head: str
     batch_size: int
     accum_steps: int
     instances_per_identity: int
@@ -320,7 +337,7 @@ def _embed_dataset(
         y = y.to(device, non_blocking=True)
         with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=bool(amp and device.type == "cuda")):
             emb, _ = model(x, None)
-        emb_chunks.append(emb.float())
+        emb_chunks.append(F.normalize(emb.float(), p=2, dim=1))
         label_chunks.append(y)
 
     return torch.cat(emb_chunks, dim=0), torch.cat(label_chunks, dim=0)
@@ -339,6 +356,8 @@ def _retrieval_top1_accuracy(
     if total == 0:
         return float("nan")
 
+    ref_emb = F.normalize(ref_emb.float(), p=2, dim=1)
+    query_emb = F.normalize(query_emb.float(), p=2, dim=1)
     correct = 0
     ref_t = ref_emb.t().contiguous()
     for start in range(0, total, int(chunk_size)):
@@ -373,7 +392,8 @@ def _eval_val(
         with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=bool(amp and device.type == "cuda")):
             _emb, logits = model(x, y)
             loss_margin = ce(logits, y)
-            cosine = F.linear(_emb, F.normalize(model.arc.weight, p=2, dim=1))
+            emb_norm = F.normalize(_emb, p=2, dim=1)
+            cosine = F.linear(emb_norm, F.normalize(model.arc.weight, p=2, dim=1))
             logits_nomargin = cosine * float(model.arc.s)
             loss_nomargin = ce(logits_nomargin, y)
         pred_margin = logits.argmax(dim=1)
@@ -432,6 +452,8 @@ def _save_checkpoint(
         "label_to_index": label_to_index,
         "backbone_name": model.backbone_name,
         "embed_dim": model.embed_dim,
+        "projection_head": model.projection_head,
+        "backbone_feature_dim": model.backbone_feature_dim,
         "num_classes": model.num_classes,
     }
     torch.save(payload, ckpt_path)
@@ -444,9 +466,18 @@ def main() -> None:
     parser.add_argument("--wreid-root", default=DEFAULT_WREID_ROOT)
     parser.add_argument("--out-dir", default=f"models/megadescriptor_scratch/{_now_tag()}")
     parser.add_argument("--backbone", default="swin_large_patch4_window12_384")
-    parser.add_argument("--embed-dim", type=int, default=384)
+    parser.add_argument("--embed-dim", type=int, default=1536)
     parser.add_argument("--imagenet-init", action="store_true", default=True)
     parser.add_argument("--no-imagenet-init", dest="imagenet_init", action="store_false")
+    parser.add_argument(
+        "--projection-head",
+        choices=["none", "linear_l2"],
+        default="none",
+        help=(
+            "Embedding head after the Swin backbone. Use 'none' for MegaDescriptor-compatible "
+            "1536-D pooled features; use 'linear_l2' for the older learned projection head."
+        ),
+    )
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--accum-steps", type=int, default=4, help="Gradient accumulation steps; effective batch = batch_size * accum_steps.")
     parser.add_argument(
@@ -480,6 +511,7 @@ def main() -> None:
         backbone=str(args.backbone),
         embed_dim=int(args.embed_dim),
         imagenet_init=bool(args.imagenet_init),
+        projection_head=str(args.projection_head),
         batch_size=int(args.batch_size),
         accum_steps=max(1, int(args.accum_steps)),
         instances_per_identity=max(1, int(args.instances_per_identity)),
@@ -515,7 +547,8 @@ def main() -> None:
     print(
         f"[DATA] train images={len(df_train)} val images={len(df_val)} classes(train)={num_classes} "
         f"batch={cfg.batch_size} accum_steps={cfg.accum_steps} effective_batch={cfg.batch_size * cfg.accum_steps} "
-        f"instances_per_identity={cfg.instances_per_identity}"
+        f"instances_per_identity={cfg.instances_per_identity} projection_head={cfg.projection_head} "
+        f"embed_dim={cfg.embed_dim}"
     )
 
     image_size = 384
@@ -589,6 +622,7 @@ def main() -> None:
         embed_dim=cfg.embed_dim,
         num_classes=num_classes,
         imagenet_init=cfg.imagenet_init,
+        projection_head=cfg.projection_head,
         arc_s=cfg.arc_s,
         arc_m=cfg.arc_m,
     ).to(device)
