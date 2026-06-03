@@ -39,6 +39,7 @@ from tqdm import tqdm
 
 DEFAULT_SPLITS_CSV = "data/wreid10k_splits_80_10_10.csv"
 DEFAULT_WREID_ROOT = "data/wildlifedatasets/wildlifereid-10k/versions/7"
+PRETRAINED_MEGADESCRIPTOR_MODEL = "hf-hub:BVRA/wildlife-mega-L-384"
 
 
 def _seed_all(seed: int) -> None:
@@ -206,6 +207,45 @@ class MegaDescriptorScratch(nn.Module):
         return emb, logits
 
 
+def _init_backbone_from_pretrained_megadescriptor(model: MegaDescriptorScratch) -> None:
+    pretrained = timm.create_model(PRETRAINED_MEGADESCRIPTOR_MODEL, pretrained=True)
+    pretrained_state = pretrained.state_dict()
+    target_state = model.backbone.state_dict()
+
+    copied = {}
+    shape_mismatches = []
+    for key, value in pretrained_state.items():
+        candidates = [key]
+        for prefix in ("backbone.", "model."):
+            if key.startswith(prefix):
+                candidates.append(key[len(prefix) :])
+
+        for candidate in candidates:
+            if candidate not in target_state:
+                continue
+            if tuple(target_state[candidate].shape) != tuple(value.shape):
+                shape_mismatches.append((candidate, tuple(value.shape), tuple(target_state[candidate].shape)))
+                break
+            copied[candidate] = value
+            break
+
+    if not copied:
+        raise RuntimeError(
+            f"Could not copy any weights from {PRETRAINED_MEGADESCRIPTOR_MODEL} "
+            f"into backbone {model.backbone_name}."
+        )
+
+    updated_state = dict(target_state)
+    updated_state.update(copied)
+    model.backbone.load_state_dict(updated_state, strict=True)
+    print(
+        f"[INIT] Loaded {len(copied)}/{len(target_state)} matching backbone tensors "
+        f"from {PRETRAINED_MEGADESCRIPTOR_MODEL}"
+    )
+    if shape_mismatches:
+        print(f"[INIT] Skipped {len(shape_mismatches)} shape-mismatched tensors; first={shape_mismatches[0]}")
+
+
 class IdentityBalancedBatchSampler(Sampler[List[int]]):
     """Sample P identities with K images per identity in each batch."""
 
@@ -274,6 +314,7 @@ class TrainConfig:
     backbone: str
     embed_dim: int
     imagenet_init: bool
+    init_from_pretrained_megadescriptor: bool
     projection_head: str
     batch_size: int
     accum_steps: int
@@ -470,6 +511,15 @@ def main() -> None:
     parser.add_argument("--imagenet-init", action="store_true", default=True)
     parser.add_argument("--no-imagenet-init", dest="imagenet_init", action="store_false")
     parser.add_argument(
+        "--init-from-pretrained-megadescriptor",
+        action="store_true",
+        default=False,
+        help=(
+            "Initialize the Swin-L backbone from the public MegaDescriptor model "
+            "hf-hub:BVRA/wildlife-mega-L-384 before ArcFace fine-tuning."
+        ),
+    )
+    parser.add_argument(
         "--projection-head",
         choices=["none", "linear_l2"],
         default="none",
@@ -511,6 +561,7 @@ def main() -> None:
         backbone=str(args.backbone),
         embed_dim=int(args.embed_dim),
         imagenet_init=bool(args.imagenet_init),
+        init_from_pretrained_megadescriptor=bool(args.init_from_pretrained_megadescriptor),
         projection_head=str(args.projection_head),
         batch_size=int(args.batch_size),
         accum_steps=max(1, int(args.accum_steps)),
@@ -548,7 +599,7 @@ def main() -> None:
         f"[DATA] train images={len(df_train)} val images={len(df_val)} classes(train)={num_classes} "
         f"batch={cfg.batch_size} accum_steps={cfg.accum_steps} effective_batch={cfg.batch_size * cfg.accum_steps} "
         f"instances_per_identity={cfg.instances_per_identity} projection_head={cfg.projection_head} "
-        f"embed_dim={cfg.embed_dim}"
+        f"embed_dim={cfg.embed_dim} init_from_pretrained_megadescriptor={cfg.init_from_pretrained_megadescriptor}"
     )
 
     image_size = 384
@@ -621,11 +672,17 @@ def main() -> None:
         backbone_name=cfg.backbone,
         embed_dim=cfg.embed_dim,
         num_classes=num_classes,
-        imagenet_init=cfg.imagenet_init,
+        imagenet_init=bool(cfg.imagenet_init and not cfg.init_from_pretrained_megadescriptor),
         projection_head=cfg.projection_head,
         arc_s=cfg.arc_s,
         arc_m=cfg.arc_m,
-    ).to(device)
+    )
+
+    if cfg.init_from_pretrained_megadescriptor and not args.resume:
+        _init_backbone_from_pretrained_megadescriptor(model)
+    elif cfg.init_from_pretrained_megadescriptor and args.resume:
+        print("[INIT] Skipping pretrained MegaDescriptor initialization because --resume was provided.")
+    model = model.to(device)
 
     optimizer = torch.optim.SGD(
         model.parameters(),

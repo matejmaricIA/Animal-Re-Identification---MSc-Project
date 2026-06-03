@@ -97,21 +97,44 @@ class L2NormHead(nn.Module):
 
 
 class MegaDescriptorEmbedder(nn.Module):
-    def __init__(self, backbone_name: str, embed_dim: int) -> None:
+    def __init__(
+        self,
+        backbone_name: str,
+        embed_dim: int,
+        *,
+        projection_head: str = "linear_l2",
+        backbone_feature_dim: int | None = None,
+    ) -> None:
         super().__init__()
         self.backbone_name = str(backbone_name)
-        self.embed_dim = int(embed_dim)
+        self.projection_head = str(projection_head).lower()
         self.backbone = timm.create_model(
             self.backbone_name, pretrained=False, num_classes=0, global_pool="avg"
         )
         in_dim = int(getattr(self.backbone, "num_features", None) or 0)
         if in_dim <= 0:
             raise ValueError(f"Could not determine backbone num_features for {self.backbone_name}")
-        self.head = L2NormHead(in_dim, self.embed_dim)
+        if backbone_feature_dim is not None and int(backbone_feature_dim) != in_dim:
+            raise ValueError(
+                f"Checkpoint backbone_feature_dim={backbone_feature_dim} does not match "
+                f"{self.backbone_name} num_features={in_dim}"
+            )
+
+        self.backbone_feature_dim = in_dim
+        if self.projection_head == "none":
+            if int(embed_dim) != in_dim:
+                print(f"[WARN] projection_head=none ignores embed_dim={embed_dim}; using backbone dim {in_dim}")
+            self.embed_dim = in_dim
+            self.head = nn.Identity()
+        elif self.projection_head == "linear_l2":
+            self.embed_dim = int(embed_dim)
+            self.head = L2NormHead(in_dim, self.embed_dim)
+        else:
+            raise ValueError(f"Unsupported projection_head: {projection_head}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         feats = self.backbone(x)
-        return self.head(feats)
+        return F.normalize(self.head(feats), p=2, dim=1)
 
 
 def _build_val_transform(image_size: int = 384) -> T.Compose:
@@ -128,18 +151,37 @@ def _build_val_transform(image_size: int = 384) -> T.Compose:
 
 def _load_embedder_from_ckpt(ckpt_path: Path, device: torch.device) -> tuple[MegaDescriptorEmbedder, dict]:
     payload = torch.load(ckpt_path, map_location="cpu")
-    backbone = str(payload.get("backbone_name") or payload.get("config", {}).get("backbone") or "swin_large_patch4_window12_384")
-    embed_dim = int(payload.get("embed_dim") or payload.get("config", {}).get("embed_dim") or 384)
-    model = MegaDescriptorEmbedder(backbone, embed_dim).to(device)
+    cfg = payload.get("config", {})
+    if not isinstance(cfg, dict):
+        cfg = {}
 
-    # Load only backbone+head weights (ignore arcface classifier head).
+    backbone = str(payload.get("backbone_name") or cfg.get("backbone") or "swin_large_patch4_window12_384")
+    embed_dim = int(payload.get("embed_dim") or cfg.get("embed_dim") or 384)
+    projection_head = str(payload.get("projection_head") or cfg.get("projection_head") or "linear_l2").lower()
+    backbone_feature_dim = payload.get("backbone_feature_dim")
+
+    model = MegaDescriptorEmbedder(
+        backbone,
+        embed_dim,
+        projection_head=projection_head,
+        backbone_feature_dim=backbone_feature_dim,
+    ).to(device)
+
+    # Load only inference weights (ignore ArcFace classifier head).
     state = payload.get("model", payload)
-    filtered = {k: v for k, v in state.items() if k.startswith("backbone.") or k.startswith("head.")}
+    if projection_head == "none":
+        filtered = {k: v for k, v in state.items() if k.startswith("backbone.")}
+    else:
+        filtered = {k: v for k, v in state.items() if k.startswith("backbone.") or k.startswith("head.")}
     missing, unexpected = model.load_state_dict(filtered, strict=False)
     if unexpected:
         print(f"[WARN] unexpected keys: {unexpected[:10]}")
     if missing:
         print(f"[WARN] missing keys: {missing[:10]}")
+    print(
+        f"[MODEL] checkpoint={ckpt_path} backbone={backbone} "
+        f"projection_head={projection_head} embed_dim={model.embed_dim}"
+    )
     model.eval()
     return model, payload
 
@@ -168,7 +210,8 @@ def _embed_all(
             e = model(x)
             if isinstance(e, (list, tuple)):
                 e = e[0]
-        embs.append(e.float().cpu())
+        e = F.normalize(e.float(), p=2, dim=1)
+        embs.append(e.cpu())
         labels.extend(list(lab))
     return torch.cat(embs, dim=0), labels
 
