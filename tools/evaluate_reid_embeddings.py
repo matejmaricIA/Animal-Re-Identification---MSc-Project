@@ -196,7 +196,7 @@ def _load_scratch_checkpoint(ckpt_path: Path, device: torch.device) -> Tuple[nn.
 
 def _load_model(args: argparse.Namespace, device: torch.device) -> Tuple[nn.Module, Dict[str, object]]:
     if args.pretrained_megadescriptor:
-        model = load_megadescriptor_l_384(device)
+        model, _preprocess = load_megadescriptor_l_384(device)
         model.eval()
         return model, {
             "kind": "pretrained_megadescriptor_l_384",

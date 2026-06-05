@@ -324,6 +324,7 @@ Runtime is mean wall-clock **seconds** per run.
 |---|---:|---:|---|
 | `--use_global_embedding` | bool | `False` | Enable global embeddings as a signal. |
 | `--embedding_model` | str | `"megadescriptor-l-384"` | Global embedding model. Choices: `resnet50`, `megadescriptor-l-384`. |
+| `--global_ckpt` | str | `""` | Optional MegaDescriptor-style checkpoint to use for global embeddings in the full pipeline. |
 
 ### Fusion + calibration (train/visualize)
 | Flag | Type | Default | Description |

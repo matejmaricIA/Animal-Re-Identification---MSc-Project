@@ -19,7 +19,7 @@ from feature_aggregation import (
     feature_descriptor_dir,
     load_or_train_fisher_vectors,
 )
-from global_embedding import load_or_build_global_embeddings
+from global_embedding import global_embedding_cache_label, load_or_build_global_embeddings
 from nested_importance_sampling import nested_importance_sampling
 from nested_importance_sampling import CountCalibrators
 from preprocessing import prepare_processed_dataset
@@ -155,6 +155,11 @@ if __name__ == '__main__':
             'megadescriptor-l-384',
         ],
         help='Model for global embeddings',
+    )
+    parser.add_argument(
+        '--global_ckpt',
+        default='',
+        help='Optional MegaDescriptor-style checkpoint to use for global embeddings.',
     )
     parser.add_argument('--seed', type=int, default=None, help='Random seed for reproducible counting')
     parser.add_argument('--calibration_method', type=str, default='isotonic_pchip', choices=['isotonic_pchip', 'logistic', 'isotonic'], help='Calibration method to use')
@@ -444,11 +449,14 @@ if __name__ == '__main__':
         if args.use_global_embedding:
             print("[COUNT] Loading/computing global embeddings...")
             image_paths = dict(zip(df["image_id"].astype(str), get_image_paths(df, args.remove_background)))
-            emb_path = f"{base_dir}/global_embeddings_count_{args.embedding_model}_{seg_tag}_full.pkl"
+            global_ckpt = args.global_ckpt or None
+            emb_model_label = global_embedding_cache_label(args.embedding_model, global_ckpt)
+            emb_path = f"{base_dir}/global_embeddings_count_{emb_model_label}_{seg_tag}_full.pkl"
             global_embeddings = load_or_build_global_embeddings(
                 image_paths,
                 emb_path,
                 model_name=args.embedding_model,
+                checkpoint_path=global_ckpt,
             )
 
         if global_embeddings is None and fisher_vectors is None:
@@ -481,6 +489,7 @@ if __name__ == '__main__':
                 "seg_tag": seg_tag,
                 "use_global_embedding": bool(args.use_global_embedding),
                 "embedding_model": args.embedding_model if args.use_global_embedding else None,
+                "global_ckpt": args.global_ckpt if args.use_global_embedding else None,
                 "use_fisher": bool(args.use_fisher),
                 "fisher_method": method_tag if args.use_fisher else None,
                 "count_cal_pairs": int(args.count_cal_pairs),
@@ -561,6 +570,7 @@ if __name__ == '__main__':
                 "Ground Truth": int(df['identity'].nunique()),
                 "Use Global Embedding": bool(args.use_global_embedding),
                 "Embedding Model": args.embedding_model if args.use_global_embedding else "None",
+                "Global Checkpoint": args.global_ckpt if args.use_global_embedding else "",
                 "Use Fisher": bool(args.use_fisher),
                 "Fisher Method": method_tag if args.use_fisher else "None",
                 "GV Features": gv_features,

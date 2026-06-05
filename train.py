@@ -27,7 +27,7 @@ from feature_aggregation import (
     load_or_train_fisher_vectors,
 )
 from feature_extraction import get_image_paths
-from global_embedding import load_or_build_global_embeddings
+from global_embedding import global_embedding_cache_label, load_or_build_global_embeddings
 from predict import classify_single_image_late_fusion, classify_test_images_late_fusion
 from train_late_fusion import train_calibrators_two_stage
 from utils.make_classification_pipeline_assets import build_assets_from_funnel
@@ -264,17 +264,21 @@ def run_training_for_dataset(
 
     if args.use_global_embedding:
         print("Extracting global embeddings...")
-        emb_tr_path = f"{base_dir}/global_embeddings_train_{args.embedding_model}_{seg_tag}.pkl"
-        emb_te_path = f"{base_dir}/global_embeddings_test_{args.embedding_model}_{seg_tag}.pkl"
+        global_ckpt = getattr(args, "global_ckpt", "") or None
+        emb_model_label = global_embedding_cache_label(args.embedding_model, global_ckpt)
+        emb_tr_path = f"{base_dir}/global_embeddings_train_{emb_model_label}_{seg_tag}.pkl"
+        emb_te_path = f"{base_dir}/global_embeddings_test_{emb_model_label}_{seg_tag}.pkl"
         emb_tr = load_or_build_global_embeddings(
             train_paths_map,
             emb_tr_path,
             model_name=args.embedding_model,
+            checkpoint_path=global_ckpt,
         )
         emb_te = load_or_build_global_embeddings(
             test_paths_map,
             emb_te_path,
             model_name=args.embedding_model,
+            checkpoint_path=global_ckpt,
         )
     else:
         emb_tr, emb_te = {}, {}
@@ -341,6 +345,7 @@ def run_training_for_dataset(
             "Use Fisher": use_fisher_signal,
             "Use Global Embedding": args.use_global_embedding,
             "Embedding Model": args.embedding_model if args.use_global_embedding else "None",
+            "Global Checkpoint": getattr(args, "global_ckpt", "") if args.use_global_embedding else "",
             "Use GV": use_gv_signal,
             "Geom. Candidates": GEOMETRIC_CANDIDATES,
             "Calibration Method": args.calibration_method,
@@ -640,17 +645,21 @@ def run_query_visualization_for_dataset(
 
     if args.use_global_embedding:
         print("Extracting global embeddings...")
-        emb_tr_path = f"{base_dir}/global_embeddings_train_{args.embedding_model}_{seg_tag}.pkl"
-        emb_te_path = f"{base_dir}/global_embeddings_test_{args.embedding_model}_{seg_tag}.pkl"
+        global_ckpt = getattr(args, "global_ckpt", "") or None
+        emb_model_label = global_embedding_cache_label(args.embedding_model, global_ckpt)
+        emb_tr_path = f"{base_dir}/global_embeddings_train_{emb_model_label}_{seg_tag}.pkl"
+        emb_te_path = f"{base_dir}/global_embeddings_test_{emb_model_label}_{seg_tag}.pkl"
         emb_tr = load_or_build_global_embeddings(
             train_paths_map,
             emb_tr_path,
             model_name=args.embedding_model,
+            checkpoint_path=global_ckpt,
         )
         emb_te = load_or_build_global_embeddings(
             test_paths_map,
             emb_te_path,
             model_name=args.embedding_model,
+            checkpoint_path=global_ckpt,
         )
     else:
         emb_tr, emb_te = {}, {}
