@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evaluate a trained MegaDescriptor-scratch checkpoint on closed-set and open-set splits.
+"""Evaluate a MegaDescriptor model on closed-set and open-set splits.
 
 Closed-set:
   - DB: split_open in {train,val}
@@ -20,6 +20,7 @@ import argparse
 import json
 from dataclasses import dataclass
 from pathlib import Path
+import sys
 from typing import Dict, Iterable, Tuple
 
 import numpy as np
@@ -31,6 +32,11 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms as T
 import timm
+
+repo_root = Path(__file__).resolve().parents[1]
+sys.path.append(str(repo_root))
+
+from megadescriptor import load_megadescriptor_l_384
 
 
 DEFAULT_SPLITS_CSV = "data/wreid10k_splits_80_10_10.csv"
@@ -91,21 +97,44 @@ class L2NormHead(nn.Module):
 
 
 class MegaDescriptorEmbedder(nn.Module):
-    def __init__(self, backbone_name: str, embed_dim: int) -> None:
+    def __init__(
+        self,
+        backbone_name: str,
+        embed_dim: int,
+        *,
+        projection_head: str = "linear_l2",
+        backbone_feature_dim: int | None = None,
+    ) -> None:
         super().__init__()
         self.backbone_name = str(backbone_name)
-        self.embed_dim = int(embed_dim)
+        self.projection_head = str(projection_head).lower()
         self.backbone = timm.create_model(
             self.backbone_name, pretrained=False, num_classes=0, global_pool="avg"
         )
         in_dim = int(getattr(self.backbone, "num_features", None) or 0)
         if in_dim <= 0:
             raise ValueError(f"Could not determine backbone num_features for {self.backbone_name}")
-        self.head = L2NormHead(in_dim, self.embed_dim)
+        if backbone_feature_dim is not None and int(backbone_feature_dim) != in_dim:
+            raise ValueError(
+                f"Checkpoint backbone_feature_dim={backbone_feature_dim} does not match "
+                f"{self.backbone_name} num_features={in_dim}"
+            )
+
+        self.backbone_feature_dim = in_dim
+        if self.projection_head == "none":
+            if int(embed_dim) != in_dim:
+                print(f"[WARN] projection_head=none ignores embed_dim={embed_dim}; using backbone dim {in_dim}")
+            self.embed_dim = in_dim
+            self.head = nn.Identity()
+        elif self.projection_head == "linear_l2":
+            self.embed_dim = int(embed_dim)
+            self.head = L2NormHead(in_dim, self.embed_dim)
+        else:
+            raise ValueError(f"Unsupported projection_head: {projection_head}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         feats = self.backbone(x)
-        return self.head(feats)
+        return F.normalize(self.head(feats), p=2, dim=1)
 
 
 def _build_val_transform(image_size: int = 384) -> T.Compose:
@@ -122,20 +151,48 @@ def _build_val_transform(image_size: int = 384) -> T.Compose:
 
 def _load_embedder_from_ckpt(ckpt_path: Path, device: torch.device) -> tuple[MegaDescriptorEmbedder, dict]:
     payload = torch.load(ckpt_path, map_location="cpu")
-    backbone = str(payload.get("backbone_name") or payload.get("config", {}).get("backbone") or "swin_large_patch4_window12_384")
-    embed_dim = int(payload.get("embed_dim") or payload.get("config", {}).get("embed_dim") or 384)
-    model = MegaDescriptorEmbedder(backbone, embed_dim).to(device)
+    cfg = payload.get("config", {})
+    if not isinstance(cfg, dict):
+        cfg = {}
 
-    # Load only backbone+head weights (ignore arcface classifier head).
+    backbone = str(payload.get("backbone_name") or cfg.get("backbone") or "swin_large_patch4_window12_384")
+    embed_dim = int(payload.get("embed_dim") or cfg.get("embed_dim") or 384)
+    projection_head = str(payload.get("projection_head") or cfg.get("projection_head") or "linear_l2").lower()
+    backbone_feature_dim = payload.get("backbone_feature_dim")
+
+    model = MegaDescriptorEmbedder(
+        backbone,
+        embed_dim,
+        projection_head=projection_head,
+        backbone_feature_dim=backbone_feature_dim,
+    ).to(device)
+
+    # Load only inference weights (ignore ArcFace classifier head).
     state = payload.get("model", payload)
-    filtered = {k: v for k, v in state.items() if k.startswith("backbone.") or k.startswith("head.")}
+    if projection_head == "none":
+        filtered = {k: v for k, v in state.items() if k.startswith("backbone.")}
+    else:
+        filtered = {k: v for k, v in state.items() if k.startswith("backbone.") or k.startswith("head.")}
     missing, unexpected = model.load_state_dict(filtered, strict=False)
     if unexpected:
         print(f"[WARN] unexpected keys: {unexpected[:10]}")
     if missing:
         print(f"[WARN] missing keys: {missing[:10]}")
+    print(
+        f"[MODEL] checkpoint={ckpt_path} backbone={backbone} "
+        f"projection_head={projection_head} embed_dim={model.embed_dim}"
+    )
     model.eval()
     return model, payload
+
+
+def _load_pretrained_megadescriptor(device: torch.device) -> tuple[torch.nn.Module, dict]:
+    model, _preprocess = load_megadescriptor_l_384(device)
+    return model, {
+        "source": "hf-hub:BVRA/wildlife-mega-L-384",
+        "backbone_name": "hf-hub:BVRA/wildlife-mega-L-384",
+        "embed_dim": None,
+    }
 
 
 @torch.no_grad()
@@ -151,7 +208,10 @@ def _embed_all(
         x = x.to(device, non_blocking=True)
         with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=bool(amp and device.type == "cuda")):
             e = model(x)
-        embs.append(e.float().cpu())
+            if isinstance(e, (list, tuple)):
+                e = e[0]
+        e = F.normalize(e.float(), p=2, dim=1)
+        embs.append(e.cpu())
         labels.extend(list(lab))
     return torch.cat(embs, dim=0), labels
 
@@ -198,9 +258,10 @@ def _topk_acc(
 
 
 def _roc_auc(scores_known: np.ndarray, scores_unknown: np.ndarray) -> float:
-    # Treat "unknown" as positive class (1) so AUC reflects unknown detection.
+    # Treat "unknown" as positive class (1). Because higher max similarity means
+    # "more likely known", flip the sign so larger scores mean "more likely unknown".
     y = np.concatenate([np.zeros_like(scores_known), np.ones_like(scores_unknown)])
-    s = np.concatenate([scores_known, scores_unknown])
+    s = -np.concatenate([scores_known, scores_unknown])
     order = np.argsort(s)
     y = y[order]
     # Rank-sum AUC
@@ -232,13 +293,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate MegaDescriptor-scratch checkpoint on closed/open splits.")
     parser.add_argument("--splits-csv", default=DEFAULT_SPLITS_CSV)
     parser.add_argument("--wreid-root", default=DEFAULT_WREID_ROOT)
-    parser.add_argument("--ckpt", required=True, help="Path to ckpt_best.pt or ckpt_last.pt produced by training script.")
+    parser.add_argument("--ckpt", default="", help="Path to ckpt_best.pt or ckpt_last.pt produced by training script.")
+    parser.add_argument(
+        "--pretrained-megadescriptor",
+        action="store_true",
+        help="Evaluate the pretrained paper MegaDescriptor model from Hugging Face instead of a scratch checkpoint.",
+    )
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--num-workers", type=int, default=4)
     parser.add_argument("--no-amp", dest="amp", action="store_false", default=True)
     parser.add_argument("--skip-missing", action="store_true", default=False)
     parser.add_argument("--out-json", default="", help="Optional output JSON path.")
     args = parser.parse_args()
+
+    if bool(args.ckpt) == bool(args.pretrained_megadescriptor):
+        raise ValueError("Specify exactly one of --ckpt or --pretrained-megadescriptor.")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     wreid_root = Path(args.wreid_root)
@@ -266,7 +335,10 @@ def main() -> None:
         else None
     )
 
-    model, payload = _load_embedder_from_ckpt(Path(args.ckpt), device=device)
+    if args.pretrained_megadescriptor:
+        model, payload = _load_pretrained_megadescriptor(device=device)
+    else:
+        model, payload = _load_embedder_from_ckpt(Path(args.ckpt), device=device)
 
     db_embs, db_labels = _embed_all(model, db_loader, device=device, amp=args.amp)
     proto, proto_labels = _build_prototypes(db_embs, db_labels)
@@ -305,4 +377,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
