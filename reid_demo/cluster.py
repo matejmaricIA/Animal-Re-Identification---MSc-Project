@@ -89,10 +89,16 @@ from reid_demo.store import (
 # --------------------------------------------------------------------------- #
 
 DEFAULT_BACKEND: str = "dbscan"                  # one of CLUSTER_BACKENDS
-CLUSTER_BACKENDS: set = {"dbscan", "agglomerative"}
+# dbscan/agglomerative are absolute-distance methods (a global eps/threshold). finch/leiden
+# are RANK/GRAPH methods over the kNN structure — far better when embeddings are
+# 1-NN-correct but the per-individual clouds are diffuse and overlapping (the common
+# metric-learning / unseen-class regime), and they need neither eps nor a target k.
+CLUSTER_BACKENDS: set = {"dbscan", "agglomerative", "finch", "leiden"}
 DEFAULT_EPS: float = 0.30                         # DBSCAN cosine-distance eps (analyze_folder.py default)
 DEFAULT_MIN_SAMPLES: int = 2                      # >=2 so a lone crop is noise -> candidate-new
 DEFAULT_DISTANCE_THRESHOLD: float = 0.30          # agglomerative cosine-distance cut
+DEFAULT_KNN_K: int = 15                           # neighbours per node for the leiden kNN graph
+DEFAULT_RESOLUTION: float = 1.0                   # leiden/louvain resolution (higher => more clusters)
 NOISE_LABEL: int = -1                             # matches sklearn DBSCAN / T01 cluster_id == -1
 
 #: The 3 DATA_CONTRACT flank buckets, in deterministic iteration order (D4).
@@ -312,6 +318,7 @@ def cluster_embeddings(
     distance_threshold: float = DEFAULT_DISTANCE_THRESHOLD,
     calibrator: Optional["ScoreCalibrator"] = None,
     affinity: Optional[Affinity] = None,
+    backend_params: Optional[Dict[str, Any]] = None,
     seed: int = 42,
 ) -> CropClustering:
     """Cluster a single homogeneous group of embeddings (one bucket).
@@ -359,7 +366,7 @@ def cluster_embeddings(
     dist = _affinity_to_distance(ids, mat, affinity)
     raw_labels = _run_backend(
         dist, backend=backend, eps=eps, min_samples=min_samples,
-        distance_threshold=distance_threshold,
+        distance_threshold=distance_threshold, backend_params=backend_params or {},
     )
 
     final_labels = _collapse_singletons_and_relabel(raw_labels)
@@ -376,28 +383,210 @@ def _run_backend(
     eps: float,
     min_samples: int,
     distance_threshold: float,
+    backend_params: Optional[Dict[str, Any]] = None,
 ) -> np.ndarray:
     """Run the selected backend on a precomputed cosine-DISTANCE matrix.
 
-    Both backends are deterministic for a fixed input order. ``metric='precomputed'`` makes
-    the DBSCAN path identical to ``metric='cosine'`` on unit-norm vectors while letting a
-    pluggable affinity flow through the SAME code path.
+    All backends are deterministic for a fixed input order and consume the SAME precomputed
+    distance (so a pluggable affinity — global, or T12's fused global+Fisher / GV-refined —
+    flows through one code path). ``dbscan``/``agglomerative`` threshold absolute distance;
+    ``finch``/``leiden`` operate on the kNN/first-neighbour graph (no eps, no target k).
     """
+    backend_params = backend_params or {}
     from sklearn.cluster import DBSCAN, AgglomerativeClustering
 
     if backend == "dbscan":
         model = DBSCAN(eps=eps, min_samples=min_samples, metric="precomputed")
         return model.fit(dist).labels_.astype(int)
 
-    # agglomerative: threshold-based, no pre-specified n_clusters. average linkage is the
-    # only meaningful choice for a precomputed cosine-distance matrix (ward needs Euclidean).
-    model = AgglomerativeClustering(
-        n_clusters=None,
-        metric="precomputed",
-        linkage="average",
-        distance_threshold=distance_threshold,
-    )
-    return model.fit(dist).labels_.astype(int)
+    if backend == "agglomerative":
+        # threshold-based, no pre-specified n_clusters. average linkage is the only meaningful
+        # choice for a precomputed cosine-distance matrix (ward needs Euclidean).
+        model = AgglomerativeClustering(
+            n_clusters=None,
+            metric="precomputed",
+            linkage="average",
+            distance_threshold=distance_threshold,
+        )
+        return model.fit(dist).labels_.astype(int)
+
+    if backend == "finch":
+        return _finch_labels(dist, n_clusters=backend_params.get("n_clusters"))
+
+    if backend == "leiden":
+        return _leiden_labels(
+            dist,
+            knn_k=int(backend_params.get("knn_k", DEFAULT_KNN_K)),
+            resolution=float(backend_params.get("resolution", DEFAULT_RESOLUTION)),
+            seed=int(backend_params.get("seed", 42)),
+        )
+
+    raise ValueError(f"unknown backend {backend!r}; must be one of {sorted(CLUSTER_BACKENDS)}")
+
+
+# --------------------------------------------------------------------------- #
+# Rank/graph backends (FINCH + Leiden/Louvain) — for diffuse, 1-NN-correct embeddings
+# --------------------------------------------------------------------------- #
+
+def _first_neighbour(dist: np.ndarray) -> np.ndarray:
+    """Index of each point's nearest OTHER point (the FINCH 'first integer neighbour')."""
+    d = dist.copy()
+    np.fill_diagonal(d, np.inf)
+    return d.argmin(axis=1)
+
+
+def _finch_one_partition(dist: np.ndarray) -> np.ndarray:
+    """One FINCH partition: link i~j if 1-NN(i)=j, 1-NN(j)=i, or they SHARE a 1-NN; then
+    take connected components (Sarfraz et al., CVPR'19). Pure scipy — no external dep."""
+    from scipy.sparse import csr_matrix
+    from scipy.sparse.csgraph import connected_components
+
+    n = dist.shape[0]
+    kappa = _first_neighbour(dist)
+    rows = list(range(n)) + list(kappa)          # i -> 1-NN(i)  (and symmetric)
+    cols = list(kappa) + list(range(n))
+    adj = csr_matrix((np.ones(len(rows)), (rows, cols)), shape=(n, n))
+    # shared-first-neighbour links: points with the same 1-NN join too
+    from collections import defaultdict
+    groups: Dict[int, List[int]] = defaultdict(list)
+    for i, k in enumerate(kappa.tolist()):
+        groups[int(k)].append(i)
+    extra_r, extra_c = [], []
+    for members in groups.values():
+        for a in range(1, len(members)):
+            extra_r.append(members[0]); extra_c.append(members[a])
+    if extra_r:
+        adj = adj + csr_matrix((np.ones(len(extra_r)), (extra_r, extra_c)), shape=(n, n))
+    adj = adj + adj.T
+    _, labels = connected_components(adj, directed=False)
+    return labels.astype(int)
+
+
+def _modularity(dist: np.ndarray, labels: np.ndarray, knn_k: int = DEFAULT_KNN_K) -> float:
+    """Newman modularity of a partition on the symmetric kNN similarity graph (for picking a
+    FINCH level without a target k). Higher = better-separated communities."""
+    sim = np.clip(1.0 - dist, 0.0, None)
+    n = sim.shape[0]
+    np.fill_diagonal(sim, -np.inf)
+    k = min(knn_k, n - 1)
+    if k < 1:
+        return 0.0
+    order = np.argsort(-sim, axis=1)[:, :k]
+    A = np.zeros((n, n))
+    s = np.clip(1.0 - dist, 0.0, None)
+    for i in range(n):
+        for j in order[i]:
+            A[i, j] = s[i, j]
+    A = 0.5 * (A + A.T)
+    m2 = A.sum()
+    if m2 <= 0:
+        return 0.0
+    deg = A.sum(axis=1)
+    Q = 0.0
+    for c in set(labels.tolist()):
+        idx = np.where(labels == c)[0]
+        Q += A[np.ix_(idx, idx)].sum() / m2 - (deg[idx].sum() / m2) ** 2
+    return float(Q)
+
+
+def _finch_labels(dist: np.ndarray, *, n_clusters: Optional[int] = None) -> np.ndarray:
+    """FINCH: build the hierarchy of first-neighbour partitions, then select one level.
+
+    With ``n_clusters`` given, pick the level whose cluster count is closest to it; otherwise
+    pick the level with the highest kNN-graph modularity (parameter-free). Singletons are left
+    as their own labels and become candidate-new downstream.
+    """
+    n = dist.shape[0]
+    partitions: List[np.ndarray] = []
+    base = np.arange(n)            # maps original points -> current super-node
+    cur = dist
+    for _ in range(20):
+        part = _finch_one_partition(cur)
+        full = part[base]
+        nc = len(set(full.tolist()))
+        partitions.append(full)
+        if nc <= 1 or nc >= cur.shape[0]:
+            break
+        # collapse to super-nodes: average-linkage distance between current clusters
+        labs = sorted(set(part.tolist()))
+        remap = {c: i for i, c in enumerate(labs)}
+        g = len(labs)
+        nxt = np.zeros((g, g))
+        members = {remap[c]: np.where(part == c)[0] for c in labs}
+        for a in range(g):
+            ia = members[a]
+            for b in range(a + 1, g):
+                ib = members[b]
+                d = float(cur[np.ix_(ia, ib)].mean())
+                nxt[a, b] = nxt[b, a] = d
+        cur = nxt
+        base = np.array([remap[c] for c in part])[base]
+
+    # drop the trivial all-in-one partition for selection
+    candidates = [p for p in partitions if len(set(p.tolist())) > 1] or partitions
+    if n_clusters is not None:
+        best = min(candidates, key=lambda p: abs(len(set(p.tolist())) - n_clusters))
+    else:
+        best = max(candidates, key=lambda p: _modularity(dist, p))
+    return best.astype(int)
+
+
+def _leiden_labels(dist: np.ndarray, *, knn_k: int = DEFAULT_KNN_K,
+                   resolution: float = DEFAULT_RESOLUTION, seed: int = 42) -> np.ndarray:
+    """Community detection on the weighted symmetric kNN similarity graph.
+
+    Prefers Leiden (``leidenalg`` + ``igraph``); falls back to networkx Louvain; raises a
+    clear error if neither is installed. No target k and no eps — communities are discovered.
+    """
+    sim = np.clip(1.0 - dist, 0.0, None)
+    n = sim.shape[0]
+    snn = sim.copy()
+    np.fill_diagonal(snn, -np.inf)
+    k = min(knn_k, n - 1)
+    order = np.argsort(-snn, axis=1)[:, :k]
+    edges: Dict[Tuple[int, int], float] = {}
+    for i in range(n):
+        for j in order[i]:
+            a, b = (i, int(j)) if i < j else (int(j), i)
+            if a == b:
+                continue
+            edges[(a, b)] = max(edges.get((a, b), 0.0), float(sim[i, j]))
+
+    # try Leiden (igraph) first
+    try:
+        import igraph as ig
+        import leidenalg
+        elist = list(edges.keys())
+        weights = [edges[e] for e in elist]
+        g = ig.Graph(n=n, edges=elist)
+        part = leidenalg.find_partition(
+            g, leidenalg.RBConfigurationVertexPartition,
+            weights=weights, resolution_parameter=resolution, seed=seed,
+        )
+        return np.array(part.membership, dtype=int)
+    except ImportError:
+        pass
+
+    # fallback: networkx Louvain
+    try:
+        import networkx as nx
+        from networkx.algorithms.community import louvain_communities
+    except ImportError as exc:
+        raise RuntimeError(
+            "backend 'leiden' needs leidenalg+igraph (preferred) or networkx>=3 for the "
+            "Louvain fallback; none is installed. `pip install leidenalg python-igraph` "
+            "or `pip install networkx`, or use --backend finch (no extra dependency)."
+        ) from exc
+    G = nx.Graph()
+    G.add_nodes_from(range(n))
+    for (a, b), w in edges.items():
+        G.add_edge(a, b, weight=w)
+    comms = louvain_communities(G, weight="weight", resolution=resolution, seed=seed)
+    labels = np.zeros(n, dtype=int)
+    for ci, nodes in enumerate(comms):
+        for node in nodes:
+            labels[node] = ci
+    return labels
 
 
 def _collapse_singletons_and_relabel(raw_labels: np.ndarray) -> np.ndarray:
@@ -435,6 +624,7 @@ def cluster_by_flank(
     distance_threshold: float = DEFAULT_DISTANCE_THRESHOLD,
     calibrator: Optional["ScoreCalibrator"] = None,
     affinity: Optional[Affinity] = None,
+    backend_params: Optional[Dict[str, Any]] = None,
     flank_policy: str = "separate",
     seed: int = 42,
 ) -> CropClustering:
@@ -484,7 +674,8 @@ def cluster_by_flank(
         return cluster_embeddings(
             embeddings, backend=backend, eps=eps, min_samples=min_samples,
             distance_threshold=distance_threshold, calibrator=calibrator,
-            affinity=global_sim if global_sim is not None else affinity, seed=seed,
+            affinity=global_sim if global_sim is not None else affinity,
+            backend_params=backend_params, seed=seed,
         )
 
     # Bucket the ids (deterministic).
@@ -515,7 +706,7 @@ def cluster_by_flank(
         cc = cluster_embeddings(
             sub_emb, backend=backend, eps=eps, min_samples=min_samples,
             distance_threshold=distance_threshold, calibrator=calibrator,
-            affinity=sub_affinity, seed=seed,
+            affinity=sub_affinity, backend_params=backend_params, seed=seed,
         )
 
         labels = cc.labels.copy()
@@ -601,6 +792,7 @@ def run_clustering(
     force: bool = False,
     dry_run: bool = False,
     affinity: Optional[Affinity] = None,   # D8: precomputed affinity OR provider (T10 wires T12 in)
+    backend_params: Optional[Dict[str, Any]] = None,  # backend-specific (finch n_clusters; leiden knn_k/resolution)
     seed: int = 42,
 ) -> ClusterRunSummary:
     """Read records from the T01 store, cluster per the 3-bucket flank policy, and (unless
@@ -641,6 +833,7 @@ def run_clustering(
         "dry_run": dry_run,
         "seed": seed,
         "affinity_supplied": affinity is not None,
+        "backend_params": dict(backend_params) if backend_params else {},
     }
 
     conn = connect(db_path)
@@ -674,7 +867,8 @@ def run_clustering(
         result = cluster_by_flank(
             embeddings, orientations, backend=backend, eps=eps,
             min_samples=min_samples, distance_threshold=distance_threshold,
-            calibrator=calibrator, affinity=affinity, flank_policy=flank_policy, seed=seed,
+            calibrator=calibrator, affinity=affinity, backend_params=backend_params,
+            flank_policy=flank_policy, seed=seed,
         )
 
         if not dry_run:
@@ -775,6 +969,13 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--distance-threshold", type=float, default=DEFAULT_DISTANCE_THRESHOLD,
                         help=f"agglomerative cosine-distance cut (default "
                              f"{DEFAULT_DISTANCE_THRESHOLD}).")
+    parser.add_argument("--knn-k", type=int, default=DEFAULT_KNN_K,
+                        help=f"leiden: neighbours per node in the kNN graph (default {DEFAULT_KNN_K}).")
+    parser.add_argument("--resolution", type=float, default=DEFAULT_RESOLUTION,
+                        help=f"leiden: resolution; higher => more clusters (default {DEFAULT_RESOLUTION}).")
+    parser.add_argument("--n-clusters", type=int, default=None,
+                        help="finch: pick the hierarchy level closest to this many clusters "
+                             "(default: auto, by max modularity).")
     parser.add_argument("--flank-policy", default="separate", choices=("separate", "ignore"),
                         help="'separate' (default; left/right/other) or 'ignore' (flank-blind).")
     parser.add_argument("--species", default=None,
@@ -807,6 +1008,12 @@ def _main(argv: Optional[List[str]] = None) -> int:
         return 2
 
     db_path = args.db or store.DEFAULT_DB_PATH
+    backend_params = {
+        "knn_k": args.knn_k,
+        "resolution": args.resolution,
+        "n_clusters": args.n_clusters,
+        "seed": args.seed,
+    }
     try:
         summary = run_clustering(
             db_path=db_path,
@@ -821,6 +1028,7 @@ def _main(argv: Optional[List[str]] = None) -> int:
             species_filter=args.species,
             force=args.force,
             dry_run=args.dry_run,
+            backend_params=backend_params,
             seed=args.seed,
         )
     except Exception as exc:

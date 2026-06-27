@@ -77,11 +77,18 @@ def _three_groups(seed=0, per=5, dim=DIM):
 
 def test_contract_constants():
     assert DEFAULT_BACKEND == "dbscan"
-    assert CLUSTER_BACKENDS == {"dbscan", "agglomerative"}
+    # dbscan/agglomerative threshold absolute distance; finch/leiden are rank/graph methods.
+    assert CLUSTER_BACKENDS == {"dbscan", "agglomerative", "finch", "leiden"}
     assert DEFAULT_EPS == 0.30
     assert DEFAULT_MIN_SAMPLES == 2
     assert DEFAULT_DISTANCE_THRESHOLD == 0.30
     assert NOISE_LABEL == -1
+
+
+# threshold backends isolate a far loner as noise (-1); graph backends absorb it. Split the
+# parametrized run accordingly.
+THRESHOLD_BACKENDS = ["agglomerative", "dbscan"]
+GRAPH_BACKENDS = ["finch", "leiden"]
 
 
 def test_works_at_native_dims_no_hardcoded_384():
@@ -181,8 +188,8 @@ def test_assignment_confidence_standalone():
 # Backends
 # --------------------------------------------------------------------------- #
 
-@pytest.mark.parametrize("backend", sorted(CLUSTER_BACKENDS))
-def test_both_backends_run(backend):
+@pytest.mark.parametrize("backend", THRESHOLD_BACKENDS)
+def test_threshold_backends_run(backend):
     emb, gt = _three_groups()
     res = cluster_embeddings(emb, backend=backend, eps=0.30, distance_threshold=0.30,
                              min_samples=2)
@@ -191,6 +198,23 @@ def test_both_backends_run(backend):
     assert n_clusters == 3
     gt_aligned = [gt[i] for i in res.image_ids]
     assert adjusted_rand_score(gt_aligned, res.labels.tolist()) == 1.0
+
+
+@pytest.mark.parametrize("backend", GRAPH_BACKENDS)
+def test_graph_backends_run(backend):
+    """finch/leiden run on the precomputed graph and recover the 3 real groups well, without
+    eps/k. They absorb the far loner into its nearest community rather than flagging it noise.
+    Assertions are lenient on a 16-point toy (finch's first-neighbour hierarchy is coarse at
+    this scale) but still catch the real failures: merging distinct groups, or shattering."""
+    emb, gt = _three_groups()
+    res = cluster_embeddings(emb, backend=backend)
+    assert len(res.labels) == len(emb)
+    n_clusters = len(set(int(l) for l in res.labels if l >= 0))
+    assert 2 <= n_clusters <= 5                      # not collapsed-to-1, not shattered
+    gt_aligned = [gt[i] for i in res.image_ids]
+    from sklearn.metrics import homogeneity_score
+    assert adjusted_rand_score(gt_aligned, res.labels.tolist()) >= 0.75   # groups recovered
+    assert homogeneity_score(gt_aligned, res.labels.tolist()) >= 0.80     # clusters stay pure
 
 
 def test_invalid_backend_raises():

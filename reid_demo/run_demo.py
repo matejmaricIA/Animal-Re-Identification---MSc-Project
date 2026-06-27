@@ -137,6 +137,14 @@ class DemoConfig:
     force: bool = False
     continue_on_error: bool = False
     signals: str = DEFAULT_SIGNALS         # additive (D8): global | global+fisher | full-funnel
+    # clustering (T05) tuning passthrough; None => use cluster.py's own defaults.
+    backend: Optional[str] = None
+    eps: Optional[float] = None
+    min_samples: Optional[int] = None
+    distance_threshold: Optional[float] = None
+    knn_k: Optional[int] = None             # leiden backend
+    resolution: Optional[float] = None      # leiden backend
+    n_clusters: Optional[int] = None        # finch backend (target level)
 
 
 @dataclass
@@ -220,6 +228,10 @@ def build_config(args) -> DemoConfig:
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         run_name = f"{primary}_{stamp}"
 
+    def _opt(name):
+        v = _get(name)
+        return v if v is not None else file_cfg.get(name)
+
     return DemoConfig(
         datasets=list(datasets),
         primary_dataset=primary,
@@ -232,6 +244,13 @@ def build_config(args) -> DemoConfig:
         force=bool(_get("force") or file_cfg.get("force", False)),
         continue_on_error=bool(_get("continue_on_error") or file_cfg.get("continue_on_error", False)),
         signals=signals,
+        backend=_opt("backend"),
+        eps=_opt("eps"),
+        min_samples=_opt("min_samples"),
+        distance_threshold=_opt("distance_threshold"),
+        knn_k=_opt("knn_k"),
+        resolution=_opt("resolution"),
+        n_clusters=_opt("n_clusters"),
     )
 
 
@@ -318,11 +337,34 @@ def _spec_fusion(cfg: DemoConfig, ds: str) -> StageSpec:
                      cli=argv, dataset=ds, label=f"fusion({cfg.signals})")
 
 
+def _cluster_tuning(cfg: DemoConfig) -> tuple:
+    """Resolve T05 tuning passthrough -> (cli_args, kwargs) of only the set (non-None) values."""
+    cli: List[str] = []
+    kw: Dict[str, Any] = {}
+    if cfg.backend is not None:
+        cli += ["--backend", cfg.backend]; kw["backend"] = cfg.backend
+    if cfg.eps is not None:
+        cli += ["--eps", str(cfg.eps)]; kw["eps"] = cfg.eps
+    if cfg.min_samples is not None:
+        cli += ["--min-samples", str(cfg.min_samples)]; kw["min_samples"] = cfg.min_samples
+    if cfg.distance_threshold is not None:
+        cli += ["--distance-threshold", str(cfg.distance_threshold)]
+        kw["distance_threshold"] = cfg.distance_threshold
+    if cfg.knn_k is not None:
+        cli += ["--knn-k", str(cfg.knn_k)]; kw["knn_k"] = cfg.knn_k
+    if cfg.resolution is not None:
+        cli += ["--resolution", str(cfg.resolution)]; kw["resolution"] = cfg.resolution
+    if cfg.n_clusters is not None:
+        cli += ["--n-clusters", str(cfg.n_clusters)]; kw["n_clusters"] = cfg.n_clusters
+    return cli, kw
+
+
 def _spec_cluster(cfg: DemoConfig, ds: str, *, affinity_path: Optional[str] = None,
                   force: bool = False, label: Optional[str] = None) -> StageSpec:
+    tune_cli, tune_kw = _cluster_tuning(cfg)
     if affinity_path is None:
         argv = _py_module("reid_demo.cluster", "--db", cfg.db_path, "--dataset", ds,
-                          "--flank-policy", "separate")
+                          "--flank-policy", "separate", *tune_cli)
         if force:
             argv += ["--force"]
         return StageSpec(name="cluster", ticket="T05", critical=True, output_paths=[],
@@ -333,7 +375,7 @@ def _spec_cluster(cfg: DemoConfig, ds: str, *, affinity_path: Optional[str] = No
         name="cluster", ticket="T05", critical=True, output_paths=[],
         func="reid_demo.run_demo:_cluster_with_affinity",
         kwargs={"db_path": cfg.db_path, "dataset": ds, "affinity_path": affinity_path,
-                "force": force, "flank_policy": "separate"},
+                "force": force, "flank_policy": "separate", **tune_kw},
         dataset=ds, label=label or "cluster(fused-affinity)",
         skip_store_column=None if force else "cluster_id",
     )
@@ -437,13 +479,33 @@ def plan_stages(config: DemoConfig) -> List[StageSpec]:
 # --------------------------------------------------------------------------- #
 
 def _cluster_with_affinity(*, db_path: str, dataset: str, affinity_path: str,
-                           force: bool = False, flank_policy: str = "separate", **_) -> Any:
-    """Cluster on a precomputed fused/GV affinity (T12 -> T05's pluggable ``affinity=``)."""
+                           force: bool = False, flank_policy: str = "separate",
+                           backend: Optional[str] = None, eps: Optional[float] = None,
+                           min_samples: Optional[int] = None,
+                           distance_threshold: Optional[float] = None,
+                           knn_k: Optional[int] = None, resolution: Optional[float] = None,
+                           n_clusters: Optional[int] = None, **_) -> Any:
+    """Cluster on a precomputed fused/GV affinity (T12 -> T05's pluggable ``affinity=``).
+
+    The fused global+Fisher (or GV-refined) affinity flows straight into whatever backend is
+    selected — including the rank/graph backends (finch/leiden) — so Fisher+GV sharpen the
+    SAME neighbour graph those methods cluster on.
+    """
     from . import cluster, fusion
 
     matrix, _ids = fusion.load_affinity(affinity_path)
+    tune = {k: v for k, v in {
+        "backend": backend, "eps": eps, "min_samples": min_samples,
+        "distance_threshold": distance_threshold,
+    }.items() if v is not None}
+    backend_params = {k: v for k, v in {
+        "knn_k": knn_k, "resolution": resolution, "n_clusters": n_clusters,
+    }.items() if v is not None}
+    if backend_params:
+        tune["backend_params"] = backend_params
     return cluster.run_clustering(
         db_path, dataset=dataset, affinity=matrix, force=force, flank_policy=flank_policy,
+        **tune,
     )
 
 
@@ -633,11 +695,18 @@ def _read_eval_json(path: str) -> Optional[dict]:
 
 
 def _headline_from_eval(report: dict) -> dict:
-    """Map a T07 ClusteringReport dict to the biologist-facing headline trio (no recompute)."""
+    """Map a T07 ClusteringReport dict to the biologist-facing headline (no recompute).
+
+    Includes ARI and V-measure alongside the plain-language trio: ``pct`` alone can be
+    inflated by over-segmentation (purer-but-fragmented clusters), so the chance-corrected
+    ARI and the balanced V-measure are carried so the bundle can't flatter a bad result.
+    """
     return {
         "individuals_found": report.get("n_found_clusters"),
         "individuals_true": report.get("n_true_individuals"),
         "pct_photos_correctly_grouped": report.get("pct_photos_correctly_grouped"),
+        "adjusted_rand_index": report.get("adjusted_rand_index"),
+        "v_measure": report.get("v_measure"),
     }
 
 
@@ -740,6 +809,8 @@ def _build_headline(config: DemoConfig, stage_results: List[StageResult]) -> dic
         "individuals_found": None,
         "individuals_true": None,
         "pct_photos_correctly_grouped": None,
+        "adjusted_rand_index": None,
+        "v_measure": None,
         "candidate_new_individuals": None,
         "crops_total": None,
     }
@@ -850,6 +921,20 @@ def _config_to_argv(config: DemoConfig) -> List[str]:
         argv.append("--force")
     if config.continue_on_error:
         argv.append("--continue-on-error")
+    if config.backend is not None:
+        argv += ["--backend", config.backend]
+    if config.eps is not None:
+        argv += ["--eps", str(config.eps)]
+    if config.min_samples is not None:
+        argv += ["--min-samples", str(config.min_samples)]
+    if config.distance_threshold is not None:
+        argv += ["--distance-threshold", str(config.distance_threshold)]
+    if config.knn_k is not None:
+        argv += ["--knn-k", str(config.knn_k)]
+    if config.resolution is not None:
+        argv += ["--resolution", str(config.resolution)]
+    if config.n_clusters is not None:
+        argv += ["--n-clusters", str(config.n_clusters)]
     return argv
 
 
@@ -957,6 +1042,8 @@ def _accuracy_table_html(headline: dict) -> str:
         ("Individuals found", headline.get("individuals_found")),
         ("Known individuals", headline.get("individuals_true")),
         ("% photos correctly grouped", headline.get("pct_photos_correctly_grouped")),
+        ("ARI (corrected for chance, 0–1)", headline.get("adjusted_rand_index")),
+        ("V-measure (0–1)", headline.get("v_measure")),
         ("Possible new individuals", headline.get("candidate_new_individuals")),
         ("Total photos", headline.get("crops_total")),
     ]
@@ -975,13 +1062,19 @@ def _lift_html(headline: dict) -> str:
         return ""
     g = lift["global"]
     f = lift["full_funnel"]
+
+    def _leg(d):
+        return (f"<b>{d.get('individuals_found')}</b> individuals "
+                f"(ARI {d.get('adjusted_rand_index')}, V-measure {d.get('v_measure')}, "
+                f"{d.get('pct_photos_correctly_grouped')}% grouped)")
+
     return (
         "<div class='lift'><h3>Accuracy lift</h3>"
-        f"<p>Global backbone finds <b>{g.get('individuals_found')}</b> individuals "
-        f"({g.get('pct_photos_correctly_grouped')}% correctly grouped); "
+        f"<p>Global backbone finds {_leg(g)}; "
         f"with geometric verification (<code>{lift.get('full_funnel_signals')}</code>) "
-        f"&rarr; <b>{f.get('individuals_found')}</b> individuals "
-        f"({f.get('pct_photos_correctly_grouped')}% correctly grouped).</p></div>"
+        f"&rarr; {_leg(f)}.</p>"
+        "<p class='muted'>ARI / V-measure are the honest, chance-corrected scores; "
+        "“% grouped” alone can rise from over-segmentation, so compare ARI.</p></div>"
     )
 
 
@@ -1012,6 +1105,15 @@ def _render_summary_md(config: DemoConfig, headline: dict, manifest: dict,
         f"- Signals: `{config.signals}`",
         f"- Status: {manifest['status']}",
         f"- Generated: {manifest['created_at']}",
+    ]
+    ari = headline.get("adjusted_rand_index")
+    vm = headline.get("v_measure")
+    if ari is not None or vm is not None:
+        lines.append(
+            f"- Accuracy (honest, chance-corrected): ARI **{ari}** · V-measure **{vm}** "
+            f"— compare these, not “% grouped” (which over-segmentation can inflate)"
+        )
+    lines += [
         "",
         "## (A) Your footage, filtered",
         ("See `medvednica_report/`." if has_report else "_Not produced._"),
@@ -1025,10 +1127,15 @@ def _render_summary_md(config: DemoConfig, headline: dict, manifest: dict,
         g, f = lift["global"], lift["full_funnel"]
         lines += [
             "## Accuracy lift",
-            f"- Global backbone: {g.get('individuals_found')} individuals, "
-            f"{g.get('pct_photos_correctly_grouped')}% correctly grouped",
-            f"- `{lift.get('full_funnel_signals')}`: {f.get('individuals_found')} individuals, "
-            f"{f.get('pct_photos_correctly_grouped')}% correctly grouped",
+            f"- Global backbone: {g.get('individuals_found')} individuals — "
+            f"ARI {g.get('adjusted_rand_index')}, V-measure {g.get('v_measure')}, "
+            f"{g.get('pct_photos_correctly_grouped')}% grouped",
+            f"- `{lift.get('full_funnel_signals')}`: {f.get('individuals_found')} individuals — "
+            f"ARI {f.get('adjusted_rand_index')}, V-measure {f.get('v_measure')}, "
+            f"{f.get('pct_photos_correctly_grouped')}% grouped",
+            "",
+            "_ARI is the chance-corrected score; a higher “% grouped” with a lower ARI "
+            "means the run over-segmented (split individuals into more clusters)._",
             "",
         ]
     return "\n".join(lines)
@@ -1054,6 +1161,24 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--stages", nargs="+", default=None, help="subset of stage names to run.")
     p.add_argument("--signals", default=None, choices=SIGNAL_CHOICES,
                    help=f"clustering signal set (default: {DEFAULT_SIGNALS}).")
+    # T05 clustering tuning (passthrough; omit to use cluster.py's own defaults).
+    p.add_argument("--backend", default=None,
+                   choices=("dbscan", "agglomerative", "finch", "leiden"),
+                   help="clustering backend. dbscan/agglomerative threshold absolute distance; "
+                        "finch/leiden are rank/graph methods (no eps/k) and far better when "
+                        "embeddings are 1-NN-correct but diffuse (default: cluster's dbscan).")
+    p.add_argument("--eps", type=float, default=None,
+                   help="DBSCAN cosine-distance eps; raise to merge more (default: cluster's 0.30).")
+    p.add_argument("--min-samples", type=int, default=None,
+                   help="DBSCAN min_samples (default: cluster's 2).")
+    p.add_argument("--distance-threshold", type=float, default=None,
+                   help="agglomerative cosine-distance cut (default: cluster's 0.30).")
+    p.add_argument("--knn-k", type=int, default=None,
+                   help="leiden: neighbours per node in the kNN graph (default: cluster's 15).")
+    p.add_argument("--resolution", type=float, default=None,
+                   help="leiden: resolution; higher => more clusters (default: cluster's 1.0).")
+    p.add_argument("--n-clusters", type=int, default=None,
+                   help="finch: pick the hierarchy level closest to this count (default: auto).")
     p.add_argument("--smoke", action="store_true",
                    help="tiny subset (caps identities) for a fast test run.")
     p.add_argument("--max-identities", type=int, default=None,
