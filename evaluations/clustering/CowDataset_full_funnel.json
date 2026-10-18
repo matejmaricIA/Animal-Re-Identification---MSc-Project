@@ -1,0 +1,1593 @@
+{
+  "dataset": "CowDataset",
+  "tag": "full_funnel",
+  "flank_aware": true,
+  "n_photos_total": 1388,
+  "n_photos_labeled": 1388,
+  "n_photos_clustered": 1388,
+  "n_photos_evaluated": 1388,
+  "n_photos_noise": 554,
+  "n_true_individuals": 12,
+  "n_found_clusters": 182,
+  "pct_photos_correctly_grouped": 64.5533,
+  "n_merge_errors": 0,
+  "n_split_errors": 12,
+  "merged_individual_groups": [],
+  "split_individuals": [
+    "CowDataset_10|other",
+    "CowDataset_11|other",
+    "CowDataset_13|other",
+    "CowDataset_1|other",
+    "CowDataset_2|other",
+    "CowDataset_3|other",
+    "CowDataset_4|other",
+    "CowDataset_5|other",
+    "CowDataset_6|other",
+    "CowDataset_7|other",
+    "CowDataset_8|other",
+    "CowDataset_9|other"
+  ],
+  "n_candidate_new": 554,
+  "candidate_new_precision": 0.0,
+  "candidate_new_recall": null,
+  "homogeneity": 0.6054,
+  "completeness": 0.4137,
+  "v_measure": 0.4915,
+  "adjusted_rand_index": 0.0306,
+  "adjusted_mutual_info": 0.3637,
+  "pairwise_precision": 0.1044,
+  "pairwise_recall": 0.2022,
+  "pairwise_f1": 0.1377,
+  "per_individual": [
+    {
+      "gt_label": "CowDataset_10|other",
+      "n_photos": 115,
+      "n_clusters": 18,
+      "dominant_cluster": -1,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_11|other",
+      "n_photos": 89,
+      "n_clusters": 10,
+      "dominant_cluster": -1,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_13|other",
+      "n_photos": 119,
+      "n_clusters": 20,
+      "dominant_cluster": -1,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_1|other",
+      "n_photos": 123,
+      "n_clusters": 11,
+      "dominant_cluster": 9,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_2|other",
+      "n_photos": 116,
+      "n_clusters": 17,
+      "dominant_cluster": -1,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_3|other",
+      "n_photos": 125,
+      "n_clusters": 20,
+      "dominant_cluster": -1,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_4|other",
+      "n_photos": 127,
+      "n_clusters": 16,
+      "dominant_cluster": -1,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_5|other",
+      "n_photos": 111,
+      "n_clusters": 17,
+      "dominant_cluster": -1,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_6|other",
+      "n_photos": 106,
+      "n_clusters": 17,
+      "dominant_cluster": -1,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_7|other",
+      "n_photos": 123,
+      "n_clusters": 14,
+      "dominant_cluster": -1,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_8|other",
+      "n_photos": 96,
+      "n_clusters": 12,
+      "dominant_cluster": -1,
+      "is_split": true
+    },
+    {
+      "gt_label": "CowDataset_9|other",
+      "n_photos": 138,
+      "n_clusters": 22,
+      "dominant_cluster": -1,
+      "is_split": true
+    }
+  ],
+  "per_cluster": [
+    {
+      "cluster_id": 0,
+      "n_photos": 22,
+      "dominant_gt_label": "CowDataset_1|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 1,
+      "n_photos": 8,
+      "dominant_gt_label": "CowDataset_1|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 2,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_1|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 3,
+      "n_photos": 9,
+      "dominant_gt_label": "CowDataset_1|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 4,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_1|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 5,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_1|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 6,
+      "n_photos": 13,
+      "dominant_gt_label": "CowDataset_1|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 7,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_1|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 8,
+      "n_photos": 13,
+      "dominant_gt_label": "CowDataset_1|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 9,
+      "n_photos": 26,
+      "dominant_gt_label": "CowDataset_1|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 10,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 11,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 12,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 13,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 14,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 15,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 16,
+      "n_photos": 7,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 17,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 18,
+      "n_photos": 20,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 19,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 20,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 21,
+      "n_photos": 9,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 22,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 23,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 24,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 25,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 26,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_10|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 27,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_11|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 28,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_11|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 29,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_11|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 30,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_11|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 31,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_11|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 32,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_11|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 33,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_11|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 34,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_11|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 35,
+      "n_photos": 6,
+      "dominant_gt_label": "CowDataset_11|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 36,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 37,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 38,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 39,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 40,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 41,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 42,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 43,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 44,
+      "n_photos": 6,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 45,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 46,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 47,
+      "n_photos": 8,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 48,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 49,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 50,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 51,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 52,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 53,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 54,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_13|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 55,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 56,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 57,
+      "n_photos": 8,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 58,
+      "n_photos": 9,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 59,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 60,
+      "n_photos": 7,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 61,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 62,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 63,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 64,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 65,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 66,
+      "n_photos": 7,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 67,
+      "n_photos": 9,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 68,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 69,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 70,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_2|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 71,
+      "n_photos": 16,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 72,
+      "n_photos": 9,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 73,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 74,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 75,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 76,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 77,
+      "n_photos": 14,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 78,
+      "n_photos": 7,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 79,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 80,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 81,
+      "n_photos": 8,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 82,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 83,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 84,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 85,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 86,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 87,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 88,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 89,
+      "n_photos": 8,
+      "dominant_gt_label": "CowDataset_3|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 90,
+      "n_photos": 7,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 91,
+      "n_photos": 6,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 92,
+      "n_photos": 10,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 93,
+      "n_photos": 10,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 94,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 95,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 96,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 97,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 98,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 99,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 100,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 101,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 102,
+      "n_photos": 8,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 103,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 104,
+      "n_photos": 10,
+      "dominant_gt_label": "CowDataset_4|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 105,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 106,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 107,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 108,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 109,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 110,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 111,
+      "n_photos": 10,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 112,
+      "n_photos": 12,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 113,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 114,
+      "n_photos": 6,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 115,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 116,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 117,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 118,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 119,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 120,
+      "n_photos": 8,
+      "dominant_gt_label": "CowDataset_5|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 121,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 122,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 123,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 124,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 125,
+      "n_photos": 7,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 126,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 127,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 128,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 129,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 130,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 131,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 132,
+      "n_photos": 11,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 133,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 134,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 135,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 136,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_6|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 137,
+      "n_photos": 9,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 138,
+      "n_photos": 9,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 139,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 140,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 141,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 142,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 143,
+      "n_photos": 9,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 144,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 145,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 146,
+      "n_photos": 17,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 147,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 148,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 149,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_7|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 150,
+      "n_photos": 6,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 151,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 152,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 153,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 154,
+      "n_photos": 17,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 155,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 156,
+      "n_photos": 13,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 157,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 158,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 159,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 160,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_8|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 161,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 162,
+      "n_photos": 14,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 163,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 164,
+      "n_photos": 7,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 165,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 166,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 167,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 168,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 169,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 170,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 171,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 172,
+      "n_photos": 5,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 173,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 174,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 175,
+      "n_photos": 4,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 176,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 177,
+      "n_photos": 3,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 178,
+      "n_photos": 8,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 179,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 180,
+      "n_photos": 2,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": 181,
+      "n_photos": 8,
+      "dominant_gt_label": "CowDataset_9|other",
+      "purity": 1.0,
+      "n_true_individuals": 1,
+      "is_merge": false
+    },
+    {
+      "cluster_id": -1,
+      "n_photos": 554,
+      "dominant_gt_label": "CowDataset_11|other",
+      "purity": 0.1119,
+      "n_true_individuals": 12,
+      "is_merge": false
+    }
+  ]
+}

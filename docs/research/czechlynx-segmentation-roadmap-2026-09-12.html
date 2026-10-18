@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CzechLynx recognition and clustering roadmap</title><style>
+:root{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:white;color:#202020;font:18px/1.6 Georgia,'Times New Roman',serif}
+main{max-width:1020px;margin:0 auto;padding:54px 36px 80px}
+h1,h2,h3,nav,table{font-family:Arial,Helvetica,sans-serif}
+h1{font-size:38px;line-height:1.18;font-weight:650;margin:0 0 30px;letter-spacing:-.5px}
+h2{font-size:25px;line-height:1.3;margin:52px 0 18px;padding-top:18px;border-top:1px solid #c9c9c9}
+h3{font-size:20px;line-height:1.35;margin:32px 0 14px}
+p{margin:0 0 19px}
+a{color:#17475e;text-underline-offset:3px}
+strong{font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.45;margin:23px 0 27px}
+th,td{vertical-align:top;text-align:left;padding:10px 11px;border-bottom:1px solid #d9d9d9;overflow-wrap:anywhere}
+th{background:#ededed;border-bottom:2px solid #777;font-weight:700}
+tbody tr:nth-child(even){background:#fafafa}
+code{font:13px/1.5 'DejaVu Sans Mono',monospace;overflow-wrap:anywhere}
+nav{font-size:14px;line-height:1.55;margin:24px 0 40px}
+nav summary{cursor:pointer;font-weight:700;padding:10px 0}
+nav ul{margin:5px 0;padding-left:22px;columns:2;column-gap:25px}
+nav li{break-inside:avoid;margin:5px 0}
+.footnote{font-size:14px;line-height:1.5;margin-top:40px}
+.footnote p{margin-bottom:9px}
+sup{font-size:11px;line-height:0}
+li{margin-bottom:9px}
+@media(max-width:700px){
+ body{font-size:16px}main{padding:28px 18px 50px}
+ h1{font-size:31px}h2{font-size:23px}h3{font-size:19px}
+ nav ul{columns:1}table{font-size:12px}th,td{padding:8px 6px}
+}
+@media print{
+ @page{size:A4;margin:17mm 16mm}
+ body{font-size:10.3pt;line-height:1.4}
+ main{max-width:none;padding:0}
+ h1{font-size:23pt}h2{font-size:16pt;margin-top:24pt;padding-top:10pt}
+ h3{font-size:12pt;margin-top:18pt}
+ p{margin-bottom:10pt}table{font-size:8.5pt;margin:12pt 0}
+ th,td{padding:6pt 5pt}
+ h1,h2,h3{break-after:avoid}
+ tr{break-inside:avoid}
+ nav{display:none}a{color:inherit;text-decoration:none}
+ code{font-size:8pt}.footnote{font-size:8pt}
+}
+</style></head><body><main><h1 id="czechlynx-recognition-and-clustering-roadmap">CzechLynx recognition and clustering roadmap</h1><nav aria-label="Report contents"><details><summary>Contents</summary><div class="toc">
+<ul>
+<li><a href="#czechlynx-recognition-and-clustering-roadmap">CzechLynx recognition and clustering roadmap</a><ul>
+<li><a href="#recommendation">Recommendation</a></li>
+<li><a href="#1-current-evidence">1. Current evidence</a></li>
+<li><a href="#2-external-baselines-and-comparability">2. External baselines and comparability</a></li>
+<li><a href="#3-evaluation-design">3. Evaluation design</a></li>
+<li><a href="#4-recognition-improvements">4. Recognition improvements</a></li>
+<li><a href="#5-clustering-improvements">5. Clustering improvements</a></li>
+<li><a href="#6-bounded-experiment-programme">6. Bounded experiment programme</a></li>
+<li><a href="#7-proposed-implementation-and-verification">7. Proposed implementation and verification</a></li>
+<li><a href="#8-proposed-pilot-gates">8. Proposed pilot gates</a></li>
+<li><a href="#sources">Sources</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</details></nav>
+<h2 id="recommendation">Recommendation</h2>
+<p>Use fully segmented animal images as the primary development path. Compare frozen MegaDescriptor and MiewID embeddings, replace the current custom reranking rule with a calibrated WildFusion reference, and build a clustering graph that can reject weak links. Then fine-tune the strongest global model using identity labels, with sampling and augmentation designed around camera and illumination changes.</p>
+<p>A 50% recognition target is a reasonable research milestone, but it is not established as achievable on this exact protocol. The current segmented result is <strong>29.37% top-1</strong>. Its verified candidate list imposes a <strong>49.17% ceiling</strong>, so tuning geometric verification within the existing top ten cannot reach the target. Clustering is further from useful: it combines 60 real identities into seven groups, with <strong>6.11% pairwise precision</strong>.<sup id="fnref:local"><a class="footnote-ref" href="#fn:local">1</a></sup></p>
+<p>The practical objective should be a review assistant that produces useful identity suggestions and conservative groups, while leaving difficult images unresolved. Reliable population estimates require additional ecological assumptions and validation; photographed identity groups do not establish total park abundance.</p>
+<p>This assessment uses the saved development runs and sources available on 12 September 2026. All experimental changes below are proposals. Frozen-model comparisons and supervised fine-tuning are both included.</p>
+<h2 id="1-current-evidence">1. Current evidence</h2>
+<h3 id="recognition-results">Recognition results</h3>
+<p>The three completed runs use the same 750 gallery images and 560 queries. Of those queries, 303 have a matching identity in the gallery and 257 are unknown. The accuracy columns below concern the 303 known queries, without applying the rejection threshold. These are development results, not results on the untouched official test split.<sup id="fnref2:local"><a class="footnote-ref" href="#fn:local">1</a></sup></p>
+<table>
+<thead>
+<tr>
+<th>Pipeline stage</th>
+<th style="text-align: right;">Bbox images</th>
+<th style="text-align: right;">Fully segmented images</th>
+<th style="text-align: right;">Bbox retrieval, masked GV points</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Global top-1</td>
+<td style="text-align: right;">23.43%</td>
+<td style="text-align: right;">20.13%</td>
+<td style="text-align: right;">23.43%</td>
+</tr>
+<tr>
+<td>Global + Fisher top-1</td>
+<td style="text-align: right;">28.05%</td>
+<td style="text-align: right;">22.11%</td>
+<td style="text-align: right;">28.05%</td>
+</tr>
+<tr>
+<td>Full pipeline top-1</td>
+<td style="text-align: right;">34.32%</td>
+<td style="text-align: right;"><strong>29.37%</strong></td>
+<td style="text-align: right;">33.99%</td>
+</tr>
+<tr>
+<td>Full pipeline top-5</td>
+<td style="text-align: right;">46.53%</td>
+<td style="text-align: right;"><strong>39.60%</strong></td>
+<td style="text-align: right;">44.22%</td>
+</tr>
+<tr>
+<td>Full pipeline mAP@50</td>
+<td style="text-align: right;">0.0944</td>
+<td style="text-align: right;"><strong>0.0760</strong></td>
+<td style="text-align: right;">0.0932</td>
+</tr>
+<tr>
+<td>Correct top-1 queries</td>
+<td style="text-align: right;">104/303</td>
+<td style="text-align: right;"><strong>89/303</strong></td>
+<td style="text-align: right;">103/303</td>
+</tr>
+</tbody>
+</table>
+<p>The bbox advantage is five percentage points over full segmentation. That establishes better performance on this sample, but does not establish better transfer to a new park or camera. Foreground-only development remains justified because the intended application needs identity evidence that survives changes in surroundings.</p>
+<p>The segmented pipeline uses supplied masks, crops the animal, replaces the background with gray RGB 128, and saves lossless PNGs. Global embeddings, Fisher features and geometric verification all see those segmented pixels. This is an annotation-assisted benchmark; automatic field segmentation remains a separate source of error.<sup id="fnref:implementation"><a class="footnote-ref" href="#fn:implementation">2</a></sup></p>
+<h3 id="the-shortlist-bottleneck">The shortlist bottleneck</h3>
+<p>The current global/Fisher stage forms a union of candidates, sorts them by the mean of clipped cosine scores, and geometrically reranks only the first ten. A correct candidate below that boundary cannot become top-1 through the existing reranking operation.<sup id="fnref2:implementation"><a class="footnote-ref" href="#fn:implementation">2</a></sup></p>
+<table>
+<thead>
+<tr>
+<th>Correct identity present within the segmented retrieval list</th>
+<th style="text-align: right;">Known queries covered</th>
+<th style="text-align: right;">Maximum possible top-1 if reranking were perfect within that list</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First 10 candidates</td>
+<td style="text-align: right;">149/303</td>
+<td style="text-align: right;"><strong>49.17%</strong></td>
+</tr>
+<tr>
+<td>First 20</td>
+<td style="text-align: right;">175/303</td>
+<td style="text-align: right;">57.76%</td>
+</tr>
+<tr>
+<td>First 50</td>
+<td style="text-align: right;">228/303</td>
+<td style="text-align: right;">75.25%</td>
+</tr>
+<tr>
+<td>Entire union of global/Fisher shortlists</td>
+<td style="text-align: right;">258/303</td>
+<td style="text-align: right;">85.15%</td>
+</tr>
+</tbody>
+</table>
+<p>Reaching at least 50% on these 303 queries requires 152 correct predictions, or 63 more than the current 89. Wider candidate verification creates room for improvement; it does not guarantee that the matcher will select the correct animal. Better global retrieval is still needed, especially for the 45 queries with no correct identity anywhere in the union.</p>
+<h3 id="rejection-is-also-unreliable">Rejection is also unreliable</h3>
+<p>At the current segmented rejection threshold, 65 queries are accepted: 45 correct known identities, eight incorrect known identities and 12 unknown animals incorrectly attached to the gallery. Overall accepted-match precision is therefore <strong>45/65 = 69.23%</strong>.</p>
+<p>The approximately 4.67% unknown false-accept rate does not mean accepted suggestions are 95% correct. Furthermore, these rejection thresholds were fitted and assessed on the same development unknowns. They need an independent calibration/selection split before supporting any deployment claim.<sup id="fnref3:local"><a class="footnote-ref" href="#fn:local">1</a></sup></p>
+<h3 id="illumination-and-acquisition-appearance">Illumination and acquisition appearance</h3>
+<p>A foreground colour diagnostic was computed from the existing segmented images. After resizing images and masks to 128 × 128, an image was marked near-monochrome when the 90th percentile of foreground channel spread, <code>max(R,G,B) − min(R,G,B)</code>, was at most five. This is an appearance proxy, <strong>not a verified day/night or infrared label</strong>. White-flash night images can be colour, and colourlessness alone does not identify the sensor.<sup id="fnref:diagnostic"><a class="footnote-ref" href="#fn:diagnostic">3</a></sup></p>
+<table>
+<thead>
+<tr>
+<th>Full pipeline result</th>
+<th style="text-align: right;">Near-monochrome known queries</th>
+<th style="text-align: right;">Colour known queries</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bbox</td>
+<td style="text-align: right;">37/97 = 38.14%</td>
+<td style="text-align: right;">67/206 = 32.52%</td>
+</tr>
+<tr>
+<td>Fully segmented</td>
+<td style="text-align: right;">26/97 = 26.80%</td>
+<td style="text-align: right;">63/206 = 30.58%</td>
+</tr>
+<tr>
+<td>Bbox with masked GV points</td>
+<td style="text-align: right;">35/97 = 36.08%</td>
+<td style="text-align: right;">68/206 = 33.01%</td>
+</tr>
+</tbody>
+</table>
+<p>The stronger warning concerns changes between query and reference appearance: <strong>27 known queries have correct gallery examples only in the opposite colour-proxy category. All three pipelines miss all 27.</strong> These cases span five identities, including 19 near-monochrome queries and eight colour queries. Their small, correlated sample does not isolate illumination causally; viewpoint, camera and image quality may also differ.</p>
+<p>Clustering shows the same association. One segmented cluster contains <strong>104 images of 22 identities, all near-monochrome</strong>. Another contains 79 images, of which 70 are near-monochrome. Together these groups contain 174 of the 178 near-monochrome queries. Background removal has therefore not removed acquisition-related similarities.</p>
+<h3 id="the-clustering-graph">The clustering graph</h3>
+<p>The segmented full-pipeline clustering has ARI 0.0649, pairwise precision 6.11%, pairwise recall 37.99%, seven clusters and no unassigned images. All seven clusters mix identities. Although the requested backend is Leiden, the saved run used the NetworkX Louvain fallback.<sup id="fnref4:local"><a class="footnote-ref" href="#fn:local">1</a></sup></p>
+<p>Graph construction is a more immediate concern than the choice between those algorithms. Every image nominates 15 neighbours and the graph takes their symmetric union without a meaningful confidence cutoff. With this query distribution, even perfect identity rankings would place at least <strong>2,753 of 8,400 directed neighbour slots, or 32.77%, on another identity</strong>, because many identities have fewer than 16 images.</p>
+<p>This is a lower bound on neighbour slots, not an observed count of unique false edges or a proof that every such edge causes a merge. It nevertheless shows why fixed neighbour quotas are inappropriate as sufficient evidence for shared identity. The graph needs permission to have fewer neighbours, isolated nodes and unresolved groups.<sup id="fnref2:diagnostic"><a class="footnote-ref" href="#fn:diagnostic">3</a></sup></p>
+<h2 id="2-external-baselines-and-comparability">2. External baselines and comparability</h2>
+<h3 id="the-two-kaggle-notebooks">The two Kaggle notebooks</h3>
+<p>The requested <a href="https://www.kaggle.com/code/picekl/czechlynx-baseline-with-wildfusion">CzechLynx baseline with WildFusion</a> and <a href="https://www.kaggle.com/code/mdnomanhossain/czechlynx-base-open-imagenet">CzechLynx base open ImageNet</a> could not be audited at cell level: their executable cells and saved outputs were not accessible. No accuracy, preprocessing choice or split is attributed to those exact notebooks here. An exported notebook with its dataset version and outputs would close that specific evidence gap.</p>
+<p>The dataset card explicitly notes an update adding backgrounds and around 100 identities. The current real data contain 39,760 images and 319 identities. Consequently, a notebook using an earlier release may differ substantially from the present benchmark.<sup id="fnref:dataset"><a class="footnote-ref" href="#fn:dataset">4</a></sup></p>
+<p>A valid reproduction must pin dataset version, image IDs, split assignments, segmentation, checkpoint, calibration identities, gallery construction and metric definition. “Open” in a notebook title is not enough to establish that unknown detection, retrieval and clustering are scored identically.</p>
+<h3 id="wildfusion-and-the-current-implementation">WildFusion and the current implementation</h3>
+<p>The original WildFusion method combines separately calibrated global similarity and local matching scores. Its local branches use counts of sufficiently confident matches; isotonic calibration with interpolation makes heterogeneous scores comparable before fusion. Its published 84% mean identification accuracy across 17 datasets is <strong>not a CzechLynx result</strong>.<sup id="fnref:wildfusion"><a class="footnote-ref" href="#fn:wildfusion">5</a></sup></p>
+<p>The official Wildlife Tools implementation exposes separate matcher/extractor/calibration pipelines and a candidate budget. Its examples include MegaDescriptor, DISK, ALIKED and SuperPoint with LightGlue. That budget controls score evaluation work; it is unrelated to Fisher GMM components.<sup id="fnref:wildtools"><a class="footnote-ref" href="#fn:wildtools">6</a></sup></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Current CzechLynx runner</th>
+<th>Proposed reference comparison</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Global model</td>
+<td>Frozen MegaDescriptor, 1536-D</td>
+<td>Same MegaDescriptor first; MiewID separately</td>
+</tr>
+<tr>
+<td>Local ensemble</td>
+<td>DISK + SuperPoint + ALIKED Fisher vectors</td>
+<td>Separate local matching branches</td>
+</tr>
+<tr>
+<td>GV matcher</td>
+<td>DISK + LightGlue</td>
+<td>DISK + LightGlue and ALIKED + LightGlue</td>
+</tr>
+<tr>
+<td>Score scaling</td>
+<td>Raw clipped cosine mean</td>
+<td>Calibration for each signal</td>
+</tr>
+<tr>
+<td>Reranking evidence</td>
+<td>RANSAC inliers in a custom power score</td>
+<td>Calibrated high-confidence match counts</td>
+</tr>
+<tr>
+<td>Candidate budget</td>
+<td>First ten reranked</td>
+<td>Compare 20 and 50 candidates</td>
+</tr>
+<tr>
+<td>Fisher role</td>
+<td>Mandatory in full-funnel path</td>
+<td>Optional measured contribution</td>
+</tr>
+</tbody>
+</table>
+<p>The current ensemble uses PCA 128 and <strong>256 GMM components per extractor</strong>, followed by an equal-weight sum of separately encoded Fisher vectors and normalization. That sums coordinates from independent descriptor spaces and codebooks, introducing cross-extractor terms when similarities are computed. It deserves an ablation against separate score fusion or normalized concatenation; the existing improvement is not evidence that coordinate summation is optimal.<sup id="fnref3:implementation"><a class="footnote-ref" href="#fn:implementation">2</a></sup></p>
+<p>The repo already contains a WildFusion reference script and calibration classes. Reuse these components, but adapt them to the frozen CzechLynx protocol. The existing reference script is a closed-set evaluator and uses a different model identifier; checkpoint identity must be verified before comparison.<sup id="fnref:reusable"><a class="footnote-ref" href="#fn:reusable">7</a></sup></p>
+<h3 id="evidence-for-foreground-only-recognition">Evidence for foreground-only recognition</h3>
+<p>Picek, Neumann and Matas studied 6,743 lynx images, 103 individuals and 81 locations with a temporal train/test split. Their foreground-only model achieved 49.3% overall accuracy versus 49.7% for the whole-image baseline, while improving accuracy at new locations from 13.9% to 16.3%. Foreground training with their PITS objective reached 52.5% overall and 19.1% at new locations.<sup id="fnref:foreground"><a class="footnote-ref" href="#fn:foreground">8</a></sup></p>
+<p>This supports the concern that headline accuracy can reward location dependence. It also demonstrates a foreground-only result above 50% in a different supervised setting. The small new-location result prevents treating that headline as evidence of reliable park transfer, and its 103-identity classification protocol does not forecast performance on the current open-set benchmark.</p>
+<h3 id="miewid-and-recent-clustering-research">MiewID and recent clustering research</h3>
+<p>MiewID-msv3 is a 51.11-million-parameter wildlife embedding model with 440 × 440 input. Its card reports Eurasian lynx rank-1 of 69.8% on Whiskerbook-sourced evaluation data. That makes it a worthwhile frozen-model candidate, not a prediction for CzechLynx. Eurasian lynx is represented in its evaluation coverage; unseen-species performance must not be assumed, and exact CzechLynx training overlap remains unverified.<sup id="fnref:miewid"><a class="footnote-ref" href="#fn:miewid">9</a></sup></p>
+<p>A 2026 AnimalCLEF working paper combines MiewID, DISK/ALIKED LightGlue scores, calibration and graph clustering. It reports private leaderboard ARI of 0.21221 for the competition baseline, 0.66695 for its main frozen-model pipeline, and 0.70393 for its ensemble. Individual fine-tuned variants scored below the frozen pipeline. These are aggregate challenge clustering results, <strong>not CzechLynx top-1 accuracy</strong>.<sup id="fnref:animalclef"><a class="footnote-ref" href="#fn:animalclef">10</a></sup></p>
+<p>The paper's preprocessing description also says lynx inputs were already focused crops. Its aggregate segmentation ablation is therefore not controlled proof that fully masking our lynx images will produce the same improvement. The relevant lesson is to benchmark the entire similarity-to-graph design and retain a frozen baseline throughout fine-tuning. The accompanying repository provides reusable implementation references.<sup id="fnref:animalcode"><a class="footnote-ref" href="#fn:animalcode">11</a></sup></p>
+<h2 id="3-evaluation-design">3. Evaluation design</h2>
+<h3 id="separate-model-fitting-calibration-and-selection">Separate model fitting, calibration and selection</h3>
+<p>Preserve the existing development subset as a diagnostic anchor. Establish a new, versioned protocol within official training data with three functions: encoder/Fisher fitting, score and rejection calibration, and development selection. Group by encounter to prevent burst leakage; reserve some identities entirely from encoder training to measure transfer to unseen individuals.</p>
+<p>Calibration examples must come from the final checkpoint and the same preprocessing used at inference. Calibrating a frozen model and subsequently changing its weights invalidates that calibration. Development unknown identities must be absent from both the reference gallery and supervised encoder fitting. Separately measure gallery-known animals that were never encoder-training identities.</p>
+<p>For the final evaluation, freeze all model choices, transforms, fusion parameters and thresholds, then run the official time-open test. The installed metadata specify 27,587 training and 12,173 test images, with 44 test identities absent from training. Preserve a calibration holdout if refitting on more training data; do not train on the calibration pool and silently reuse its old thresholds.<sup id="fnref2:dataset"><a class="footnote-ref" href="#fn:dataset">4</a></sup><sup id="fnref4:implementation"><a class="footnote-ref" href="#fn:implementation">2</a></sup></p>
+<p>Retain explicit overlap audits. The existing time-closed metadata contain shared mixed-animal encounters, so official split names alone do not establish independence. Report any purged query records rather than silently changing assignments.</p>
+<h3 id="measure-the-intended-transfer">Measure the intended transfer</h3>
+<p>Report image-, encounter- and identity-averaged metrics, with confidence intervals grouped by encounter or identity rather than treating adjacent photos as independent. Include camera-separated positives, different appearance modes, difficult exposure, blur, visible flank and small animal crops. Show subgroup counts alongside scores.</p>
+<p>Evaluate geographic transfer as a separate experiment. A split with disjoint identities cannot be used as an ordinary known-identity retrieval task with the training population as its only gallery. For retrieval, construct a disclosed reference/query division within the held-out population, separated by encounter; for pure discovery, evaluate its clusters without identity access during inference.</p>
+<p>The current data have date-only metadata and no directly usable day/night or flank field in the inspected CSV. The initial audit should manually label roughly 150–300 selected development images for visible-light/likely infrared/uncertain appearance, exposure, blur and visible side. Include all 27 cross-proxy failures, their true references and a representative control sample. Keep uncertainty explicit.</p>
+<h3 id="segmentation-transfer">Segmentation transfer</h3>
+<p>Use supplied masks for controlled recognition development. Before a field demonstration, add a separate end-to-end evaluation using predicted detections and masks on images excluded from any mask-model training or adaptation. Measure missing animals, truncated flanks and background leakage, as well as final retrieval and clustering.</p>
+<p>Mask contours and body silhouette can still encode pose, camera angle and size. Compare modest crop padding, preserved aspect ratio and conservative mask-boundary filtering only after a stable reference exists. Keypoint-centre filtering does not guarantee that an entire descriptor's receptive field lies on the animal.</p>
+<h2 id="4-recognition-improvements">4. Recognition improvements</h2>
+<h3 id="frozen-reference-first">Frozen reference first</h3>
+<p>Keep the segmented RGB inputs and current MegaDescriptor checkpoint as a reproducibility control. Add a model adapter for MiewID using its documented preprocessing. Cache each model/view separately, including checkpoint hash, transform, input-image hash and precision settings.</p>
+<p>Compare global-only retrieval before adding local matching. If a new embedding improves candidate recall at 20 and 50 but has modest top-1 improvement, it may still improve the final pipeline. Conversely, a model that only improves same-camera matches is a poor pilot candidate.</p>
+<p>Use DISK and ALIKED as independent LightGlue branches on segmented pixels. Record match confidence, coordinates, retained foreground points, inliers and spatial coverage. Keep raw-match scoring and geometric-inlier scoring as separate ablations. A single geometric transform may reject correspondences on a bending or differently posed animal; this is a hypothesis to test, not a reason to discard geometry.</p>
+<p>Fit simple calibrators on development pairs drawn from the candidate distribution. Include same-identity cross-encounter positives and difficult different-identity negatives with similar camera/appearance conditions. An initial bounded sample might contain 300–500 positives and 1,500–3,000 hard negatives, expanded if learning curves or subgroup coverage demand it.</p>
+<p>Balanced or hard-mined pair sampling changes class prevalence. A fitted “probability” is conditional on that sampling distribution until checked on representative candidate pairs. Use separate validation of reliability and accepted-match precision for retrieval and clustering.</p>
+<h3 id="illumination-handling">Illumination handling</h3>
+<p>Test a second grayscale view of the masked animal and fuse its score with the RGB view after calibration. This retains useful colour information while offering a texture-focused comparison. Start with the winning frozen global model; add a grayscale local branch only if diagnostics justify its extra matching cost.</p>
+<p>A grayscale image is not a faithful infrared simulation. Sensor spectrum, flash direction, saturation, blur and exposure can alter apparent coat texture. The visible–infrared literature supports channel augmentation and consistency training as a way to reduce colour dependence, but that evidence comes from human recognition and must be validated on lynx.<sup id="fnref:illumination"><a class="footnote-ref" href="#fn:illumination">12</a></sup></p>
+<p>Use conservative brightness, gamma, contrast, channel/grayscale, noise and blur augmentation during fine-tuning. Compute any exposure normalization from foreground pixels so the artificial background does not dominate its statistics. A deterministic foreground contrast-normalization variant can be compared separately; sharpening or CLAHE should not become defaults without measured benefit.</p>
+<p>Do not build independent “day identities” and “night identities.” Such separation would hide the cross-mode problem and fragment the same animal. Exposure and modality should guide diagnosis, sampling and uncertainty, rather than impose hard identity barriers.</p>
+<h3 id="fine-tuning">Fine-tuning</h3>
+<p>Start from a pretrained wildlife embedding model. Compare a small head-only warm-up with gradual unfreezing, using the model's native embedding dimensionality. For MegaDescriptor, preserve the existing architecture-compatible 1536-D representation; a projection-head change would be a separate experiment.<sup id="fnref2:reusable"><a class="footnote-ref" href="#fn:reusable">7</a></sup></p>
+<p>Use identity-balanced batches containing different encounters, and preferentially different cameras and appearance modes for the same animal when available. Include visually similar negative identities. Audit how many identities actually have cross-mode positive pairs; augmentation cannot replace absent real cross-sensor evidence.</p>
+<p>The initial objective should be one established identity/metric learning recipe, such as the existing ArcFace-based trainer, with cross-mode sampling. Add an embedding-consistency term only as a subsequent ablation. Begin with a small pretrained-backbone learning rate, approximately 2e-5 as a starting configuration, early stopping on held-out retrieval, and one fixed seed for initial screening.</p>
+<p>Ordinary horizontal flips can support orientation robustness, but they do not reveal the animal's unseen opposite flank. If visible-side labels are used, update them under flips. Avoid aggressive crops or erasing that remove nearly all identifying coat pattern.</p>
+<p>The available GPU is a 16 GB RTX 4070 Ti SUPER. Use mixed precision and measured microbatch sizing; activation memory, not parameter count alone, determines fit. Gradient accumulation can increase effective batch size, but it does not by itself enlarge the simultaneously available negative set of a batch-based metric loss.</p>
+<p>Retain the frozen model if fine-tuning improves familiar identities while harming unseen animals or cameras. Consider score-level ensembling only when the held-out errors are complementary enough to justify extra inference.</p>
+<h2 id="5-clustering-improvements">5. Clustering improvements</h2>
+<h3 id="conservative-graph-construction">Conservative graph construction</h3>
+<p>Build a sparse query–query candidate graph from the strongest embeddings. Keep edges only when calibrated evidence exceeds a development-selected threshold, with mutual-neighbour support as an additional option. A top-K list limits search work; it must not force K accepted relationships.</p>
+<p>Allow isolated images, singletons and unresolved cases. Compare Chinese Whispers and Leiden/Louvain on the same filtered graph before attributing gains to the clustering algorithm. Also evaluate a conservative agglomerative alternative on the bounded development subset.</p>
+<p>A high-confidence edge is not sufficient evidence that every pair in its connected component matches. Audit weak bridge edges and require additional cross-group support before merging established groups. A three-image chain where A matches B and B matches C, while A conflicts with C, is a necessary diagnostic case.</p>
+<p>k-reciprocal reranking can incorporate mutual neighbourhood information, but should follow stronger embeddings and graph filtering. Otherwise it may reinforce acquisition-related groups. Its original evidence comes from person re-identification, so its animal benefit remains an experiment.<sup id="fnref:rerank"><a class="footnote-ref" href="#fn:rerank">13</a></sup></p>
+<h3 id="identity-attachment-and-review">Identity attachment and review</h3>
+<p>Separate discovery among query images from attachment to a known gallery identity. For a query group, require consistent support across independent encounters before accepting an identity; use both best score and margin over competing identities. Conflicting confident votes should trigger review.</p>
+<p>Provide a small review set consisting of cluster representatives, the weakest accepted links and proposed merges. Collect “same animal / different animal / uncertain” decisions on those pairs. Save confirmed relationships as persistent constraints, with model version and evidence, and apply human labels only to subsequent evaluation cycles.</p>
+<p>Do not automatically join every image sharing an encounter. The installed dataset contains encounters with multiple animals. A verified single-animal tracklet can provide a useful constraint; an encounter ID by itself cannot.</p>
+<p>Visible flank is useful context. A published flank classifier reached 88.70% on lynx, which is side-classification accuracy, not identity accuracy. Its remaining errors illustrate why an uncertain side prediction should not hard-block plausible matches.<sup id="fnref:flank"><a class="footnote-ref" href="#fn:flank">14</a></sup> Keep left/right reference views where supported, and merge them into an individual only with linking evidence.</p>
+<h3 id="clustering-metrics">Clustering metrics</h3>
+<p>Report pairwise precision and recall over all input images, ARI, identity fragmentation, cluster size distributions, and non-singleton coverage. Treat each unassigned image as a separate predicted label for scoring; never score all unresolved images as one identity.</p>
+<p>High purity obtained by assigning everything to singletons is not useful clustering. Conversely, high coverage with mixed-identity groups is actively misleading. Calibrate the tradeoff against review workload, including large-cluster audits because a single incorrect bridge can create many incorrect implied pairs.</p>
+<h2 id="6-bounded-experiment-programme">6. Bounded experiment programme</h2>
+<p>Each stage has a decision gate. Do not launch a full combination of models, GMM sizes, transforms and graph settings.</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Controlled work</th>
+<th>Decision criterion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0. Protocol and diagnostics</td>
+<td>New fit/calibration/selection manifests; stratified metrics; retained existing results</td>
+<td>No overlap or training-label leakage; every metric has a clear denominator</td>
+</tr>
+<tr>
+<td>1. Frozen global comparison</td>
+<td>Segmented MegaDescriptor vs MiewID</td>
+<td>Candidate recall, known top-1 and cross-camera/mode performance</td>
+</tr>
+<tr>
+<td>2. WildFusion reference</td>
+<td>Independent DISK/ALIKED matching; per-signal calibration; 20/50 candidates</td>
+<td>Improvement over current custom fusion at a measured pair budget</td>
+</tr>
+<tr>
+<td>3. Appearance ablation</td>
+<td>RGB vs calibrated RGB+gray; then one foreground contrast variant</td>
+<td>Cross-mode gains without material overall or subgroup regression</td>
+</tr>
+<tr>
+<td>4. Graph repair</td>
+<td>Thresholded graph; mutual edges; conservative clustering and attachment</td>
+<td>Pair precision/recall/coverage together; no giant appearance-only groups</td>
+</tr>
+<tr>
+<td>5. Fine-tuning</td>
+<td>Best frozen backbone; baseline vs camera/mode-aware training</td>
+<td>Gains on unseen identities and cameras, not only familiar animals</td>
+</tr>
+<tr>
+<td>6. Final qualification</td>
+<td>Locked temporal test; separate geographic and predicted-mask evaluations</td>
+<td>Pilot gates and uncertainty reported on untouched data</td>
+</tr>
+</tbody>
+</table>
+<p>Graph experiments can reuse saved embeddings and pair evidence. New local evidence still costs computation: at 560 queries, 50 candidates and two matchers, the upper budget is <strong>56,000 matcher-pair evaluations</strong>, before calibration and query–query work. The previous ten-candidate single-matcher budget was 5,600. Report these units explicitly; library-specific budget parameters may count work differently.</p>
+<p>Keep PCA 128/GMM 256 fixed while testing the main hypotheses. If Fisher remains useful after calibrated global/local fusion, compare separate Fisher score fusion and only then a small 64/128/256-component sweep. Remove a branch if it adds cost without held-out benefit.</p>
+<p>Store compact pair evidence once and reuse it for scoring/threshold changes. Avoid dense all-pairs matching on the full 39,760 images: there are about 790 million unordered pairs. Use bounded candidate graphs and chunked retrieval. All tests, training and benchmark commands should be handed to the operator to run; runtime estimates should follow measured throughput.</p>
+<h2 id="7-proposed-implementation-and-verification">7. Proposed implementation and verification</h2>
+<p>The following is a reviewable change outline, not implemented pipeline functionality. Existing defaults and cached historical reports should remain reproducible.</p>
+<table>
+<thead>
+<tr>
+<th>Files or proposed module</th>
+<th>Planned change and purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reid_demo/benchmark.py</code></td>
+<td>Add explicit scoring strategies, calibrated fusion and wider candidate handling; keep ranking label-free; add subgroup metrics and confidence/coverage reporting</td>
+</tr>
+<tr>
+<td><code>tools/evaluate_czechlynx.py</code></td>
+<td>Wire model/scoring choices, frozen calibration artifacts and separate fit/selection manifests; remove Fisher as a prerequisite for a WildFusion-only path</td>
+</tr>
+<tr>
+<td>New <code>reid_demo/benchmark_embeddings.py</code></td>
+<td>Shared frozen MegaDescriptor/MiewID adapters and checkpoint/transform-aware caches</td>
+</tr>
+<tr>
+<td>New <code>reid_demo/benchmark_matching.py</code></td>
+<td>Independent local matcher branches, foreground-aligned coordinates, confidence/coverage evidence and versioned pair caches</td>
+</tr>
+<tr>
+<td><code>calibration.py</code> and benchmark adapter</td>
+<td>Reuse calibrators after checking monotonic interpolation, clipping, degenerate inputs and serialization; distinguish similarity calibration from rejection</td>
+</tr>
+<tr>
+<td><code>reid_demo/cluster.py</code>, <code>reid_demo/fusion.py</code></td>
+<td>Optional thresholded/mutual sparse graph, uncertainty handling, conservative merge checks and truthful backend reporting</td>
+</tr>
+<tr>
+<td><code>reid_demo/benchmark_report.py</code></td>
+<td>Cross-mode/camera/flank metrics, candidate ceilings, accepted precision, cluster contamination and review evidence</td>
+</tr>
+<tr>
+<td><code>utils/train_megadescriptor_scratch.py</code> plus dataset/sampler helpers</td>
+<td>Safe CzechLynx fine-tuning adapter, protected holdouts, encounter/camera/modality sampling; separate MiewID training adapter if selected</td>
+</tr>
+<tr>
+<td><code>tests/test_benchmark*.py</code>, <code>tests/test_cluster.py</code>, focused new tests</td>
+<td>Verify data/score/cache/graph contracts with small fixtures and mocked models</td>
+</tr>
+<tr>
+<td><code>docs/czechlynx-benchmark.md</code>, <code>AGENTS.md</code></td>
+<td>Document approved flags, metric definitions, cache versions, split rules and actual capabilities</td>
+</tr>
+</tbody>
+</table>
+<p>Implementation should be approved and delivered in three manageable batches: protocol/metrics and frozen global adapters; calibrated local fusion and graph handling; then fine-tuning and field-mask qualification. Each batch should include its concrete diff and exact runnable commands.</p>
+<table>
+<thead>
+<tr>
+<th>Verification area</th>
+<th>Meaningful checks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Splits</td>
+<td>Encounters cannot cross fitting/evaluation boundaries; reserved unknown identities never enter encoder training; mixed-animal encounter handling is explicit</td>
+</tr>
+<tr>
+<td>Label independence</td>
+<td>Permuting evaluation identity labels does not change rankings or inferred clusters</td>
+</tr>
+<tr>
+<td>Model adapters</td>
+<td>Correct input size/normalization and output dimension; checkpoint/transform changes invalidate caches</td>
+</tr>
+<tr>
+<td>Mask alignment</td>
+<td>Crops/resizes map keypoints and masks consistently; missing masks and empty foreground are handled explicitly</td>
+</tr>
+<tr>
+<td>Calibration</td>
+<td>Monotonic bounded output, duplicate/constant scores, train-only fitting, serialization, and invalid artifact rejection</td>
+</tr>
+<tr>
+<td>Candidate handling</td>
+<td>Correct item below old rank ten can be promoted; skipped matching differs from attempted zero evidence; comparisons use coherent score scales</td>
+</tr>
+<tr>
+<td>Graph logic</td>
+<td>Weak unrelated pairs remain disconnected; isolates survive; reciprocal edges and conflicting constraints behave correctly; weak bridges do not silently join reviewed groups</td>
+</tr>
+<tr>
+<td>Metrics</td>
+<td>Hand-computable unknown acceptance, subgroup denominators, pair precision/recall, and unique noise labels</td>
+</tr>
+<tr>
+<td>Fine-tuning</td>
+<td>Sampler uses valid positives; holdouts are excluded; flips update side labels; checkpoint reload reproduces embeddings</td>
+</tr>
+<tr>
+<td>Empirical qualification</td>
+<td>Real saved predictions, cluster audits and user-run benchmarks establish accuracy; mocked tests do not</td>
+</tr>
+</tbody>
+</table>
+<h2 id="8-proposed-pilot-gates">8. Proposed pilot gates</h2>
+<p>These are engineering targets for discussion, not published standards or demonstrated results. Evaluate them on a frozen test and report confidence intervals. A headline score passing on the small development subset alone is insufficient.</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Proposed minimum for a limited review pilot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Known-identity suggestions</td>
+<td>At least <strong>50% top-1</strong> and a working target of <strong>75% top-5</strong></td>
+</tr>
+<tr>
+<td>Accepted known-identity links</td>
+<td>At least <strong>95% precision</strong>, counting accepted unknowns as errors; target at least <strong>25% correct-accept coverage</strong> of known queries</td>
+</tr>
+<tr>
+<td>Unknown handling</td>
+<td>At most <strong>5% false attachment</strong> on a representative unknown set; report precision as unknown prevalence changes</td>
+</tr>
+<tr>
+<td>Useful clustering</td>
+<td>At least <strong>95% pair precision</strong>, <strong>50% pair recall</strong>, <strong>60% non-singleton image coverage</strong>, and <strong>ARI 0.5</strong> as a working target</td>
+</tr>
+<tr>
+<td>Acquisition robustness</td>
+<td>Cross-camera and cross-mode results improve on the frozen control with adequate subgroup counts; unresolved cross-mode collapse blocks qualification</td>
+</tr>
+<tr>
+<td>Field input</td>
+<td>Predicted-mask evaluation, failure reporting and representative manual audits</td>
+</tr>
+<tr>
+<td>Review value</td>
+<td>Measurably less work than manual sorting; target a <strong>30% reduction in review time</strong> on a matched, blinded task</td>
+</tr>
+<tr>
+<td>Data integrity</td>
+<td>Persistent reviews and collision-safe multi-camera ingestion</td>
+</tr>
+</tbody>
+</table>
+<p>The existing pilot-readiness assessment identified basename collisions and ingestion updates that could reset downstream information or human reviews. Those remain prerequisites before real multi-camera ingestion, independently of recognition quality.<sup id="fnref:pilot"><a class="footnote-ref" href="#fn:pilot">15</a></sup></p>
+<p>The immediate milestone is a trustworthy segmented benchmark with stronger candidate retrieval and independently calibrated scores. Fine-tuning follows a useful frozen reference, and conservative clustering follows measured pair evidence. This sequence targets the observed failure mechanisms while making it possible to stop spending compute on changes that do not improve held-out results.</p>
+<h2 id="sources">Sources</h2>
+<p>Source notes below preserve the distinction between repository evidence, published experiments and proposed engineering choices. Web sources were checked on 12 September 2026. Published numbers from different datasets and metrics are not pooled.</p>
+<ol>
+<li><strong>Saved CzechLynx evaluations.</strong> <a href="../../evaluations/czechlynx/dev_bbox_ensamble/index.html">Bbox report</a>, <a href="../../evaluations/czechlynx/dev_masked_ensamble/index.html">segmented report</a>, <a href="../../evaluations/czechlynx/dev_bbox_gv_mask_ensamble/index.html">GV-mask report</a>. Underlying <code>comparison.csv</code>, prediction JSONs and clustering JSONs in each directory. File hashes and derived counts: <a href="czechlynx-analysis-2026-09-12.json">analysis JSON</a>.</li>
+<li><strong>Repository implementation.</strong> <a href="../../reid_demo/benchmark.py">Ranking and metrics</a>, especially <code>rank_queries</code> and <code>retrieval_metrics</code>; <a href="../../tools/evaluate_czechlynx.py">runner</a>, especially <code>combine_fisher_matrices</code> and <code>run_clustering</code>; <a href="../../reid_demo/cluster.py">graph construction</a>, <code>_leiden_labels</code>; <a href="../../reid_demo/fusion.py">fusion</a>; <a href="../../reid_demo/benchmark_masks.py">mask handling</a>. Working-tree snapshot, 12 September 2026.</li>
+<li><strong>Foreground appearance diagnostic.</strong> <a href="czechlynx-lighting-diagnostics-2026-09-12.csv">Per-image CSV</a> and <a href="czechlynx-analysis-2026-09-12.json">aggregate JSON</a>. Includes 1,310 existing gallery/query images, colour-proxy definition, candidate coverage, acceptance counts and graph bound. Threshold sensitivity: cutoffs 3, 5 and 8 classify 434, 434 and 436 images respectively as near-monochrome. No sensor labels inferred.</li>
+<li><strong>Picek et al.</strong> <a href="https://www.nature.com/articles/s41597-026-06853-9">CzechLynx: A Dataset for Individual Identification and Pose Estimation of the Eurasian Lynx</a>. Scientific Data, 2026; accessible <a href="https://arxiv.org/html/2506.04931v2">arXiv v2 text</a>. <a href="https://www.kaggle.com/datasets/picekl/czechlynx">Official Kaggle dataset card</a>, version-update note, metadata and split tables.</li>
+<li><strong>Requested notebook references.</strong> Lukas Picek, <a href="https://www.kaggle.com/code/picekl/czechlynx-baseline-with-wildfusion">CzechLynx baseline with WildFusion</a>; mdnomanhossain, <a href="https://www.kaggle.com/code/mdnomanhossain/czechlynx-base-open-imagenet">CzechLynx base open ImageNet</a>. Cells, outputs and exact version dates unavailable; no notebook-specific experimental claims used.</li>
+<li><strong>Čermák et al.</strong> <a href="https://arxiv.org/abs/2408.12934">WildFusion</a>, 2024, method sections 3.2–3.4. Full text also available in <a href="../papers/wildfusion.pdf">local paper</a>.</li>
+<li><strong>WildlifeDatasets.</strong> <a href="https://wildlifedatasets.github.io/wildlife-tools/wildfusion/">WildFusion documentation</a> and <a href="https://github.com/WildlifeDatasets/wildlife-tools">Wildlife Tools repository</a>. Matcher pipelines, calibration and shortlist examples.</li>
+<li><strong>Existing reusable project code.</strong> <a href="../../test-scripts/run_wildfusion_paper_baseline.py">WildFusion reference script</a>, <a href="../../calibration.py">calibration classes</a>, <a href="../../utils/train_megadescriptor_scratch.py">MegaDescriptor trainer</a>. These require protocol adaptation, not direct reuse of their evaluation splits.</li>
+<li><strong>Picek, Neumann and Matas.</strong> <a href="https://arxiv.org/html/2408.12930v1">Animal Identification with Independent Foreground and Background Modeling</a>, 2024, section 4.1 and Table 1. Foreground/background and new-location comparison.</li>
+<li><strong>Conservation X Labs / Wild Me.</strong> <a href="https://huggingface.co/conservationxlabs/miewid-msv3">MiewID-msv3 model card</a>, <a href="https://huggingface.co/conservationxlabs/miewid-msv3/raw/main/README.md">readable card source</a>. Architecture, preprocessing, training provenance and Whiskerbook lynx metrics; exact CzechLynx overlap unresolved.</li>
+<li><strong>El Bassat et al.</strong> <a href="https://arxiv.org/html/2608.02469v1">Calibrated Similarity and Graph Clustering for Open-Set Animal Re-Identification</a>, arXiv working paper, August 2026, sections 3.2–3.8 and Tables 3–5. AnimalCLEF aggregate ARI; a recent preprint rather than independent validation on this repository.</li>
+<li><strong>MIA AI Team.</strong> <a href="https://github.com/MIA-AI-Team/AnimalCLEF26">AnimalCLEF26 implementation</a>, README and file inventory. Reference for model, calibration and clustering integration.</li>
+<li><strong>Ye, Ruan, Du and Shou.</strong> <a href="https://openaccess.thecvf.com/content/ICCV2021/html/Ye_Channel_Augmented_Joint_Learning_for_Visible-Infrared_Recognition_ICCV_2021_paper.html">Channel Augmented Joint Learning for Visible-Infrared Recognition</a>. ICCV 2021, pp. 13567–13576. Human visible–infrared evidence used only as an augmentation hypothesis.</li>
+<li><strong>Suessle et al.</strong> <a href="https://arxiv.org/abs/2406.13588">CNN Based Flank Predictor for Quadruped Animal Species</a>, 2024. Lynx flank classification and bilateral-asymmetry context.</li>
+<li><strong>Zhong et al.</strong> <a href="https://arxiv.org/abs/1701.08398">Re-ranking Person Re-identification with k-reciprocal Encoding</a>, CVPR 2017. Mutual-neighbour reranking; animal application requires validation.</li>
+<li><strong>Project pilot assessment.</strong> <a href="../pilot-readiness-2026-09-10.md">Pilot readiness, 10 September 2026</a>. Ingestion defects, provisional identity/counting outputs and pilot limitations.</li>
+</ol>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:local">
+<p><a href="czechlynx-analysis-2026-09-12.json">Saved-run analysis and file hashes</a>; <a href="../../evaluations/czechlynx/dev_masked_ensamble/index.html">segmented benchmark report</a>. Full inventory: source 1.&#160;<a class="footnote-backref" href="#fnref:local" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:local" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:local" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:local" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:implementation">
+<p><a href="../../reid_demo/benchmark.py">Benchmark ranking/metrics</a>, <a href="../../tools/evaluate_czechlynx.py">runner</a>, <a href="../../reid_demo/cluster.py">graph construction</a>. Full inventory: source 2.&#160;<a class="footnote-backref" href="#fnref:implementation" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:implementation" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:implementation" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:implementation" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:diagnostic">
+<p><a href="czechlynx-lighting-diagnostics-2026-09-12.csv">Per-image appearance CSV</a> and <a href="czechlynx-analysis-2026-09-12.json">aggregate analysis</a>. Method and limitations: source 3.&#160;<a class="footnote-backref" href="#fnref:diagnostic" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:diagnostic" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:dataset">
+<p>Picek et al., <a href="https://arxiv.org/html/2506.04931v2">CzechLynx dataset paper</a>; <a href="https://www.kaggle.com/datasets/picekl/czechlynx">dataset card</a>. Full details: source 4.&#160;<a class="footnote-backref" href="#fnref:dataset" title="Jump back to footnote 4 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:dataset" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:wildfusion">
+<p>Čermák et al., <a href="https://arxiv.org/abs/2408.12934">WildFusion</a>, 2024. Full details: source 6.&#160;<a class="footnote-backref" href="#fnref:wildfusion" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+<li id="fn:wildtools">
+<p>WildlifeDatasets, <a href="https://wildlifedatasets.github.io/wildlife-tools/wildfusion/">WildFusion documentation</a>. Source 7.&#160;<a class="footnote-backref" href="#fnref:wildtools" title="Jump back to footnote 6 in the text">&#8617;</a></p>
+</li>
+<li id="fn:reusable">
+<p><a href="../../test-scripts/run_wildfusion_paper_baseline.py">WildFusion reference script</a>, <a href="../../calibration.py">calibration</a>, <a href="../../utils/train_megadescriptor_scratch.py">trainer</a>. Source 8.&#160;<a class="footnote-backref" href="#fnref:reusable" title="Jump back to footnote 7 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:reusable" title="Jump back to footnote 7 in the text">&#8617;</a></p>
+</li>
+<li id="fn:foreground">
+<p>Picek, Neumann and Matas, <a href="https://arxiv.org/html/2408.12930v1">foreground/background study</a>, 2024, Table 1. Source 9.&#160;<a class="footnote-backref" href="#fnref:foreground" title="Jump back to footnote 8 in the text">&#8617;</a></p>
+</li>
+<li id="fn:miewid">
+<p>Conservation X Labs / Wild Me, <a href="https://huggingface.co/conservationxlabs/miewid-msv3/raw/main/README.md">MiewID-msv3 card</a>. Source 10.&#160;<a class="footnote-backref" href="#fnref:miewid" title="Jump back to footnote 9 in the text">&#8617;</a></p>
+</li>
+<li id="fn:animalclef">
+<p>El Bassat et al., <a href="https://arxiv.org/html/2608.02469v1">AnimalCLEF working paper</a>, 2026, preprocessing section and Table 3. Source 11.&#160;<a class="footnote-backref" href="#fnref:animalclef" title="Jump back to footnote 10 in the text">&#8617;</a></p>
+</li>
+<li id="fn:animalcode">
+<p>MIA AI Team, <a href="https://github.com/MIA-AI-Team/AnimalCLEF26">AnimalCLEF26 implementation</a>. Source 12.&#160;<a class="footnote-backref" href="#fnref:animalcode" title="Jump back to footnote 11 in the text">&#8617;</a></p>
+</li>
+<li id="fn:illumination">
+<p>Ye et al., <a href="https://openaccess.thecvf.com/content/ICCV2021/html/Ye_Channel_Augmented_Joint_Learning_for_Visible-Infrared_Recognition_ICCV_2021_paper.html">Channel Augmented Joint Learning</a>, ICCV 2021. Source 13.&#160;<a class="footnote-backref" href="#fnref:illumination" title="Jump back to footnote 12 in the text">&#8617;</a></p>
+</li>
+<li id="fn:rerank">
+<p>Zhong et al., <a href="https://arxiv.org/abs/1701.08398">k-reciprocal reranking</a>, CVPR 2017. Source 15.&#160;<a class="footnote-backref" href="#fnref:rerank" title="Jump back to footnote 13 in the text">&#8617;</a></p>
+</li>
+<li id="fn:flank">
+<p>Suessle et al., <a href="https://arxiv.org/abs/2406.13588">CNN Based Flank Predictor</a>, 2024. Source 14.&#160;<a class="footnote-backref" href="#fnref:flank" title="Jump back to footnote 14 in the text">&#8617;</a></p>
+</li>
+<li id="fn:pilot">
+<p><a href="../pilot-readiness-2026-09-10.md">Project pilot-readiness assessment</a>. Source 16.&#160;<a class="footnote-backref" href="#fnref:pilot" title="Jump back to footnote 15 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div></main></body></html>

@@ -1,0 +1,398 @@
+{
+  "artifact_sha256": {
+    "diagnostics.json": "7e990607a45095ab1924b3ab0826e4d408cd55e13e6299b0dcfea214745192af",
+    "manifest.json": "48926a92d35fde19f8823c208f2e1cfeeff5e8d9b991ba990cf0403d90abf5e3",
+    "metrics.json": "a7faa734e3e37c4641e4e85d89e2dbb1802cd285f28a20a46adc59008e6b8aaf",
+    "predictions_global.json": "7c534ed5aaebc11b26b808406b3f6748d27140a398817a628fe66af90844e705",
+    "thresholds.json": "610a2de6a713a4968a195440ea6077076213ad83d5d2c8b08b9ed094aa3365fb"
+  },
+  "diagnostic_groups": {
+    "all": {
+      "accepted": 534,
+      "accepted_precision": 0.898876404494382,
+      "correct_accepts": 480,
+      "correct_known_coverage": 0.3592814371257485,
+      "encounters": 923,
+      "identities": 55,
+      "known_encounters": 708,
+      "known_identities": 44,
+      "known_queries": 1336,
+      "map_at_k": 0.3100775242048097,
+      "queries": 1830,
+      "recall_at": {
+        "10": 0.8720059880239521,
+        "20": 0.9116766467065869,
+        "50": 0.9483532934131736
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": 0.9483532934131736,
+      "top1": 0.656437125748503,
+      "top5": 0.8248502994011976,
+      "unknown_false_accept_rate": 0.048582995951417005,
+      "unknown_false_accepts": 24,
+      "unknown_queries": 494
+    },
+    "appearance/colour": {
+      "accepted": 309,
+      "accepted_precision": 0.8770226537216829,
+      "correct_accepts": 271,
+      "correct_known_coverage": 0.4075187969924812,
+      "encounters": 525,
+      "identities": 49,
+      "known_encounters": 399,
+      "known_identities": 38,
+      "known_queries": 665,
+      "map_at_k": 0.3120374474837798,
+      "queries": 940,
+      "recall_at": {
+        "10": 0.8676691729323308,
+        "20": 0.9082706766917293,
+        "50": 0.9443609022556391
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": 0.9443609022556391,
+      "top1": 0.6781954887218045,
+      "top5": 0.8180451127819549,
+      "unknown_false_accept_rate": 0.07272727272727272,
+      "unknown_false_accepts": 20,
+      "unknown_queries": 275
+    },
+    "appearance/near_monochrome": {
+      "accepted": 225,
+      "accepted_precision": 0.9288888888888889,
+      "correct_accepts": 209,
+      "correct_known_coverage": 0.3114754098360656,
+      "encounters": 403,
+      "identities": 37,
+      "known_encounters": 311,
+      "known_identities": 29,
+      "known_queries": 671,
+      "map_at_k": 0.3081351263202865,
+      "queries": 890,
+      "recall_at": {
+        "10": 0.8763040238450075,
+        "20": 0.9150521609538003,
+        "50": 0.9523099850968704
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": 0.9523099850968704,
+      "top1": 0.6348733233979136,
+      "top5": 0.8315946348733234,
+      "unknown_false_accept_rate": 0.0182648401826484,
+      "unknown_false_accepts": 4,
+      "unknown_queries": 219
+    },
+    "camera/other_camera_only": {
+      "accepted": 87,
+      "accepted_precision": 0.9310344827586207,
+      "correct_accepts": 81,
+      "correct_known_coverage": 0.2745762711864407,
+      "encounters": 172,
+      "identities": 26,
+      "known_encounters": 172,
+      "known_identities": 26,
+      "known_queries": 295,
+      "map_at_k": 0.2842031576268933,
+      "queries": 295,
+      "recall_at": {
+        "10": 0.823728813559322,
+        "20": 0.8813559322033898,
+        "50": 0.9186440677966101
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": 0.9186440677966101,
+      "top1": 0.5389830508474577,
+      "top5": 0.7728813559322034,
+      "unknown_false_accept_rate": null,
+      "unknown_false_accepts": 0,
+      "unknown_queries": 0
+    },
+    "camera/same_camera_available": {
+      "accepted": 423,
+      "accepted_precision": 0.9432624113475178,
+      "correct_accepts": 399,
+      "correct_known_coverage": 0.38328530259365995,
+      "encounters": 536,
+      "identities": 39,
+      "known_encounters": 536,
+      "known_identities": 39,
+      "known_queries": 1041,
+      "map_at_k": 0.3174098375001847,
+      "queries": 1041,
+      "recall_at": {
+        "10": 0.8856868395773295,
+        "20": 0.920268972142171,
+        "50": 0.9567723342939481
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": 0.9567723342939481,
+      "top1": 0.6897214217098944,
+      "top5": 0.8395773294908742,
+      "unknown_false_accept_rate": null,
+      "unknown_false_accepts": 0,
+      "unknown_queries": 0
+    },
+    "camera/unknown_identity": {
+      "accepted": 24,
+      "accepted_precision": 0.0,
+      "correct_accepts": 0,
+      "correct_known_coverage": null,
+      "encounters": 215,
+      "identities": 11,
+      "known_encounters": 0,
+      "known_identities": 0,
+      "known_queries": 0,
+      "map_at_k": null,
+      "queries": 494,
+      "recall_at": {
+        "10": null,
+        "20": null,
+        "50": null
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": null,
+      "top1": null,
+      "top5": null,
+      "unknown_false_accept_rate": 0.048582995951417005,
+      "unknown_false_accepts": 24,
+      "unknown_queries": 494
+    },
+    "cross_appearance/opposite_appearance_only": {
+      "accepted": 0,
+      "accepted_precision": null,
+      "correct_accepts": 0,
+      "correct_known_coverage": 0.0,
+      "encounters": 4,
+      "identities": 3,
+      "known_encounters": 4,
+      "known_identities": 3,
+      "known_queries": 8,
+      "map_at_k": 0.008092948717948719,
+      "queries": 8,
+      "recall_at": {
+        "10": 0.125,
+        "20": 0.375,
+        "50": 0.5
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": 0.5,
+      "top1": 0.0,
+      "top5": 0.0,
+      "unknown_false_accept_rate": null,
+      "unknown_false_accepts": 0,
+      "unknown_queries": 0
+    },
+    "cross_appearance/same_appearance_available": {
+      "accepted": 510,
+      "accepted_precision": 0.9411764705882353,
+      "correct_accepts": 480,
+      "correct_known_coverage": 0.3614457831325301,
+      "encounters": 704,
+      "identities": 42,
+      "known_encounters": 704,
+      "known_identities": 42,
+      "known_queries": 1328,
+      "map_at_k": 0.31189670839448963,
+      "queries": 1328,
+      "recall_at": {
+        "10": 0.8765060240963856,
+        "20": 0.9149096385542169,
+        "50": 0.9510542168674698
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": 0.9510542168674698,
+      "top1": 0.6603915662650602,
+      "top5": 0.8298192771084337,
+      "unknown_false_accept_rate": null,
+      "unknown_false_accepts": 0,
+      "unknown_queries": 0
+    },
+    "cross_appearance/unknown_identity": {
+      "accepted": 24,
+      "accepted_precision": 0.0,
+      "correct_accepts": 0,
+      "correct_known_coverage": null,
+      "encounters": 215,
+      "identities": 11,
+      "known_encounters": 0,
+      "known_identities": 0,
+      "known_queries": 0,
+      "map_at_k": null,
+      "queries": 494,
+      "recall_at": {
+        "10": null,
+        "20": null,
+        "50": null
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": null,
+      "top1": null,
+      "top5": null,
+      "unknown_false_accept_rate": 0.048582995951417005,
+      "unknown_false_accepts": 24,
+      "unknown_queries": 494
+    },
+    "source/foe_bohemia": {
+      "accepted": 102,
+      "accepted_precision": 0.8823529411764706,
+      "correct_accepts": 90,
+      "correct_known_coverage": 0.3202846975088968,
+      "encounters": 128,
+      "identities": 18,
+      "known_encounters": 90,
+      "known_identities": 15,
+      "known_queries": 281,
+      "map_at_k": 0.17272009140995775,
+      "queries": 394,
+      "recall_at": {
+        "10": 0.800711743772242,
+        "20": 0.8790035587188612,
+        "50": 0.9466192170818505
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": 0.9466192170818505,
+      "top1": 0.5765124555160143,
+      "top5": 0.7330960854092526,
+      "unknown_false_accept_rate": 0.017699115044247787,
+      "unknown_false_accepts": 2,
+      "unknown_queries": 113
+    },
+    "source/foe_carpaths": {
+      "accepted": 207,
+      "accepted_precision": 0.9227053140096618,
+      "correct_accepts": 191,
+      "correct_known_coverage": 0.3167495854063018,
+      "encounters": 467,
+      "identities": 17,
+      "known_encounters": 408,
+      "known_identities": 13,
+      "known_queries": 603,
+      "map_at_k": 0.35371435215682706,
+      "queries": 695,
+      "recall_at": {
+        "10": 0.9286898839137645,
+        "20": 0.9535655058043118,
+        "50": 0.978441127694859
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": 0.978441127694859,
+      "top1": 0.6766169154228856,
+      "top5": 0.87893864013267,
+      "unknown_false_accept_rate": 0.043478260869565216,
+      "unknown_false_accepts": 4,
+      "unknown_queries": 92
+    },
+    "source/snpa": {
+      "accepted": 225,
+      "accepted_precision": 0.8844444444444445,
+      "correct_accepts": 199,
+      "correct_known_coverage": 0.44026548672566373,
+      "encounters": 328,
+      "identities": 27,
+      "known_encounters": 210,
+      "known_identities": 22,
+      "known_queries": 452,
+      "map_at_k": 0.33725546969217024,
+      "queries": 741,
+      "recall_at": {
+        "10": 0.8407079646017699,
+        "20": 0.8761061946902655,
+        "50": 0.9092920353982301
+      },
+      "shortlist_size_max": 50,
+      "shortlist_size_min": 50,
+      "shortlist_union_recall": 0.9092920353982301,
+      "top1": 0.6792035398230089,
+      "top5": 0.8097345132743363,
+      "unknown_false_accept_rate": 0.06228373702422145,
+      "unknown_false_accepts": 18,
+      "unknown_queries": 289
+    }
+  },
+  "metrics": {
+    "global": {
+      "ap_denominator": "min(relevant_gallery_images, K)",
+      "gallery": 4522,
+      "gv_attempted_pairs": 0,
+      "gv_requested_pairs": 0,
+      "gv_skipped_pairs": 0,
+      "known_correct_accept_rate": 0.3592814371257485,
+      "known_false_reject_rate": 0.6182634730538923,
+      "known_queries": 1336,
+      "macro_encounter_top1": 0.7200436059546229,
+      "macro_identity_top1": 0.5608832500002577,
+      "map_at_k": 0.3100775242048097,
+      "queries": 1830,
+      "ranking_seconds": 0.9261225275695324,
+      "retrieval_depth": 50,
+      "shortlist_recall": 0.9483532934131736,
+      "threshold": 0.5372944474220277,
+      "threshold_evaluation": "development calibration (in-sample)",
+      "top1": 0.656437125748503,
+      "top5": 0.8248502994011976,
+      "unknown_false_accept_rate": 0.048582995951417005,
+      "unknown_queries": 494
+    }
+  },
+  "protocol_fingerprint": "e3401b266c0e9af162ecd4d16530c0e9f6d5d7f623920c2e24a6af18c04a5fa5",
+  "report_directory": "evaluations/czechlynx/phase2_calibration_miewid_global",
+  "review": "saved artifacts only; user ran benchmark",
+  "unknown_by_identity": {
+    "lynx_013": {
+      "false_accepts": 2,
+      "queries": 31
+    },
+    "lynx_036": {
+      "false_accepts": 5,
+      "queries": 12
+    },
+    "lynx_086": {
+      "false_accepts": 11,
+      "queries": 286
+    },
+    "lynx_135": {
+      "false_accepts": 0,
+      "queries": 25
+    },
+    "lynx_161": {
+      "false_accepts": 0,
+      "queries": 11
+    },
+    "lynx_202": {
+      "false_accepts": 2,
+      "queries": 24
+    },
+    "lynx_209": {
+      "false_accepts": 0,
+      "queries": 13
+    },
+    "lynx_264": {
+      "false_accepts": 3,
+      "queries": 71
+    },
+    "lynx_300": {
+      "false_accepts": 0,
+      "queries": 8
+    },
+    "lynx_310": {
+      "false_accepts": 1,
+      "queries": 5
+    },
+    "lynx_312": {
+      "false_accepts": 0,
+      "queries": 8
+    }
+  },
+  "unknown_macro_identity_false_accept_rate": 0.07683919896550519
+}

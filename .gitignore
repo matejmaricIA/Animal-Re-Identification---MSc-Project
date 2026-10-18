@@ -92,9 +92,13 @@ test-scripts/wildlifereid10k_splits/*
 notebooks/mantiuk_sweep.ipynb
 
 # Large generated artifacts / local research assets
+demo_bundle/
 docs/papers/
 docs/thesis.pdf
 visualization_suite/output/
 evaluations/classifications/
 evaluations/full_evals/
 evaluations/final_evals/
+
+# Generated CzechLynx benchmark reports and thumbnails
+evaluations/czechlynx/

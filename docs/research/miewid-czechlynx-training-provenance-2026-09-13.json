@@ -1,0 +1,226 @@
+{
+  "development_gallery": {
+    "file": "evaluations/czechlynx/dev_masked_miewid_global/gallery.csv",
+    "sha256": "01346404da4c544ea0f6052292f0f06bbd2dad98933e1076e43b54f424ca2c89",
+    "images": 750,
+    "missing_dates": 0,
+    "min_date": "2006-01-02",
+    "max_date": "2021-12-10",
+    "after_checkpoint_upload": 0,
+    "after_upload_identities": 0,
+    "after_upload_sources": {}
+  },
+  "development_query": {
+    "file": "evaluations/czechlynx/dev_masked_miewid_global/query.csv",
+    "sha256": "cbcea75914f3ae22fb5fb2c7120a6b72027052c97862e99881ef323dd94a7a9f",
+    "images": 560,
+    "missing_dates": 6,
+    "min_date": "2009-02-06",
+    "max_date": "2021-12-28",
+    "after_checkpoint_upload": 0,
+    "after_upload_identities": 0,
+    "after_upload_sources": {}
+  },
+  "prepared_dataset": {
+    "file": "data/czechlynx/prepared_masked/masked/metadata.csv",
+    "sha256": "330da2fec373637554056517643cd1b7f26e6a9ff47883b9fc58110dc88b947a",
+    "images": 39760,
+    "missing_dates": 413,
+    "min_date": "2006-01-02",
+    "max_date": "2025-10-12",
+    "after_checkpoint_upload": 1614,
+    "after_upload_identities": 13,
+    "after_upload_sources": {
+      "foe_carpaths": 1614
+    },
+    "after_upload_by_official_time_open": {
+      "test": 1614
+    }
+  },
+  "manifest": {
+    "file": "evaluations/czechlynx/dev_masked_miewid_global/manifest.json",
+    "sha256": "db2ed86f93191c79a677cb51a26a017a15479806ac0675c8f68340b53972af0a",
+    "keys": [
+      "audit",
+      "code",
+      "config",
+      "gallery_ids",
+      "git_head",
+      "global_comparison",
+      "global_model",
+      "input_mode",
+      "metadata_sha256",
+      "prepared_data",
+      "query_ids",
+      "run_fingerprint",
+      "schema",
+      "seed",
+      "segmentation",
+      "split",
+      "stage",
+      "status",
+      "timing_seconds"
+    ],
+    "model_entries": {
+      "global_model": {
+        "amp": true,
+        "dimension": 2152,
+        "expected_dimension": 2152,
+        "implementation": {
+          "reid_demo/benchmark_embeddings.py": "d9e92502f135aeadc11abf1c56066921b946850375e84927b907e3dc84b21163",
+          "tools/evaluate_reid_embeddings.py": "0a8edf8ede233050b0c75766e2ea37ace9051dc7fe4314f28be9a3559fd5bdec"
+        },
+        "input_mode": "masked",
+        "kind": "pretrained_miewid_msv3",
+        "masked_preprocessing": {
+          "background_rgb": [
+            128,
+            128,
+            128
+          ],
+          "image_format": "PNG",
+          "mask_values": [
+            0,
+            255
+          ],
+          "version": "provided_mask_gray128_png_v1"
+        },
+        "model_id": "conservationxlabs/miewid-msv3",
+        "pillow": "11.2.1",
+        "remote_code_sha256": {
+          "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "configuration_miewid.py": "61cdc49f3df558105e7cced133cc05f423cbfff744cec4fc87c8f65447dfdeba",
+          "heads.py": "7581dc405a3d68f14779fbc8d2b2ee9aa2e4116bc1f53422410d2509095c6737",
+          "modeling_miewid.py": "09ef802d44b528acb4848199ef5403dff3b9ac7a7d1c1c4af254f0c84aae5bd7"
+        },
+        "revision": "4f1d7f2b521149e5fe34bb85f377248ce9971a7d",
+        "timm": "1.0.19",
+        "torch": "2.7.1+cu126",
+        "torchvision": "0.22.1",
+        "transform": "RGB; resize 440x440 bilinear; ImageNet normalization; L2",
+        "transform_size": 440,
+        "transformers": "4.57.6",
+        "weights_sha256": "8bb56ea54bc45fa7ed0c33a60623a49f2944fb5444d373955a4919d6a2666168"
+      }
+    },
+    "status": "complete"
+  },
+  "post_upload_metadata_check": {
+    "raw_file": "data/czechlynx/raw/CzechLynxDataset-Metadata-Real.csv",
+    "raw_sha256": "d180c15502a13827fb1fe107ecb4543b1d5e593eeca150ccda30f85994b5bce1",
+    "checked": 1614,
+    "date_conversion_mismatches": 0,
+    "years": {
+      "2024": 394,
+      "2025": 1220
+    },
+    "encounters": 833,
+    "known_to_official_train_images": 1194
+  },
+  "cached_snapshot": {
+    "present": true,
+    "files": [
+      "config.json",
+      "configuration_miewid.py",
+      "heads.py",
+      "model.safetensors",
+      "modeling_miewid.py"
+    ],
+    "config": {
+      "architectures": [
+        "MiewIdNet"
+      ],
+      "auto_map": {
+        "AutoConfig": "configuration_miewid.MiewIdNetConfig",
+        "AutoModel": "modeling_miewid.MiewIdNet"
+      },
+      "dropout": 0.0,
+      "fc_dim": 512,
+      "k": null,
+      "loss_module": "softmax",
+      "ls_eps": 0.0,
+      "margin": 0.5,
+      "margins": null,
+      "model_name": "efficientnetv2_rw_m",
+      "model_type": "miewid",
+      "n_classes": 10,
+      "pretrained": true,
+      "s": 30.0,
+      "theta_zero": 0.785,
+      "torch_dtype": "float32",
+      "transformers_version": "4.45.0.dev0",
+      "use_fc": false
+    },
+    "file_sha256": "adff92b39678f37eb74861c6399a741639a8907ec2382738e903d6120727b348",
+    "matches_publisher_file_sha256": true
+  },
+  "review_date": "2026-09-13",
+  "checkpoint_upload_date": "2024-10-15",
+  "checkpoint_upload_commit": "5ff899ef579bebdabc9482aafabe96cfac027060",
+  "date_selection_rule": "Parsed acquisition date strictly greater than 2024-10-15; missing dates excluded from temporal claims.",
+  "capture_date_validity": "unverified; raw/prepared conversion agrees, not independent acquisition-date authentication",
+  "upstream_overlap": {
+    "czechlynx_images": "unresolved",
+    "czechlynx_individuals": "unresolved",
+    "v2_eurasian_lynx_training": "confirmed",
+    "v3_exact_training_inventory": "not found in reviewed public sources"
+  },
+  "execution_scope": {
+    "read_existing_metadata": true,
+    "hashed_cached_weights": true,
+    "tests_run": false,
+    "benchmarks_run": false,
+    "training_run": false,
+    "external_messages_sent": false
+  },
+  "source_notes": [
+    {
+      "number": 1,
+      "citation": "Conservation X Labs. [MiewID-msv3 upload commit](https://huggingface.co/conservationxlabs/miewid-msv3/commit/5ff899ef579bebdabc9482aafabe96cfac027060), 15 October 2024; [commit history](https://huggingface.co/conservationxlabs/miewid-msv3/commits/main); [release file inventory](https://huggingface.co/conservationxlabs/miewid-msv3/tree/main). Used for release identity, chronology and available artifacts."
+    },
+    {
+      "number": 2,
+      "citation": "Conservation X Labs. [MiewID-msv3 model.safetensors file metadata](https://huggingface.co/conservationxlabs/miewid-msv3/blob/main/model.safetensors). Publisher SHA-256 compared with the local cached file; comparison recorded in the accompanying JSON."
+    },
+    {
+      "number": 3,
+      "citation": "Conservation X Labs. [MiewID-msv2 model card](https://huggingface.co/conservationxlabs/miewid-msv2), Eurasian lynx row under Detailed results. Explicit annotation/name training and test counts."
+    },
+    {
+      "number": 4,
+      "citation": "Lasha Otarashvili, Tamilselvan Subramanian, Jason Holmberg, J.J. Levenson and Charles V. Stewart. [Multispecies Animal Re-ID Using a Large Community-Curated Dataset](https://arxiv.org/abs/2412.05602), December 2024, Sections 3.2–3.3, Table 1 and acknowledgements. Table text also available in the [author-uploaded paper](https://www.researchgate.net/publication/386577080_Multispecies_Animal_Re-ID_Using_a_Large_Community-Curated_Dataset). The table describes the collected dataset, not v3’s exact training split."
+    },
+    {
+      "number": 5,
+      "citation": "Wild Me. [MiewID v4 Announcement](https://community.wildme.org/t/miewid-v4-announcement/5406), 30 January 2026. Identifies the paper’s model as v2 and distinguishes later versions."
+    },
+    {
+      "number": 6,
+      "citation": "Conservation X Labs. [MiewID-msv3 model card](https://huggingface.co/conservationxlabs/miewid-msv3), Training Data and Evaluation Results. Public description of training sources and Eurasian lynx evaluation; no image-level source manifest supplied."
+    },
+    {
+      "number": 7,
+      "citation": "Wild Me. wbia-plugin-miew-id: [default training configuration](https://github.com/WildMeOrg/wbia-plugin-miew-id/blob/main/wbia_miew_id/configs/default_config.yaml), [dataset-related exclusions](https://github.com/WildMeOrg/wbia-plugin-miew-id/blob/main/wbia_miew_id/.gitignore), and [deployment model configuration](https://github.com/WildMeOrg/wbia-plugin-miew-id/blob/main/wbia_miew_id/configs/model_config.json). Inspected repository state; these files are not a verified recipe for the pinned v3 release."
+    },
+    {
+      "number": 8,
+      "citation": "Hugging Face community. [MiewID-msv3 discussion: msv2 versus msv3](https://huggingface.co/conservationxlabs/miewid-msv3/discussions/1), opened May 2025. Third-party discussion, not publisher confirmation of training membership."
+    },
+    {
+      "number": 9,
+      "citation": "Lukáš Picek et al. [CzechLynx preprint record](https://arxiv.org/abs/2506.04931), first submitted 5 June 2025; [revised paper](https://arxiv.org/html/2506.04931v2), source-collection table and earlier-study discussion; [Scientific Data article](https://www.nature.com/articles/s41597-026-06853-9), 24 February 2026. These are versions of the same work, not independent corroborating datasets."
+    },
+    {
+      "number": 10,
+      "citation": "Lukáš Picek, Lukáš Neumann and Jiří Matas. [Animal Identification with Independent Foreground and Background Modeling](https://arxiv.org/html/2408.12930v1), 23 August 2024, Section 4 and access footnote. Earlier Czech lynx collection and access conditions."
+    },
+    {
+      "number": 11,
+      "citation": "LIFE Lynx. [C5 annual report](https://www.lifelynx.eu/wp-content/uploads/2024/04/LIFE-Lynx-C5-annual-report_FINAL.pdf), April 2024 hosting path, p. 10. Whiskerbook upload counts and monitoring years verified from the indexed passage; the complete large PDF was not available for review. No training-membership claim is inferred."
+    },
+    {
+      "number": 12,
+      "citation": "Silvia Blašković, Magda Sindičić, Maureen Reilly, Ira Topličanec and Tomislav Gomerčić. [Spotted correctly? Human expertise remains essential in AI-assisted identification of Eurasian lynx](https://zslpublications.onlinelibrary.wiley.com/doi/10.1111/jzo.70095), first published 22 December 2025; Journal of Zoology 328(3), 223–233 (2026). Publisher abstract and [public photo resource](http://lynx.vef.hr/public/); full methods were not available for review."
+    }
+  ]
+}

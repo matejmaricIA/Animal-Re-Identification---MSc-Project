@@ -581,5 +581,95 @@ def _main(argv: Optional[List[str]] = None) -> int:
     return 0
 
 
+
+
+# Explicit fit/transform API for held-out benchmarks. Existing demo APIs above
+# retain their whole-collection fitting behavior.
+@dataclass
+class FittedFisherModel:
+    pca: object
+    gmm: object
+    fitting_ids: list
+    fitting_digest: str
+    pca_dim: int
+    gmm_components: int
+    seed: int
+
+
+def fit_fisher_model(descriptors, fitting_ids, *, pca_dim=DEFAULT_PCA_DIM,
+                     gmm_components=256, max_descriptors=50000,
+                     per_image_max=128, seed=42):
+    """Fit only the named images using a bounded, reproducible descriptor sample."""
+    import hashlib
+    import numpy as np
+    from sklearn.decomposition import PCA
+    from sklearn.mixture import GaussianMixture
+    ids = sorted(set(map(str, fitting_ids)))
+    if not ids or min(pca_dim, gmm_components, max_descriptors, per_image_max) < 1:
+        raise ValueError("Positive Fisher settings and fitting IDs are required.")
+    rng = np.random.default_rng(seed)
+    samples, keys, total, dimension = [], [], 0, None
+    digest = hashlib.sha256()
+    # Random priorities implement a bounded sample, independent of test examples.
+    for rid in ids:
+        if rid not in descriptors:
+            raise KeyError(f"Missing fitting descriptors: {rid}")
+        arr = np.asarray(descriptors[rid], dtype=np.float32)
+        if arr.ndim != 2 or not np.isfinite(arr).all():
+            raise ValueError(f"Invalid fitting descriptors: {rid}")
+        if dimension is None:
+            dimension = arr.shape[1]
+        if arr.shape[1] != dimension:
+            raise ValueError("Inconsistent descriptor dimensions.")
+        digest.update(rid.encode())
+        digest.update(str(arr.shape).encode())
+        digest.update(arr.tobytes())
+        if len(arr) > per_image_max:
+            arr = arr[rng.choice(len(arr), per_image_max, replace=False)]
+        if len(arr):
+            samples.append(arr)
+            keys.append(rng.random(len(arr)))
+            total += len(arr)
+        if total > max_descriptors * 2:
+            all_samples, all_keys = np.vstack(samples), np.concatenate(keys)
+            take = np.argpartition(all_keys, max_descriptors - 1)[:max_descriptors]
+            samples, keys, total = [all_samples[take]], [all_keys[take]], max_descriptors
+    if not samples:
+        raise ValueError("No descriptors in the fitting partition.")
+    stacked, priorities = np.vstack(samples), np.concatenate(keys)
+    if len(stacked) > max_descriptors:
+        take = np.argpartition(priorities, max_descriptors - 1)[:max_descriptors]
+        stacked = stacked[take]
+    if pca_dim > min(stacked.shape) or gmm_components > len(stacked):
+        raise ValueError("Insufficient fitting descriptors for PCA/GMM settings.")
+    pca = PCA(n_components=pca_dim, whiten=True, random_state=seed)
+    reduced = pca.fit_transform(stacked)
+    gmm = GaussianMixture(n_components=gmm_components, covariance_type="diag",
+                          random_state=seed)
+    gmm.fit(reduced)
+    return FittedFisherModel(pca, gmm, ids, digest.hexdigest(),
+                             pca_dim, gmm_components, seed)
+
+
+def transform_fisher_vectors(descriptors, image_ids, model):
+    """Transform arbitrary images without ever calling fit."""
+    import numpy as np
+    from feature_aggregation import compute_fisher_vector
+    output = {}
+    dimension = 2 * model.gmm_components * model.pca_dim
+    for rid in map(str, image_ids):
+        arr = np.asarray(descriptors[rid], dtype=np.float32)
+        if arr.ndim != 2 or not np.isfinite(arr).all():
+            raise ValueError(f"Invalid transform descriptors: {rid}")
+        if len(arr):
+            vector = compute_fisher_vector(model.pca.transform(arr), model.gmm)
+            output[rid] = np.asarray(vector, dtype=np.float32).reshape(-1)
+        else:
+            output[rid] = np.zeros(dimension, dtype=np.float32)
+        if output[rid].shape != (dimension,) or not np.isfinite(output[rid]).all():
+            raise ValueError("Unexpected Fisher dimension.")
+    return output
+
+
 if __name__ == "__main__":
     raise SystemExit(_main())

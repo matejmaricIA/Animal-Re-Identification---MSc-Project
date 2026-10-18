@@ -1,5 +1,7 @@
 # STATUS BOARD — Lynx Re-ID Demo & Pilot MVP
 
+**Current lynx requirements, 22 September 2026:** Read [the persistent decision log](docs/lynx-demo-decision-log.md) and [CzechLynx plan](docs/czechlynx-implementation-plan.md) alongside this historical ticket board. Reliable clustering and photographed-individual count assessment are required; assisted matching alone is insufficient. Upstream training overlap, local-feature effectiveness and nighttime/IR handling remain unresolved. The leopard-proxy pitch and assumed Fisher/GV improvement below are historical plans, not current validated lynx capabilities.
+
 **Last updated:** 2026-06-12
 **North star:** Turn the existing closed-set animal re-ID research code into an **open-set clustering pipeline** that ingests raw camera-trap photos, removes empties, isolates a target species, groups detections by **individual animal** with human-in-the-loop review, and produces a **visual catalogue + a defensible count** — packaged as a credible cold-pitch demo for Croatian national parks (first target: **Risnjak NP**, Eurasian lynx) and the basis of a no-cost pilot on a park's existing footage.
 

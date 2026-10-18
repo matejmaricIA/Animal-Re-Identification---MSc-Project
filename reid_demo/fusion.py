@@ -568,6 +568,9 @@ def refine_affinity_with_gv(
     out = np.array(affinity, dtype=np.float32, copy=True)  # NEW matrix (never mutate input)
 
     for ps in pair_scores:
+        # Missing evidence is a no-op, not a failed geometric match.
+        if ps.reason in {"gv_unavailable", "missing_local_features"}:
+            continue
         i = pos.get(ps.record_id_a)
         j = pos.get(ps.record_id_b)
         if i is None or j is None or i == j:

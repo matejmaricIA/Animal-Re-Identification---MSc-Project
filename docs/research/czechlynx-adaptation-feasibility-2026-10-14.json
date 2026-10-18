@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-14",
+  "scope": "Read-only input and source inspection for the proposed audit/adaptation trial; no tests, training or benchmarks executed",
+  "protocol_fingerprint": "e3401b266c0e9af162ecd4d16530c0e9f6d5d7f623920c2e24a6af18c04a5fa5",
+  "fitting": {
+    "images": 16504,
+    "identities": 165,
+    "atomic_identity_groups": 156,
+    "linked_groups": [
+      ["lynx_006", "lynx_181"],
+      ["lynx_041", "lynx_120", "lynx_139", "lynx_184", "lynx_185", "lynx_189"],
+      ["lynx_084", "lynx_087"],
+      ["lynx_119", "lynx_143"],
+      ["lynx_203", "lynx_214"]
+    ],
+    "source_images": {"foe_bohemia": 3538, "foe_carpaths": 7285, "snpa": 5681},
+    "one_encounter_identities": ["lynx_048"],
+    "images_per_identity": {"minimum": 1, "median": 31, "maximum": 1441},
+    "inner_split_generated": false
+  },
+  "source_annotation_alignment": {
+    "image_id": "clx_e981b521482a803cb7855493",
+    "identity": "lynx_280",
+    "source_path": "CzechLynx/foe_carpaths/lynx_280/07972_lynx_280.jpg",
+    "source_sha256": "c1cb28f2470cf0f645aad32af95bb088e9cc80ebef30109f0f2061c54ed06530",
+    "prepared_sha256": "aaf7067ff650faa7519d08faad5f4a009c3561f0b309aaf0cc7440044c1a864e",
+    "mask_sha256": "4bc366cffd72eb5492da4ead7618d9195d212cc8e8b4c6466a975dcb3d3dd418",
+    "matching_raw_metadata_rows": 1,
+    "raw_mask_dimensions_height_width": [2158, 2159],
+    "annotation_bbox_xywh": [120, 568, 1919, 1022],
+    "prepared_bbox_xyxy": [120, 568, 2039, 1590],
+    "prepared_mask_exactly_matches_cropped_annotation": true,
+    "prepared_rgb_exactly_matches_masked_source_crop": true,
+    "foreground_fraction": 0.9968641935776645,
+    "interpretation": "Preparation matches supplied annotation in this case. Source annotation/identifiability requires review; no empty-frame, wrong-identity or general mask-validity conclusion."
+  },
+  "inspected_model": {
+    "revision": "4f1d7f2b521149e5fe34bb85f377248ce9971a7d",
+    "local_source": "/home/mm-workstation/.cache/huggingface/modules/transformers_modules/conservationxlabs/miewid_hyphen_msv3/4f1d7f2b521149e5fe34bb85f377248ce9971a7d/modeling_miewid.py",
+    "backbone": "efficientnetv2_rw_m",
+    "native_embedding_dimension": 2152,
+    "pooling": "learned GeM",
+    "output_normalization_module": "BatchNorm1d",
+    "forward_returns": "native embedding, not publisher classification logits",
+    "neural_model_loaded": false
+  },
+  "status": {
+    "user_agreed_recommendations": true,
+    "exact_seven_file_scope_approved": false,
+    "source_changes_implemented": false,
+    "tests_run_by_assistant": false,
+    "training_run": false,
+    "clustering_selection_run": false,
+    "upstream_exposure": "unresolved"
+  }
+}

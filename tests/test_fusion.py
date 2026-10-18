@@ -937,3 +937,15 @@ def test_cli_dry_run_writes_nothing(tmp_path, monkeypatch, capsys):
                        "--out-dir", out_dir, "--dry-run", "--json"])
     assert rc == 0
     assert not os.path.isdir(out_dir) or os.listdir(out_dir) == []
+
+
+@pytest.mark.parametrize("reason", ["gv_unavailable", "missing_local_features"])
+def test_skipped_gv_does_not_suppress_affinity(reason):
+    affinity = np.array([[1, .7], [.7, 1]], dtype=np.float32)
+    score = PairScore("a", "b", .7, 0, None, .7, "band", reason)
+    result = refine_affinity_with_gv(affinity, ["a", "b"], [score])
+    np.testing.assert_array_equal(result, affinity)
+    # A real zero-inlier attempt still carries negative evidence.
+    score.reason = "gv_inliers=0"
+    result = refine_affinity_with_gv(affinity, ["a", "b"], [score])
+    assert result[0, 1] < affinity[0, 1]

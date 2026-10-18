@@ -309,3 +309,43 @@ def test_build_fisher_records_species_filter(tmp_path):
     assert json.loads(get_record(conn, lynx).extra_json).get("fisher_ref") == lynx
     assert json.loads(get_record(conn, other).extra_json).get("fisher_ref") is None
     _cleanup_fitted_cache(ds)
+
+
+def test_explicit_fisher_fit_never_reads_query_and_transform_never_refits(monkeypatch):
+    from reid_demo.fisher import fit_fisher_model, transform_fisher_vectors
+    rng = np.random.default_rng(42)
+    class FittingOnly(dict):
+        def __getitem__(self, key):
+            assert key in {"train1", "train2"}, "Query descriptors leaked into fitting"
+            return super().__getitem__(key)
+    descriptors = FittingOnly({
+        "train1": rng.normal(size=(30, 4)).astype(np.float32),
+        "train2": rng.normal(size=(30, 4)).astype(np.float32),
+        "query": rng.normal(size=(10, 4)).astype(np.float32),
+    })
+    model = fit_fisher_model(descriptors, ["train1", "train2"], pca_dim=2, gmm_components=2,
+                             max_descriptors=40, per_image_max=25, seed=7)
+    assert model.fitting_ids == ["train1", "train2"]
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Transform attempted to fit")
+    monkeypatch.setattr(model.pca, "fit", forbidden)
+    monkeypatch.setattr(model.gmm, "fit", forbidden)
+    transformed = transform_fisher_vectors({"query": rng.normal(size=(10, 4))}, ["query"], model)
+    assert transformed["query"].shape == (8,)
+    assert np.isfinite(transformed["query"]).all()
+    empty = transform_fisher_vectors({"empty": np.empty((0, 4))}, ["empty"], model)
+    np.testing.assert_array_equal(empty["empty"], np.zeros(8))
+
+
+def test_explicit_fisher_fit_reproducibility_and_validation():
+    from reid_demo.fisher import fit_fisher_model
+    descriptors = {"a": np.random.default_rng(5).normal(size=(50, 4)).astype(np.float32)}
+    settings = dict(pca_dim=2, gmm_components=2, max_descriptors=25, per_image_max=30, seed=8)
+    a = fit_fisher_model(descriptors, ["a"], **settings)
+    b = fit_fisher_model(descriptors, ["a"], **settings)
+    np.testing.assert_allclose(a.gmm.means_, b.gmm.means_)
+    assert a.fitting_digest == b.fitting_digest
+    with pytest.raises(ValueError, match="Insufficient"):
+        fit_fisher_model(descriptors, ["a"], pca_dim=5, gmm_components=2)
+    with pytest.raises(KeyError, match="Missing"):
+        fit_fisher_model(descriptors, ["missing"], **settings)

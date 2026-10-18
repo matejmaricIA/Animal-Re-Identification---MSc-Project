@@ -1,0 +1,321 @@
+{
+  "artifacts": {
+    "best.pt": "c1e7792f0aeee7cbf0b9fa6a0de7f10a1f36770e6db45acb90397e803cbba32f",
+    "epochs.json": "94f6100dba96e9c908cbc2eb16912f5d152b2da7e6725e8feeb7734e6bd857a9",
+    "holdout_appearance.json": "894c48226df203f76ac87e641d284cf5c7e298f25ad4f8629e077969ea77335c",
+    "inner_plan.json": "9351779bc068cdec598f1383d65a7876e5731b900a6a09496603463b1481d316",
+    "inner_validation_latest.json": "379eeba5b69e0c047c777232b765058081a8c63c68cee9a2895c297e0a931c32",
+    "last.pt": "576de6a20e6cc7038b99a575e73b76bc0704cfa91661ad70f9d62fba4a0cf3cb"
+  },
+  "baseline_calibration": {
+    "cache_path": "/home/mm-workstation/re-id/Animal-Re-Identification---MSc-Project/data/czechlynx/cache/masked/global_4e16d8880ef85c0842a4.sqlite",
+    "cache_sha256": "e3a42c751ddd593b9014a178f35963eebe2d692afacd9c7d176a385e691a76fe",
+    "diagnostic_manifest_sha256": "0de74f602e9bf82ee0f6c72e07200b8d99611b2fecb52d688628d1e7d92a223b",
+    "identities": 55,
+    "images": 6352,
+    "manifest_sha256": "db5241a75037f9f6c2457d578764558ac1c2d0524a4afbaf3019d09ede3cf043",
+    "model_initialization_matches": true,
+    "profiles": 25,
+    "saved_source_artifact_checks": "pass"
+  },
+  "baseline_metrics": {
+    "groups": {
+      "opposite_proxy_only": {
+        "identities": 2,
+        "macro_recall_at_50": 1.0,
+        "macro_top1": 0.5,
+        "queries": 7
+      },
+      "other_camera_only": {
+        "identities": 28,
+        "macro_recall_at_50": 0.8428571428571427,
+        "macro_top1": 0.5857220160791589,
+        "queries": 156
+      },
+      "same_camera_positive_available": {
+        "identities": 34,
+        "macro_recall_at_50": 0.9453875403032922,
+        "macro_top1": 0.6658698748166245,
+        "queries": 2304
+      },
+      "same_proxy_positive_available": {
+        "identities": 34,
+        "macro_recall_at_50": 0.9255046208207822,
+        "macro_top1": 0.6534301227305049,
+        "queries": 2453
+      }
+    },
+    "identities": 34,
+    "images": 2460,
+    "ineligible_identities": [],
+    "ineligible_query_ids": [],
+    "macro_recall_at_50": 0.9263512632411912,
+    "macro_top1": 0.654233938880621,
+    "notes": "Inner unseen identities; colour proxies are not night/IR. Oracle uses truth only after inference.",
+    "oracle_connectivity": {
+      "15": {
+        "complete_oracle_fragment_total": 159,
+        "fraction_fully_connected_identities": 0.029411764705882353,
+        "fraction_fully_connected_multi_image_identities": 0.029411764705882353,
+        "fully_connected_identities": 1,
+        "fully_connected_multi_image_identities": 1,
+        "identities": 34,
+        "multi_image_identities": 34,
+        "multi_image_identity_valid_images_without_correct_neighbour": 66,
+        "oracle_fragments": 159,
+        "policy": "Reference-truth filtering of this fixed candidate graph only; not deployable identities/counts.",
+        "threshold": null,
+        "unresolved_images": 0,
+        "valid_images_without_correct_neighbour": 66
+      },
+      "50": {
+        "complete_oracle_fragment_total": 70,
+        "fraction_fully_connected_identities": 0.35294117647058826,
+        "fraction_fully_connected_multi_image_identities": 0.35294117647058826,
+        "fully_connected_identities": 12,
+        "fully_connected_multi_image_identities": 12,
+        "identities": 34,
+        "multi_image_identities": 34,
+        "multi_image_identity_valid_images_without_correct_neighbour": 20,
+        "oracle_fragments": 70,
+        "policy": "Reference-truth filtering of this fixed candidate graph only; not deployable identities/counts.",
+        "threshold": null,
+        "unresolved_images": 0,
+        "valid_images_without_correct_neighbour": 20
+      }
+    },
+    "queries": 2460,
+    "unresolved_images": 0
+  },
+  "checkpoint_inspection": {
+    "best": {
+      "changed_native_tensors": 698,
+      "epoch": 6,
+      "finite_fp32_native_and_head": true,
+      "fixed_bn_buffers": 510,
+      "frozen_final_tensors": 2,
+      "keys_shapes_dtypes_match_initial": true,
+      "native_state_sha256": "f0bf17cc7214b86ce253e4f5d1fc61e10082ccd1aefaf45c8cc0ef4f8b904c12",
+      "native_tensors": 1210
+    },
+    "last": {
+      "changed_native_tensors": 698,
+      "epoch": 9,
+      "finite_fp32_native_and_head": true,
+      "fixed_bn_buffers": 510,
+      "frozen_final_tensors": 2,
+      "keys_shapes_dtypes_match_initial": true,
+      "native_state_sha256": "32a2c4e8b5d866a1725c22d9bedab88df7f6351d6270a6d28669d3352ffe7c7b",
+      "native_tensors": 1210
+    }
+  },
+  "cpu_weights_only_checkpoint_inspection": true,
+  "date": "2026-10-17",
+  "elapsed_seconds": 2397.9404161199927,
+  "epochs": [
+    {
+      "epoch": 0,
+      "macro_recall_at_50": 0.9263512632411912,
+      "macro_top1": 0.654233938880621,
+      "mean_loss": null,
+      "observations": null,
+      "seconds": 17.69671236909926
+    },
+    {
+      "epoch": 1,
+      "macro_recall_at_50": 0.9263512632411912,
+      "macro_top1": 0.654233938880621,
+      "mean_loss": 8.115898140334865,
+      "observations": 14048,
+      "seconds": 92.07947422936559
+    },
+    {
+      "epoch": 2,
+      "macro_recall_at_50": 0.9417463487839633,
+      "macro_top1": 0.7065203703363014,
+      "mean_loss": 4.849100672659,
+      "observations": 14048,
+      "seconds": 282.6615801434964
+    },
+    {
+      "epoch": 3,
+      "macro_recall_at_50": 0.9459470174382749,
+      "macro_top1": 0.7141681302410788,
+      "mean_loss": 3.716629518539664,
+      "observations": 14048,
+      "seconds": 275.7486519664526
+    },
+    {
+      "epoch": 4,
+      "macro_recall_at_50": 0.9518099703582633,
+      "macro_top1": 0.7119374032771224,
+      "mean_loss": 3.1415431806478216,
+      "observations": 14048,
+      "seconds": 279.18575288541615
+    },
+    {
+      "epoch": 5,
+      "macro_recall_at_50": 0.9487863274585183,
+      "macro_top1": 0.7078816387672914,
+      "mean_loss": 2.767597771637939,
+      "observations": 14048,
+      "seconds": 282.0929273478687
+    },
+    {
+      "epoch": 6,
+      "macro_recall_at_50": 0.9531567743895188,
+      "macro_top1": 0.713711365736728,
+      "mean_loss": 2.410706942803428,
+      "observations": 14048,
+      "seconds": 289.06936039216816
+    },
+    {
+      "epoch": 7,
+      "macro_recall_at_50": 0.9529137359976917,
+      "macro_top1": 0.7094677025391563,
+      "mean_loss": 2.183475203978657,
+      "observations": 14048,
+      "seconds": 281.9563551209867
+    },
+    {
+      "epoch": 8,
+      "macro_recall_at_50": 0.9520400086101233,
+      "macro_top1": 0.7105116924320204,
+      "mean_loss": 2.0248271406358764,
+      "observations": 14048,
+      "seconds": 276.67804475687444
+    },
+    {
+      "epoch": 9,
+      "macro_recall_at_50": 0.9521434278744423,
+      "macro_top1": 0.7146216058833003,
+      "mean_loss": 1.910717648756319,
+      "observations": 14048,
+      "seconds": 269.11249617673457
+    }
+  ],
+  "fitting_image_mask_bytes": "all verified by read-only load_completed_trial",
+  "fresh_calibration_paths": [
+    "/home/mm-workstation/re-id/Animal-Re-Identification---MSc-Project/data/czechlynx/cache/miewid_adaptation_v2_fp32",
+    "/home/mm-workstation/re-id/Animal-Re-Identification---MSc-Project/evaluations/czechlynx/miewid_adaptation_calibration_v2_fp32"
+  ],
+  "gain_percentage_points": {
+    "macro_recall_at_50": 2.680551114832763,
+    "macro_top1": 5.947742685610702
+  },
+  "gradient_proof": {
+    "batch": 1,
+    "epoch": 2,
+    "finite_global_gradient_norm": 9.634041786193848,
+    "updated_parameter": "backbone.global_pool.p"
+  },
+  "inner_plan_fingerprint": "ef8d64056a89ef7bce2e37db9d089bd86ce92ff12b922f9f4acbd951db0c88e7",
+  "kind": "czechlynx_miewid_fp32_completed_training_review",
+  "last_epoch": 9,
+  "latest_query_macro_arithmetic": "pass",
+  "limits": [
+    "Inner holdout selected the checkpoint; not independent final-test or park accuracy.",
+    "Oracle connectivity uses reference truth and does not establish deployed counts.",
+    "Colour proxies are not verified night/IR; upstream exposure remains unresolved.",
+    "Adapted full calibration and local/global combination remain pending."
+  ],
+  "manifest_sha256": "efd9d8f3ccfc0a8db2379c6d092df45b91322c19063025fb7d0493dc68e15cf1",
+  "model_instantiation_inference_tests_training_benchmarks_executed_by_assistant": false,
+  "protected_hashes_matched": 22,
+  "run_fingerprint": "675d43e66317e459cf7d0672789ed19d4a3db1d91f1e606dc7b8233b3e8cd22d",
+  "runtime": {
+    "chunk_size": 64,
+    "cuda_version": "12.6",
+    "device": "cuda",
+    "evaluation_precision": {
+      "autocast": true,
+      "autocast_dtype": "float16",
+      "matrix_dtype": "float32",
+      "normalization_dtype": "float32",
+      "parameter_dtype": "float32"
+    },
+    "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+    "threads": 4,
+    "training_precision": {
+      "autocast": false,
+      "gradient_scaling": false,
+      "input_dtype": "float32",
+      "parameter_dtype": "float32"
+    },
+    "workers": 4
+  },
+  "selected_epoch": 6,
+  "selected_metrics": {
+    "groups": {
+      "opposite_proxy_only": {
+        "identities": 2,
+        "macro_recall_at_50": 1.0,
+        "macro_top1": 0.5,
+        "queries": 7
+      },
+      "other_camera_only": {
+        "identities": 28,
+        "macro_recall_at_50": 0.8935374149659863,
+        "macro_top1": 0.687550247371676,
+        "queries": 156
+      },
+      "same_camera_positive_available": {
+        "identities": 34,
+        "macro_recall_at_50": 0.9566658123448816,
+        "macro_top1": 0.7123887759627263,
+        "queries": 2304
+      },
+      "same_proxy_positive_available": {
+        "identities": 34,
+        "macro_recall_at_50": 0.9523397809254666,
+        "macro_top1": 0.7138134899197345,
+        "queries": 2453
+      }
+    },
+    "identities": 34,
+    "images": 2460,
+    "ineligible_identities": [],
+    "ineligible_query_ids": [],
+    "macro_recall_at_50": 0.9531567743895188,
+    "macro_top1": 0.713711365736728,
+    "notes": "Inner unseen identities; colour proxies are not night/IR. Oracle uses truth only after inference.",
+    "oracle_connectivity": {
+      "15": {
+        "complete_oracle_fragment_total": 128,
+        "fraction_fully_connected_identities": 0.17647058823529413,
+        "fraction_fully_connected_multi_image_identities": 0.17647058823529413,
+        "fully_connected_identities": 6,
+        "fully_connected_multi_image_identities": 6,
+        "identities": 34,
+        "multi_image_identities": 34,
+        "multi_image_identity_valid_images_without_correct_neighbour": 54,
+        "oracle_fragments": 128,
+        "policy": "Reference-truth filtering of this fixed candidate graph only; not deployable identities/counts.",
+        "threshold": null,
+        "unresolved_images": 0,
+        "valid_images_without_correct_neighbour": 54
+      },
+      "50": {
+        "complete_oracle_fragment_total": 58,
+        "fraction_fully_connected_identities": 0.5588235294117647,
+        "fraction_fully_connected_multi_image_identities": 0.5588235294117647,
+        "fully_connected_identities": 19,
+        "fully_connected_multi_image_identities": 19,
+        "identities": 34,
+        "multi_image_identities": 34,
+        "multi_image_identity_valid_images_without_correct_neighbour": 14,
+        "oracle_fragments": 58,
+        "policy": "Reference-truth filtering of this fixed candidate graph only; not deployable identities/counts.",
+        "threshold": null,
+        "unresolved_images": 0,
+        "valid_images_without_correct_neighbour": 14
+      }
+    },
+    "queries": 2460,
+    "unresolved_images": 0
+  },
+  "status": "complete",
+  "stop_reason": "three nonimproving post-best epochs; declared patience 3",
+  "trial": "/home/mm-workstation/re-id/Animal-Re-Identification---MSc-Project/models/czechlynx/miewid_adaptation_v2_fp32",
+  "trial_contract_and_artifact_checks": "pass"
+}
