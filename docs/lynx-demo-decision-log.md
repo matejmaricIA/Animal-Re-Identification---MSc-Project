@@ -9,12 +9,14 @@ Every agent working here updates this section at start, at each milestone and at
 | Work item | Owner | State | Progress / next step | Files and outputs in use |
 | --- | --- | --- | --- | --- |
 | Flank-aware grouping ([proposal](czechlynx-flank-grouping-proposal-2026-10-18.md), [results](research/czechlynx-flank-grouping-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done, awaiting the user's choice of next step** | 1 ☑ implement · 2 ☑ CLI + tests · 3 ☑ tests (13 new; 132 related) · 4 ☑ calibration run (215 s) · 5 ☑ results review + docs · 6 ☑ committed at the user's request (see git log; not pushed) | Output `evaluations/czechlynx/flank_grouping_v2_fp32/` is complete; do not modify it. No other files are claimed. | `reid_demo/benchmark_flank_grouping.py`, `tools/evaluate_czechlynx_flank_grouping.py`, `tests/test_benchmark_flank_grouping.py` (new); output `evaluations/czechlynx/flank_grouping_v2_fp32/` |
+| Review-effort measurement ([proposal](czechlynx-review-effort-proposal-2026-10-18.md), [results](research/czechlynx-review-effort-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done; awaiting the user's decision** | 1 ☑ proposal · 2 ☑ approval · 3 ☑ implement · 4 ☑ tests (15 new) · 5 ☑ run (first run failed at report writing, preserved; `_r2` complete, identical numbers) · 6 ☑ results + docs · 7 ☐ commit (only on request) | Outputs `evaluations/czechlynx/review_effort_v2_fp32/` (failed) and `..._r2/` (complete) are final; do not modify. No other files are claimed. |
+| Minimum-review confidence-gated matching ([proposal](czechlynx-minimum-review-proposal-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Proposal drafted; awaiting user approval** | 1 ☑ draft proposal · 2 ▶ user approval · 3 ☐ implement · 4 ☐ tests · 5 ☐ run · 6 ☐ results + docs · 7 ☐ commit (only on request) | `docs/czechlynx-minimum-review-proposal-2026-10-18.md` (new) |
 
 Open questions for the user: what the audit's left/right labels meant (pose geometry suggests facing direction, not the anatomical flank).
 
 Last completed items: coverage diagnostic (`9065277d`), edge grouping + local pilot (`3f5a0f11`), flank-aware grouping (committed 18 Oct). None of these commits is pushed. The user will choose the next direction after reading the results.
 
-Candidate next steps awaiting a user decision, none approved: (1) facing-aware MiewID adaptation on the fitting pool with (animal, facing) classes; (2) measured human-review effort baseline; (3) high-precision core count on confident, low-risk images.
+User decision (18 Oct): expert-confirmed ranked matching is acceptable only if the bulk is automated; see "Requirement update — 18 October 2026". Next: the [minimum-review proposal](czechlynx-minimum-review-proposal-2026-10-18.md) (awaiting approval). Other candidate steps, none approved: facing-aware re-adaptation (lowers review and raises automation), integration of the re-ID core behind the existing ingestion/classification stages, and a W3 group-as-unit variant.
 
 ## Required outcome — user clarification, 22 September 2026
 
@@ -24,6 +26,17 @@ Specify the collection, time window, opposite-flank handling, unresolved images 
 
 The assistant's preceding summary overemphasised outreach and assisted matching. The user corrected that framing. Exploratory conversations do not close technical gates or justify promising reliable counts. This logging request does not authorise park outreach.
 
+## Requirement update — user decision, 18 October 2026
+
+After the [review-effort results](research/czechlynx-review-effort-results-2026-10-18.md), the user accepted expert-confirmed, embedding-ranked matching as a route to reliable counts, **on condition that the bulk of the work is automated**.
+
+The envisioned product is an **all-in-one system**: camera-trap image ingestion → empty/species classification → re-identification and counting. Some expert review is acceptable, but it must be reduced to a minimum. The system is useful to wildlife researchers only if it **reliably saves them a lot of time**.
+
+Implications:
+- Full manual confirmation of every bundle (W1 as simulated, ≈1.8 h per 1,000 photos at placeholder costs) is a fallback, not the target.
+- The target is automatic decisions where confidence is demonstrably high, expert review only for uncertain cases, and measured, reported error rates.
+- The 22 September requirement for reliable clustering and counts still stands. This update defines how reliability may be achieved, through automation plus bounded review with measured error. It does not relax it.
+
 ## Current snapshot — 18 October 2026
 
 This is the working diary and the entry point for current status. Update this snapshot and add a dated entry after each substantive experiment, evidence review or user decision. Record what changed, why, observed results and limitations, the next action and remaining gates. Preserve failed trials and historical entries. Distinguish user-reported execution, saved-artifact inspection, hypotheses and completed validation. Updates happen during active work; this does not imply continuous background monitoring.
@@ -32,7 +45,7 @@ This is the working diary and the entry point for current status. Update this sn
 | --- | --- | --- |
 | Inputs and protocol | All 321 human reviews/receipt complete; fitting split and FP32 preparation reviewed; original image inclusion preserved | Keep quality limitations visible; no unapproved cleanup or exclusions |
 | Adapted global model | Training and full calibration reviewed. Calibration top-1 877/1,336 → 917/1,336 (65.6437% → 68.6377%); macro top-1 56.0883% → 60.3884%; mAP@50 31.0078% → 40.1974% | Preserve the improved recognition baseline; use it in a controlled local/global candidate/pair/grouping proposal |
-| Clusters and photographed-individual counts | Adapted calibration: all 25 controls fail reliable counting. Coverage diagnostic (18 Oct): oracle connectivity 10/55 → 28/55 with encounter links, 44/55 with encounters + k=150 (post-hoc), at the cost of 64% wrong candidate edges | Edge grouping (18 Oct): F1 .585 (controls .264), 1/55 exact; local features add nothing. Flank-aware grouping (18 Oct): facing works (AUC .99) but F1 only .602 and 0/55 exact; within-flank discrimination is the bottleneck. Next: representation change or measured human review; no count configuration or frozen selection |
+| Clusters and photographed-individual counts | Automatic grouping peaks at F1 ≈ .60 (edge .585, flank .602), 0–1/55 exact. Simulated review (18 Oct): ranked catalogue matching reaches a verified 55/55 count with 5,283 decisions (≈11.7 h; 5.7× fewer than unassisted); group-then-correct costs 1.3–2.9× more | User decision: is expert-confirmed ranked matching acceptable for reliable counts? Measure real reviewer time and error; no count configuration or frozen selection yet |
 | Thesis local + global evidence | 18 Oct pilot: DISK+LightGlue adds ≈0 AUC to calibrated edge evidence and does not generalize across animals (identity-cross-fitted local-only AUC .35). User explicitly wants a combined final approach. Earlier combination gave no consistent gain; a flawed prior integration is a hypothesis, not an established cause | Diagnose candidate coverage, patch/mask geometry and score fusion; propose a controlled comparison of adapted global alone against local/global combinations on identical observations |
 | Independent and field validation | Upstream exposure unresolved; verified night/IR and flank handling, raw-camera crop quality and independent park transfer unqualified | Freeze an improved method before selection; independently check relevant camera/view/illumination cases and expert-reviewed park data |
 | Park demonstration | Research prototype; reliable counting is still unvalidated. Count-error tolerance, uncertainty and acceptable review effort remain unagreed | Demonstrate correct grouping/counts with false merges, splits, unresolved images and measured review effort; protect media/reviews and qualify a bounded supervised pilot |
@@ -96,6 +109,39 @@ These priorities do not approve new implementation or benchmark runs. Present co
 
 ### 2026-10-18
 
+**User decision recorded; minimum-review proposal drafted.** The user accepted expert-confirmed ranked matching as a route to reliable counts, provided the bulk is automated within an all-in-one ingestion → classification → re-ID/counting system with minimal expert review. This is recorded as a requirement update near the top of this log.
+
+Read-only in-sample check: auto-accepting the top-1 match when its margin over the runner-up is ≥ .15 decides 53% of bundles with 0.42% wrong; margin ≥ .10 decides 65% with 1.37% wrong. Margin AUC is .934 for top-1 correctness; new-vs-known AUC from s1 is .87, so new animals stay expert-confirmed. 88% of calibration photos have coordinates for space-time features.
+
+[Proposal](czechlynx-minimum-review-proposal-2026-10-18.md):
+- W4 confidence-gated ranked matching: identity-cross-fitted confidence model with appearance and space-time features.
+- Expert queue with a top-K new-animal check, a duplicate sweep, and an audit sample that estimates the error rate with a 95% interval.
+- Simulated sequentially so that automatic errors propagate.
+- Declared targets: ≥70% automatic; ≤1% misassigned photos; |count error| ≤ 1; ≤0.5 expert-h per 1,000 photos; the audit interval covers the true error.
+- CPU only. Awaiting approval; the earlier review-effort round is still uncommitted.
+
+**Review-effort simulation run: ranked catalogue matching wins; grouping-first costs more.** The user approved the scope and authorized the assistant to run it. Three new files and 15 tests were added. The first run completed all 88 simulations but failed while writing the report (numpy int64 in JSON); it is preserved. After a fix and a regression test, the `_r2` run completed in 131 s with identical numbers.
+- **Starting groupings** reproduce the saved edge, flank and legacy runs exactly.
+- **Main setting** (perfect reviewer, trap-day bundles):
+  - W0 unassisted: 29,930 decisions.
+  - **W1 embedding-ranked catalogue: 5,283 decisions (≈11.7 h; 1.8 h per 1,000 photos at placeholder costs), verified F1 1.0, 55/55, count error 0.**
+  - W2 group-then-correct: 1.27× (edge), 1.91× (flank) and 2.92× (legacy) W1's decisions. From the edge and flank starts it is left with about 100 surplus fragments.
+- **Ranking:** the correct animal ranks first for 82.9% of known-animal bundles (top-10: 95.9%); the 55 new animals cost 1,485 full-catalogue scans.
+- **Bundling:** without trap-day bundles, W1 needs 3.1× more decisions.
+- **Reviewer error:** 3% wrong answers degrade W1 to F1 .916, count +5, and W2 further.
+- **Declared rules:** grouping saves work, strong saving and robust to reviewer error were all not met.
+
+[Results](research/czechlynx-review-effort-results-2026-10-18.md). The user needs to decide whether expert-confirmed ranked matching satisfies the reliable-count requirement. Real reviewer timing and error rates are unmeasured.
+
+**Review-effort measurement proposed (user choice after the flank results).**
+- **User questions answered:** asked which next option the assistant would choose and whether local matching + geometric verification could still help. The assistant recommended measuring expert review effort first, keeping facing-aware re-adaptation as the fallback.
+- **Local matching:** ruled out only in the tested form (generic DISK+LightGlue, homography/affine), per the same-flank re-check above. Pose-rectified flank spot matching remains the one untested variant.
+- **Crop resolution:** crops are already native resolution (median animal crop width 521 px).
+- **[Proposal](czechlynx-review-effort-proposal-2026-10-18.md):** a simulated expert compares W0 unassisted catalogue matching, W1 embedding-ranked matching and W2 group-then-correct review. W2 starts from the best edge-grouping, flank-grouping and legacy groupings, with trap-day bundles, a declared time-cost model, reviewer-error and unidentifiable-photo sensitivities, and effort–quality curves.
+- **Declared rules:** W2 reaches F1 ≥ .98 and |count error| ≤ 1 with ≤ 50% (strong: ≤ 25%) of W1's decisions; F1 ≥ .95 with 3% reviewer error.
+- Acceptable absolute effort and whether bounded review satisfies "reliable counts" remain the user's decisions. CPU only. Awaiting approval; no code or runs yet.
+
+
 **Checkpoint committed; candidate-coverage/identifiability diagnostic proposed.** At the user's request, the CzechLynx work since June was committed as `606082f2` on `feat/reid-demo-pipeline` and pushed. The local `disk` submodule edit was not included. The assistant inspected the 16 saved adapted review examples, which are deterministic extremes and not representative. None is a clear left-side vs right-side pair. Most involve frontal/rear views, partial crops, washed-out or dark IR, tiny crops or fragmented masks. One clear same-side, same-camera `lynx_036` pair scores 0.04. 193 of the 321 audited images are calibration images with human flank/visibility/usable-markings labels. [Proposal](czechlynx-coverage-diagnostics-proposal-2026-10-18.md): three new files, no existing-source edits, calibration only, frozen adapted cache, no inference. It tests whether missing oracle links come from unidentifiable images (abstention curve vs random-drop control), split encounters, narrow candidate lists (k=100, mutual kNN, query expansion) or opposite flanks (audited cross-tabs), with decision rules declared before running. Awaiting approval; no code, tests or runs yet.
 
 **Coverage diagnostic approved, implemented and run: missing links are largely recoverable; wrong links are now the bottleneck.** The user approved the scope as written and authorized the assistant to run the new tests and the read-only diagnostic. Three new files were added; 21 new tests pass (90 with the existing clustering suites). The run took 151.6 s, and its self-check reproduces the calibration graphs and the 10/55 oracle baseline exactly. Encounter links raise oracle connectivity 10 → 28/55 (0.81% of encounter pairs join different animals, from two encounters). kNN k=100 raises it to 23/55 at precision .41. A post-hoc check of encounters plus k=150 reaches 44/55, but 64% of those candidate edges are wrong. Opposite-flank same-animal pairs are almost never in each other's top-50 (2.6% vs 29% same-flank). The label-free quality score matches human audit labels (AUC .73), but abstaining on risky images does not connect animals. Query expansion and mutual kNN do not help. Caveat: encounter IDs are dataset-provided and unverified for deployment (day-only timestamps; 113 cross-camera encounters). [Results](research/czechlynx-coverage-diagnostics-results-2026-10-18.md). Next: propose grouping on kNN k=100–150 ∪ encounter links with calibrated global + local edge verification, plus a test of camera/time-derived encounters. No count configuration, selection or outreach.
@@ -138,7 +184,7 @@ Outcome rules are declared in the proposal. Awaiting approval; no code or runs y
 - **Declared rules:** only "facing classifier usable" is met.
 - **Interpretation:** the frozen embedding does not separate same-side photos of different lynx well enough. Further graph or grouping engineering on these vectors is unlikely to reach reliable counts.
 
-[Results](research/czechlynx-flank-grouping-results-2026-10-18.md). Candidate next steps (not approved): facing-aware re-adaptation, a review-effort baseline, a high-precision core count. The audit left/right convention is still unconfirmed by the user.
+[Results](research/czechlynx-flank-grouping-results-2026-10-18.md). A follow-up read-only check (user question: could local matching + GV still help?) found local evidence equally weak on same-facing and opposite-facing pilot pairs (affine-inlier AUC .61 vs .59; 5–6 inliers). Its weak signal is therefore image-condition confounding, not spot matching. This negative is limited to generic DISK+LightGlue with homography/affine verification; see the [addendum](research/czechlynx-edge-grouping-results-2026-10-18.md#addendum-18-oct-after-the-flank-run-local-evidence-on-same-flank-pairs). Candidate next steps (not approved): facing-aware re-adaptation, a review-effort baseline, a high-precision core count. The audit left/right convention is still unconfirmed by the user.
 
 ### 2026-10-17
 

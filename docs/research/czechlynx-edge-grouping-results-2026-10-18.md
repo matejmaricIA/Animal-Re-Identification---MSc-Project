@@ -69,6 +69,24 @@ The "ambiguous band" (cosine-only p between 0.2 and 0.8) turned out to cover mos
 
 Pooled raw signal is weak: match count AUC 0.59, homography inliers 0.60 (median 5 vs 5), affine inliers 0.60 (median 5 vs 4); on kNN-only edges, affine inliers reach 0.63. A follow-up check on the pilot edges confirmed the cause. A local-only logistic model reaches **0.60 AUC with random cross-validation but 0.35 with identity cross-fitting**. The local signal tracks which animal (and which images) are involved, not whether two photos show the same animal, so it does not transfer to unseen animals. The looser partial-affine model did not change this.
 
+## Addendum (18 Oct, after the flank run): local evidence on same-flank pairs
+
+About half of the pilot's same-animal pairs face opposite ways, and local matching cannot confirm those by design, which could have hidden a real effect. A read-only re-analysis of the saved pilot evidence, using the flank run's predicted facing, rules that out:
+
+| Pilot subset | Edges | Affine-inlier AUC | Median inliers (same / different) | Cosine AUC |
+| --- | ---: | ---: | --- | ---: |
+| All | 20,000 | 0.597 | 5 / 4 | 0.477 |
+| Opposite-facing | 7,509 | 0.585 | 5 / 4 | 0.347 |
+| Same-facing | 12,491 | 0.608 | 5 / 4 | 0.559 |
+| Same-facing, both confident | 7,744 | 0.601 | 6 / 5 | 0.636 |
+| Same-facing, confident, kNN only | 6,692 | 0.625 | 6 / 5 | 0.812 |
+
+Local evidence is about as "predictive" on opposite-facing pairs, where spot correspondence is impossible, as on same-facing pairs. Its weak signal therefore reflects shared image conditions (same camera, day or scale), not spot-pattern matching. The matcher finds only 5–6 geometric inliers even for same-side photos of the same lynx.
+
+Identity-cross-fitted models on the 7,744-edge subset were unstable (cosine-only 0.500, local-only 0.397, combined 0.517) and are not relied on.
+
+**Scope of this negative:** it covers generic DISK+LightGlue keypoints on the prepared masked crops, verified with a single homography or partial affine. It does not cover spot-specific matching on pose-rectified flank patches, SIFT/HotSpotter-style descriptors, non-rigid verification, or native-resolution crops.
+
 ## Deviations from the proposal
 
 - **G3 uses networkx Louvain**, not Leiden. `leidenalg` is not installed, and installing it would change which backend the frozen legacy control resolves to. The proposal wrongly called Leiden an existing dependency.
