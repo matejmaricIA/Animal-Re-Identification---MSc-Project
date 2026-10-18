@@ -1,6 +1,6 @@
 # Lynx demo requirements and decision log
 
-Last updated: 17 October 2026. Read this before work on lynx demo readiness, park outreach or the CzechLynx plan. Preserve dated updates and distinguish requirements, evidence, hypotheses and proposed work.
+Last updated: 18 October 2026. Read this before work on lynx demo readiness, park outreach or the CzechLynx plan. Preserve dated updates and distinguish requirements, evidence, hypotheses and proposed work.
 
 ## Required outcome — user clarification, 22 September 2026
 
@@ -10,7 +10,7 @@ Specify the collection, time window, opposite-flank handling, unresolved images 
 
 The assistant's preceding summary overemphasised outreach and assisted matching. The user corrected that framing. Exploratory conversations do not close technical gates or justify promising reliable counts. This logging request does not authorise park outreach.
 
-## Current snapshot — 17 October 2026
+## Current snapshot — 18 October 2026
 
 This is the working diary and the entry point for current status. Update this snapshot and add a dated entry after each substantive experiment, evidence review or user decision. Record what changed, why, observed results and limitations, the next action and remaining gates. Preserve failed trials and historical entries. Distinguish user-reported execution, saved-artifact inspection, hypotheses and completed validation. Updates happen during active work; this does not imply continuous background monitoring.
 
@@ -18,7 +18,7 @@ This is the working diary and the entry point for current status. Update this sn
 | --- | --- | --- |
 | Inputs and protocol | All 321 human reviews/receipt complete; fitting split and FP32 preparation reviewed; original image inclusion preserved | Keep quality limitations visible; no unapproved cleanup or exclusions |
 | Adapted global model | Training and full calibration reviewed. Calibration top-1 877/1,336 → 917/1,336 (65.6437% → 68.6377%); macro top-1 56.0883% → 60.3884%; mAP@50 31.0078% → 40.1974% | Preserve the improved recognition baseline; use it in a controlled local/global candidate/pair/grouping proposal |
-| Clusters and photographed-individual counts | Adapted calibration complete: all 25 controls fail reliable counting; zero exact identity-group recovery throughout. Legacy gives 26 groups for 55 identities; strict controls fragment into thousands. k50 oracle still connects only 10/55 identities | Address missing candidate paths, pair calibration/local evidence and false-bridge-resistant grouping; do not export a count configuration or run frozen selection yet |
+| Clusters and photographed-individual counts | Adapted calibration: all 25 controls fail reliable counting. Coverage diagnostic (18 Oct): oracle connectivity 10/55 → 28/55 with encounter links, 44/55 with encounters + k=150 (post-hoc), at the cost of 64% wrong candidate edges | Group on kNN k=100–150 ∪ encounter links with calibrated global + local edge verification and false-bridge-resistant grouping; test camera/time-derived encounters; do not export a count configuration or run frozen selection yet |
 | Thesis local + global evidence | User explicitly wants a combined final approach. Earlier combination gave no consistent gain; a flawed prior integration is a hypothesis, not an established cause | Diagnose candidate coverage, patch/mask geometry and score fusion; propose a controlled comparison of adapted global alone against local/global combinations on identical observations |
 | Independent and field validation | Upstream exposure unresolved; verified night/IR and flank handling, raw-camera crop quality and independent park transfer unqualified | Freeze an improved method before selection; independently check relevant camera/view/illumination cases and expert-reviewed park data |
 | Park demonstration | Research prototype; reliable counting is still unvalidated. Count-error tolerance, uncertainty and acceptable review effort remain unagreed | Demonstrate correct grouping/counts with false merges, splits, unresolved images and measured review effort; protect media/reviews and qualify a bounded supervised pilot |
@@ -79,6 +79,12 @@ These priorities do not approve new implementation or benchmark runs. Present co
 - [Proposed pilot gates](research/czechlynx-segmentation-roadmap-2026-09-12.md#8-proposed-pilot-gates): discussion targets, not achieved results or agreed count-error tolerances.
 
 ## Dated updates
+
+### 2026-10-18
+
+**Checkpoint committed; candidate-coverage/identifiability diagnostic proposed.** At the user's request, the CzechLynx work since June was committed as `606082f2` on `feat/reid-demo-pipeline` and pushed. The local `disk` submodule edit was not included. The assistant inspected the 16 saved adapted review examples, which are deterministic extremes and not representative. None is a clear left-side vs right-side pair. Most involve frontal/rear views, partial crops, washed-out or dark IR, tiny crops or fragmented masks. One clear same-side, same-camera `lynx_036` pair scores 0.04. 193 of the 321 audited images are calibration images with human flank/visibility/usable-markings labels. [Proposal](czechlynx-coverage-diagnostics-proposal-2026-10-18.md): three new files, no existing-source edits, calibration only, frozen adapted cache, no inference. It tests whether missing oracle links come from unidentifiable images (abstention curve vs random-drop control), split encounters, narrow candidate lists (k=100, mutual kNN, query expansion) or opposite flanks (audited cross-tabs), with decision rules declared before running. Awaiting approval; no code, tests or runs yet.
+
+**Coverage diagnostic approved, implemented and run: missing links are largely recoverable; wrong links are now the bottleneck.** The user approved the scope as written and authorized the assistant to run the new tests and the read-only diagnostic. Three new files were added; 21 new tests pass (90 with the existing clustering suites). The run took 151.6 s, and its self-check reproduces the calibration graphs and the 10/55 oracle baseline exactly. Encounter links raise oracle connectivity 10 → 28/55 (0.81% of encounter pairs join different animals, from two encounters). kNN k=100 raises it to 23/55 at precision .41. A post-hoc check of encounters plus k=150 reaches 44/55, but 64% of those candidate edges are wrong. Opposite-flank same-animal pairs are almost never in each other's top-50 (2.6% vs 29% same-flank). The label-free quality score matches human audit labels (AUC .73), but abstaining on risky images does not connect animals. Query expansion and mutual kNN do not help. Caveat: encounter IDs are dataset-provided and unverified for deployment (day-only timestamps; 113 cross-camera encounters). [Results](research/czechlynx-coverage-diagnostics-results-2026-10-18.md). Next: propose grouping on kNN k=100–150 ∪ encounter links with calibrated global + local edge verification, plus a test of camera/time-derived encounters. No count configuration, selection or outreach.
 
 ### 2026-10-17
 
