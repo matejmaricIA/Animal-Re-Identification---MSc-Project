@@ -2,6 +2,20 @@
 
 Last updated: 18 October 2026. Read this before work on lynx demo readiness, park outreach or the CzechLynx plan. Preserve dated updates and distinguish requirements, evidence, hypotheses and proposed work.
 
+## Active work (live) — check before starting anything
+
+Every agent working here updates this section at start, at each milestone and at the end (user requirement, 18 October 2026). Several agents may be active; claim work here before touching shared files or outputs, and do not run into another agent's output directory.
+
+| Work item | Owner | State | Progress / next step | Files and outputs in use |
+| --- | --- | --- | --- | --- |
+| Flank-aware grouping ([proposal](czechlynx-flank-grouping-proposal-2026-10-18.md), [results](research/czechlynx-flank-grouping-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done, awaiting the user's choice of next step** | 1 ☑ implement · 2 ☑ CLI + tests · 3 ☑ tests (13 new; 132 related) · 4 ☑ calibration run (215 s) · 5 ☑ results review + docs · 6 ☑ committed at the user's request (see git log; not pushed) | Output `evaluations/czechlynx/flank_grouping_v2_fp32/` is complete; do not modify it. No other files are claimed. | `reid_demo/benchmark_flank_grouping.py`, `tools/evaluate_czechlynx_flank_grouping.py`, `tests/test_benchmark_flank_grouping.py` (new); output `evaluations/czechlynx/flank_grouping_v2_fp32/` |
+
+Open questions for the user: what the audit's left/right labels meant (pose geometry suggests facing direction, not the anatomical flank).
+
+Last completed items: coverage diagnostic (`9065277d`), edge grouping + local pilot (`3f5a0f11`), flank-aware grouping (committed 18 Oct). None of these commits is pushed. The user will choose the next direction after reading the results.
+
+Candidate next steps awaiting a user decision, none approved: (1) facing-aware MiewID adaptation on the fitting pool with (animal, facing) classes; (2) measured human-review effort baseline; (3) high-precision core count on confident, low-risk images.
+
 ## Required outcome — user clarification, 22 September 2026
 
 The demo must support **reliable clustering and a defensible assessment of the number of individual lynx represented in the photographs**. Ranked suggestions and human review can support this outcome, but an assisted-matching-only demonstration does not satisfy the user's goal. Do not quietly defer clustering/count assessment to an optional later product.
@@ -18,7 +32,7 @@ This is the working diary and the entry point for current status. Update this sn
 | --- | --- | --- |
 | Inputs and protocol | All 321 human reviews/receipt complete; fitting split and FP32 preparation reviewed; original image inclusion preserved | Keep quality limitations visible; no unapproved cleanup or exclusions |
 | Adapted global model | Training and full calibration reviewed. Calibration top-1 877/1,336 → 917/1,336 (65.6437% → 68.6377%); macro top-1 56.0883% → 60.3884%; mAP@50 31.0078% → 40.1974% | Preserve the improved recognition baseline; use it in a controlled local/global candidate/pair/grouping proposal |
-| Clusters and photographed-individual counts | Adapted calibration: all 25 controls fail reliable counting. Coverage diagnostic (18 Oct): oracle connectivity 10/55 → 28/55 with encounter links, 44/55 with encounters + k=150 (post-hoc), at the cost of 64% wrong candidate edges | Edge grouping (18 Oct): best pairwise F1 .585 (controls .264) but 1/55 exact; local DISK/LightGlue adds nothing. Next: stronger pairwise evidence (flank-aware comparison, learned verifier); no count configuration or frozen selection yet |
+| Clusters and photographed-individual counts | Adapted calibration: all 25 controls fail reliable counting. Coverage diagnostic (18 Oct): oracle connectivity 10/55 → 28/55 with encounter links, 44/55 with encounters + k=150 (post-hoc), at the cost of 64% wrong candidate edges | Edge grouping (18 Oct): F1 .585 (controls .264), 1/55 exact; local features add nothing. Flank-aware grouping (18 Oct): facing works (AUC .99) but F1 only .602 and 0/55 exact; within-flank discrimination is the bottleneck. Next: representation change or measured human review; no count configuration or frozen selection |
 | Thesis local + global evidence | 18 Oct pilot: DISK+LightGlue adds ≈0 AUC to calibrated edge evidence and does not generalize across animals (identity-cross-fitted local-only AUC .35). User explicitly wants a combined final approach. Earlier combination gave no consistent gain; a flawed prior integration is a hypothesis, not an established cause | Diagnose candidate coverage, patch/mask geometry and score fusion; propose a controlled comparison of adapted global alone against local/global combinations on identical observations |
 | Independent and field validation | Upstream exposure unresolved; verified night/IR and flank handling, raw-camera crop quality and independent park transfer unqualified | Freeze an improved method before selection; independently check relevant camera/view/illumination cases and expert-reviewed park data |
 | Park demonstration | Research prototype; reliable counting is still unvalidated. Count-error tolerance, uncertainty and acceptable review effort remain unagreed | Demonstrate correct grouping/counts with false merges, splits, unresolved images and measured review effort; protect media/reviews and qualify a bounded supervised pilot |
@@ -108,6 +122,23 @@ Outcome rules are declared in the proposal. Awaiting approval; no code or runs y
 - **Deviations:** Louvain instead of Leiden (leidenalg not installed; installing it would alter the frozen legacy control); G2 support min(s,|A||B|); derived links use trap-day or location-day; affine threshold .03.
 
 [Results](research/czechlynx-edge-grouping-results-2026-10-18.md). Full Stage B is not recommended. Pairwise evidence quality is now the binding constraint. Candidate next directions (not approved): flank-aware comparison using the 5,206 pose-keypoint images, a learned pair verifier trained on fitting data, and a measured review-effort baseline. No count configuration, selection or outreach.
+
+**Edge grouping committed (`3f5a0f11`, not pushed); flank-aware grouping proposed.** At the user's request, read-only checks used saved vectors, raw metadata and audit labels, with no inference.
+- **Pose geometry:** pose keypoints exist for 5,206 images. Facing from head vs tail-base geometry agrees with all 56 audited side views, but with the names swapped: the audit's "right" means "faces right". The user needs to confirm the convention.
+- **Facing from embeddings:** a logistic classifier on the adapted MiewID vectors predicts facing at AUC .995 vs pose and .989 vs audit (n=145, including 103 images without pose), 94.5% accuracy, identity-cross-fitted. An unscaled first attempt looked unconfident because of a regularization artifact. Public MegaDescriptor is nearly flip-invariant (.60).
+- **Structure of the problem:** about half of same-animal pairs are opposite-facing (37,443 vs 36,283). Opposite-facing pairs at the same trap on the same day are 98.95% the same animal, and 50/55 animals have one.
+
+[Proposal](czechlynx-flank-grouping-proposal-2026-10-18.md): group within each facing (per-facing graphs and cross-fitted edge models), join flank clusters by one-to-one matching on trap-day co-occurrence, and report bilateral count bounds [pairs + max(unmatched), pairs + sum(unmatched)]. Rules are declared. CPU only. Awaiting approval; no code or runs yet.
+
+**Flank-aware grouping approved, implemented and run: facing works, grouping does not improve materially.** The user approved the scope, authorized the assistant to run it, and asked that every step be documented for multi-agent work. Since then, AGENTS.md carries a coordination rule and this log has a live "Active work" section.
+- **Implementation:** three new files and 13 tests; 132 pass across related suites. The run took 215 s on CPU.
+- **Facing:** identity-cross-fitted predicted facing reaches pose AUC .995 and audit AUC .989 (n=145; 103 without pose); 74% of images are confident.
+- **Grouping:** per-side edge AUC is .85–.90, no better than without the split. Best animal-level F1 is .602 (edge grouping .585), with 0/55 exact recoveries. Flank-level precision is .6–.7, with at most 8/110 flank units recovered.
+- **Counts:** 33/144 count intervals contain 55, but all are ≥19 wide and rest on about 30 merge errors.
+- **Declared rules:** only "facing classifier usable" is met.
+- **Interpretation:** the frozen embedding does not separate same-side photos of different lynx well enough. Further graph or grouping engineering on these vectors is unlikely to reach reliable counts.
+
+[Results](research/czechlynx-flank-grouping-results-2026-10-18.md). Candidate next steps (not approved): facing-aware re-adaptation, a review-effort baseline, a high-precision core count. The audit left/right convention is still unconfirmed by the user.
 
 ### 2026-10-17
 
