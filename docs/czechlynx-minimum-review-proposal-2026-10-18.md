@@ -1,6 +1,6 @@
 # Proposal: confidence-gated matching with minimum expert review
 
-Date: 18 October 2026. Status: **proposed, awaiting approval**. No code written, no runs started.
+Date: 18 October 2026. Status: **approved and run 18 October 2026: no configuration met all targets. Automation is accurate but saves little expert time; the top-K expert-path design caused large count errors (fixed in a post-hoc variant).** See [results](research/czechlynx-gated-matching-results-2026-10-18.md).
 
 ## Why
 

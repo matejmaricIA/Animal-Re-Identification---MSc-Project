@@ -9,14 +9,16 @@ Every agent working here updates this section at start, at each milestone and at
 | Work item | Owner | State | Progress / next step | Files and outputs in use |
 | --- | --- | --- | --- | --- |
 | Flank-aware grouping ([proposal](czechlynx-flank-grouping-proposal-2026-10-18.md), [results](research/czechlynx-flank-grouping-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done, awaiting the user's choice of next step** | 1 ☑ implement · 2 ☑ CLI + tests · 3 ☑ tests (13 new; 132 related) · 4 ☑ calibration run (215 s) · 5 ☑ results review + docs · 6 ☑ committed at the user's request (see git log; not pushed) | Output `evaluations/czechlynx/flank_grouping_v2_fp32/` is complete; do not modify it. No other files are claimed. | `reid_demo/benchmark_flank_grouping.py`, `tools/evaluate_czechlynx_flank_grouping.py`, `tests/test_benchmark_flank_grouping.py` (new); output `evaluations/czechlynx/flank_grouping_v2_fp32/` |
-| Review-effort measurement ([proposal](czechlynx-review-effort-proposal-2026-10-18.md), [results](research/czechlynx-review-effort-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done; awaiting the user's decision** | 1 ☑ proposal · 2 ☑ approval · 3 ☑ implement · 4 ☑ tests (15 new) · 5 ☑ run (first run failed at report writing, preserved; `_r2` complete, identical numbers) · 6 ☑ results + docs · 7 ☐ commit (only on request) | Outputs `evaluations/czechlynx/review_effort_v2_fp32/` (failed) and `..._r2/` (complete) are final; do not modify. No other files are claimed. |
-| Minimum-review confidence-gated matching ([proposal](czechlynx-minimum-review-proposal-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Proposal drafted; awaiting user approval** | 1 ☑ draft proposal · 2 ▶ user approval · 3 ☐ implement · 4 ☐ tests · 5 ☐ run · 6 ☐ results + docs · 7 ☐ commit (only on request) | `docs/czechlynx-minimum-review-proposal-2026-10-18.md` (new) |
+| Review-effort measurement ([proposal](czechlynx-review-effort-proposal-2026-10-18.md), [results](research/czechlynx-review-effort-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done; user decided (see Requirement update)** | all steps ☑; committed `0a25c2c8` (not pushed) | Outputs `evaluations/czechlynx/review_effort_v2_fp32/` (failed) and `..._r2/` (complete) are final; do not modify. No other files are claimed. |
+| Minimum-review confidence-gated matching ([proposal](czechlynx-minimum-review-proposal-2026-10-18.md), [results](research/czechlynx-gated-matching-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done; user chose next steps (a) then (b), see rows below** | 1 ☑ proposal · 2 ☑ approval · 3 ☑ implement · 4 ☑ tests (11 new; 158 related) · 5 ☑ run (135 s) + labelled post-hoc full-scan variant · 6 ☑ results + docs · 7 ☑ committed at the user's request together with (a) (see git log; not pushed) | Outputs `evaluations/czechlynx/gated_matching_v2_fp32/` and `..._posthoc_fullscan/` are final; do not modify. No other files are claimed. |
+| **(a) Non-match pruning + safeguards** (cut new-animal and hard-match review cost) — [handoff](czechlynx-nonmatch-pruning-handoff-2026-10-18.md), [proposal](czechlynx-nonmatch-pruning-proposal-2026-10-18.md), [results](research/czechlynx-nonmatch-pruning-results-2026-10-18.md) | Claude Code session (non-match pruning), 18 Oct 2026 | **Done; awaiting the user's next decision.** Best exact count: 2,211 decisions, 0.77 h per 1,000 photos at placeholder costs (−58% vs W1); targets not all met. 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval · 4 ☑ implement · 5 ☑ tests (18 new; 167 related) · 6 ☑ run (440 s) + labelled post-hoc check · 7 ☑ results + docs · 8 ☑ committed at the user's request together with the minimum-review round (see git log; not pushed) | Outputs `evaluations/czechlynx/nonmatch_pruning_v2_fp32/` and `..._posthoc_pmatch_auto/` are final; do not modify. No other files are claimed. |
+| **(b) Facing-aware re-adaptation of the embedding** ((animal, facing) classes on the fitting pool) | **Planned after (a)**; unclaimed | **Decided by the user 18 Oct: WILL do, after (a).** Not started; needs its own proposal, approval and GPU authorization | None yet |
 
 Open questions for the user: what the audit's left/right labels meant (pose geometry suggests facing direction, not the anatomical flank).
 
-Last completed items: coverage diagnostic (`9065277d`), edge grouping + local pilot (`3f5a0f11`), flank-aware grouping (committed 18 Oct). None of these commits is pushed. The user will choose the next direction after reading the results.
+Last completed items: coverage diagnostic (`9065277d`), edge grouping + local pilot (`3f5a0f11`), flank-aware grouping (`64b70e6e`), review effort (`0a25c2c8`); none of these commits is pushed. Minimum-review gated matching and (a) non-match pruning are committed together (see git log; not pushed).
 
-User decision (18 Oct): expert-confirmed ranked matching is acceptable only if the bulk is automated; see "Requirement update — 18 October 2026". Next: the [minimum-review proposal](czechlynx-minimum-review-proposal-2026-10-18.md) (awaiting approval). Other candidate steps, none approved: facing-aware re-adaptation (lowers review and raises automation), integration of the re-ID core behind the existing ingestion/classification stages, and a W3 group-as-unit variant.
+**Agreed plan (user decision, 18 Oct): do (a), then (b).** (a) Calibrated non-match pruning to shorten new-animal and hard-match checks, plus a cold-start guard and reviewer-error safeguards, in a fresh session started from the [handoff prompt](czechlynx-nonmatch-pruning-handoff-2026-10-18.md). (b) Facing-aware re-adaptation of the embedding afterwards. End-to-end integration behind the ingestion/classification stages follows once the review-cost picture is settled. Context: expert-confirmed ranked matching is acceptable only if the bulk is automated (see "Requirement update — 18 October 2026").
 
 ## Required outcome — user clarification, 22 September 2026
 
@@ -45,7 +47,7 @@ This is the working diary and the entry point for current status. Update this sn
 | --- | --- | --- |
 | Inputs and protocol | All 321 human reviews/receipt complete; fitting split and FP32 preparation reviewed; original image inclusion preserved | Keep quality limitations visible; no unapproved cleanup or exclusions |
 | Adapted global model | Training and full calibration reviewed. Calibration top-1 877/1,336 → 917/1,336 (65.6437% → 68.6377%); macro top-1 56.0883% → 60.3884%; mAP@50 31.0078% → 40.1974% | Preserve the improved recognition baseline; use it in a controlled local/global candidate/pair/grouping proposal |
-| Clusters and photographed-individual counts | Automatic grouping peaks at F1 ≈ .60 (edge .585, flank .602), 0–1/55 exact. Simulated review (18 Oct): ranked catalogue matching reaches a verified 55/55 count with 5,283 decisions (≈11.7 h; 5.7× fewer than unassisted); group-then-correct costs 1.3–2.9× more | User decision: is expert-confirmed ranked matching acceptable for reliable counts? Measure real reviewer time and error; no count configuration or frozen selection yet |
+| Clusters and photographed-individual counts | Automatic grouping peaks at F1 ≈ .60. Ranked matching with expert confirmation gives a verified 55/55 count (W1: 5,283 decisions, 1.85 h per 1,000 photos at placeholder costs). Non-match pruning (18 Oct): a space-time-aware P(match) model (AUC .998) re-ranks and prunes candidates. With W4 auto-accept and safeguards, an exact count at 0.19% misassigned photos takes **2,211 decisions (0.77 h per 1,000 photos; 0.35 h at fast-click costs; −58% vs W1)**. Automation stays ≤ 45% at ≤ 1% error. With 3% reviewer error: count +1, 2.3% misassigned. Audits are unreliable with a noisy auditor | Raise safe automation (better embedding: item (b)), measure real reviewer timing, engineer audits for imperfect auditors; no count configuration or frozen selection yet |
 | Thesis local + global evidence | 18 Oct pilot: DISK+LightGlue adds ≈0 AUC to calibrated edge evidence and does not generalize across animals (identity-cross-fitted local-only AUC .35). User explicitly wants a combined final approach. Earlier combination gave no consistent gain; a flawed prior integration is a hypothesis, not an established cause | Diagnose candidate coverage, patch/mask geometry and score fusion; propose a controlled comparison of adapted global alone against local/global combinations on identical observations |
 | Independent and field validation | Upstream exposure unresolved; verified night/IR and flank handling, raw-camera crop quality and independent park transfer unqualified | Freeze an improved method before selection; independently check relevant camera/view/illumination cases and expert-reviewed park data |
 | Park demonstration | Research prototype; reliable counting is still unvalidated. Count-error tolerance, uncertainty and acceptable review effort remain unagreed | Demonstrate correct grouping/counts with false merges, splits, unresolved images and measured review effort; protect media/reviews and qualify a bounded supervised pilot |
@@ -108,6 +110,82 @@ These priorities do not approve new implementation or benchmark runs. Present co
 ## Dated updates
 
 ### 2026-10-18
+
+**(a) Non-match pruning run and reviewed: expert time for an exact count roughly halves; targets still not all met.** The run (`evaluations/czechlynx/nonmatch_pruning_v2_fp32/`) completed in 440 s with 148 simulations. The reference check passed: W1 and the saved full-scan W4 rows reproduce exactly.
+
+- **P(match) model:** identity-cross-fitted, both sides excluded from training. AUC .998 with space-time features vs .988 appearance-only; rank-1 share 93.2% vs 82.9% in cosine order.
+- **Re-ranking is the main lever:** P(match) order cuts hard-match comparisons 2,379 → 417. Pruning at ε = .001 cuts new-animal comparisons by 58% with no extra duplicates; larger ε adds 2–16 duplicates.
+- **Best exact-count setting** (P(match) order, ε .001, τ .99, safeguards on): count error 0, 0.19% misassigned, 45% automatic. It takes 2,211 decisions: 0.77 h per 1,000 photos at placeholder costs and 0.35 at fast-click costs. That is −58% vs W1 and −50% vs the full-scan W4. Of those decisions, 990 are one-click confirmations.
+- **3% reviewer error:** count +1 and 2.3% misassigned, vs 8–9.5% before. Without safeguards, the count errors are +15 to +37. The disagreement check and double confirmation do most of the work. Duplicate merges lack a second check and cause wrong merges.
+- **Appearance-only models:** count errors of +10 to +59. Space-time context is essential.
+- **Audits:** they cover the truth with a perfect auditor, but with a 3% auditor the automation audit covers it in 50% of runs and the count audit in 0–3%.
+- **Post-hoc (outside the grid):** gating auto-accept on P(match) is worse than W4 (41% automatic at 0.82% vs 45% at 0.19%).
+
+**Declared outcomes:**
+- Targets: ≥70% automatic and ≤0.5 h at placeholder costs are not met. Misassignment, count and audit-coverage targets are met by the best setting. There is no candidate operating point.
+- D1 pruning works: not met (58% < 75%).
+- D2 re-ranking helps hard matches: met (−82%).
+- D3 safeguards earn their cost: met in 2 of 4 combinations.
+- D4 cold-start guard: mechanically met but uninformative (no collapse at τ .99 even without the guard).
+
+[Results](research/czechlynx-nonmatch-pruning-results-2026-10-18.md). Next options, not approved:
+- (b) facing-aware re-adaptation, already agreed as next, to raise automation and the rank-1 share;
+- a timed reviewer UI trial to settle the cost model;
+- consensus or bias-corrected audits;
+- a second check on duplicate merges.
+
+Nothing is committed; no count configuration, selection or outreach.
+
+**(a) Non-match pruning approved.** The user approved the proposal as written, kept the carried-over targets, and authorized the assistant to implement it and run the CPU tests and the calibration run.
+
+**(a) implemented and tested.** Three new files: `reid_demo/benchmark_nonmatch_pruning.py`, `tools/simulate_czechlynx_nonmatch_pruning.py` and `tests/test_benchmark_nonmatch_pruning.py`. No existing source was edited. All 18 new synthetic tests pass; across the eight related suites, 167 pass; Ruff F is clean. The tests cover:
+- identity-free features;
+- both-sides identity exclusion in P(match) training;
+- W1 reproduction;
+- automation error propagation, with no automatic new animals;
+- pruning-induced duplicates, with full-scan, duplicate-check and double-confirmation recovery;
+- the cold-start guard and the disagreement check;
+- merges, ledger costs and count-audit arithmetic;
+- the CLI contracts, including a failed manifest kept on a reference mismatch.
+
+Implementation choices within the approved scope:
+- The count audit scans each sampled animal against the older catalogue animals only, ranked and stopping at a "yes"; duplicates are defined against an older entry.
+- The pruned scan always shows at least one candidate.
+- The CLI compares the references with a live W1 and, on real data, with the saved W1 and full-scan W4 numbers. If they differ, the run is marked failed.
+
+**(a) Non-match pruning claimed; proposal drafted.** A fresh session claimed item (a) from the handoff, read the five 18 October results and the reusable code, and drafted the [proposal](czechlynx-nonmatch-pruning-proposal-2026-10-18.md). No code, tests or runs yet.
+
+**Ceiling arithmetic** (from saved W1 numbers; indicative, not a result):
+- W1's 5,269 comparisons split into 1,485 for new-animal scans, about 1,451 rank-1 confirmations and about 2,333 for roughly 299 hard matches.
+- Pruning can remove most of the new-animal cost, but not hard-match cost, because a scan stops at the first "yes".
+- At placeholder costs, ≤ 0.5 h per 1,000 photos therefore needs hard-match comparisons cut by about two thirds, through better ranking. At "fast-click" costs, about 20% would be enough.
+- ≥ 70% automation looks out of reach for the unchanged W4 confidence model.
+
+**Design:**
+- **P(match) model:** a per-candidate model with appearance, rank, reciprocal-rank, facing, risk and space-time features, including a same-day distance conflict. It is identity-cross-fitted, excluding both the part's animal and the candidate's animal from training.
+- **Pruned scan:** in cosine or P(match) order, stopped when no remaining candidate has P ≥ ε (ε 0–0.03).
+- **Automation:** the existing W4 auto-accept (τ grid).
+- **Safeguards:** a cold-start guard (N = 10 animals, B = 100 bundles); second-reviewer double confirmation of new animals; a model–expert disagreement check (added); periodic duplicate checks; a second-reviewer automation audit; and a count audit by full-scan sampling (added).
+- **Reviewer error and costs:** 0% and 3% reviewer error; two cost settings, with raw counts.
+- **Integrity checks:** W1 and the post-hoc full-scan W4 must be reproduced exactly as references.
+
+The carried-over targets and new rules D1–D4 are declared in the proposal. Questions for the user:
+- approve the scope;
+- keep or revise the targets, given the ceiling arithmetic;
+- authorize CPU tests and the run after implementation.
+
+**Plan agreed: (a) non-match pruning + safeguards, then (b) facing-aware re-adaptation.** After the gated-matching results, the user decided to do (a) first and (b) after it. (a) will start in a fresh session from the [handoff prompt](czechlynx-nonmatch-pruning-handoff-2026-10-18.md). Both items are listed in Active work as unclaimed. The minimum-review round (`benchmark_gated_matching`, its CLI/tests, results doc and these log updates) is still uncommitted in the working tree; a fresh session in this checkout sees it.
+
+**Minimum-review gated matching run: accurate automation, small time saving; no configuration met all targets.** The user approved the scope and authorized the assistant to commit the review-effort round first (`0a25c2c8`) and then to implement and run this. Three new files and 11 tests were added (158 pass across related suites). The run took 135 s.
+- **Confidence model:** identity-cross-fitted AUC .979 with space-time features, .924 with appearance only.
+- **Automation:** in the sequential simulation, τ=.99 automates 49–51% of bundles with 0.30–0.41% misassigned photos.
+- **Count:** the approved design (expert checks only the top-K before declaring a new animal) leaves +28 (K=20) to +70 (K=10) duplicate animals even without automation. The ≤50-pair duplicate sweep barely helps.
+- **Post-hoc variant** (full-scan new-animal confirmation, run from a separate script with evidence saved next to the main output): count error 0 at τ .98–.995 with 46–61% automated and 0.22–1.57% misassigned. Expert time is only 1.48–1.59 vs 1.85 h per 1,000 photos, because automated bundles were one-click decisions and the cost sits in new-animal confirmations and hard matches.
+- **Reviewer error:** 3% reviewer error gives 8–11% misassigned photos.
+- **Cold start:** appearance-only τ=.95 collapsed everything into one animal, so a cold-start guard is needed.
+- **Audit intervals:** covered the truth in all perfect-reviewer space-time runs and in 73% of all automated runs.
+
+Declared targets were not all met; there is no candidate operating point. [Results](research/czechlynx-gated-matching-results-2026-10-18.md). Next options (not approved): calibrated non-match pruning plus safeguards; facing-aware re-adaptation; end-to-end integration.
 
 **User decision recorded; minimum-review proposal drafted.** The user accepted expert-confirmed ranked matching as a route to reliable counts, provided the bulk is automated within an all-in-one ingestion → classification → re-ID/counting system with minimal expert review. This is recorded as a requirement update near the top of this log.
 
