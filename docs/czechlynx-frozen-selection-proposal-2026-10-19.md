@@ -1,6 +1,6 @@
 # Proposal: freeze one review operating point and evaluate it once on the reserved selection pool
 
-Date: 19 October 2026. Work item (c) in the [decision log](lynx-demo-decision-log.md) "Active work" table. Status: **approved by the user on 19 October 2026 as written** (τ 0.99 primary, 0.98 secondary; the selection rule is lifted for this one run). The assistant is authorized to run the tests, the freeze, the freeze-record commit and the GPU selection run. Implementing.
+Date: 19 October 2026. Work item (c) in the [decision log](lynx-demo-decision-log.md) "Active work" table. Status: **approved by the user on 19 October 2026 as written, pre-registered (`97571909`) and run once on selection. S1, S2 and S4 not met; S3 met.** See [results](research/czechlynx-frozen-selection-results-2026-10-19.md).
 
 ## Why
 
