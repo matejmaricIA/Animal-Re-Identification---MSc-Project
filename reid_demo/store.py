@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import csv as _csv
+import hashlib
 import json
 import os
 import sqlite3
@@ -179,6 +180,30 @@ def make_record_id(source_stem: str, det_index: int) -> str:
     return f"{source_stem}__crop{det_index}"
 
 
+def make_source_key(source_path: str, root: Optional[str] = None) -> str:
+    """Stable, OS-independent identity of a source frame (N1).
+
+    The POSIX path relative to ``root`` (the ingest images_dir / dataset root) when the
+    file lies inside it; otherwise the normalised absolute POSIX path.
+    """
+    path = os.path.normpath(os.path.abspath(source_path))
+    if root is not None:
+        rel = os.path.relpath(path, os.path.normpath(os.path.abspath(root)))
+        if rel != os.pardir and not rel.startswith(os.pardir + os.sep):
+            return Path(rel).as_posix()
+    return Path(path).as_posix()
+
+
+def make_scoped_record_id(source_key: str, det_index: int) -> str:
+    """Collision-safe record_id: f'{stem}__{sha1(source_key)[:10]}__crop{det_index}'.
+
+    Keeps the readable stem, is filesystem-safe, and is deterministic across re-ingests,
+    so ``cam_a/IMG_0001.JPG`` and ``cam_b/IMG_0001.JPG`` get different ids.
+    """
+    digest = hashlib.sha1(source_key.encode("utf-8")).hexdigest()[:10]
+    return f"{Path(source_key).stem}__{digest}__crop{det_index}"
+
+
 def _normalize_orientation(value: Optional[str]) -> Optional[str]:
     """Normalize orientation at ingest (D4): '' / missing -> 'unknown', None stays None."""
     if value is None:
@@ -327,7 +352,8 @@ _UPSERT_SQL = (
 
 
 def upsert_record(conn: sqlite3.Connection, record: DetectionRecord) -> None:
-    """Insert or replace one record by record_id.
+    """Insert or replace one record by record_id (replace semantics: every non-key
+    column comes from ``record``). Ingestion uses ``ingest_upsert_records`` instead.
 
     Sets created_at on first insert (preserved on conflict), always refreshes
     updated_at. Validates review_status and orientation. Commits.
@@ -345,6 +371,153 @@ def upsert_records(conn: sqlite3.Connection, records: Iterable[DetectionRecord])
     with conn:  # single transaction (commit on success, rollback on error)
         conn.executemany(_UPSERT_SQL, rows)
     return len(rows)
+
+
+# --------------------------------------------------------------------------- #
+# Stage-owned ingestion upsert (N1)
+# --------------------------------------------------------------------------- #
+# ``upsert_record(s)`` above REPLACE every non-key column (used by import/restore and
+# tests). Ingestion uses ``ingest_upsert_records`` instead, which never resets work
+# owned by later stages (species, embeddings, clusters, human review).
+
+RECORD_ID_SCHEMES: set = {"path", "legacy"}
+
+#: Columns ingestion owns: always refreshed from the incoming row on re-ingest.
+INGEST_OWNED: List[str] = [
+    "source_image", "source_stem", "det_index", "crop_path", "bbox_x", "bbox_y",
+    "bbox_w", "bbox_h", "detector_conf", "camera_id", "timestamp", "dataset",
+    "gt_identity",
+]
+#: Ingestion metadata (B-track) that may fill an empty value but never overwrites one.
+FILL_IF_NULL: List[str] = ["orientation", "species", "species_conf", "species_class"]
+#: A change in any of these means the stored crop is a different observation. A change
+#: of source frame is not "geometry": it is a collision (RecordCollisionError).
+GEOMETRY_COLS: List[str] = ["crop_path", "bbox_x", "bbox_y", "bbox_w", "bbox_h"]
+#: Values computed from the old crop; cleared (and counted) when geometry changes.
+DERIVED_FROM_CROP: List[str] = [
+    "species", "species_conf", "species_class", "embedding_ref", "embedding_path",
+    "cluster_id", "cluster_conf", "is_candidate_new",
+]
+
+
+class RecordCollisionError(ValueError):
+    """An incoming record's id already belongs to a different source frame."""
+
+
+def _scheme_key(dataset: str) -> str:
+    return f"record_id_scheme:{dataset}"
+
+
+def get_record_id_scheme(conn: sqlite3.Connection, dataset: str) -> Optional[str]:
+    """The record-id scheme recorded for ``dataset`` ('path' | 'legacy'), or None."""
+    row = conn.execute(
+        f"SELECT value FROM {META_TABLE} WHERE key = ?", (_scheme_key(dataset),)
+    ).fetchone()
+    return None if row is None else row[0]
+
+
+def set_record_id_scheme(conn: sqlite3.Connection, dataset: str, scheme: str) -> None:
+    """Record ``dataset``'s record-id scheme. Refuses to change an existing value."""
+    if scheme not in RECORD_ID_SCHEMES:
+        raise ValueError(f"record_id scheme {scheme!r} not in {sorted(RECORD_ID_SCHEMES)}")
+    current = get_record_id_scheme(conn, dataset)
+    if current == scheme:
+        return
+    if current is not None:
+        raise ValueError(
+            f"dataset {dataset!r} already uses record_id scheme {current!r}; "
+            f"refusing to switch to {scheme!r}"
+        )
+    conn.execute(
+        f"INSERT INTO {META_TABLE}(key, value) VALUES (?, ?)", (_scheme_key(dataset), scheme)
+    )
+    conn.commit()
+
+
+def _same_source(a: Optional[str], b: Optional[str]) -> bool:
+    """Same source frame, tolerating relative vs absolute spellings of one file."""
+    if a == b:
+        return True
+    if a is None or b is None:
+        return False
+    return os.path.realpath(a) == os.path.realpath(b)
+
+
+def ingest_upsert_records(conn: sqlite3.Connection,
+                          records: Iterable[DetectionRecord]) -> Dict[str, int]:
+    """Stage-owned upsert for ingestion, in one transaction. For each record:
+
+    * new record_id -> insert (``inserted``);
+    * existing id whose stored ``source_image`` is a different file ->
+      ``RecordCollisionError`` naming both paths; nothing in the batch is written;
+    * existing id, same crop geometry -> refresh INGEST_OWNED, fill FILL_IF_NULL,
+      leave every other column untouched (``refreshed``);
+    * existing id, changed crop geometry (crop_path / bbox) -> as above, plus clear
+      DERIVED_FROM_CROP (``geometry_changed``). A human review is never cleared: if
+      review_status != 'unreviewed' it is kept and
+      ``extra_json['review_needs_recheck']`` records the change (``reviews_flagged``).
+
+    Returns the four counts. ``upsert_records`` keeps its replace semantics.
+    """
+    now = _now()
+    counts = {"inserted": 0, "refreshed": 0, "geometry_changed": 0, "reviews_flagged": 0}
+    insert_sql = (
+        f"INSERT INTO {TABLE_NAME} ({', '.join(COLUMNS)}) "
+        f"VALUES ({', '.join('?' for _ in COLUMNS)})"
+    )
+    with conn:  # single transaction (commit on success, rollback on error)
+        for record in records:
+            values = _record_values(record, now=now)
+            incoming = dict(zip(COLUMNS, values))
+            row = conn.execute(
+                f"SELECT * FROM {TABLE_NAME} WHERE record_id = ?", (record.record_id,)
+            ).fetchone()
+            if row is None:
+                conn.execute(insert_sql, values)
+                counts["inserted"] += 1
+                continue
+            stored = {c: row[c] for c in COLUMNS}
+            if not _same_source(stored["source_image"], incoming["source_image"]):
+                raise RecordCollisionError(
+                    f"record_id {record.record_id!r} already belongs to "
+                    f"{stored['source_image']!r}; refusing to overwrite it with "
+                    f"{incoming['source_image']!r}"
+                )
+            updates: Dict[str, Any] = {c: incoming[c] for c in INGEST_OWNED}
+            changed = [c for c in GEOMETRY_COLS if stored[c] != incoming[c]]
+            if changed:
+                for c in DERIVED_FROM_CROP:
+                    updates[c] = None
+                counts["geometry_changed"] += 1
+                if stored["review_status"] != "unreviewed":
+                    try:
+                        extra = json.loads(stored["extra_json"] or "{}")
+                    except json.JSONDecodeError as exc:
+                        raise ValueError(
+                            f"extra_json for {record.record_id!r} is not valid JSON: {exc}"
+                        ) from exc
+                    if not isinstance(extra, dict):
+                        raise ValueError(f"extra_json for {record.record_id!r} is not a JSON object")
+                    extra["review_needs_recheck"] = {
+                        "reason": "geometry_changed",
+                        "changed": changed,
+                        "previous": {c: stored[c] for c in changed},
+                        "at": now,
+                    }
+                    updates["extra_json"] = json.dumps(extra)
+                    counts["reviews_flagged"] += 1
+            else:
+                counts["refreshed"] += 1
+            for c in FILL_IF_NULL:
+                if updates.get(c, stored[c]) is None and incoming[c] is not None:
+                    updates[c] = incoming[c]
+            updates["updated_at"] = now
+            conn.execute(
+                f"UPDATE {TABLE_NAME} SET {', '.join(f'{c} = ?' for c in updates)} "
+                f"WHERE record_id = ?",
+                (*updates.values(), record.record_id),
+            )
+    return counts
 
 
 def _require_record(conn: sqlite3.Connection, record_id: str) -> None:

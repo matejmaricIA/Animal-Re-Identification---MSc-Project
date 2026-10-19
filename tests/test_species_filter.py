@@ -411,3 +411,37 @@ def test_real_medvednica_smoke(tmp_path):
     assert "european roe deer" in res.species_breakdown
     assert res.n_classified > 0
     assert res.n_kept + res.n_dropped == res.n_classified
+
+
+# --------------------------------------------------------------------------- #
+# N1: two cameras with the same file name
+# --------------------------------------------------------------------------- #
+
+def test_speciesnet_disambiguates_by_path(tmp_path):
+    """Same stem in two cameras: each prediction lands on its own frame's record;
+    a prediction whose path matches neither frame is counted, not guessed."""
+    conn = connect(str(tmp_path / "n1.sqlite"))
+    bbox = (0.2, 0.2, 0.3, 0.3)  # identical boxes: bbox alone cannot separate them
+    for cam in ("cam_a", "cam_b"):
+        upsert_record(conn, DetectionRecord(
+            record_id=f"IMG_0001__{cam}__crop1", source_image=f"data/cams/{cam}/IMG_0001.JPG",
+            source_stem="IMG_0001", det_index=1, crop_path=f"crops/{cam}.jpg",
+            bbox_x=bbox[0], bbox_y=bbox[1], bbox_w=bbox[2], bbox_h=bbox[3],
+            detector_conf=0.9, dataset="Cams"))
+
+    def pred(path, taxon):
+        return {"filepath": path, "detections": [{
+            "bbox": list(bbox), "classifications": {"classes": [taxon], "scores": [0.9]}}]}
+
+    payload = {"predictions": [
+        pred("/mnt/archive/cam_b/IMG_0001.JPG", BOAR),
+        pred("/mnt/archive/cam_a/IMG_0001.JPG", LYNX),
+        pred("/mnt/archive/IMG_0001.JPG", ROE),  # no camera folder: ambiguous
+    ]}
+    path = tmp_path / "speciesnet.json"
+    path.write_text(json.dumps(payload))
+    res = ingest_speciesnet_json(conn, str(path), dataset="Cams", target_species="lynx")
+    assert get_record(conn, "IMG_0001__cam_a__crop1").species == "eurasian lynx"
+    assert get_record(conn, "IMG_0001__cam_b__crop1").species == "wild boar"
+    assert res.skipped_ambiguous == 1 and res.skipped_unmatched == 0
+    conn.close()

@@ -36,6 +36,7 @@ from reid_demo.store import (  # noqa: E402
     query_records,
     get_record,
     make_record_id,
+    make_scoped_record_id,
     ORIENTATIONS,
 )
 
@@ -46,6 +47,15 @@ from PIL import Image  # noqa: E402
 # --------------------------------------------------------------------------- #
 # Fixtures: synthetic images + detection JSONs
 # --------------------------------------------------------------------------- #
+
+def _find(conn, stem, det_index, dataset="SynthDS"):
+    """The single ingested record for (source_stem, det_index), or None (N1 ids are
+    path-scoped, so tests look records up instead of rebuilding ids from stems)."""
+    rows = query_records(conn, dataset=dataset, where_sql="source_stem = ? AND det_index = ?",
+                         where_params=(stem, det_index))
+    assert len(rows) <= 1, rows
+    return rows[0] if rows else None
+
 
 def _make_image(path, size=(200, 100), color=(120, 90, 60)):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -281,7 +291,10 @@ def test_ingest_end_to_end(md_json, images_dir, metadata_csv, tmp_path):
     rows = query_records(conn, dataset="SynthDS")
     assert len(rows) == 3
     for r in rows:
-        assert r.record_id == make_record_id(r.source_stem, r.det_index)
+        # Path scheme (N1): the key is the detector path, since the images sit flat.
+        frame = {"IMG_A": "Camera 1/IMG_A.JPG", "IMG_B": "Camera 2/IMG_B.JPG"}[r.source_stem]
+        assert r.record_id == make_scoped_record_id(frame, r.det_index)
+        assert r.crop_path.endswith(f"{r.record_id}.jpg")
         assert os.path.exists(r.crop_path)
         assert r.species is None and r.species_conf is None and r.species_class is None
         assert r.embedding_ref is None and r.embedding_path is None
@@ -295,16 +308,16 @@ def test_ingest_end_to_end(md_json, images_dir, metadata_csv, tmp_path):
         assert 0.0 <= r.bbox_x <= 1.0 and 0.0 <= r.bbox_w <= 1.0
 
     # Camera/timestamp resolution: IMG_A -> CSV cam_alpha; det_index 1-based.
-    a1 = get_record(conn, make_record_id("IMG_A", 1))
+    a1 = _find(conn, "IMG_A", 1)
     assert a1 is not None
     assert a1.camera_id == "cam_alpha"
     assert a1.timestamp == "2025-06-02 04:27:51"
     assert a1.detector_conf == pytest.approx(0.91)
-    a2 = get_record(conn, make_record_id("IMG_A", 2))
+    a2 = _find(conn, "IMG_A", 2)
     assert a2 is not None and a2.det_index == 2
 
     # IMG_B falls back to CSV unknown_camera (CSV present for IMG_B).
-    b1 = get_record(conn, make_record_id("IMG_B", 1))
+    b1 = _find(conn, "IMG_B", 1)
     assert b1.camera_id == "unknown_camera"
     conn.close()
 
@@ -320,7 +333,7 @@ def test_ingest_idempotent(md_json, images_dir, metadata_csv, tmp_path):
     s1 = ingest(**kwargs)
     conn = connect(db)
     n1 = len(query_records(conn, dataset="SynthDS"))
-    u1 = get_record(conn, make_record_id("IMG_A", 1)).updated_at
+    u1 = _find(conn, "IMG_A", 1).updated_at
     conn.close()
 
     s2 = ingest(**kwargs)
@@ -343,8 +356,8 @@ def test_ingest_camera_hint_fallback(md_json, images_dir, tmp_path):
         crops_out_dir=str(tmp_path / "crops"), db_path=db, dataset="SynthDS",
     )
     conn = connect(db)
-    a1 = get_record(conn, make_record_id("IMG_A", 1))
-    b1 = get_record(conn, make_record_id("IMG_B", 1))
+    a1 = _find(conn, "IMG_A", 1)
+    b1 = _find(conn, "IMG_B", 1)
     assert a1.camera_id == "Camera 1"   # from "Camera 1/IMG_A.JPG"
     assert b1.camera_id == "Camera 2"   # from "Camera 2/IMG_B.JPG"
     conn.close()
@@ -361,7 +374,7 @@ def test_ingest_reuses_legacy_crops(md_json, images_dir, tmp_path):
     stats = ingest(
         md_json=str(md_json), images_dir=str(images_dir), metadata_csv=None,
         existing_crops_dir=str(legacy), crops_out_dir=crops_out,
-        db_path=db, dataset="SynthDS",
+        db_path=db, dataset="SynthDS", record_id_scheme="legacy",  # stem-based reuse
     )
     assert stats["crops_reused"] == 1
     assert stats["crops_written"] == 2  # the other two are fresh
@@ -398,8 +411,8 @@ def test_ingest_no_crop_records_paths_without_files(md_json, images_dir, tmp_pat
     # No crop files were written.
     assert not os.path.isdir(crops_out) or not os.listdir(crops_out)
     conn = connect(db)
-    a1 = get_record(conn, make_record_id("IMG_A", 1))
-    assert a1.crop_path.endswith("IMG_A__crop1.jpg")  # path recorded, file absent
+    a1 = _find(conn, "IMG_A", 1)
+    assert a1.crop_path.endswith(f"{a1.record_id}.jpg")  # path recorded, file absent
     conn.close()
 
 
@@ -608,3 +621,177 @@ def test_constants_present():
     assert DEFAULT_DATASET == "MedvednicaDS"
     assert DEFAULT_CONF_THRESHOLD == 0.5
     assert ANIMAL_CATEGORY_ID == "1"
+
+
+# --------------------------------------------------------------------------- #
+# N1: collision-safe ids and review-preserving re-ingestion
+# --------------------------------------------------------------------------- #
+
+from reid_demo.store import (  # noqa: E402
+    get_record_id_scheme,
+    update_cluster,
+    update_embedding,
+    update_review,
+    upsert_record,
+    DetectionRecord,
+)
+
+
+def _two_camera_setup(tmp_path, *, nested=True):
+    """Two cameras, same file name, different pixels; CSV keyed by full path."""
+    images = tmp_path / "cams"
+    if nested:
+        _make_image(str(images / "cam_a" / "IMG_0001.JPG"), color=(250, 0, 0))
+        _make_image(str(images / "cam_b" / "IMG_0001.JPG"), color=(0, 0, 250))
+    else:  # flat layout: only one of the two can exist on disk
+        _make_image(str(images / "IMG_0001.JPG"), color=(250, 0, 0))
+    payload = {"detection_categories": {"1": "animal"}, "images": [
+        {"file": "cam_a/IMG_0001.JPG",
+         "detections": [{"category": "1", "conf": 0.9, "bbox": [0.1, 0.1, 0.5, 0.5]}]},
+        {"file": "cam_b/IMG_0001.JPG",
+         "detections": [{"category": "1", "conf": 0.8, "bbox": [0.2, 0.2, 0.5, 0.5]}]},
+    ]}
+    md = tmp_path / "two_cams.json"
+    md.write_text(json.dumps(payload))
+    csv_path = tmp_path / "two_cams.csv"
+    csv_path.write_text(
+        "filepath,camera,datetime\n"
+        "/archive/cam_a/IMG_0001.JPG,A,2025-06-01 01:00:00\n"
+        "/archive/cam_b/IMG_0001.JPG,B,2025-06-02 02:00:00\n"
+    )
+    return images, md, csv_path
+
+
+def test_two_cameras_same_basename_are_distinct(tmp_path):
+    images, md, csv_path = _two_camera_setup(tmp_path)
+    db = str(tmp_path / "n1.sqlite")
+    stats = ingest(md_json=str(md), images_dir=str(images), metadata_csv=str(csv_path),
+                   existing_crops_dir=None, crops_out_dir=str(tmp_path / "crops"),
+                   db_path=db, dataset="Cams")
+    assert stats["records_inserted"] == 2 and stats["record_id_scheme"] == "path"
+    assert stats["sources_ambiguous"] == 0 and stats["metadata_ambiguous"] == 0
+    conn = connect(db)
+    rows = {r.camera_id: r for r in query_records(conn, dataset="Cams")}
+    assert set(rows) == {"A", "B"}
+    assert rows["A"].record_id == make_scoped_record_id("cam_a/IMG_0001.JPG", 1)
+    assert rows["B"].record_id == make_scoped_record_id("cam_b/IMG_0001.JPG", 1)
+    assert rows["A"].timestamp == "2025-06-01 01:00:00"
+    assert rows["B"].timestamp == "2025-06-02 02:00:00"
+    assert rows["A"].crop_path != rows["B"].crop_path
+    red = Image.open(rows["A"].crop_path).convert("RGB").getpixel((5, 5))
+    blue = Image.open(rows["B"].crop_path).convert("RGB").getpixel((5, 5))
+    assert red[0] > 200 and red[2] < 50 and blue[2] > 200 and blue[0] < 50
+    assert get_record_id_scheme(conn, "Cams") == "path"
+    conn.close()
+
+
+def test_reingest_preserves_review_embedding_cluster(md_json, images_dir, metadata_csv, tmp_path):
+    """The 10 Sep reproduction, inverted: re-ingesting must not reset downstream work."""
+    db = str(tmp_path / "t02.sqlite")
+    kwargs = dict(md_json=str(md_json), images_dir=str(images_dir),
+                  metadata_csv=str(metadata_csv), existing_crops_dir=None,
+                  crops_out_dir=str(tmp_path / "crops"), db_path=db, dataset="SynthDS")
+    ingest(**kwargs)
+    conn = connect(db)
+    rid = _find(conn, "IMG_A", 1).record_id
+    update_embedding(conn, rid, rid, "emb.pkl")
+    update_cluster(conn, rid, 7, 0.9)
+    update_review(conn, rid, "confirmed", "same cat")
+    conn.close()
+
+    stats = ingest(**kwargs)
+    assert stats["records_refreshed"] == 3 and stats["records_inserted"] == 0
+    assert stats["reviews_flagged_for_recheck"] == 0
+    conn = connect(db)
+    got = get_record(conn, rid)
+    assert got.review_status == "confirmed" and got.review_note == "same cat"
+    assert got.cluster_id == 7 and got.embedding_ref == rid
+    conn.close()
+
+
+def test_reingest_geometry_change_invalidates_but_keeps_review(md_json, images_dir, tmp_path):
+    db = str(tmp_path / "t02.sqlite")
+    kwargs = dict(images_dir=str(images_dir), metadata_csv=None, existing_crops_dir=None,
+                  crops_out_dir=str(tmp_path / "crops"), db_path=db, dataset="SynthDS")
+    ingest(md_json=str(md_json), **kwargs)
+    conn = connect(db)
+    rid = _find(conn, "IMG_A", 1).record_id
+    update_embedding(conn, rid, rid, "emb.pkl")
+    update_review(conn, rid, "confirmed")
+    conn.close()
+
+    payload = json.loads(md_json.read_text())
+    payload["images"][1]["detections"][0]["bbox"] = [0.15, 0.1, 0.3, 0.4]  # IMG_A det 1 moved
+    moved = tmp_path / "md_moved.json"
+    moved.write_text(json.dumps(payload))
+    stats = ingest(md_json=str(moved), **kwargs)
+    assert stats["records_geometry_changed"] == 1 and stats["reviews_flagged_for_recheck"] == 1
+    conn = connect(db)
+    got = get_record(conn, rid)
+    assert got.bbox_x == 0.15 and got.embedding_ref is None
+    assert got.review_status == "confirmed"
+    assert json.loads(got.extra_json)["review_needs_recheck"]["reason"] == "geometry_changed"
+    conn.close()
+
+
+def test_legacy_scheme_batch_collision_raises(tmp_path):
+    images, md, csv_path = _two_camera_setup(tmp_path)
+    with pytest.raises(ValueError, match="legacy"):
+        ingest(md_json=str(md), images_dir=str(images), metadata_csv=str(csv_path),
+               existing_crops_dir=None, crops_out_dir=str(tmp_path / "crops"),
+               db_path=str(tmp_path / "n1.sqlite"), dataset="Cams", record_id_scheme="legacy")
+
+
+def test_existing_dataset_requires_explicit_scheme(md_json, images_dir, tmp_path):
+    """A dataset with rows from before schemes were tracked must opt into 'legacy'."""
+    db = str(tmp_path / "old.sqlite")
+    conn = connect(db)
+    upsert_record(conn, DetectionRecord(
+        record_id=make_record_id("IMG_A", 1),
+        source_image=os.path.join(str(images_dir), "IMG_A.JPG"), source_stem="IMG_A",
+        det_index=1, crop_path="old.jpg", bbox_x=0.1, bbox_y=0.1, bbox_w=0.3, bbox_h=0.4,
+        dataset="SynthDS"))
+    conn.close()
+    kwargs = dict(md_json=str(md_json), images_dir=str(images_dir), metadata_csv=None,
+                  existing_crops_dir=None, crops_out_dir=str(tmp_path / "crops"),
+                  db_path=db, dataset="SynthDS")
+    with pytest.raises(ValueError, match="record_id_scheme='legacy'"):
+        ingest(**kwargs)
+    with pytest.raises(ValueError):
+        ingest(record_id_scheme="path", **kwargs)
+    stats = ingest(record_id_scheme="legacy", **kwargs)
+    assert stats["record_id_scheme"] == "legacy"
+    assert stats["records_inserted"] == 2 and stats["records_geometry_changed"] == 1
+    conn = connect(db)
+    assert len(query_records(conn, dataset="SynthDS")) == 3   # no duplicates
+    assert get_record_id_scheme(conn, "SynthDS") == "legacy"
+    conn.close()
+
+
+def test_scheme_conflict_with_recorded_scheme_raises(md_json, images_dir, tmp_path):
+    db = str(tmp_path / "t02.sqlite")
+    kwargs = dict(md_json=str(md_json), images_dir=str(images_dir), metadata_csv=None,
+                  existing_crops_dir=None, crops_out_dir=str(tmp_path / "crops"),
+                  db_path=db, dataset="SynthDS")
+    ingest(**kwargs)
+    with pytest.raises(ValueError, match="uses record_id_scheme 'path'"):
+        ingest(record_id_scheme="legacy", **kwargs)
+
+
+def test_ambiguous_flat_fallback_skipped(tmp_path):
+    """Flat layout + two detector paths with one basename: neither frame can be told
+    apart on disk, so both are skipped and counted instead of overwriting each other."""
+    images, md, _ = _two_camera_setup(tmp_path, nested=False)
+    stats = ingest(md_json=str(md), images_dir=str(images), metadata_csv=None,
+                   existing_crops_dir=None, crops_out_dir=str(tmp_path / "crops"),
+                   db_path=str(tmp_path / "n1.sqlite"), dataset="Cams")
+    assert stats["sources_ambiguous"] == 2 and stats["records_upserted"] == 0
+
+
+def test_path_scheme_ignores_stem_based_legacy_crops(md_json, images_dir, tmp_path):
+    legacy = tmp_path / "legacy"
+    _make_image(str(legacy / "IMG_A_crop1_conf91.jpg"), size=(40, 40))
+    stats = ingest(md_json=str(md_json), images_dir=str(images_dir), metadata_csv=None,
+                   existing_crops_dir=str(legacy), crops_out_dir=str(tmp_path / "crops"),
+                   db_path=str(tmp_path / "t02.sqlite"), dataset="SynthDS")
+    assert stats["crops_reused"] == 0 and stats["crops_written"] == 3

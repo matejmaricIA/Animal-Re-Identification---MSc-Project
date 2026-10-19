@@ -15,9 +15,22 @@ Four input adapters:
       ATRW) ingested WHOLE-FRAME with ground-truth identity/orientation/species.
 
 ``det_index`` is **1-based**, assigned over the kept (animal, above-threshold)
-detections in MegaDetector source-file order. This matches the existing
-``…_crop1_conf…jpg`` naming and the T01 ``make_record_id`` contract:
-``record_id == make_record_id(source_stem, det_index) == f"{source_stem}__crop{det_index}"``.
+detections in MegaDetector source-file order.
+
+Record ids follow the dataset's record-id scheme (N1, recorded in the store's meta
+table on first ingest):
+  * ``path`` (default for a new dataset):
+    ``record_id == make_scoped_record_id(source_key, det_index)
+    == f"{stem}__{sha1(source_key)[:10]}__crop{det_index}"``, where ``source_key`` is the
+    frame's path relative to ``images_dir`` (or the detector's relative path when the
+    images sit flat on disk). Two cameras' ``IMG_0001.JPG`` get different ids.
+  * ``legacy``: ``make_record_id(source_stem, det_index) == f"{source_stem}__crop{det_index}"``
+    (matches the existing ``…_crop1_conf…jpg`` naming). Required explicitly for a dataset
+    ingested before schemes were tracked. Two sources sharing a stem raise instead of
+    overwriting each other.
+
+Re-ingestion goes through ``store.ingest_upsert_records``: it refreshes only the columns
+ingestion owns and never resets species, embeddings, clusters or human reviews.
 
 Field-population contract (which columns T02 sets):
   * A-track (MegaDetector / flat / raw-image): record_id, source_image, source_stem,
@@ -44,6 +57,7 @@ import json
 import os
 import sys
 import tempfile
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -52,8 +66,10 @@ from reid_demo.store import (
     DetectionRecord,
     ORIENTATIONS,
     connect,
+    ingest_upsert_records,
     make_record_id,
-    upsert_records,
+    make_scoped_record_id,
+    make_source_key,
 )
 
 # --------------------------------------------------------------------------- #
@@ -109,6 +125,7 @@ def load_detection_frames(
     OR the flat ``animal_detections.json`` format into a normalized list of frame dicts:
 
         {"source_basename": "IMG_0066.JPG",
+         "source_relpath": "Camera 1/IMG_0066.JPG",   # full detector path, POSIX
          "camera_hint": "Camera 1" | None,
          "timestamp": "2025-06-02 04:27:51" | None,
          "animal_dets": [ {"det_index": int (1-based), "bbox": [x,y,w,h],
@@ -171,6 +188,7 @@ def load_detection_frames(
 
             frames.append({
                 "source_basename": basename,
+                "source_relpath": Path(file_field).as_posix(),
                 "camera_hint": camera_hint,
                 "timestamp": rec.get("timestamp"),
                 "animal_dets": animal_dets,
@@ -201,6 +219,7 @@ def load_detection_frames(
                     n_below += 1
             frames.append({
                 "source_basename": basename,
+                "source_relpath": Path(basename).as_posix(),
                 "camera_hint": None,
                 "timestamp": None,
                 "animal_dets": animal_dets,
@@ -294,7 +313,14 @@ def resolve_metadata(
     parsed from ``trail_cam_data.csv`` (match by basename of the ``filepath`` column;
     ``camera`` -> camera_id, ``datetime`` -> timestamp). Returns ``{}`` if the csv is
     missing or None. Uses the stdlib ``csv`` module (no pandas dependency)."""
-    out: Dict[str, Dict[str, Optional[str]]] = {}
+    return {Path(path).name: row for path, row in _metadata_rows(metadata_csv)}
+
+
+def _metadata_rows(
+    metadata_csv: Optional[str],
+) -> List[Tuple[str, Dict[str, Optional[str]]]]:
+    """``[(posix filepath, {"camera_id", "timestamp"}), ...]`` in CSV order."""
+    out: List[Tuple[str, Dict[str, Optional[str]]]] = []
     if not metadata_csv or not os.path.exists(metadata_csv):
         return out
     import csv as _csv
@@ -304,13 +330,38 @@ def resolve_metadata(
             filepath = row.get("filepath") or ""
             if not filepath:
                 continue
-            basename = Path(filepath).name
             camera = row.get("camera")
             camera = camera if camera not in (None, "") else None
             ts = row.get("datetime")
             ts = ts if ts not in (None, "") else None
-            out[basename] = {"camera_id": camera, "timestamp": ts}
+            out.append((Path(filepath).as_posix(), {"camera_id": camera, "timestamp": ts}))
     return out
+
+
+class _MetadataIndex:
+    """Path-aware metadata lookup for the ``path`` record-id scheme (N1).
+
+    A CSV row matches a frame when its filepath equals the frame's source key or ends
+    with ``/<source key>``. The old basename lookup is used only when the basename is
+    unique both in the CSV and in the ingest batch, so one camera's metadata can never be
+    attached to another camera's frame of the same name."""
+
+    def __init__(self, rows: List[Tuple[str, Dict[str, Optional[str]]]]):
+        self.by_basename: Dict[str, List[Tuple[str, Dict[str, Optional[str]]]]] = defaultdict(list)
+        for path, row in rows:
+            self.by_basename[Path(path).name].append((path, row))
+
+    def lookup(self, source_key: str, *, unique_in_batch: bool
+               ) -> Tuple[Optional[Dict[str, Optional[str]]], bool]:
+        """Return ``(row or None, ambiguous)``."""
+        candidates = self.by_basename.get(Path(source_key).name, [])
+        matches = {json.dumps(r, sort_keys=True): r for p, r in candidates
+                   if p == source_key or p.endswith("/" + source_key)}
+        if len(matches) == 1:
+            return next(iter(matches.values())), False
+        if not matches and len(candidates) == 1 and unique_in_batch:
+            return candidates[0][1], False
+        return None, bool(candidates)
 
 
 def _resolve_camera(meta_row: Optional[Dict[str, Optional[str]]],
@@ -350,10 +401,91 @@ def _empty_stats(dataset: str, db_path: str) -> Dict[str, Any]:
         "crops_written": 0,
         "crops_reused": 0,
         "crops_missing_source": 0,
+        "sources_ambiguous": 0,
+        "metadata_ambiguous": 0,
         "records_upserted": 0,
+        "records_inserted": 0,
+        "records_refreshed": 0,
+        "records_geometry_changed": 0,
+        "reviews_flagged_for_recheck": 0,
+        "record_id_scheme": None,
         "dataset": dataset,
         "db_path": db_path,
     }
+
+
+def _resolve_record_id_scheme(conn, dataset: str, requested: Optional[str]) -> str:
+    """The record-id scheme for this ingest (N1).
+
+    A dataset's recorded scheme wins; a conflicting request raises. A dataset that
+    already has rows but no recorded scheme was ingested with stem-based ids, so it needs
+    an explicit ``legacy`` request (re-keying it to ``path`` would duplicate every
+    record). A new dataset defaults to ``path``."""
+    if requested is not None and requested not in store.RECORD_ID_SCHEMES:
+        raise ValueError(
+            f"record_id_scheme {requested!r} not in {sorted(store.RECORD_ID_SCHEMES)}")
+    recorded = store.get_record_id_scheme(conn, dataset)
+    if recorded is not None:
+        if requested is not None and requested != recorded:
+            raise ValueError(
+                f"dataset {dataset!r} uses record_id_scheme {recorded!r}; got {requested!r}")
+        return recorded
+    has_rows = bool(store.query_records(conn, dataset=dataset, limit=1))
+    if has_rows and requested != "legacy":
+        raise ValueError(
+            f"dataset {dataset!r} already has records with stem-based ids from before "
+            "record-id schemes were tracked. Re-ingest with record_id_scheme='legacy' "
+            "(CLI: --record-id-scheme legacy) to keep its ids; colliding file names are "
+            "then refused instead of overwritten."
+        )
+    return requested or "path"
+
+
+def _basename_counts(frames: List[Dict[str, Any]]) -> Counter:
+    """How many distinct detector paths share each basename in this batch."""
+    return Counter(Path(rel).name for rel in {f["source_relpath"] for f in frames})
+
+
+def _resolve_source(frame: Dict[str, Any], images_dir: str,
+                    unique_basename: bool) -> Tuple[Optional[str], Optional[str]]:
+    """``(source image path, source key)`` for the ``path`` scheme, or ``(None, None)``
+    when the frame cannot be told apart from another frame of the same name.
+
+    Tries the detector's path under ``images_dir``, then as given (absolute or relative
+    to the working directory). If neither exists, falls back to ``images_dir/<basename>``
+    (flat on-disk layouts such as Medvednica, whose detector paths keep camera folders)
+    only when the basename is unique in the batch; the key is then the detector path.
+    A missing file is reported by the caller as ``crops_missing_source``."""
+    rel = frame["source_relpath"]
+    candidates = [rel] if os.path.isabs(rel) else [os.path.join(images_dir, rel), rel]
+    for candidate in candidates:
+        if os.path.isfile(candidate):
+            return candidate, make_source_key(candidate, images_dir)
+    if unique_basename:
+        return os.path.join(images_dir, frame["source_basename"]), Path(rel).as_posix()
+    return None, None
+
+
+def _check_legacy_collisions(frames: List[Dict[str, Any]]) -> None:
+    """Legacy scheme: refuse a batch in which distinct sources share a stem."""
+    by_stem: Dict[str, set] = defaultdict(set)
+    for frame in frames:
+        by_stem[Path(frame["source_basename"]).stem].add(frame["source_relpath"])
+    clashes = {stem: sorted(paths) for stem, paths in by_stem.items() if len(paths) > 1}
+    if clashes:
+        raise ValueError(
+            "record_id_scheme 'legacy' would give distinct source frames the same id "
+            f"(stem -> sources): {clashes}"
+        )
+
+
+def _apply_upsert_counts(stats: Dict[str, Any], counts: Dict[str, int]) -> None:
+    stats["records_inserted"] = counts["inserted"]
+    stats["records_refreshed"] = counts["refreshed"]
+    stats["records_geometry_changed"] = counts["geometry_changed"]
+    stats["reviews_flagged_for_recheck"] = counts["reviews_flagged"]
+    stats["records_upserted"] = (
+        counts["inserted"] + counts["refreshed"] + counts["geometry_changed"])
 
 
 def ingest(
@@ -368,17 +500,23 @@ def ingest(
     conf_threshold: float = DEFAULT_CONF_THRESHOLD,
     write_crops: bool = True,               # False -> record paths only, no JPGs
     limit: Optional[int] = None,            # cap on number of SOURCE frames (debug)
+    record_id_scheme: Optional[str] = None,  # None -> dataset's recorded scheme / 'path'
 ) -> Dict[str, Any]:
     """Run the full A-track ingestion: load/filter detections, crop (reusing legacy
-    crops where present), resolve camera/timestamp, and upsert one ``DetectionRecord``
-    per kept crop into the store. Returns a stats dict (see ``IngestStats`` keys).
-    Opens the store via ``reid_demo.store.connect()``.
+    crops where present, ``legacy`` scheme only), resolve camera/timestamp, and upsert one
+    ``DetectionRecord`` per kept crop into the store via
+    ``store.ingest_upsert_records`` (re-ingesting never resets downstream stages or
+    reviews). Returns a stats dict. Opens the store via ``reid_demo.store.connect()``.
 
     ``limit`` caps the number of source frames that contribute at least one kept
     animal detection (i.e. frames that actually produce work). Fully-empty frames are
     still scanned for the ``frames_total`` / ``frames_empty`` / ``pct_empty`` stats but
     do not consume the limit budget, so a small ``--limit`` on empty-heavy data (the
     Medvednica JSON opens with dozens of empty frames) still produces crops.
+
+    ``record_id_scheme``: see the module docstring. Frames that the ``path`` scheme
+    cannot tell apart (same basename, flat layout) are skipped and counted in
+    ``sources_ambiguous``; ambiguous CSV metadata is not attached (``metadata_ambiguous``).
     """
     if md_json is None:
         raise ValueError("ingest() requires md_json (or use ingest_from_images).")
@@ -389,94 +527,121 @@ def ingest(
     stats = _empty_stats(dataset, resolved_db)
 
     frames = load_detection_frames(md_json, conf_threshold=conf_threshold)
-    meta = resolve_metadata(metadata_csv)
-
-    records: List[DetectionRecord] = []
-    frames_with_animals_consumed = 0
-
-    for frame in frames:
-        basename = frame["source_basename"]
-        animal_dets = frame["animal_dets"]
-
-        # Stats over ALL frames (limit-independent denominators for pct_empty).
-        stats["frames_total"] += 1
-        stats["dets_person"] += frame.get("n_person", 0)
-        stats["dets_vehicle"] += frame.get("n_vehicle", 0)
-        stats["dets_below_threshold"] += frame.get("n_below_threshold", 0)
-        stats["dets_animal"] += len(animal_dets)
-        stats["dets_total"] += (
-            len(animal_dets) + frame.get("n_person", 0)
-            + frame.get("n_vehicle", 0) + frame.get("n_below_threshold", 0)
-        )
-        if not animal_dets:
-            stats["frames_empty"] += 1
-            continue
-        stats["frames_with_animals"] += 1
-
-        # Apply the limit over frames that actually do work.
-        if limit is not None and frames_with_animals_consumed >= limit:
-            continue
-        frames_with_animals_consumed += 1
-
-        stem = Path(basename).stem
-        source_image_path = os.path.join(images_dir, basename)
-        meta_row = meta.get(basename)
-        camera_id = _resolve_camera(meta_row, frame.get("camera_hint"))
-        timestamp = _resolve_timestamp(meta_row, frame.get("timestamp"))
-        source_exists = os.path.exists(source_image_path)
-
-        for det in animal_dets:
-            det_index = det["det_index"]
-            bbox = det["bbox"]
-            legacy = _find_legacy_crop(existing_crops_dir, stem, det_index)
-            new_crop_path = os.path.join(crops_out_dir, f"{stem}__crop{det_index}.jpg")
-
-            crop_path: Optional[str] = None
-            if legacy is not None:
-                crop_path = legacy
-                stats["crops_reused"] += 1
-            elif source_exists:
-                try:
-                    crop_path = crop_for_detection(
-                        source_image_path, tuple(bbox), new_crop_path,
-                        existing_crop_path=None, write=write_crops,
-                    )
-                    if write_crops:
-                        stats["crops_written"] += 1
-                    else:
-                        # No file written, but the record points at the path it WOULD
-                        # have; count it as written for record-completeness.
-                        stats["crops_written"] += 1
-                except (ValueError, OSError):
-                    # Degenerate box or unreadable image: skip this detection.
-                    stats["crops_missing_source"] += 1
-                    crop_path = None
-            else:
-                # No legacy crop and the source frame is missing on disk: skip.
-                stats["crops_missing_source"] += 1
-                crop_path = None
-
-            if crop_path is None:
-                continue  # a record must always point at a real crop path
-
-            bx, by, bw, bh = (float(v) for v in bbox)
-            records.append(DetectionRecord(
-                record_id=make_record_id(stem, det_index),
-                source_image=source_image_path,
-                source_stem=stem,
-                det_index=det_index,
-                crop_path=crop_path,
-                bbox_x=bx, bbox_y=by, bbox_w=bw, bbox_h=bh,
-                detector_conf=det["conf"],
-                camera_id=camera_id,
-                timestamp=timestamp,
-                orientation="unknown",
-                dataset=dataset,
-            ))
-
     conn = connect(resolved_db)
     try:
-        stats["records_upserted"] = upsert_records(conn, records)
+        scheme = _resolve_record_id_scheme(conn, dataset, record_id_scheme)
+        stats["record_id_scheme"] = scheme
+        meta = resolve_metadata(metadata_csv) if scheme == "legacy" else None
+        meta_index = _MetadataIndex(_metadata_rows(metadata_csv)) if scheme == "path" else None
+        basename_counts = _basename_counts(frames)
+
+        records: List[DetectionRecord] = []
+        working_frames: List[Dict[str, Any]] = []
+        frames_with_animals_consumed = 0
+
+        for frame in frames:
+            animal_dets = frame["animal_dets"]
+
+            # Stats over ALL frames (limit-independent denominators for pct_empty).
+            stats["frames_total"] += 1
+            stats["dets_person"] += frame.get("n_person", 0)
+            stats["dets_vehicle"] += frame.get("n_vehicle", 0)
+            stats["dets_below_threshold"] += frame.get("n_below_threshold", 0)
+            stats["dets_animal"] += len(animal_dets)
+            stats["dets_total"] += (
+                len(animal_dets) + frame.get("n_person", 0)
+                + frame.get("n_vehicle", 0) + frame.get("n_below_threshold", 0)
+            )
+            if not animal_dets:
+                stats["frames_empty"] += 1
+                continue
+            stats["frames_with_animals"] += 1
+
+            # Apply the limit over frames that actually do work.
+            if limit is not None and frames_with_animals_consumed >= limit:
+                continue
+            frames_with_animals_consumed += 1
+            working_frames.append(frame)
+
+        if scheme == "legacy":
+            _check_legacy_collisions(working_frames)
+
+        for frame in working_frames:
+            basename = frame["source_basename"]
+            animal_dets = frame["animal_dets"]
+            if scheme == "path":
+                unique = basename_counts[basename] == 1
+                source_image_path, source_key = _resolve_source(frame, images_dir, unique)
+                if source_key is None:
+                    stats["sources_ambiguous"] += len(animal_dets)
+                    continue
+                stem = Path(source_key).stem
+                meta_row, ambiguous = meta_index.lookup(source_key, unique_in_batch=unique)
+                stats["metadata_ambiguous"] += int(ambiguous)
+            else:
+                stem = Path(basename).stem
+                source_key = None
+                source_image_path = os.path.join(images_dir, basename)
+                meta_row = meta.get(basename)
+            camera_id = _resolve_camera(meta_row, frame.get("camera_hint"))
+            timestamp = _resolve_timestamp(meta_row, frame.get("timestamp"))
+            source_exists = os.path.exists(source_image_path)
+
+            for det in animal_dets:
+                det_index = det["det_index"]
+                bbox = det["bbox"]
+                record_id = (make_scoped_record_id(source_key, det_index) if scheme == "path"
+                             else make_record_id(stem, det_index))
+                # Stem-based legacy crops are only safe under the legacy scheme.
+                legacy = (_find_legacy_crop(existing_crops_dir, stem, det_index)
+                          if scheme == "legacy" else None)
+                new_crop_path = os.path.join(crops_out_dir, f"{record_id}.jpg")
+
+                crop_path: Optional[str] = None
+                if legacy is not None:
+                    crop_path = legacy
+                    stats["crops_reused"] += 1
+                elif source_exists:
+                    try:
+                        crop_path = crop_for_detection(
+                            source_image_path, tuple(bbox), new_crop_path,
+                            existing_crop_path=None, write=write_crops,
+                        )
+                        if write_crops:
+                            stats["crops_written"] += 1
+                        else:
+                            # No file written, but the record points at the path it WOULD
+                            # have; count it as written for record-completeness.
+                            stats["crops_written"] += 1
+                    except (ValueError, OSError):
+                        # Degenerate box or unreadable image: skip this detection.
+                        stats["crops_missing_source"] += 1
+                        crop_path = None
+                else:
+                    # No legacy crop and the source frame is missing on disk: skip.
+                    stats["crops_missing_source"] += 1
+                    crop_path = None
+
+                if crop_path is None:
+                    continue  # a record must always point at a real crop path
+
+                bx, by, bw, bh = (float(v) for v in bbox)
+                records.append(DetectionRecord(
+                    record_id=record_id,
+                    source_image=source_image_path,
+                    source_stem=stem,
+                    det_index=det_index,
+                    crop_path=crop_path,
+                    bbox_x=bx, bbox_y=by, bbox_w=bw, bbox_h=bh,
+                    detector_conf=det["conf"],
+                    camera_id=camera_id,
+                    timestamp=timestamp,
+                    orientation="unknown",
+                    dataset=dataset,
+                ))
+
+        _apply_upsert_counts(stats, ingest_upsert_records(conn, records))
+        store.set_record_id_scheme(conn, dataset, scheme)
     finally:
         conn.close()
 
@@ -618,6 +783,7 @@ def ingest_wildlife_dataset(
     limit: Optional[int] = None,
     db_path: Optional[str] = None,   # None -> store.DEFAULT_DB_PATH
     dataset: Optional[str] = None,   # store --dataset label; defaults to `subset`
+    record_id_scheme: Optional[str] = None,  # None -> dataset's recorded scheme / 'path'
 ) -> Dict[str, Any]:
     """FOURTH adapter. Ingest a labeled WildlifeReID-10k subset (e.g. 'LeopardID2022',
     'ATRW') as GROUND-TRUTH re-id data, creating ONE WHOLE-FRAME ``DetectionRecord``
@@ -626,7 +792,8 @@ def ingest_wildlife_dataset(
       * bbox = (0.0, 0.0, 1.0, 1.0)   — the whole frame IS the crop
       * crop_path = the ORIGINAL full image path on disk (no cropping, no MegaDetector)
       * detector_conf = 1.0
-      * det_index = 1, record_id = make_record_id(source_stem, 1)
+      * det_index = 1; record_id = make_scoped_record_id(<dataset-relative path>, 1)
+        under the ``path`` scheme, make_record_id(source_stem, 1) under ``legacy``
       * gt_identity = metadata 'identity'
       * orientation = metadata 'orientation', with ''/missing/NaN -> 'unknown'
       * species     = metadata 'species'
@@ -635,6 +802,7 @@ def ingest_wildlife_dataset(
     Loads the subset via ``utility_functions.load_dataset(subset)``; if that loader
     returns the curated metadata WITHOUT orientation/species columns, those fields are
     enriched from the authoritative WildlifeReID10k metadata (joined by path).
+    Records are written with ``store.ingest_upsert_records`` (see the module docstring).
 
     ``max_identities`` caps the number of DISTINCT identities ingested (first N in
     sorted order, deterministic; used by T10 ``--smoke``). ``limit`` caps the number of
@@ -680,14 +848,50 @@ def ingest_wildlife_dataset(
     has_orientation = "orientation" in df.columns
     has_species = "species" in df.columns
 
+    rows_to_ingest = [
+        row for _, row in df.iterrows()
+        if not (row["path"] is None or (isinstance(row["path"], float) and row["path"] != row["path"]))
+    ]
+
+    conn = connect(resolved_db)
+    try:
+        scheme = _resolve_record_id_scheme(conn, label, record_id_scheme)
+        if scheme == "legacy":
+            _check_legacy_collisions([
+                {"source_basename": Path(str(r["path"])).name,
+                 "source_relpath": Path(str(r["path"])).as_posix()} for r in rows_to_ingest])
+        records = _wildlife_records(rows_to_ingest, image_root, label, scheme,
+                                    has_orientation, has_species)
+        upsert_stats: Dict[str, Any] = {}
+        _apply_upsert_counts(upsert_stats, ingest_upsert_records(conn, records))
+        store.set_record_id_scheme(conn, label, scheme)
+    finally:
+        conn.close()
+
+    stats = {
+        "images_total": images_total,
+        "images_ingested": len(records),
+        "identities_total": identities_total,
+        "identities_ingested": identities_ingested,
+        **upsert_stats,
+        "record_id_scheme": scheme,
+        "subset": subset,
+        "dataset": label,
+        "db_path": resolved_db,
+    }
+    _print_bt_stats(stats)
+    return stats
+
+
+def _wildlife_records(rows, image_root: str, label: str, scheme: str,
+                      has_orientation: bool, has_species: bool) -> List[DetectionRecord]:
+    """B-track DetectionRecords (whole frame = crop) for ``ingest_wildlife_dataset``."""
     records: List[DetectionRecord] = []
-    images_ingested = 0
-    for _, row in df.iterrows():
+    for row in rows:
         rel_path = row["path"]
-        if rel_path is None or (isinstance(rel_path, float) and rel_path != rel_path):
-            continue
         abs_path = os.path.join(image_root, str(rel_path))
-        stem = Path(str(rel_path)).stem
+        source_key = make_source_key(abs_path, image_root)
+        stem = Path(source_key).stem
 
         orientation = (
             _normalize_bt_orientation(row["orientation"]) if has_orientation else "unknown"
@@ -703,7 +907,8 @@ def ingest_wildlife_dataset(
         gt_identity = None if gt_identity is None else str(gt_identity)
 
         records.append(DetectionRecord(
-            record_id=make_record_id(stem, 1),
+            record_id=(make_scoped_record_id(source_key, 1) if scheme == "path"
+                       else make_record_id(stem, 1)),
             source_image=abs_path,
             source_stem=stem,
             det_index=1,
@@ -715,26 +920,7 @@ def ingest_wildlife_dataset(
             species=species,
             dataset=label,
         ))
-        images_ingested += 1
-
-    conn = connect(resolved_db)
-    try:
-        records_upserted = upsert_records(conn, records)
-    finally:
-        conn.close()
-
-    stats = {
-        "images_total": images_total,
-        "images_ingested": images_ingested,
-        "identities_total": identities_total,
-        "identities_ingested": identities_ingested,
-        "records_upserted": records_upserted,
-        "subset": subset,
-        "dataset": label,
-        "db_path": resolved_db,
-    }
-    _print_bt_stats(stats)
-    return stats
+    return records
 
 
 # --------------------------------------------------------------------------- #
@@ -758,7 +944,18 @@ def _print_stats(stats: Dict[str, Any]) -> None:
     print(f"  crops_written:        {stats['crops_written']}")
     print(f"  crops_reused:         {stats['crops_reused']}")
     print(f"  crops_missing_source: {stats['crops_missing_source']}")
+    print(f"  sources_ambiguous:    {stats['sources_ambiguous']}")
+    print(f"  metadata_ambiguous:   {stats['metadata_ambiguous']}")
+    _print_upsert_stats(stats)
+
+
+def _print_upsert_stats(stats: Dict[str, Any]) -> None:
+    print(f"  record_id_scheme:     {stats['record_id_scheme']}")
     print(f"  records_upserted:     {stats['records_upserted']}")
+    print(f"    inserted:           {stats['records_inserted']}")
+    print(f"    refreshed:          {stats['records_refreshed']}")
+    print(f"    geometry_changed:   {stats['records_geometry_changed']}")
+    print(f"  reviews_flagged_for_recheck: {stats['reviews_flagged_for_recheck']}")
 
 
 def _print_bt_stats(stats: Dict[str, Any]) -> None:
@@ -770,7 +967,7 @@ def _print_bt_stats(stats: Dict[str, Any]) -> None:
     print(f"  images_ingested:      {stats['images_ingested']}")
     print(f"  identities_total:     {stats['identities_total']}")
     print(f"  identities_ingested:  {stats['identities_ingested']}")
-    print(f"  records_upserted:     {stats['records_upserted']}")
+    _print_upsert_stats(stats)
 
 
 # --------------------------------------------------------------------------- #
@@ -810,6 +1007,11 @@ def _build_parser() -> argparse.ArgumentParser:
                         help="cap on number of source frames / images (debug).")
     parser.add_argument("--max-identities", type=int, default=None,
                         help="B-track: cap on distinct identities ingested.")
+    parser.add_argument("--record-id-scheme", choices=sorted(store.RECORD_ID_SCHEMES),
+                        default=None,
+                        help="record-id scheme: 'path' (collision-safe; default for a new "
+                             "dataset) or 'legacy' (stem-based; required for a dataset "
+                             "ingested before schemes were tracked).")
     parser.add_argument("--report-json", default=None,
                         help="also write the stats dict to this JSON path.")
     return parser
@@ -828,6 +1030,7 @@ def _main(argv: Optional[List[str]] = None) -> int:
                 limit=args.limit,
                 db_path=args.db,
                 dataset=args.dataset,   # defaults to subset inside the adapter
+                record_id_scheme=args.record_id_scheme,
             )
         # Raw-image path: --images-dir given but no --md-json.
         elif args.md_json is None and args.images_dir and args.images_dir != DEFAULT_IMAGES_DIR:
@@ -841,6 +1044,7 @@ def _main(argv: Optional[List[str]] = None) -> int:
                 conf_threshold=args.conf_threshold,
                 write_crops=not args.no_crop,
                 limit=args.limit,
+                record_id_scheme=args.record_id_scheme,
             )
         # A-track JSON path (default).
         else:
@@ -855,6 +1059,7 @@ def _main(argv: Optional[List[str]] = None) -> int:
                 conf_threshold=args.conf_threshold,
                 write_crops=not args.no_crop,
                 limit=args.limit,
+                record_id_scheme=args.record_id_scheme,
             )
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
         print(f"[ingest] FATAL: {exc}", file=sys.stderr)

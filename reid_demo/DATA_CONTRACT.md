@@ -32,7 +32,7 @@ same order. NOT NULL / DEFAULT constraints exist but the SQLite `type` (PRAGMA
 
 | # | column | sqlite type | python type | nullable | written by | meaning / allowed values |
 |---|--------|-------------|-------------|----------|------------|--------------------------|
-| 1 | `record_id` | TEXT PRIMARY KEY | str | no | T02 | `make_record_id(stem, det_index)` → `f"{source_stem}__crop{det_index}"`. Stable across re-runs. Whole-frame B-track record → `det_index == 1`. |
+| 1 | `record_id` | TEXT PRIMARY KEY | str | no | T02 | Per the dataset's record-id scheme (N1): `path` (default for a new dataset) → `make_scoped_record_id(source_key, det_index)` = `f"{stem}__{sha1(source_key)[:10]}__crop{det_index}"`; `legacy` → `make_record_id(stem, det_index)` = `f"{source_stem}__crop{det_index}"`. Stable across re-runs. Whole-frame B-track record → `det_index == 1`. |
 | 2 | `source_image` | TEXT | str | no | T02 | Path to the original full frame (relative to repo root or absolute). |
 | 3 | `source_stem` | TEXT | str | no | T02 | Filename stem of the source image, no extension (e.g. `IMG_0066`). |
 | 4 | `det_index` | INTEGER | int | no | T02 | **BINDING (D3):** 1-based index over **KEPT ANIMAL detections in MegaDetector source-file order**. Matches the `crop1`-based crop filenames. Whole-frame B-track record → `1`. T03's join does NOT rely on positional `det_index`. |
@@ -162,7 +162,12 @@ def update_cluster(conn, record_id, cluster_id, cluster_conf, is_candidate_new=0
 def update_review(conn, record_id, review_status, review_note=None, cluster_id=None) -> None: ...
 def update_extra(conn, record_id, key, value) -> None: ...   # merge one key into extra_json; never raw SQL
 def count_by(conn, column, *, dataset=None) -> dict: ...
-def make_record_id(source_stem: str, det_index: int) -> str: ...
+def make_record_id(source_stem: str, det_index: int) -> str: ...          # legacy scheme
+def make_source_key(source_path: str, root: Optional[str] = None) -> str: ...  # N1
+def make_scoped_record_id(source_key: str, det_index: int) -> str: ...    # path scheme (N1)
+def ingest_upsert_records(conn, records) -> Dict[str, int]: ...          # stage-owned upsert (N1)
+def get_record_id_scheme(conn, dataset) -> Optional[str]: ...
+def set_record_id_scheme(conn, dataset, scheme) -> None: ...             # refuses to change it
 def export_records(conn, out_path, *, fmt="parquet", dataset=None) -> str: ...
 def import_records(conn, in_path: str) -> int: ...
 def to_dataframe(conn, *, dataset=None): ...                 # pandas DataFrame in COLUMNS order
@@ -178,6 +183,23 @@ def to_dataframe(conn, *, dataset=None): ...                 # pandas DataFrame 
   `REVIEW_STATUSES` and `orientation` ∈ `ORIENTATIONS ∪ {None}` (raise `ValueError`);
   `orientation=''` is normalized to `'unknown'`, not rejected. Bbox ranges are warned
   on, never hard-rejected.
+- `upsert_record`/`upsert_records` have **replace** semantics: every non-key column
+  comes from the incoming record. They are for import/restore and tests. Ingestion (T02)
+  uses `ingest_upsert_records` instead (N1, 19 Oct 2026):
+  - columns owned by ingestion (`INGEST_OWNED`: source, crop path, bbox, detector conf,
+    camera, timestamp, dataset, gt_identity) are refreshed on re-ingest;
+  - `orientation` and `species*` are filled only if NULL (`FILL_IF_NULL`);
+  - embeddings, clusters, `is_candidate_new`, review fields and `extra_json` are never
+    touched by re-ingestion;
+  - if the crop geometry changed (`crop_path`/bbox), the values derived from the old crop
+    (species, embedding, cluster) are cleared; a human review is kept and
+    `extra_json['review_needs_recheck']` records what changed;
+  - an existing `record_id` whose `source_image` is a different file raises
+    `RecordCollisionError` and the whole batch is rolled back.
+- Record-id scheme (N1): stored per dataset in the `meta` table under
+  `record_id_scheme:<dataset>` (no schema change). A new dataset defaults to `path`;
+  a dataset ingested before schemes were tracked must be re-ingested with
+  `--record-id-scheme legacy`, which refuses distinct sources sharing a stem.
 - `update_extra` reads → parses → merges one key → writes back (preserves other keys);
   raises `KeyError` if the record is absent, `ValueError` if `extra_json` is not a JSON
   object. This is the ONLY sanctioned way to stash module extras.
@@ -186,7 +208,10 @@ def to_dataframe(conn, *, dataset=None): ...                 # pandas DataFrame 
 
 ## Join rules
 
-- `record_id` is the join key everywhere; build it only via `make_record_id`.
+- `record_id` is the join key everywhere; build it only via `make_scoped_record_id`
+  (path scheme) or `make_record_id` (legacy scheme), as T02 does. Never rebuild an
+  ingested record's id from its stem: look records up by id or by
+  `(source_image, det_index)`.
 - `embedding_ref` is the key into the embeddings pickle dict produced by the T04
   service `reid_demo.embed` (`embed_records` / `embed_crops`; path in `embedding_path`).
   `reid_demo.embed` is the canonical interface downstream tickets (T05, T12) import; it
@@ -211,7 +236,7 @@ python -m reid_demo.store --export <out.parquet|csv> --db <path> [--dataset NAME
 
 ## How each ticket touches the store
 
-1. **T02** — inserts records (`upsert_record(s)`); for labeled data also populates
+1. **T02** — inserts/refreshes records (`ingest_upsert_records`); for labeled data also populates
    `gt_identity`+`orientation` (D1) and writes whole-frame B-track records (`det_index==1`).
 2. **T03** — `update_species(...)` + `update_extra(record_id, "species_kept", bool)`;
    joins `animals_classified.json` → records by `(source_stem, bbox)` nearest-match (D3).

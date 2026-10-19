@@ -10,7 +10,11 @@ Three entry points:
   predictions JSON (e.g. ``data/MedvednicaDS/animals_classified.json``) and write
   its per-detection classifications onto the matching T01 records. Joins each JSON
   detection to a record by ``(source_stem, bbox)`` NEAREST-MATCH (D3), NOT by a
-  positional ``det_index`` or any index/index+1 heuristic. No model, no re-cropping.
+  positional ``det_index`` or any index/index+1 heuristic. When several source frames
+  share a stem (e.g. two cameras' ``IMG_0001.JPG``), candidates are first restricted to
+  the frame with the longest shared trailing path; unresolvable detections are counted
+  as ``skipped_ambiguous`` (N1).
+  No model, no re-cropping.
 * ``classify_and_filter`` — end-to-end. Delegates to ``ingest_speciesnet_json`` when
   ``reuse_existing_json`` is given; otherwise runs the SpeciesNet CLI live on the
   dataset's crops (SECONDARY path, needs GPU/model; degrades to a clear RuntimeError).
@@ -139,6 +143,7 @@ class SpeciesFilterResult:
     skipped_unmatched: int             # JSON detections with no matching T01 record
     species_breakdown: Dict[str, int] = field(default_factory=dict)  # {common_name: count}
     kept_record_ids: List[str] = field(default_factory=list)         # species_kept == 1
+    skipped_ambiguous: int = 0         # JSON detections whose source frame is ambiguous (N1)
 
 
 # --------------------------------------------------------------------------- #
@@ -183,7 +188,8 @@ def _apply_classification(conn, record_id: str, class_string: str, score: float,
 
 
 def _summarize(conn, *, dataset: str, target_species: str,
-               drop_nontarget: bool, skipped_unmatched: int) -> SpeciesFilterResult:
+               drop_nontarget: bool, skipped_unmatched: int,
+               skipped_ambiguous: int = 0) -> SpeciesFilterResult:
     """Compute a SpeciesFilterResult from the store after writes (authoritative)."""
     rows = store.query_records(conn, dataset=dataset)
     n_classified = 0
@@ -219,7 +225,38 @@ def _summarize(conn, *, dataset: str, target_species: str,
         skipped_unmatched=skipped_unmatched,
         species_breakdown=breakdown,
         kept_record_ids=kept_ids,
+        skipped_ambiguous=skipped_ambiguous,
     )
+
+
+def _common_tail(a: str, b: str) -> int:
+    """Number of trailing path components two paths share (``x/cam_a/IMG.JPG`` and
+    ``/mnt/cam_a/IMG.JPG`` share 2)."""
+    pa = Path(os.path.normpath(a)).as_posix().split("/")
+    pb = Path(os.path.normpath(b)).as_posix().split("/")
+    n = 0
+    while n < min(len(pa), len(pb)) and pa[-1 - n] == pb[-1 - n]:
+        n += 1
+    return n
+
+
+def _frame_candidates(rows: List[store.DetectionRecord],
+                      filepath: str) -> Optional[List[store.DetectionRecord]]:
+    """Rows of the prediction's own source frame (N1).
+
+    One source frame for the stem: all its rows (unchanged behaviour). Several frames
+    sharing the stem: the rows of the single frame sharing the longest trailing path with
+    ``filepath`` (at least one folder beyond the file name); otherwise ``None``
+    (ambiguous)."""
+    frames = {r.source_image for r in rows}
+    if len(frames) <= 1:
+        return rows
+    tails = {f: _common_tail(f, filepath) for f in frames}
+    best = max(tails.values())
+    winners = [f for f, n in tails.items() if n == best]
+    if best >= 2 and len(winners) == 1:
+        return [r for r in rows if r.source_image == winners[0]]
+    return None
 
 
 # --------------------------------------------------------------------------- #
@@ -264,13 +301,14 @@ def ingest_speciesnet_json(
     consumed: set = set()
 
     skipped_unmatched = 0
+    skipped_ambiguous = 0
 
     for pred in predictions:
         filepath = pred.get("filepath")
         if not filepath:
             continue
         stem = Path(filepath).stem
-        candidates = rows_by_stem.get(stem, [])
+        candidates = _frame_candidates(rows_by_stem.get(stem, []), filepath)
         for det in pred.get("detections", []):
             classifications = det.get("classifications")
             if not classifications:
@@ -280,6 +318,9 @@ def ingest_speciesnet_json(
             classes = classifications.get("classes") or []
             scores = classifications.get("scores") or []
             if species_index >= len(classes) or species_index >= len(scores):
+                continue
+            if candidates is None:
+                skipped_ambiguous += 1
                 continue
             det_bbox = tuple(det.get("bbox", (0.0, 0.0, 0.0, 0.0)))
             if len(det_bbox) != 4:
@@ -309,6 +350,7 @@ def ingest_speciesnet_json(
     return _summarize(
         conn, dataset=dataset, target_species=target_species,
         drop_nontarget=drop_nontarget, skipped_unmatched=skipped_unmatched,
+        skipped_ambiguous=skipped_ambiguous,
     )
 
 
@@ -472,6 +514,7 @@ def _print_result(res: SpeciesFilterResult, *, top: int = 20) -> None:
     print(f"n_dropped:         {res.n_dropped}")
     print(f"n_unclassified:    {res.n_unclassified}")
     print(f"skipped_unmatched: {res.skipped_unmatched}")
+    print(f"skipped_ambiguous: {res.skipped_ambiguous}")
     print(f"species_breakdown (top {top}):")
     ranked = sorted(res.species_breakdown.items(), key=lambda kv: -kv[1])[:top]
     for name, count in ranked:

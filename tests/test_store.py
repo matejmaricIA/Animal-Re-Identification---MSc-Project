@@ -32,6 +32,12 @@ from reid_demo.store import (  # noqa: E402
     update_extra,
     count_by,
     make_record_id,
+    make_scoped_record_id,
+    make_source_key,
+    ingest_upsert_records,
+    get_record_id_scheme,
+    set_record_id_scheme,
+    RecordCollisionError,
     export_records,
     import_records,
     to_dataframe,
@@ -345,3 +351,95 @@ def test_init_db_idempotent(tmp_path):
     assert conn.execute(
         "SELECT value FROM meta WHERE key='schema_version'"
     ).fetchone()[0] == str(SCHEMA_VERSION)
+
+
+# --- N1: scoped ids and stage-owned ingestion upsert ------------------------ #
+
+def test_make_source_key_relative_and_outside_root(tmp_path):
+    root = tmp_path / "imgs"
+    assert make_source_key(str(root / "cam_a" / "IMG_0001.JPG"), str(root)) == "cam_a/IMG_0001.JPG"
+    outside = make_source_key(str(tmp_path / "other" / "x.jpg"), str(root))
+    assert outside.startswith("/") and outside.endswith("other/x.jpg")
+
+
+def test_make_scoped_record_id_distinguishes_sources():
+    a = make_scoped_record_id("cam_a/IMG_0001.JPG", 1)
+    b = make_scoped_record_id("cam_b/IMG_0001.JPG", 1)
+    assert a != b
+    assert a.startswith("IMG_0001__") and a.endswith("__crop1")
+    assert a == make_scoped_record_id("cam_a/IMG_0001.JPG", 1)  # deterministic
+
+
+def test_record_id_scheme_is_recorded_and_refuses_switch(conn):
+    assert get_record_id_scheme(conn, "DS") is None
+    set_record_id_scheme(conn, "DS", "path")
+    set_record_id_scheme(conn, "DS", "path")  # idempotent
+    assert get_record_id_scheme(conn, "DS") == "path"
+    with pytest.raises(ValueError):
+        set_record_id_scheme(conn, "DS", "legacy")
+    with pytest.raises(ValueError):
+        set_record_id_scheme(conn, "Other", "bogus")
+
+
+def test_upsert_records_still_replaces(conn):
+    """Pinned: the general upsert keeps replace semantics (import/restore, tests)."""
+    upsert_record(conn, _rec())
+    update_review(conn, make_record_id("IMG_0066", 1), "confirmed")
+    upsert_record(conn, _rec())
+    assert get_record(conn, make_record_id("IMG_0066", 1)).review_status == "unreviewed"
+
+
+def test_ingest_upsert_preserves_downstream_and_review(conn):
+    rid = make_record_id("IMG_0066", 1)
+    counts = ingest_upsert_records(conn, [_rec()])
+    assert counts == {"inserted": 1, "refreshed": 0, "geometry_changed": 0, "reviews_flagged": 0}
+    update_species(conn, rid, "eurasian lynx", 0.9, "x;eurasian lynx")
+    update_embedding(conn, rid, rid, "e.pkl")
+    update_cluster(conn, rid, 7, 0.8, is_candidate_new=0)
+    update_review(conn, rid, "confirmed", "same cat")
+    update_extra(conn, rid, "species_kept", 1)
+    counts = ingest_upsert_records(conn, [_rec(detector_conf=0.95, camera_id="cam_x")])
+    assert counts["refreshed"] == 1 and counts["inserted"] == 0
+    got = get_record(conn, rid)
+    assert got.detector_conf == 0.95 and got.camera_id == "cam_x"       # ingest-owned
+    assert got.species == "eurasian lynx" and got.embedding_ref == rid
+    assert got.cluster_id == 7 and got.review_status == "confirmed"
+    assert got.review_note == "same cat"
+    assert json.loads(got.extra_json) == {"species_kept": 1}
+
+
+def test_ingest_upsert_geometry_change_clears_derived_keeps_review(conn):
+    rid = make_record_id("IMG_0066", 1)
+    ingest_upsert_records(conn, [_rec()])
+    update_embedding(conn, rid, rid, "e.pkl")
+    update_cluster(conn, rid, 7, 0.8)
+    update_review(conn, rid, "confirmed")
+    counts = ingest_upsert_records(conn, [_rec(bbox_x=0.30)])
+    assert counts["geometry_changed"] == 1 and counts["reviews_flagged"] == 1
+    got = get_record(conn, rid)
+    assert got.bbox_x == 0.30
+    assert got.embedding_ref is None and got.cluster_id is None and got.species is None
+    assert got.review_status == "confirmed"
+    flag = json.loads(got.extra_json)["review_needs_recheck"]
+    assert flag["reason"] == "geometry_changed" and flag["changed"] == ["bbox_x"]
+    assert flag["previous"] == {"bbox_x": 0.49}
+
+
+def test_ingest_upsert_fill_if_null(conn):
+    rid = make_record_id("IMG_0066", 1)
+    ingest_upsert_records(conn, [_rec()])                       # species NULL
+    ingest_upsert_records(conn, [_rec(species="leopard")])
+    assert get_record(conn, rid).species == "leopard"          # filled
+    update_species(conn, rid, "eurasian lynx", 0.9)
+    ingest_upsert_records(conn, [_rec(species="leopard")])
+    assert get_record(conn, rid).species == "eurasian lynx"    # T03 value kept
+
+
+def test_ingest_upsert_collision_raises_and_rolls_back(conn):
+    ingest_upsert_records(conn, [_rec()])
+    other = _rec(source_image="data/elsewhere/cam_b/IMG_0066.JPG")
+    with pytest.raises(RecordCollisionError):
+        ingest_upsert_records(conn, [_rec(stem="NEW", idx=1), other])
+    assert get_record(conn, make_record_id("NEW", 1)) is None   # batch rolled back
+    assert get_record(conn, make_record_id("IMG_0066", 1)).source_image.endswith(
+        "animal_images/IMG_0066.JPG")
