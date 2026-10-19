@@ -13,6 +13,7 @@ Every agent working here updates this section at start, at each milestone and at
 | Minimum-review confidence-gated matching ([proposal](czechlynx-minimum-review-proposal-2026-10-18.md), [results](research/czechlynx-gated-matching-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done; user chose next steps (a) then (b), see rows below** | 1 ☑ proposal · 2 ☑ approval · 3 ☑ implement · 4 ☑ tests (11 new; 158 related) · 5 ☑ run (135 s) + labelled post-hoc full-scan variant · 6 ☑ results + docs · 7 ☑ committed at the user's request together with (a) (see git log; not pushed) | Outputs `evaluations/czechlynx/gated_matching_v2_fp32/` and `..._posthoc_fullscan/` are final; do not modify. No other files are claimed. |
 | **(a) Non-match pruning + safeguards** (cut new-animal and hard-match review cost) — [handoff](czechlynx-nonmatch-pruning-handoff-2026-10-18.md), [proposal](czechlynx-nonmatch-pruning-proposal-2026-10-18.md), [results](research/czechlynx-nonmatch-pruning-results-2026-10-18.md) | Claude Code session (non-match pruning), 18 Oct 2026 | **Done; awaiting the user's next decision.** | Best exact count: 2,211 decisions, 0.77 h per 1,000 photos at placeholder costs (−58% vs W1); targets not all met. 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval · 4 ☑ implement · 5 ☑ tests (18 new; 167 related) · 6 ☑ run (440 s) + labelled post-hoc check · 7 ☑ results + docs · 8 ☑ committed at the user's request together with the minimum-review round (see git log; not pushed) | Outputs `evaluations/czechlynx/nonmatch_pruning_v2_fp32/` and `..._posthoc_pmatch_auto/` are final; do not modify. No other files are claimed. |
 | **(b) Facing-aware re-adaptation of the embedding** — [proposal](czechlynx-facing-adaptation-proposal-2026-10-18.md), [results](research/czechlynx-facing-adaptation-results-2026-10-18.md) | Claude Code session, 18 Oct 2026 | **Done; documented negative under the declared rules; awaiting the user's next decision** | R1 and R2 not met by either arm. F1 (animal × facing classes) is a modest real improvement: protocol top-1 68.6% → 71.3%, safe automation 45% → 54%, −9% decisions at its best admissible setting, R3 met. 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval + GPU · 4 ☑ implement · 5 ☑ tests (16 new; 164 related) · 6 ☑ labels + training (F1 2,813 s, F2 2,843 s) · 7 ☑ calibration + review cost · 8 ☑ results + docs · 9 ☑ committed at the user's request on 19 Oct (see git log; not pushed) | Outputs are final; do not modify: `evaluations/czechlynx/fitting_facing_labels_v1/`, `data/czechlynx/cache/miewid_public_fitting_v1/`, `models/czechlynx/miewid_facing_{classes,subcenter}_v1/`, `data/czechlynx/cache/miewid_facing_{classes,subcenter}_v1/`, `evaluations/czechlynx/facing_adaptation_calibration_{classes,subcenter}_v1/`, `evaluations/czechlynx/nonmatch_pruning_facing_{classes,subcenter}_v1/`. No files claimed. |
+| **(c) Frozen operating point + one-shot selection evaluation** (F1 + P(match) ε 0.001 + W4 τ + safeguards) — [proposal](czechlynx-frozen-selection-proposal-2026-10-19.md) | Claude Code session, started 19 Oct 2026 | **Approved 19 Oct (selection rule lifted once); implemented, 10 new tests pass (161 related); frozen and pre-registered (fingerprint `f2402829…`); selection run next** | 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval (incl. permission to export a frozen configuration and touch the selection pool) · 4 ☑ implement · 5 ☑ tests · 6 ☑ freeze (calibration only) + commit freeze fingerprint · 7 ☐ one-shot selection run · 8 ☐ results + docs · 9 ☐ commit (only on request) | Claimed: `docs/czechlynx-frozen-selection-proposal-2026-10-19.md` (written). Planned outputs (confirmed absent): `evaluations/czechlynx/frozen_review_config_v1/`, `evaluations/czechlynx/frozen_review_selection_v1/`, `data/czechlynx/cache/miewid_facing_classes_v1_selection/` |
 
 Open questions for the user: what the audit's left/right labels meant (pose geometry suggests facing direction, not the anatomical flank).
 
@@ -108,6 +109,44 @@ These priorities do not approve new implementation or benchmark runs. Present co
 - [Proposed pilot gates](research/czechlynx-segmentation-roadmap-2026-09-12.md#8-proposed-pilot-gates): discussion targets, not achieved results or agreed count-error tolerances.
 
 ## Dated updates
+
+### 2026-10-19
+
+**(c) frozen and pre-registered before any selection photo was read.** The freeze ran on calibration only, in 305 s.
+
+- **Frozen configuration fingerprint:** `f24028291c0c02f9e901ee035ccc3ef23e1291695bdee15307ae893e5828951c`.
+- **`config.json` SHA-256:** `6e4c9898a21caff9b19c354a8de39656dc3fb1394f94ad1e0a0b54f8477e2fea`. A copy is committed as [czechlynx-frozen-review-config-2026-10-19.json](research/czechlynx-frozen-review-config-2026-10-19.json).
+- **Models:** W4 confidence model on 1,790 replay records, P(match) model on 56,987 records, facing classifier on 1,115 pose-labelled photos; frozen risk references for the four signals. All are JSON.
+- **Operating points:** F1 embedding, P(match) order, ε 0.001, τ 0.99 primary and 0.98 secondary, default safeguards.
+- **Calibration reference for S2:** 333.1 decisions per 1,000 photos, so the limit is ≤ 416.4.
+- **In-sample sanity check** (plumbing only, not evidence), τ 0.99 vs cross-fitted: 48.8% vs 48.4% automated, 0.19% vs 0.24% misassigned, count 0 vs +1, 2,064 vs 2,116 decisions.
+
+Code and the config copy were committed before the selection run. The run verifies these hashes, and any later code change invalidates the freeze.
+
+**(c) approved.** The user approved the proposal as written: τ 0.99 primary, τ 0.98 secondary, and the no-selection rule lifted for this one run. The assistant may run the CPU tests and the freeze, commit the freeze record, and run the GPU selection evaluation.
+
+**(c) proposed: freeze one operating point and evaluate it once on selection.** The user chose this next step.
+
+[Proposal](czechlynx-frozen-selection-proposal-2026-10-19.md):
+- **Frozen point:** the F1 embedding; P(match) order with ε 0.001; W4 auto-accept at **τ 0.99 primary** (τ 0.98 pre-declared secondary); all (a) safeguards.
+- **Models:** trained on all of calibration and frozen as JSON. Risk percentiles are frozen against calibration distributions.
+- **Pre-registration:** the configuration fingerprint is committed before any selection photo is read.
+- **One-shot run on selection** (4,725 photos, 55 unseen lynx; earlier use was only the 16 Sep public-MiewID recognition run): simulations at 0% and 3% reviewer error, the W1 reference and protocol recognition. Breakdowns per animal, with and without lynx_287 (22% of photos), and by source.
+- **Declared criteria:** S1, ≤1% misassigned and |count error| ≤1; S2, ≤416 decisions per 1,000 photos and ≥50% saving vs W1; S3, audit coverage; S4, robustness at 3% reviewer error.
+- **Locks:** one-shot locks in code; no retuning on selection.
+
+Approval would lift the standing no-count-configuration / no-selection rule for this one run. Awaiting approval and authorization; no code or runs yet.
+
+**(b) committed (`019c839b`, not pushed).** The user then asked for the assistant's view on next steps.
+
+**Assistant recommendation (not approved; the order is a suggestion):**
+1. **Freeze and test once on selection.** Freeze one operating point: F1 embedding + P(match) order, ε 0.001, W4 auto-accept τ 0.98–0.99, and the safeguards. Run it once on the reserved selection pool for honest, non-calibration numbers. This needs a count-configuration export, which has been forbidden so far, so it needs explicit approval.
+2. **Time real reviewers.** Measure real reviewer time on the pruned ranked workflow in the existing sibling review app (or a minimal extension). The fast-click cost model already meets ≤ 0.5 h per 1,000 photos; placeholder costs do not. Real timing decides whether the time-saving claim holds.
+3. **Make audits work with an imperfect auditor:** consensus or bias-corrected estimates. Without this, count uncertainty is not defensible once reviewers make errors.
+4. **Run end to end on raw frames.** The current pipeline starts from annotation-assisted masked crops. Run raw camera frames → detection/segmentation → species → re-ID review on CzechLynx raw images and Medvednica, and measure the degradation.
+5. **Later, data rather than loss tweaks:** more or different lynx training data and night/IR handling. The upstream-exposure question remains open.
+
+Readiness for outreach still depends on 1–4.
 
 ### 2026-10-18
 
@@ -271,7 +310,6 @@ Read-only in-sample check: auto-accepting the top-1 match when its margin over t
 - **[Proposal](czechlynx-review-effort-proposal-2026-10-18.md):** a simulated expert compares W0 unassisted catalogue matching, W1 embedding-ranked matching and W2 group-then-correct review. W2 starts from the best edge-grouping, flank-grouping and legacy groupings, with trap-day bundles, a declared time-cost model, reviewer-error and unidentifiable-photo sensitivities, and effort–quality curves.
 - **Declared rules:** W2 reaches F1 ≥ .98 and |count error| ≤ 1 with ≤ 50% (strong: ≤ 25%) of W1's decisions; F1 ≥ .95 with 3% reviewer error.
 - Acceptable absolute effort and whether bounded review satisfies "reliable counts" remain the user's decisions. CPU only. Awaiting approval; no code or runs yet.
-
 
 **Checkpoint committed; candidate-coverage/identifiability diagnostic proposed.** At the user's request, the CzechLynx work since June was committed as `606082f2` on `feat/reid-demo-pipeline` and pushed. The local `disk` submodule edit was not included. The assistant inspected the 16 saved adapted review examples, which are deterministic extremes and not representative. None is a clear left-side vs right-side pair. Most involve frontal/rear views, partial crops, washed-out or dark IR, tiny crops or fragmented masks. One clear same-side, same-camera `lynx_036` pair scores 0.04. 193 of the 321 audited images are calibration images with human flank/visibility/usable-markings labels. [Proposal](czechlynx-coverage-diagnostics-proposal-2026-10-18.md): three new files, no existing-source edits, calibration only, frozen adapted cache, no inference. It tests whether missing oracle links come from unidentifiable images (abstention curve vs random-drop control), split encounters, narrow candidate lists (k=100, mutual kNN, query expansion) or opposite flanks (audited cross-tabs), with decision rules declared before running. Awaiting approval; no code, tests or runs yet.
 
