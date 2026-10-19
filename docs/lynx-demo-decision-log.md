@@ -11,14 +11,14 @@ Every agent working here updates this section at start, at each milestone and at
 | Flank-aware grouping ([proposal](czechlynx-flank-grouping-proposal-2026-10-18.md), [results](research/czechlynx-flank-grouping-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done, awaiting the user's choice of next step** | 1 ☑ implement · 2 ☑ CLI + tests · 3 ☑ tests (13 new; 132 related) · 4 ☑ calibration run (215 s) · 5 ☑ results review + docs · 6 ☑ committed at the user's request (see git log; not pushed) | Output `evaluations/czechlynx/flank_grouping_v2_fp32/` is complete; do not modify it. No other files are claimed. | `reid_demo/benchmark_flank_grouping.py`, `tools/evaluate_czechlynx_flank_grouping.py`, `tests/test_benchmark_flank_grouping.py` (new); output `evaluations/czechlynx/flank_grouping_v2_fp32/` |
 | Review-effort measurement ([proposal](czechlynx-review-effort-proposal-2026-10-18.md), [results](research/czechlynx-review-effort-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done; user decided (see Requirement update)** | all steps ☑; committed `0a25c2c8` (not pushed) | Outputs `evaluations/czechlynx/review_effort_v2_fp32/` (failed) and `..._r2/` (complete) are final; do not modify. No other files are claimed. |
 | Minimum-review confidence-gated matching ([proposal](czechlynx-minimum-review-proposal-2026-10-18.md), [results](research/czechlynx-gated-matching-results-2026-10-18.md)) | Claude Code session, 18 Oct 2026 | **Done; user chose next steps (a) then (b), see rows below** | 1 ☑ proposal · 2 ☑ approval · 3 ☑ implement · 4 ☑ tests (11 new; 158 related) · 5 ☑ run (135 s) + labelled post-hoc full-scan variant · 6 ☑ results + docs · 7 ☑ committed at the user's request together with (a) (see git log; not pushed) | Outputs `evaluations/czechlynx/gated_matching_v2_fp32/` and `..._posthoc_fullscan/` are final; do not modify. No other files are claimed. |
-| **(a) Non-match pruning + safeguards** (cut new-animal and hard-match review cost) — [handoff](czechlynx-nonmatch-pruning-handoff-2026-10-18.md), [proposal](czechlynx-nonmatch-pruning-proposal-2026-10-18.md), [results](research/czechlynx-nonmatch-pruning-results-2026-10-18.md) | Claude Code session (non-match pruning), 18 Oct 2026 | **Done; awaiting the user's next decision.** Best exact count: 2,211 decisions, 0.77 h per 1,000 photos at placeholder costs (−58% vs W1); targets not all met. 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval · 4 ☑ implement · 5 ☑ tests (18 new; 167 related) · 6 ☑ run (440 s) + labelled post-hoc check · 7 ☑ results + docs · 8 ☑ committed at the user's request together with the minimum-review round (see git log; not pushed) | Outputs `evaluations/czechlynx/nonmatch_pruning_v2_fp32/` and `..._posthoc_pmatch_auto/` are final; do not modify. No other files are claimed. |
-| **(b) Facing-aware re-adaptation of the embedding** ((animal, facing) classes on the fitting pool) | **Planned after (a)**; unclaimed | **Decided by the user 18 Oct: WILL do, after (a).** Not started; needs its own proposal, approval and GPU authorization | None yet |
+| **(a) Non-match pruning + safeguards** (cut new-animal and hard-match review cost) — [handoff](czechlynx-nonmatch-pruning-handoff-2026-10-18.md), [proposal](czechlynx-nonmatch-pruning-proposal-2026-10-18.md), [results](research/czechlynx-nonmatch-pruning-results-2026-10-18.md) | Claude Code session (non-match pruning), 18 Oct 2026 | **Done; awaiting the user's next decision.** | Best exact count: 2,211 decisions, 0.77 h per 1,000 photos at placeholder costs (−58% vs W1); targets not all met. 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval · 4 ☑ implement · 5 ☑ tests (18 new; 167 related) · 6 ☑ run (440 s) + labelled post-hoc check · 7 ☑ results + docs · 8 ☑ committed at the user's request together with the minimum-review round (see git log; not pushed) | Outputs `evaluations/czechlynx/nonmatch_pruning_v2_fp32/` and `..._posthoc_pmatch_auto/` are final; do not modify. No other files are claimed. |
+| **(b) Facing-aware re-adaptation of the embedding** — [proposal](czechlynx-facing-adaptation-proposal-2026-10-18.md), [results](research/czechlynx-facing-adaptation-results-2026-10-18.md) | Claude Code session, 18 Oct 2026 | **Done; documented negative under the declared rules; awaiting the user's next decision** | R1 and R2 not met by either arm. F1 (animal × facing classes) is a modest real improvement: protocol top-1 68.6% → 71.3%, safe automation 45% → 54%, −9% decisions at its best admissible setting, R3 met. 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval + GPU · 4 ☑ implement · 5 ☑ tests (16 new; 164 related) · 6 ☑ labels + training (F1 2,813 s, F2 2,843 s) · 7 ☑ calibration + review cost · 8 ☑ results + docs · 9 ☑ committed at the user's request on 19 Oct (see git log; not pushed) | Outputs are final; do not modify: `evaluations/czechlynx/fitting_facing_labels_v1/`, `data/czechlynx/cache/miewid_public_fitting_v1/`, `models/czechlynx/miewid_facing_{classes,subcenter}_v1/`, `data/czechlynx/cache/miewid_facing_{classes,subcenter}_v1/`, `evaluations/czechlynx/facing_adaptation_calibration_{classes,subcenter}_v1/`, `evaluations/czechlynx/nonmatch_pruning_facing_{classes,subcenter}_v1/`. No files claimed. |
 
 Open questions for the user: what the audit's left/right labels meant (pose geometry suggests facing direction, not the anatomical flank).
 
-Last completed items: coverage diagnostic (`9065277d`), edge grouping + local pilot (`3f5a0f11`), flank-aware grouping (`64b70e6e`), review effort (`0a25c2c8`); none of these commits is pushed. Minimum-review gated matching and (a) non-match pruning are committed together (see git log; not pushed).
+Last completed items: coverage diagnostic (`9065277d`), edge grouping + local pilot (`3f5a0f11`), flank-aware grouping (`64b70e6e`), review effort (`0a25c2c8`); none of these commits is pushed. Minimum-review gated matching and (a) non-match pruning are committed together (`9e589d27`); (b) facing-aware re-adaptation is committed separately (19 Oct). None of these is pushed.
 
-**Agreed plan (user decision, 18 Oct): do (a), then (b).** (a) Calibrated non-match pruning to shorten new-animal and hard-match checks, plus a cold-start guard and reviewer-error safeguards, in a fresh session started from the [handoff prompt](czechlynx-nonmatch-pruning-handoff-2026-10-18.md). (b) Facing-aware re-adaptation of the embedding afterwards. End-to-end integration behind the ingestion/classification stages follows once the review-cost picture is settled. Context: expert-confirmed ranked matching is acceptable only if the bulk is automated (see "Requirement update — 18 October 2026").
+**Agreed plan (user decision, 18 Oct): do (a), then (b). Both are done (18 Oct); the next step is the user's decision.** (a) Calibrated non-match pruning to shorten new-animal and hard-match checks, plus a cold-start guard and reviewer-error safeguards, in a fresh session started from the [handoff prompt](czechlynx-nonmatch-pruning-handoff-2026-10-18.md). (b) Facing-aware re-adaptation of the embedding afterwards. End-to-end integration behind the ingestion/classification stages follows once the review-cost picture is settled. Context: expert-confirmed ranked matching is acceptable only if the bulk is automated (see "Requirement update — 18 October 2026").
 
 ## Required outcome — user clarification, 22 September 2026
 
@@ -46,7 +46,7 @@ This is the working diary and the entry point for current status. Update this sn
 | Part | Where we are | Next evidence needed |
 | --- | --- | --- |
 | Inputs and protocol | All 321 human reviews/receipt complete; fitting split and FP32 preparation reviewed; original image inclusion preserved | Keep quality limitations visible; no unapproved cleanup or exclusions |
-| Adapted global model | Training and full calibration reviewed. Calibration top-1 877/1,336 → 917/1,336 (65.6437% → 68.6377%); macro top-1 56.0883% → 60.3884%; mAP@50 31.0078% → 40.1974% | Preserve the improved recognition baseline; use it in a controlled local/global candidate/pair/grouping proposal |
+| Adapted global model | Calibration top-1: public MiewID 65.6%, v2 68.6%, facing-aware F1 (animal × facing ArcFace classes, 18 Oct) **71.3%**. Same-side cross-encounter NN macro top-1 stays ≈ 67.6% for v2, F1 and F2, so facing-aware training did not sharpen same-side discrimination. F1 raises safe automation 45% → 54% in the review simulation | Decide whether to carry F1 forward. Further embedding gains likely need more or different training data, not class-definition changes |
 | Clusters and photographed-individual counts | Automatic grouping peaks at F1 ≈ .60. Ranked matching with expert confirmation gives a verified 55/55 count (W1: 5,283 decisions, 1.85 h per 1,000 photos at placeholder costs). Non-match pruning (18 Oct): a space-time-aware P(match) model (AUC .998) re-ranks and prunes candidates. With W4 auto-accept and safeguards, an exact count at 0.19% misassigned photos takes **2,211 decisions (0.77 h per 1,000 photos; 0.35 h at fast-click costs; −58% vs W1)**. Automation stays ≤ 45% at ≤ 1% error. With 3% reviewer error: count +1, 2.3% misassigned. Audits are unreliable with a noisy auditor | Raise safe automation (better embedding: item (b)), measure real reviewer timing, engineer audits for imperfect auditors; no count configuration or frozen selection yet |
 | Thesis local + global evidence | 18 Oct pilot: DISK+LightGlue adds ≈0 AUC to calibrated edge evidence and does not generalize across animals (identity-cross-fitted local-only AUC .35). User explicitly wants a combined final approach. Earlier combination gave no consistent gain; a flawed prior integration is a hypothesis, not an established cause | Diagnose candidate coverage, patch/mask geometry and score fusion; propose a controlled comparison of adapted global alone against local/global combinations on identical observations |
 | Independent and field validation | Upstream exposure unresolved; verified night/IR and flank handling, raw-camera crop quality and independent park transfer unqualified | Freeze an improved method before selection; independently check relevant camera/view/illumination cases and expert-reviewed park data |
@@ -110,6 +110,59 @@ These priorities do not approve new implementation or benchmark runs. Present co
 ## Dated updates
 
 ### 2026-10-18
+
+**(b) facing-aware re-adaptation run and reviewed: a documented negative under the declared rules; F1 is a modest real improvement.** The user unpaused (b) and authorized the GPU steps.
+
+Runs:
+- **Fitting facing labels** (94 s): 2,415 from pose, 11,431 predicted, 16.1% "other"; pose AUC .9996.
+- **Training:** F1 (358 animal × facing classes; 2,813 s; epoch 7) and F2 (sub-center ArcFace, K = 3; 2,843 s; epoch 9). Both use v2's exact inner split.
+- **Evaluation:** calibration comparisons and the unchanged (a) review-cost simulation for each arm. Adapted weights were verified loaded by state hash.
+
+Results:
+- **R1 not met:** same-side macro NN top-1 67.6% (v2), 67.6% (F1), 67.9% (F2).
+- **R2 not met:** at the declared best setting, decisions are 2,211 (v2), 2,116 (F1, −4%) and 2,173 (F2). Max safe automation is 45% / 54% / 47%. F1's best admissible point is 2,015 decisions (−9%) at 53.5% automation.
+- **R3:** F1 meets it (3% reviewer error: count +1, 1.9% misassigned vs v2's 2.3%); F2 fails it (count +3).
+- **Recognition:** protocol top-1 is 71.3% (F1) and 69.8% (F2) vs 68.6% (v2).
+
+Interpretation: merging flanks into one class was not what limited the embedding; the limit lies elsewhere, with data and image conditions plausible but unproven. Per the declared rule, no further training variants follow without a new proposal. [Results](research/czechlynx-facing-adaptation-results-2026-10-18.md).
+
+Next options, not approved:
+- carry F1 forward as the working embedding;
+- a timed reviewer UI trial;
+- engineered audits;
+- more or different training data;
+- end-to-end integration.
+
+Nothing is committed; no count configuration, selection or outreach.
+
+**(b) implemented and tested.** Five new files:
+- `reid_demo/benchmark_facing_adaptation.py`
+- `tools/label_czechlynx_fitting_facing.py`
+- `utils/finetune_czechlynx_miewid_facing.py` (the v2 FP32 loop, copied)
+- `tools/evaluate_czechlynx_facing_adaptation.py`
+- `tests/test_benchmark_facing_adaptation.py`
+
+All 16 new tests pass; across eight related suites, 164 pass; Ruff F is clean.
+
+Implementation detail: R1 is computed with **common facing labels** for all three models (pose, else the public-MiewID cross-fitted prediction), so the v2 same-side baseline is recomputed under those labels. The proposal's 66.7% used each model's own predicted facing.
+
+**(b) approved.** The user approved the facing-aware re-adaptation proposal as written. They authorized the assistant to run the CPU tests and the GPU steps: fitting facing labels, both training arms (F1 and F2) and calibration extraction. They also authorized the CPU review-cost evaluation.
+
+**(a) and the minimum-review round committed (`9e589d27`, not pushed; disk submodule excluded); (b) facing-aware re-adaptation claimed and proposed.** The user asked for the commit and then the (b) proposal.
+
+Read-only checks on saved calibration vectors (no inference):
+- Public MiewID predicts facing at pose AUC .9995, with 83% of photos confident; adapted v2 at .9946, with 74% confident. The identity-only adaptation reduced facing information.
+- Cross-encounter nearest neighbours are the same animal for v2 at macro 67.1% (any side), 66.7% (same side) and 18.2% (opposite side); public MiewID: 62.4% / 62.1% / 14.9%.
+- Only 2,415 of 16,504 fitting photos (14.6%) have pose keypoints.
+
+[Proposal](czechlynx-facing-adaptation-proposal-2026-10-18.md):
+- **Facing labels for fitting:** pose first, then an identity-cross-fitted facing classifier on public-MiewID fitting vectors (GPU extraction), else "other".
+- **Two arms, otherwise identical to v2:** F1 explicit (animal, facing) ArcFace classes and F2 sub-center ArcFace (K = 3). Both start from public MiewID on the same inner split, in FP32 and with no flips; checkpoints are selected by same-facing inner top-1.
+- **Evaluation:** the calibration comparison composed like v2, then the unchanged (a) review-cost simulation.
+- **Declared rules:** R1, same-side macro nearest-neighbour top-1 +3 points; R2, ≥15% fewer decisions than 2,211, or ≥55% safe automation; R3, no worse under 3% reviewer error.
+- **Size:** five new files and about 2 GPU-hours.
+
+Awaiting approval and GPU authorization.
 
 **(a) Non-match pruning run and reviewed: expert time for an exact count roughly halves; targets still not all met.** The run (`evaluations/czechlynx/nonmatch_pruning_v2_fp32/`) completed in 440 s with 148 simulations. The reference check passed: W1 and the saved full-scan W4 rows reproduce exactly.
 
