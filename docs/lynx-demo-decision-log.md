@@ -1,6 +1,6 @@
 # Lynx demo requirements and decision log
 
-Last updated: 18 October 2026. Read this before work on lynx demo readiness, park outreach or the CzechLynx plan. Preserve dated updates and distinguish requirements, evidence, hypotheses and proposed work.
+Last updated: 19 October 2026. Read this before work on lynx demo readiness, park outreach or the CzechLynx plan. Preserve dated updates and distinguish requirements, evidence, hypotheses and proposed work.
 
 ## Active work (live) — check before starting anything
 
@@ -14,6 +14,8 @@ Every agent working here updates this section at start, at each milestone and at
 | **(a) Non-match pruning + safeguards** (cut new-animal and hard-match review cost) — [handoff](czechlynx-nonmatch-pruning-handoff-2026-10-18.md), [proposal](czechlynx-nonmatch-pruning-proposal-2026-10-18.md), [results](research/czechlynx-nonmatch-pruning-results-2026-10-18.md) | Claude Code session (non-match pruning), 18 Oct 2026 | **Done; awaiting the user's next decision.** | Best exact count: 2,211 decisions, 0.77 h per 1,000 photos at placeholder costs (−58% vs W1); targets not all met. 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval · 4 ☑ implement · 5 ☑ tests (18 new; 167 related) · 6 ☑ run (440 s) + labelled post-hoc check · 7 ☑ results + docs · 8 ☑ committed at the user's request together with the minimum-review round (see git log; not pushed) | Outputs `evaluations/czechlynx/nonmatch_pruning_v2_fp32/` and `..._posthoc_pmatch_auto/` are final; do not modify. No other files are claimed. |
 | **(b) Facing-aware re-adaptation of the embedding** — [proposal](czechlynx-facing-adaptation-proposal-2026-10-18.md), [results](research/czechlynx-facing-adaptation-results-2026-10-18.md) | Claude Code session, 18 Oct 2026 | **Done; documented negative under the declared rules; awaiting the user's next decision** | R1 and R2 not met by either arm. F1 (animal × facing classes) is a modest real improvement: protocol top-1 68.6% → 71.3%, safe automation 45% → 54%, −9% decisions at its best admissible setting, R3 met. 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval + GPU · 4 ☑ implement · 5 ☑ tests (16 new; 164 related) · 6 ☑ labels + training (F1 2,813 s, F2 2,843 s) · 7 ☑ calibration + review cost · 8 ☑ results + docs · 9 ☑ committed at the user's request on 19 Oct (see git log; not pushed) | Outputs are final; do not modify: `evaluations/czechlynx/fitting_facing_labels_v1/`, `data/czechlynx/cache/miewid_public_fitting_v1/`, `models/czechlynx/miewid_facing_{classes,subcenter}_v1/`, `data/czechlynx/cache/miewid_facing_{classes,subcenter}_v1/`, `evaluations/czechlynx/facing_adaptation_calibration_{classes,subcenter}_v1/`, `evaluations/czechlynx/nonmatch_pruning_facing_{classes,subcenter}_v1/`. No files claimed. |
 | **(c) Frozen operating point + one-shot selection evaluation** — [proposal](czechlynx-frozen-selection-proposal-2026-10-19.md), [results](research/czechlynx-frozen-selection-results-2026-10-19.md) | Claude Code session, 19 Oct 2026 | **Done; S1, S2 and S4 not met, S3 met; awaiting the user's next decision** | Selection is spent: 51.5% automated, 0.80% misassigned, count **+6** (pruning duplicates, concentrated in snpa), 59% saving vs W1. 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval · 4 ☑ implement · 5 ☑ tests (10 new; 161 related) · 6 ☑ freeze + pre-registration commit `97571909` · 7 ☑ one-shot selection run (173 s) · 8 ☑ results + docs · 9 ☑ results committed at the user's request (see git log; not pushed) | Outputs are final; do not modify: `evaluations/czechlynx/frozen_review_config_v1/`, `evaluations/czechlynx/frozen_review_selection_v1/`, `data/czechlynx/cache/miewid_facing_classes_v1_selection/`. The one-shot lock blocks any rerun with this fingerprint. No files claimed. |
+| **(d) Pitch-readiness analysis and improvement research** (read-only audit, web research, gated roadmap; no code/tests/models) | Claude Code session, 19 Oct 2026 | **Done; awaiting the user's decision on the Now items (N1–N5)** | 1 ☑ claim · 2 ☑ audit receipts/results docs · 3 ☑ web research (monitoring practice, reporting, expert baselines, tools, buyers) · 4 ☑ improvement literature A–H · 5 ☑ write [analysis doc](research/pitch-readiness-analysis-2026-10-19.md) · 6 ☑ dated decision-log entry · 7 ☑ close row. No code, tests, models or outputs touched; committed `161ec5aa` (not pushed) | `docs/research/pitch-readiness-analysis-2026-10-19.md` is final; no files claimed. |
+| **(e) N1 ingestion/store integrity + N2 pruning floor and duplicate-merge second check** ([N1](n1-ingestion-integrity-proposal-2026-10-19.md), [N2](czechlynx-n2-pruning-safeguards-proposal-2026-10-19.md), [N2 results](research/czechlynx-n2-pruning-safeguards-results-2026-10-19.md)) | Claude Code session, 19 Oct 2026 | **Done; committed at the user's request (not pushed)** | 1 ☑ claim · 2 ☑ read code · 3 ☑ proposals · 4 ☑ approval · 5 ☑ N1 implemented (static checks pass) · 6 ☑ N1 tests (user-run 19 Oct: focused 87 passed in 16.08 s; full suite 723 passed, 960 upstream warnings, 96.12 s) · 7 ☑ N2 implemented · 8 ☑ N2 tests (18 new; 57 with related suites) · 9 ☑ N2 calibration run (2,188 s; reference reproduced exactly) · 10 ☑ results + docs · 11 ☑ committed 19 Oct: pitch analysis `161ec5aa`, N1 `fc852933`, N2 + decision log in the next commit (see git log); not pushed; disk submodule excluded | Output `evaluations/czechlynx/pruning_safeguards_f1_v1/` is final; do not modify. No files claimed. |
 
 Open questions for the user: what the audit's left/right labels meant (pose geometry suggests facing direction, not the anatomical flank).
 
@@ -111,6 +113,78 @@ These priorities do not approve new implementation or benchmark runs. Present co
 ## Dated updates
 
 ### 2026-10-19
+
+**(e) N1 tests passed (user-run).**
+- Focused `tests/test_store.py tests/test_ingest.py tests/test_species_filter.py`: **87 passed in 16.08 s**.
+- Full suite `venv/bin/python -m pytest tests -q`: **723 passed, 960 warnings in 96.12 s**. The warnings are upstream LightGlue AMP, scipy L-BFGS-B and pycocotools NumPy deprecations, plus expected catalogue placeholder-tile warnings.
+- This validates the synthetic collision, re-ingestion, scheme and SpeciesNet regressions. It does not exercise a real multi-camera archive.
+- N1b items remain open (stage-done any-row check, forced re-clustering of reviewed rows, cluster-label namespace, presence-only embedding skips).
+- Committed at the user's request in three commits on `feat/reid-demo-pipeline` (not pushed; disk submodule excluded): pitch analysis `161ec5aa`; N1 `fc852933`; N2, its docs and these log updates in the following commit.
+
+**(e) N2 run and reviewed: adopt the merge check; the floors did not help; pruning on new data stays open.** The user approved N1 and N2 as written and authorized the N2 CPU tests and run. [Results](research/czechlynx-n2-pruning-safeguards-results-2026-10-19.md).
+- **Run:** 794 simulations on calibration (F1), identity and leave-one-region-out folds (Carpathians, 17 animals, vs Bohemian Forest, 38 animals); 2,188 s. The defaults reproduce the saved F1 rows exactly (2,116 / 2,485 decisions); live W1 is 5,325.
+- **Merge check (second reviewer confirms each duplicate merge):**
+  - halves misassignment under reviewer error (region folds, 3%: 2.8% → 1.6%; 5%: 4.5% → 2.5%);
+  - wrong merges 5.2 → 0.2 per run; slightly fewer decisions overall.
+  - Residual count errors become surplus animals instead of cancelling.
+- **Cosine floor:** never found a hidden true match (0 in 49–206 extra comparisons per run); costs +4–9%.
+- **min_shown 10:** removed 1 of 2 Carpathian pruning duplicates under identity folds (+3% cost); no effect under region folds.
+- **Region holdout did not reproduce the selection failure:** 0 pruning duplicates at 0% error in every setting, so R1 passed trivially. Region-trained models are less sharp (Brier .0126 vs .0039), prune less (2,350 vs 2,116 decisions) and automate less (44.7% vs 48.4%).
+- **Declared rules:** 9/36 settings pass R1–R4, all with the merge check. Mechanical candidate: ε 0.001, no floors, merge check on: 2,350 decisions (−55.9% vs W1), 0.24% misassigned, count 0; at 3% error 1.07% / |count| 1; at 5% 1.79% / |count| 1. R3 differences among merge-check settings are mostly seed noise.
+- **Audits** still fail with a noisy auditor (unchanged, separate item).
+- **Next:** adopt the merge check. Choose between ε 0.001 and the more conservative ε 0.0003 (2,512 decisions) when pre-registering for the blind partner test (X1). Pruning fragility on unseen animals needs new held-out data.
+
+**(e) N1 implemented; user-run tests pending.** Changes:
+- path-scoped record IDs with a per-dataset scheme in `meta`; a `legacy` flag required for pre-existing datasets, and collisions refused;
+- a stage-owned `ingest_upsert_records` that never resets reviews, embeddings or clusters, flagging reviews on geometry change;
+- path-aware CSV metadata and SpeciesNet matching.
+
+About 10 existing `tests/test_ingest.py` lookups were updated as disclosed, and `test_ingest_reuses_legacy_crops` now passes `record_id_scheme="legacy"`. New tests: 8 store, 8 ingest, 1 SpeciesNet. Static checks: py_compile and Ruff F, no new findings. Command for the user: `venv/bin/python -m pytest tests/test_store.py tests/test_ingest.py tests/test_species_filter.py -q`, then the full suite.
+
+**(e) N1 and N2 proposals drafted; awaiting approval; no code changed.**
+
+[N1](n1-ingestion-integrity-proposal-2026-10-19.md) makes ingestion collision-safe and re-ingestion review-preserving:
+- **Record IDs:** scoped to the source path (`{stem}__{sha1(relpath)[:10]}__crop{n}`). The scheme is stored per dataset in the `meta` table; there is no schema change. Existing DBs need an explicit `legacy` flag, and collisions raise.
+- **New `store.ingest_upsert_records`** with stage-owned columns. Reviews, embeddings and clusters are never reset. If the geometry changes, derived values are cleared and the review is kept but flagged for a re-check.
+- **Disambiguation:** CSV metadata and SpeciesNet matching are disambiguated by path.
+- **Scope:** 5 files; about 10 test lookups in `tests/test_ingest.py` are updated (disclosed).
+
+[N2](czechlynx-n2-pruning-safeguards-proposal-2026-10-19.md) adds pruning floors and a merge check:
+- **Floors:** a minimum number of shown candidates, plus an appearance-only cosine top-k floor.
+- **Merge check:** a second reviewer must confirm each duplicate merge.
+- **Test design:** calibration only, with a leave-one-region-out fold: Carpathians, 17 animals vs Bohemian Forest, 38 animals; verified from metadata.
+- **Rules N2-R1–R4** are declared in the proposal.
+- **Scope:** 3 new files; committed modules are untouched because the frozen fingerprint binds their hashes. About 40 CPU-minutes.
+- **Reference check:** must exactly reproduce the saved F1 rows (2,116 / 2,485 decisions).
+
+**(d) Pitch-readiness analysis done (read-only; no code, tests, models or outreach).** [Analysis](research/pitch-readiness-analysis-2026-10-19.md).
+
+Verdict:
+- **An automated count is not pitchable now** (framing (b) unsupported).
+- **Honestly pitchable:** a research collaboration on an expert-verified identification workflow with an audit trail (framing (a)). Simulated support on *selection*: 59% fewer decisions, 0.80% misassigned. It fails on the count (+6) and has no real-reviewer, Croatian or night/IR evidence.
+
+New external facts (sources in the analysis):
+- **Croatian volume is small:** 4,201 lynx photos over 14 seasons and 225 individuals (Bini et al., *J. Zool.*), so roughly 300 per season. The expert-hours saving on lynx matching is therefore a weak selling point.
+- **The Croatian experts have tested AI:** experienced manual 92.7% vs MiewID operated by an expert 71.7% (Blašković et al. 2025, *J. Zool.*). Pitch alongside human expertise, not instead of it.
+- **Expert misidentification is documented:** snow leopards 12.5% of occasions and +35% abundance; leopards −22% individuals after a computer-assisted re-check. A catalogue "ghost audit" is a concrete low-risk first pilot.
+- **Competition:** Whiskerbook (MiewID) is already used by French and Croatian teams. MiewID v4 is announced (+12% for lynx) but its weights were not found public.
+- **AnimalCLEF 2026:** lynx anchoring is carried by global descriptors; LightGlue alone is weak there too.
+
+Proposed pitch criteria P1–P7 (revising S1–S4):
+- ≤ 2% misassigned and |count error| ≤ max(1, 5% of N);
+- ≥ 50% fewer decisions and ≥ 40% less **measured** wall-clock time;
+- robust at **measured** reviewer error;
+- night/IR-stratified results and raw frames;
+- all on blind partner data photographed after 15 Oct 2024.
+
+Proposed Now items, each needing approval:
+- **N1:** ingestion/store integrity fixes (bugs still present at `reid_demo/ingest.py:307`);
+- **N2:** conservative pruning floor + duplicate-merge second check, chosen by leave-one-source-out on calibration;
+- **N3:** timed matching review mode in the sibling app;
+- **N4:** same-observation local/global diagnostic with a pre-registered refutation rule;
+- **N5:** research conversation with the Zagreb Veterinary Faculty lynx team (outreach is the user's decision).
+
+Selection remains spent and the official test locked. Nothing was committed.
 
 **(c) one-shot selection evaluation done: the frozen operating point partly generalizes; S1, S2 and S4 not met.** The run completed in 173 s with no retry. The pre-registered fingerprint (`f2402829…`, commit `97571909`) was verified before and after.
 
