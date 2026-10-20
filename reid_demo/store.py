@@ -434,6 +434,57 @@ def set_record_id_scheme(conn: sqlite3.Connection, dataset: str, scheme: str) ->
     conn.commit()
 
 
+# --------------------------------------------------------------------------- #
+# Stage completion markers (N1b) — meta rows, no schema change
+# --------------------------------------------------------------------------- #
+
+_STAGE_MARKER_PREFIX = "stage_done:"
+
+
+def _stage_marker_key(stage: str, dataset: str) -> str:
+    return f"{_STAGE_MARKER_PREFIX}{stage}:{dataset}"
+
+
+def get_stage_marker(conn: sqlite3.Connection, stage: str, dataset: str) -> Optional[dict]:
+    """The completion marker the T10 runner recorded for ``(stage, dataset)``, or None."""
+    row = conn.execute(
+        f"SELECT value FROM {META_TABLE} WHERE key = ?", (_stage_marker_key(stage, dataset),)
+    ).fetchone()
+    if row is None:
+        return None
+    try:
+        value = json.loads(row[0])
+    except (TypeError, ValueError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def set_stage_marker(conn: sqlite3.Connection, stage: str, dataset: str, value: dict) -> None:
+    """Record (or replace) the completion marker for ``(stage, dataset)``. Commits."""
+    conn.execute(
+        f"INSERT INTO {META_TABLE}(key, value) VALUES (?, ?) "
+        f"ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        (_stage_marker_key(stage, dataset), json.dumps(value, sort_keys=True, default=str)),
+    )
+    conn.commit()
+
+
+def clear_stage_marker(conn: sqlite3.Connection, stage: str,
+                       dataset: Optional[str] = None) -> None:
+    """Delete the marker for ``(stage, dataset)``; ``dataset=None`` clears ``stage`` for
+    every dataset. Commits."""
+    if dataset is None:
+        prefix = f"{_STAGE_MARKER_PREFIX}{stage}:"
+        conn.execute(
+            f"DELETE FROM {META_TABLE} WHERE substr(key, 1, ?) = ?", (len(prefix), prefix)
+        )
+    else:
+        conn.execute(
+            f"DELETE FROM {META_TABLE} WHERE key = ?", (_stage_marker_key(stage, dataset),)
+        )
+    conn.commit()
+
+
 def _same_source(a: Optional[str], b: Optional[str]) -> bool:
     """Same source frame, tolerating relative vs absolute spellings of one file."""
     if a == b:
@@ -540,8 +591,9 @@ def update_species(conn, record_id: str, species: str, species_conf: float,
     conn.commit()
 
 
-def update_embedding(conn, record_id: str, embedding_ref: str, embedding_path: str) -> None:
-    """T04 stage write. Commits."""
+def update_embedding(conn, record_id: str, embedding_ref: Optional[str],
+                     embedding_path: Optional[str]) -> None:
+    """T04 stage write (``None``/``None`` clears a stale reference). Commits."""
     _require_record(conn, record_id)
     conn.execute(
         f"UPDATE {TABLE_NAME} SET embedding_ref = ?, embedding_path = ?, "

@@ -1,6 +1,6 @@
 # Lynx demo requirements and decision log
 
-Last updated: 19 October 2026. Read this before work on lynx demo readiness, park outreach or the CzechLynx plan. Preserve dated updates and distinguish requirements, evidence, hypotheses and proposed work.
+Last updated: 20 October 2026. Read this before work on lynx demo readiness, park outreach or the CzechLynx plan. Preserve dated updates and distinguish requirements, evidence, hypotheses and proposed work.
 
 ## Active work (live) — check before starting anything
 
@@ -16,6 +16,7 @@ Every agent working here updates this section at start, at each milestone and at
 | **(c) Frozen operating point + one-shot selection evaluation** — [proposal](czechlynx-frozen-selection-proposal-2026-10-19.md), [results](research/czechlynx-frozen-selection-results-2026-10-19.md) | Claude Code session, 19 Oct 2026 | **Done; S1, S2 and S4 not met, S3 met; awaiting the user's next decision** | Selection is spent: 51.5% automated, 0.80% misassigned, count **+6** (pruning duplicates, concentrated in snpa), 59% saving vs W1. 1 ☑ claim · 2 ☑ proposal · 3 ☑ approval · 4 ☑ implement · 5 ☑ tests (10 new; 161 related) · 6 ☑ freeze + pre-registration commit `97571909` · 7 ☑ one-shot selection run (173 s) · 8 ☑ results + docs · 9 ☑ results committed at the user's request (see git log; not pushed) | Outputs are final; do not modify: `evaluations/czechlynx/frozen_review_config_v1/`, `evaluations/czechlynx/frozen_review_selection_v1/`, `data/czechlynx/cache/miewid_facing_classes_v1_selection/`. The one-shot lock blocks any rerun with this fingerprint. No files claimed. |
 | **(d) Pitch-readiness analysis and improvement research** (read-only audit, web research, gated roadmap; no code/tests/models) | Claude Code session, 19 Oct 2026 | **Done; awaiting the user's decision on the Now items (N1–N5)** | 1 ☑ claim · 2 ☑ audit receipts/results docs · 3 ☑ web research (monitoring practice, reporting, expert baselines, tools, buyers) · 4 ☑ improvement literature A–H · 5 ☑ write [analysis doc](research/pitch-readiness-analysis-2026-10-19.md) · 6 ☑ dated decision-log entry · 7 ☑ close row. No code, tests, models or outputs touched; committed `161ec5aa` (not pushed) | `docs/research/pitch-readiness-analysis-2026-10-19.md` is final; no files claimed. |
 | **(e) N1 ingestion/store integrity + N2 pruning floor and duplicate-merge second check** ([N1](n1-ingestion-integrity-proposal-2026-10-19.md), [N2](czechlynx-n2-pruning-safeguards-proposal-2026-10-19.md), [N2 results](research/czechlynx-n2-pruning-safeguards-results-2026-10-19.md)) | Claude Code session, 19 Oct 2026 | **Done; committed at the user's request (not pushed)** | 1 ☑ claim · 2 ☑ read code · 3 ☑ proposals · 4 ☑ approval · 5 ☑ N1 implemented (static checks pass) · 6 ☑ N1 tests (user-run 19 Oct: focused 87 passed in 16.08 s; full suite 723 passed, 960 upstream warnings, 96.12 s) · 7 ☑ N2 implemented · 8 ☑ N2 tests (18 new; 57 with related suites) · 9 ☑ N2 calibration run (2,188 s; reference reproduced exactly) · 10 ☑ results + docs · 11 ☑ committed 19 Oct: pitch analysis `161ec5aa`, N1 `fc852933`, N2 + decision log in the next commit (see git log); not pushed; disk submodule excluded | Output `evaluations/czechlynx/pruning_safeguards_f1_v1/` is final; do not modify. No files claimed. |
+| **N1b pipeline integrity** (stage-done any-row check, forced re-clustering of reviewed rows, cluster-label namespace, model-blind embedding skips) — [handoff prompt](n1b-pipeline-integrity-handoff-2026-10-19.md), [proposal](n1b-pipeline-integrity-proposal-2026-10-20.md) | Claude Code session (N1b), 20 Oct 2026 | **Done; committed at the user's request (see git log; not pushed)** | All four defects verified in code and reproduced on temporary stores (scratch script, no models, not a test run). 1 ☑ claim · 2 ☑ verify defects in code · 3 ☑ proposal · 4 ☑ approval (20 Oct, as written, reserved labels 3a) · 5 ☑ implement (4 source files, 21 new tests, 1 disclosed assertion edit) · 6 ☑ static checks (py_compile; Ruff F no new findings) · 7 ☑ tests (assistant-run at the user's request, 20 Oct: focused 170 passed; full suite 762 passed, 91 s) · 8 ☑ docs (DATA_CONTRACT, AGENTS.md, decision log) · 9 ☑ committed 20 Oct at the user's request (N1b files only; disk submodule and N3 files excluded; not pushed) | `docs/n1b-pipeline-integrity-proposal-2026-10-20.md` (new). Planned, after approval only: `reid_demo/run_demo.py`, `reid_demo/cluster.py`, `reid_demo/embed.py`, `reid_demo/store.py`, `reid_demo/DATA_CONTRACT.md`, `tests/test_run_demo.py`, `tests/test_cluster.py`, `tests/test_embed.py`, `tests/test_store.py`. No benchmark modules, outputs or `review.py`/`ingest.py`/`fusion.py`. |
 
 Open questions for the user: what the audit's left/right labels meant (pose geometry suggests facing direction, not the anatomical flank).
 
@@ -111,6 +112,66 @@ These priorities do not approve new implementation or benchmark runs. Present co
 - [Proposed pilot gates](research/czechlynx-segmentation-roadmap-2026-09-12.md#8-proposed-pilot-gates): discussion targets, not achieved results or agreed count-error tolerances.
 
 ## Dated updates
+
+### 2026-10-20
+
+**N1b committed at the user's request (not pushed).** Only N1b files: the 4 `reid_demo` source files, `DATA_CONTRACT.md`, the 4 test files, the proposal, the handoff and the N1b parts of this log. The disk submodule and the N3 session's files and log entries are excluded.
+
+**N1b tests passed (assistant-run at the user's request).**
+- **Focused run:** `tests/test_run_demo.py tests/test_cluster.py tests/test_embed.py tests/test_store.py tests/test_review.py`: **170 passed in 24.52 s**.
+- **Full suite** `venv/bin/python -m pytest tests -q`: **762 passed, 960 warnings in 91.19 s**, no failures.
+  - 762 = the 723 baseline + N1b's 21 new tests + 18 tests in the N3 session's uncommitted `tests/test_benchmark_timed_review.py`, which the full run also collects.
+  - The 960 warnings match the baseline: upstream LightGlue AMP, scipy and pycocotools deprecations, plus the expected catalogue placeholder-tile warnings.
+- **What this covers:** the synthetic regressions for all four defects. It does not exercise a real partner archive or a real conductor run on an existing demo database.
+- **Next:** N1c (file-output freshness), proposal-to-identity review questions and MiewID in the demo embed path remain proposed follow-ups, each needing its own proposal.
+
+**N1b implemented; user-run tests pending; not committed.** The user approved the proposal as written, with reserved proposal labels (option 3a).
+
+Source changes:
+- `reid_demo/run_demo.py`:
+  - completion checks over every eligible row;
+  - invocation markers for ingest and cluster;
+  - embed and fisher never runner-skipped;
+  - fused pass unforced, with the sidecar sliced to the clustered rows;
+  - `--record-id-scheme` passthrough.
+- `reid_demo/cluster.py`:
+  - marker cleared on non-dry runs;
+  - proposal-label offset above the reserved IDs;
+  - logged `--force` overrides with a review reset;
+  - `n_review_overridden`.
+- `reid_demo/embed.py`: model/checkpoint-bound reuse, `n_stale`, and clear-on-failed-stale.
+- `reid_demo/store.py`: stage-marker helpers and `update_embedding` type hints.
+
+Tests:
+- 21 new tests: 12 run_demo, 5 cluster, 3 embed, 1 store.
+- One disclosed edit: the fused spec's `force` assertion, True → False.
+- Static checks: py_compile passes. Ruff F shows no new findings; the 7 left in the changed files are pre-existing at HEAD.
+
+Docs: `DATA_CONTRACT.md` and AGENTS.md are updated.
+
+Commands for the user:
+- `venv/bin/python -m pytest tests/test_run_demo.py tests/test_cluster.py tests/test_embed.py tests/test_store.py tests/test_review.py -q`
+- then the full suite (baseline 723 passed).
+
+**N1b pipeline integrity: claimed and proposed; awaiting approval; no code changed.** [Proposal](n1b-pipeline-integrity-proposal-2026-10-20.md).
+
+All four remaining `reid_demo` integrity defects were verified in code and reproduced on temporary stores (scratch script, synthetic vectors, stubbed model; not a test run):
+- **Stage completion:** with species set on 1 of 9 rows, `_store_stage_done` returns true.
+- **Forced fused re-clustering:** a reviewed row's cluster 999 became 0 with status still `confirmed`. Without `force`, the fused pass fails, because the fusion sidecar (9 × 9) covers reviewed rows too. That is why `force=True` was there.
+- **Label namespace:** after a reviewer confirmed identity 1, a rerun gave another animal's rows label 1.
+- **Embedding reuse:** embedding with checkpoint B after model A embedded 0 rows and skipped 3, which stayed on A's cache.
+
+Proposed fixes:
+- **Completion:** a stage is done only when every eligible row has output. Ingest and cluster also need a `meta` completion marker for the exact invocation. Embed always runs and is itself incremental.
+- **Fused pass:** runs unforced, with the sidecar sliced to the rows being clustered. An explicit `--force` is logged in `extra_json['review_overrides']` and resets the row to `unreviewed`.
+- **Labels:** proposal labels start above every cluster ID that the run does not rewrite, so confirmed identity numbers are never reused and stay stable under review merges.
+- **Embeddings:** reused only if they live in the cache for the requested model and checkpoint and the key exists. Otherwise they are recomputed; a stale one whose recompute fails is cleared.
+
+Other points:
+- No schema change. A new conductor option, `--record-id-scheme`, is needed because ingest reruns once on existing databases.
+- **Tests:** 19 new tests and 1 disclosed assertion edit (fused spec `force` True → False).
+- **Visible consequence:** after a rerun, unreviewed companions of reviewed rows become separate proposals until attached by review. Today the same relabelling happens and collisions are silent.
+- **Follow-ups proposed separately:** artifact freshness for fusion, catalogue and eval (N1c); proposal-to-identity review questions; MiewID in the demo embed path.
 
 ### 2026-10-19
 

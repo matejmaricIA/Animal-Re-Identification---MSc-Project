@@ -682,3 +682,115 @@ def test_cli_bad_backend_nonzero():
     r = _run_cli(["--dataset", "DemoDS", "--db", "/tmp/does_not_matter.sqlite",
                   "--backend", "bogus"])
     assert r.returncode != 0
+
+
+# --------------------------------------------------------------------------- #
+# N1b: label namespace and logged --force overrides
+# --------------------------------------------------------------------------- #
+
+def _labels(conn, emb):
+    return {rid: get_record(conn, rid).cluster_id for rid in emb}
+
+
+def test_rerun_never_reuses_reviewed_ids(demo_store):
+    """After review, a rerun must not give another animal a reviewed identity's id
+    (was: proposals restarted at 0 and collided)."""
+    db, pkl, conn, emb = demo_store
+    run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl)
+    l0, l1 = make_record_id("L0", 1), make_record_id("L1", 1)
+    r0, r1 = make_record_id("R0", 1), make_record_id("R1", 1)
+    identity = get_record(conn, l0).cluster_id
+    for rid in (l0, l1):
+        update_review(conn, rid, review_status="confirmed")
+
+    s = run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl)
+    got = _labels(conn, emb)
+    assert got[l0] == got[l1] == identity                    # reviewed rows untouched
+    assert got[r0] == got[r1] and got[r0] != identity        # proposal never reuses it
+    assert got[r0] > identity
+    assert got[make_record_id("S", 1)] == NOISE_LABEL
+    assert s.params["label_offset"] == identity + 1
+    assert s.params["n_reserved_ids"] == 1
+
+
+def test_rerun_avoids_out_of_scope_labels(demo_store):
+    """Rows outside the species filter keep their labels, and new labels avoid them."""
+    db, pkl, conn, emb = demo_store
+    r0, r1 = make_record_id("R0", 1), make_record_id("R1", 1)
+    for stem in ("L0", "L1", "S"):
+        store.update_species(conn, make_record_id(stem, 1), "lynx", 1.0)
+    for rid in (r0, r1):
+        store.update_species(conn, rid, "boar", 1.0)
+
+    run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl, species_filter="boar")
+    boar_label = get_record(conn, r0).cluster_id
+    assert boar_label == 0
+    run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl, species_filter="lynx")
+    got = _labels(conn, emb)
+    assert got[r0] == got[r1] == boar_label
+    assert got[make_record_id("L0", 1)] == got[make_record_id("L1", 1)] != boar_label
+
+
+def test_label_offset_zero_without_reviews_and_idempotent(demo_store):
+    db, pkl, conn, emb = demo_store
+    s0 = run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl)
+    assert s0.params["label_offset"] == 0
+    assert set(_labels(conn, emb).values()) == {0, 1, NOISE_LABEL}
+
+    for stem in ("L0", "L1"):
+        update_review(conn, make_record_id(stem, 1), review_status="confirmed")
+    s1 = run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl)
+    labels1 = _labels(conn, emb)
+    s2 = run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl)
+    assert _labels(conn, emb) == labels1
+    assert s1.params["label_offset"] == s2.params["label_offset"] == 1
+
+
+def test_force_logs_and_resets_review(demo_store):
+    """--force is an explicit, logged correction: previous review kept, status reset."""
+    db, pkl, conn, emb = demo_store
+    run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl)
+    rid = make_record_id("L0", 1)
+    update_review(conn, rid, review_status="confirmed", review_note="looks right",
+                  cluster_id=999)
+
+    s = run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl, force=True)
+    rec = get_record(conn, rid)
+    assert rec.cluster_id != 999
+    assert rec.review_status == "unreviewed" and rec.review_note is None
+    log = json.loads(rec.extra_json)["review_overrides"]
+    assert len(log) == 1
+    assert log[0]["reason"] == "cluster --force"
+    assert log[0]["previous_cluster_id"] == 999
+    assert log[0]["previous_review_status"] == "confirmed"
+    assert log[0]["previous_review_note"] == "looks right"
+    assert s.n_review_overridden == 1 and "--force" in s.sentence
+
+    # Nothing left to override: a second forced run adds no log entry.
+    s2 = run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl, force=True)
+    assert s2.n_review_overridden == 0
+    assert len(json.loads(get_record(conn, rid).extra_json)["review_overrides"]) == 1
+
+
+def test_review_merge_keeps_identity_number(demo_store, tmp_path):
+    """Proposals sit above identities, so merging a proposal into an identity through
+    review keeps the identity's number."""
+    from reid_demo.review import ReviewDecision, ReviewItem, apply_decisions
+
+    db, pkl, conn, emb = demo_store
+    run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl)
+    r0, r1 = make_record_id("R0", 1), make_record_id("R1", 1)
+    identity = get_record(conn, r0).cluster_id
+    for rid in (r0, r1):
+        update_review(conn, rid, review_status="confirmed")
+    run_clustering(db_path=db, dataset="DemoDS", embeddings_path=pkl)
+    l0, l1 = make_record_id("L0", 1), make_record_id("L1", 1)
+    proposal = get_record(conn, l0).cluster_id
+    assert proposal > identity
+
+    item = ReviewItem(item_id=f"pair__{l0}__{r0}", kind="pair", dataset="DemoDS",
+                      record_id_a=l0, record_id_b=r0)
+    apply_decisions(conn, [item], [ReviewDecision(item_id=item.item_id, answer="same")],
+                    dataset="DemoDS", session_path=str(tmp_path / "session.json"))
+    got = _labels(conn, emb)
+    assert got[l0] == got[l1] == got[r0] == got[r1] == identity

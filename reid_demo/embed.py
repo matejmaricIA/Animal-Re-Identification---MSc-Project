@@ -37,6 +37,7 @@ import os
 import pickle
 import sys
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -70,9 +71,12 @@ class EmbedResult:
     embedding_dim: Optional[int]  # observed vector length, e.g. 1536 (None if nothing embedded)
     n_total: int                  # candidate records considered
     n_embedded: int               # newly computed this run
-    n_skipped: int                # already had embedding (only_missing)
+    n_skipped: int                # already had a CURRENT embedding (only_missing)
     n_failed: int                 # crop missing/unreadable
     failed_ids: list = field(default_factory=list)   # record_ids that failed
+    # had an embedding from another model/checkpoint/cache, or a key missing from this
+    # call's cache; recomputed (or cleared if the recompute failed). N1b.
+    n_stale: int = 0
 
 
 # --------------------------------------------------------------------------- #
@@ -219,13 +223,20 @@ def embed_records(
     ``only_species`` matches the store ``species`` column by **exact lowercase equality**
     (whitespace-stripped). Records with no crop on disk (or unreadable) go to
     ``failed_ids`` and are not updated.
+
+    Model binding (N1b): under ``only_missing`` a record is skipped only if its vector is
+    CURRENT — it lives in this call's cache (whose name encodes the model and checkpoint
+    label) and the key is present. Any other existing embedding is stale: it is
+    recomputed into this cache (``n_stale``), and if that recompute fails its reference
+    is cleared (reason logged in ``extra_json['embedding_cleared']``) rather than left
+    pointing at another model's vector.
     """
     label = _model_label(model_name, checkpoint_path)
     cache_path = embedding_cache_path(dataset, model_name, checkpoint_path, cache_dir)
 
     # Always query the full matching set (for stable n_total / skip accounting). When
-    # only_missing=True, records that already carry an embedding_ref are SKIPPED (not
-    # recomputed and not re-written); when False, all are (re)embedded.
+    # only_missing=True, records whose embedding is CURRENT are SKIPPED (not recomputed
+    # and not re-written); when False, all are (re)embedded.
     records = query_records(
         conn,
         dataset=dataset,
@@ -246,16 +257,22 @@ def embed_records(
 
     n_total = len(records)
 
-    # Partition into "skip (already embedded)" vs "to embed". Under only_missing, a record
-    # is skipped iff it already has embedding_ref set in the store. Under only_missing
-    # False, everything is (re)embedded.
+    # Partition into "skip (current embedding)" vs "to embed". Under only_missing, a record
+    # is skipped iff its embedding is current for THIS model/checkpoint/cache. A record
+    # with any other embedding is stale. Under only_missing False, everything is
+    # (re)embedded.
+    cache_keys = set(_load_cache(cache_path).keys())
     skipped_records = []
     to_embed = []
+    stale_records: Dict[str, object] = {}
     for r in records:
-        if only_missing and r.embedding_ref is not None:
+        current = _embedding_is_current(r, cache_path, cache_keys)
+        if only_missing and current:
             skipped_records.append(r)
         else:
             to_embed.append(r)
+            if r.embedding_ref is not None and not current:
+                stale_records[r.record_id] = r
 
     crop_paths: Dict[str, str] = {r.record_id: r.crop_path for r in to_embed}
 
@@ -284,6 +301,8 @@ def embed_records(
         else:
             n_failed += 1
             failed_ids.append(rid)
+            if rid in stale_records:
+                _clear_stale_embedding(conn, stale_records[rid], cache_path)
 
     # If nothing was newly embedded but skipped records exist, surface their dim too.
     if embedding_dim is None and skipped_records:
@@ -308,7 +327,32 @@ def embed_records(
         n_skipped=n_skipped,
         n_failed=n_failed,
         failed_ids=failed_ids,
+        n_stale=len(stale_records),
     )
+
+
+def _embedding_is_current(record, cache_path: str, cache_keys: set) -> bool:
+    """True iff the record's vector lives in THIS call's cache (same model label,
+    checkpoint, dataset prefix and cache dir) and its key is actually present."""
+    return (
+        record.embedding_ref is not None
+        and record.embedding_path is not None
+        and os.path.abspath(record.embedding_path) == os.path.abspath(cache_path)
+        and record.embedding_ref in cache_keys
+    )
+
+
+def _clear_stale_embedding(conn, record, cache_path: str) -> None:
+    """A stale embedding whose recompute failed: drop the reference instead of leaving
+    the row on another model's vector, and log why."""
+    store.update_extra(conn, record.record_id, "embedding_cleared", {
+        "at": datetime.now().isoformat(timespec="seconds"),
+        "reason": "stale_and_recompute_failed",
+        "previous_embedding_ref": record.embedding_ref,
+        "previous_embedding_path": record.embedding_path,
+        "requested_cache_path": cache_path,
+    })
+    update_embedding(conn, record.record_id, None, None)
 
 
 # --------------------------------------------------------------------------- #
@@ -477,8 +521,8 @@ def _main(argv: Optional[List[str]] = None) -> int:
 
     print(
         f"T04 embed: dataset={res.dataset} dim={res.embedding_dim} total={res.n_total} "
-        f"embedded={res.n_embedded} skipped={res.n_skipped} failed={res.n_failed} "
-        f"cache={res.cache_path}"
+        f"embedded={res.n_embedded} skipped={res.n_skipped} stale={res.n_stale} "
+        f"failed={res.n_failed} cache={res.cache_path}"
     )
 
     # "Nothing to do" is an error worth surfacing: 0 found to embed AND none already done.

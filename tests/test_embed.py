@@ -288,6 +288,77 @@ def test_get_matrix_empty(fake_extract, tmp_path):
 
 
 # --------------------------------------------------------------------------- #
+# N1b: embeddings are bound to the model/checkpoint cache
+# --------------------------------------------------------------------------- #
+
+def test_model_change_recomputes(fake_extract, seeded_conn, tmp_path):
+    """A different checkpoint must not reuse the old model's vectors (was: all skipped)."""
+    conn = seeded_conn
+    cache_dir = str(tmp_path / "emb")
+    res_a = embed_records(conn, dataset="MedvednicaDS", cache_dir=cache_dir)
+    ckpt_b = str(tmp_path / "ckpt_b" / "best.pt")   # the cache label hashes the path only
+    res_b = embed_records(conn, dataset="MedvednicaDS", cache_dir=cache_dir,
+                          checkpoint_path=ckpt_b)
+    assert res_b.cache_path != res_a.cache_path
+    assert res_b.n_embedded == 3 and res_b.n_stale == 3 and res_b.n_skipped == 0
+    rows = query_records(conn, dataset="MedvednicaDS")
+    assert all(r.embedding_path == res_b.cache_path for r in rows)
+
+    again = embed_records(conn, dataset="MedvednicaDS", cache_dir=cache_dir,
+                          checkpoint_path=ckpt_b)
+    assert again.n_skipped == 3 and again.n_stale == 0 and again.n_embedded == 0
+
+
+def test_missing_cache_key_recomputes(fake_extract, seeded_conn, tmp_path):
+    import pickle
+
+    conn = seeded_conn
+    cache_dir = str(tmp_path / "emb")
+    res = embed_records(conn, dataset="MedvednicaDS", cache_dir=cache_dir)
+    with open(res.cache_path, "rb") as fh:
+        cache = pickle.load(fh)
+    victim = sorted(cache)[0]
+    del cache[victim]
+    with open(res.cache_path, "wb") as fh:
+        pickle.dump(cache, fh)
+
+    res2 = embed_records(conn, dataset="MedvednicaDS", cache_dir=cache_dir)
+    assert res2.n_embedded == 1 and res2.n_stale == 1 and res2.n_skipped == 2
+    M, ids = get_embedding_matrix(conn, dataset="MedvednicaDS")
+    assert M.shape[0] == 3 and victim in ids
+
+
+def test_failed_stale_embedding_is_cleared(fake_extract, seeded_conn, tmp_path):
+    """A stale embedding that cannot be recomputed is cleared, not left on another
+    model's vector; a CURRENT embedding with a missing crop is never cleared."""
+    import json
+
+    conn = seeded_conn
+    cache_dir = str(tmp_path / "emb")
+    res_a = embed_records(conn, dataset="MedvednicaDS", cache_dir=cache_dir)
+    lost = make_record_id("probe1", 1)
+    os.remove(get_record(conn, lost).crop_path)
+
+    ckpt_b = str(tmp_path / "ckpt_b" / "best.pt")
+    res_b = embed_records(conn, dataset="MedvednicaDS", cache_dir=cache_dir,
+                          checkpoint_path=ckpt_b)
+    assert res_b.n_failed == 1 and lost in res_b.failed_ids and res_b.n_stale == 3
+    rec = get_record(conn, lost)
+    assert rec.embedding_ref is None and rec.embedding_path is None
+    cleared = json.loads(rec.extra_json)["embedding_cleared"]
+    assert cleared["reason"] == "stale_and_recompute_failed"
+    assert cleared["previous_embedding_path"] == res_a.cache_path
+    kept = make_record_id("probe2", 1)
+    assert get_record(conn, kept).embedding_path == res_b.cache_path
+
+    os.remove(get_record(conn, kept).crop_path)
+    res_c = embed_records(conn, dataset="MedvednicaDS", cache_dir=cache_dir,
+                          checkpoint_path=ckpt_b)
+    assert get_record(conn, kept).embedding_path == res_b.cache_path   # current: kept
+    assert res_c.n_skipped == 2
+
+
+# --------------------------------------------------------------------------- #
 # Real-model smoke test (skipped without torch / real crop / weights)
 # --------------------------------------------------------------------------- #
 

@@ -31,7 +31,10 @@ from reid_demo.run_demo import (  # noqa: E402
 from reid_demo.store import (  # noqa: E402
     DetectionRecord,
     connect,
+    get_record,
     make_record_id,
+    update_review,
+    update_species,
     upsert_records,
 )
 
@@ -191,7 +194,11 @@ def test_plan_full_funnel_includes_fisher_fusion_and_baseline(tmp_path):
     # the second cluster is the in-process fused affinity one
     fused_cluster = [s for s in specs if s.name == "cluster" and s.func][0]
     assert "affinity_path" in fused_cluster.kwargs
-    assert fused_cluster.kwargs["force"] is True
+    # N1b: the fused pass is unforced (reviewed rows stay protected), marker-gated, and
+    # its completion is bound to the affinity sidecar it clusters on.
+    assert fused_cluster.kwargs["force"] is False
+    assert fused_cluster.marker is True
+    assert fused_cluster.input_paths == [fused_cluster.kwargs["affinity_path"]]
 
 
 def test_plan_max_identities_plumbed_to_ingest(tmp_path):
@@ -505,3 +512,289 @@ def test_main_runs_with_stubbed_stages(tmp_path, monkeypatch):
                "--db", str(tmp_path / "x.sqlite"), "--run-name", "r1"])
     assert rc == 0
     assert os.path.exists(tmp_path / "b" / "r1" / "manifest.json")
+
+
+# --------------------------------------------------------------------------- #
+# N1b: stage completion, review-safe fused clustering, record-id scheme passthrough
+# --------------------------------------------------------------------------- #
+
+def _embedded_store(root, *, dataset="DemoDS", dim=16):
+    """Three tight groups of three crops with RAW vectors in one pickle. Returns
+    (db_path, pkl_path, conn, {record_id: vector})."""
+    import pickle
+
+    import numpy as np
+
+    root = str(root)
+    os.makedirs(root, exist_ok=True)
+    rng = np.random.default_rng(7)
+    centres = [rng.normal(size=dim) for _ in range(3)]
+    db = os.path.join(root, "store.sqlite")
+    pkl = os.path.join(root, "emb.pkl")
+    conn = connect(db)
+    emb, recs = {}, []
+    for c, centre in enumerate(centres):
+        for k in range(3):
+            stem = f"g{c}k{k}"
+            rid = make_record_id(stem, 1)
+            emb[rid] = (centre + 0.01 * rng.normal(size=dim)).astype("float32")
+            recs.append(DetectionRecord(
+                record_id=rid, source_image=f"images/{stem}.jpg", source_stem=stem,
+                det_index=1, crop_path=f"crops/{rid}.jpg",
+                bbox_x=0.0, bbox_y=0.0, bbox_w=1.0, bbox_h=1.0, dataset=dataset,
+                orientation="left", embedding_ref=rid, embedding_path=pkl))
+    upsert_records(conn, recs)
+    with open(pkl, "wb") as fh:
+        pickle.dump(emb, fh)
+    return db, pkl, conn, emb
+
+
+def _cosine_matrix(emb, ids):
+    import numpy as np
+
+    m = np.stack([emb[i] / np.linalg.norm(emb[i]) for i in ids])
+    return (m @ m.T).astype("float32")
+
+
+def _write_sidecar(path, emb, ids=None):
+    from reid_demo import fusion
+
+    ids = sorted(emb) if ids is None else list(ids)
+    fusion._save_affinity(str(path), _cosine_matrix(emb, ids), ids)
+    return str(path)
+
+
+def test_partial_species_stage_is_not_done(tmp_path):
+    """A stage with output on only some rows is NOT done (was: any row => done)."""
+    import reid_demo.run_demo as rd
+
+    cfg = _cfg(tmp_path, datasets=["LeopardID2022"])
+    conn = connect(cfg.db_path)
+    upsert_records(conn, [_rec(f"a{i}", dataset="LeopardID2022", cluster_id=None, species=None)
+                          for i in range(3)])
+    update_species(conn, make_record_id("a0", 1), "leopard", 1.0, "leopard")
+    spec = StageSpec(name="species", ticket="T03", critical=True, output_paths=[],
+                     cli=["-m", "reid_demo.species_filter"], dataset="LeopardID2022",
+                     skip_store_column="species")
+    assert rd._store_stage_done(spec, cfg.db_path) is False
+    for i in (1, 2):
+        update_species(conn, make_record_id(f"a{i}", 1), "leopard", 1.0, "leopard")
+    conn.close()
+    assert rd._store_stage_done(spec, cfg.db_path) is True
+
+
+def test_store_stage_empty_dataset_not_done(tmp_path):
+    import reid_demo.run_demo as rd
+
+    cfg = _cfg(tmp_path, datasets=["LeopardID2022"])
+    connect(cfg.db_path).close()
+    spec = rd._spec_species(cfg, "LeopardID2022")
+    assert rd._store_stage_done(spec, cfg.db_path) is False
+
+
+def test_cluster_done_ignores_reviewed_and_unembedded(tmp_path):
+    """Only unreviewed rows WITH an embedding must carry a cluster label."""
+    import reid_demo.run_demo as rd
+
+    cfg = _cfg(tmp_path, datasets=["LeopardID2022"])
+    ds = "LeopardID2022"
+    labelled = _rec("lab", dataset=ds, cluster_id=0)
+    labelled.embedding_ref, labelled.embedding_path = labelled.record_id, "e.pkl"
+    reviewed = _rec("rev", dataset=ds, cluster_id=None)
+    reviewed.embedding_ref, reviewed.embedding_path = reviewed.record_id, "e.pkl"
+    reviewed.review_status = "confirmed"
+    unembedded = _rec("noemb", dataset=ds, cluster_id=None)
+    conn = connect(cfg.db_path)
+    upsert_records(conn, [labelled, reviewed, unembedded])
+    conn.close()
+
+    spec = rd._spec_cluster(cfg, ds)
+    assert spec.marker and spec.skip_store_where
+    assert rd._store_stage_done(spec, cfg.db_path) is False   # no marker yet
+    rd._write_stage_marker(spec, cfg.db_path)
+    assert rd._store_stage_done(spec, cfg.db_path) is True
+
+    pending = _rec("new", dataset=ds, cluster_id=None)
+    pending.embedding_ref, pending.embedding_path = pending.record_id, "e.pkl"
+    conn = connect(cfg.db_path)
+    upsert_records(conn, [pending])
+    conn.close()
+    assert rd._store_stage_done(spec, cfg.db_path) is False
+
+
+def test_ingest_marker_binds_invocation(tmp_path):
+    """Existing rows from a smoke ingest do not satisfy a full ingest (was: any row)."""
+    import reid_demo.run_demo as rd
+
+    ds = "LeopardID2022"
+    smoke = _cfg(tmp_path, datasets=[ds], max_identities=8)
+    conn = connect(smoke.db_path)
+    upsert_records(conn, [_rec("a1", dataset=ds, cluster_id=None)])
+    conn.close()
+
+    smoke_spec = rd._spec_ingest(smoke, ds)
+    assert rd._store_stage_done(smoke_spec, smoke.db_path) is False
+    rd._write_stage_marker(smoke_spec, smoke.db_path)
+    assert rd._store_stage_done(smoke_spec, smoke.db_path) is True
+
+    full_spec = rd._spec_ingest(_cfg(tmp_path, datasets=[ds]), ds)
+    assert rd._store_stage_done(full_spec, smoke.db_path) is False
+
+
+def test_run_stage_writes_marker_only_on_success(tmp_path, monkeypatch):
+    import reid_demo.run_demo as rd
+
+    ds = "LeopardID2022"
+    cfg = _cfg(tmp_path, datasets=[ds])
+    conn = connect(cfg.db_path)
+    upsert_records(conn, [_rec("a1", dataset=ds, cluster_id=None)])
+    conn.close()
+
+    def _boom(**kw):
+        raise RuntimeError("stage failed")
+
+    monkeypatch.setattr(rd, "_n1b_ok", lambda **kw: None, raising=False)
+    monkeypatch.setattr(rd, "_n1b_boom", _boom, raising=False)
+    failing = StageSpec(name="ingest", ticket="T02", critical=True, output_paths=[],
+                        func="reid_demo.run_demo:_n1b_boom", dataset=ds,
+                        skip_store_column="crop_path", marker=True)
+    assert rd._run_stage(failing, cfg, str(tmp_path / "logs")).status == "failed"
+    assert rd._store_stage_done(failing, cfg.db_path) is False
+
+    ok = StageSpec(name="ingest", ticket="T02", critical=True, output_paths=[],
+                   func="reid_demo.run_demo:_n1b_ok", dataset=ds,
+                   skip_store_column="crop_path", marker=True)
+    assert rd._run_stage(ok, cfg, str(tmp_path / "logs")).status == "ok"
+    assert rd._run_stage(ok, cfg, str(tmp_path / "logs")).status == "skipped"
+
+
+def test_cluster_marker_last_pass_wins(tmp_path):
+    """Baseline and fused passes share one marker: whichever ran last is the done one."""
+    import reid_demo.run_demo as rd
+
+    ds = "LeopardID2022"
+    cfg = _cfg(tmp_path, datasets=[ds], signals=SIGNAL_FULL_FUNNEL)
+    rec = _rec("a1", dataset=ds, cluster_id=0)
+    rec.embedding_ref, rec.embedding_path = rec.record_id, "e.pkl"
+    conn = connect(cfg.db_path)
+    upsert_records(conn, [rec])
+    conn.close()
+    sidecar = tmp_path / "aff.npz"
+    sidecar.write_bytes(b"v1")
+
+    baseline = rd._spec_cluster(cfg, ds, label="cluster(baseline-global)")
+    fused = rd._spec_cluster(cfg, ds, affinity_path=str(sidecar), label="cluster(full-funnel)")
+    rd._write_stage_marker(baseline, cfg.db_path)
+    assert rd._store_stage_done(baseline, cfg.db_path) is True
+    assert rd._store_stage_done(fused, cfg.db_path) is False
+    rd._write_stage_marker(fused, cfg.db_path)
+    assert rd._store_stage_done(fused, cfg.db_path) is True
+    assert rd._store_stage_done(baseline, cfg.db_path) is False
+    # a rewritten sidecar invalidates the fused pass
+    sidecar.write_bytes(b"version-2")
+    assert rd._store_stage_done(fused, cfg.db_path) is False
+
+
+def test_manual_cluster_run_clears_marker(tmp_path):
+    import reid_demo.run_demo as rd
+    from reid_demo.cluster import run_clustering
+
+    db, pkl, conn, _emb = _embedded_store(tmp_path)
+    cfg = _cfg(tmp_path, datasets=["DemoDS"])
+    assert cfg.db_path == db
+    spec = rd._spec_cluster(cfg, "DemoDS")
+    run_clustering(db, dataset="DemoDS", embeddings_path=pkl)
+    rd._write_stage_marker(spec, db)
+    assert rd._store_stage_done(spec, db) is True
+    run_clustering(db, dataset="DemoDS", embeddings_path=pkl, dry_run=True)
+    assert rd._store_stage_done(spec, db) is True     # a dry run writes nothing
+    run_clustering(db, dataset="DemoDS", embeddings_path=pkl)
+    assert rd._store_stage_done(spec, db) is False    # labels the runner did not write
+    conn.close()
+
+
+def test_embed_stage_is_never_store_skipped(tmp_path):
+    import reid_demo.run_demo as rd
+
+    db, _pkl, conn, _emb = _embedded_store(tmp_path)
+    conn.close()
+    cfg = _cfg(tmp_path, datasets=["DemoDS"])
+    spec = rd._spec_embed(cfg, "DemoDS")
+    assert spec.skip_store_column is None and spec.marker is False
+    assert rd._store_stage_done(spec, db) is False
+
+
+def test_fused_pass_preserves_reviewed_rows(tmp_path):
+    """The fused cluster stage leaves reviewed rows untouched (was: force=True overwrote
+    them, and unforced it failed on the sidecar's shape)."""
+    import reid_demo.run_demo as rd
+    from reid_demo.cluster import run_clustering
+
+    db, pkl, conn, emb = _embedded_store(tmp_path)
+    run_clustering(db, dataset="DemoDS", embeddings_path=pkl)
+    pinned = make_record_id("g0k0", 1)
+    update_review(conn, pinned, "confirmed", cluster_id=999)
+    sidecar = _write_sidecar(tmp_path / "aff.npz", emb)
+
+    cfg = _cfg(tmp_path, datasets=["DemoDS"], signals=SIGNAL_FULL_FUNNEL)
+    spec = rd._spec_cluster(cfg, "DemoDS", affinity_path=sidecar,
+                            label=f"cluster({SIGNAL_FULL_FUNNEL})")
+    res = rd._run_stage(spec, cfg, str(tmp_path / "logs"))
+    assert res.status == "ok", res.error
+
+    rec = get_record(conn, pinned)
+    assert rec.cluster_id == 999 and rec.review_status == "confirmed"
+    others = {rid: get_record(conn, rid).cluster_id for rid in emb if rid != pinned}
+    assert all(cid is not None and cid > 999 for cid in others.values())
+    assert others[make_record_id("g0k1", 1)] == others[make_record_id("g0k2", 1)]
+    assert others[make_record_id("g1k0", 1)] != others[make_record_id("g2k0", 1)]
+    assert rd._store_stage_done(spec, db) is True
+    conn.close()
+
+
+def test_sidecar_slicing_matches_matrix_path(tmp_path):
+    """With full coverage, the sliced-sidecar provider clusters exactly like the matrix."""
+    import reid_demo.run_demo as rd
+    from reid_demo.cluster import run_clustering
+
+    db_a, _pkl_a, conn_a, emb = _embedded_store(tmp_path / "a")
+    db_b, _pkl_b, conn_b, emb_b = _embedded_store(tmp_path / "b")
+    ids = sorted(emb)
+    sidecar = _write_sidecar(tmp_path / "aff.npz", emb, ids)
+    rd._cluster_with_affinity(db_path=db_a, dataset="DemoDS", affinity_path=sidecar)
+    run_clustering(db_b, dataset="DemoDS", affinity=_cosine_matrix(emb_b, ids))
+    got_a = {rid: (get_record(conn_a, rid).cluster_id, get_record(conn_a, rid).cluster_conf)
+             for rid in ids}
+    got_b = {rid: (get_record(conn_b, rid).cluster_id, get_record(conn_b, rid).cluster_conf)
+             for rid in ids}
+    assert got_a == got_b
+    conn_a.close()
+    conn_b.close()
+
+
+def test_sidecar_missing_records_raises_clearly(tmp_path):
+    import reid_demo.run_demo as rd
+
+    db, _pkl, conn, emb = _embedded_store(tmp_path)
+    conn.close()
+    ids = sorted(emb)
+    missing = ids[-1]
+    sidecar = _write_sidecar(tmp_path / "aff.npz", emb, ids[:-1])
+    with pytest.raises(ValueError, match="re-run the fisher and fusion stages") as exc:
+        rd._cluster_with_affinity(db_path=db, dataset="DemoDS", affinity_path=sidecar)
+    assert missing in str(exc.value)
+
+
+def test_record_id_scheme_passthrough(tmp_path):
+    import reid_demo.run_demo as rd
+
+    cfg = build_config(_Args(datasets=["LeopardID2022"], record_id_scheme="legacy",
+                             db=str(tmp_path / "s.sqlite")))
+    assert cfg.record_id_scheme == "legacy"
+    ing = next(s for s in plan_stages(cfg) if s.name == "ingest")
+    i = ing.cli.index("--record-id-scheme")
+    assert ing.cli[i + 1] == "legacy"
+    assert rd._build_parser().parse_args(["--record-id-scheme", "legacy"]).record_id_scheme == "legacy"
+    plain = next(s for s in plan_stages(_cfg(tmp_path, datasets=["LeopardID2022"]))
+                 if s.name == "ingest")
+    assert "--record-id-scheme" not in plain.cli

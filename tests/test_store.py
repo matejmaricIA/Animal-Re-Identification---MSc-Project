@@ -38,6 +38,9 @@ from reid_demo.store import (  # noqa: E402
     get_record_id_scheme,
     set_record_id_scheme,
     RecordCollisionError,
+    get_stage_marker,
+    set_stage_marker,
+    clear_stage_marker,
     export_records,
     import_records,
     to_dataframe,
@@ -443,3 +446,28 @@ def test_ingest_upsert_collision_raises_and_rolls_back(conn):
     assert get_record(conn, make_record_id("NEW", 1)) is None   # batch rolled back
     assert get_record(conn, make_record_id("IMG_0066", 1)).source_image.endswith(
         "animal_images/IMG_0066.JPG")
+
+
+# --------------------------------------------------------------------------- #
+# N1b: stage completion markers
+# --------------------------------------------------------------------------- #
+
+def test_stage_marker_round_trip_and_clear(tmp_path):
+    conn = connect(str(tmp_path / "m.sqlite"))
+    assert get_stage_marker(conn, "cluster", "DS1") is None
+    set_stage_marker(conn, "cluster", "DS1", {"config": "a", "label": "cluster"})
+    set_stage_marker(conn, "cluster", "DS2", {"config": "b"})
+    set_stage_marker(conn, "ingest", "DS1", {"config": "c"})
+    assert get_stage_marker(conn, "cluster", "DS1") == {"config": "a", "label": "cluster"}
+    set_stage_marker(conn, "cluster", "DS1", {"config": "a2"})          # replace
+    assert get_stage_marker(conn, "cluster", "DS1") == {"config": "a2"}
+
+    clear_stage_marker(conn, "cluster", "DS1")
+    assert get_stage_marker(conn, "cluster", "DS1") is None
+    assert get_stage_marker(conn, "cluster", "DS2") == {"config": "b"}
+    clear_stage_marker(conn, "cluster")                                  # every dataset
+    assert get_stage_marker(conn, "cluster", "DS2") is None
+    assert get_stage_marker(conn, "ingest", "DS1") == {"config": "c"}
+    # schema version row untouched
+    assert conn.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()[0] \
+        == str(SCHEMA_VERSION)

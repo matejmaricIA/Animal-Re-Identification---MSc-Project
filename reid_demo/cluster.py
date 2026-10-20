@@ -57,7 +57,16 @@ crop.
 RE-RUN SAFETY (D5): T05 runs BEFORE T08 review. Re-running on a dataset recomputes
 identical ``cluster_*`` for UNREVIEWED rows (deterministic/idempotent), but rows whose
 ``review_status != 'unreviewed'`` (human merges/splits) are PRESERVED — skipped from the
-write and counted in ``n_review_preserved`` — unless ``force=True`` is passed.
+write and counted in ``n_review_preserved`` — unless ``force=True`` is passed. A forced
+run is an explicit, logged correction (N1b): each reviewed row it rewrites keeps its
+previous review in ``extra_json['review_overrides']`` and is reset to ``unreviewed``.
+
+LABEL NAMESPACE (N1b): a reviewed row's ``cluster_id`` is a confirmed identity; an
+unreviewed row's is a temporary proposal. New proposal labels are offset above EVERY
+``cluster_id >= 0`` the run does not rewrite (reviewed rows, rows outside the species
+filter, unembedded rows), so a proposal never reuses a confirmed identity's number.
+With nothing reserved the offset is 0 and labels are unchanged. Attaching records to an
+existing identity is left to explicit T08 review decisions.
 
 Dependencies: stdlib + numpy + scikit-learn + ``reid_demo.store`` + (optionally, only if
 ``--calibrator`` is given) ``calibration.ScoreCalibrator``. No new third-party deps; no
@@ -72,6 +81,7 @@ import json
 import sys
 from collections import Counter
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -148,6 +158,7 @@ class ClusterRunSummary:
     per_flank: Dict[str, Dict[str, int]]   # bucket -> {crops, clusters, candidate_new}
     n_review_preserved: int     # rows skipped because review_status != 'unreviewed'
     sentence: str               # human-readable one-liner
+    n_review_overridden: int = 0  # reviewed rows re-clustered by force=True (logged, reset)
 
 
 # --------------------------------------------------------------------------- #
@@ -802,8 +813,12 @@ def run_clustering(
     Rows are filtered by ``dataset`` and (when given) the store's ``species`` column
     (D7 — NOT ``species_kept``). Rows missing an embedding are skipped and counted. Re-run
     safety (D5): rows with ``review_status != 'unreviewed'`` are PRESERVED (not
-    overwritten, reported in ``n_review_preserved``) unless ``force=True``. Among unreviewed
-    rows the run is deterministic/idempotent.
+    overwritten, reported in ``n_review_preserved``) unless ``force=True``; a forced
+    rewrite of a reviewed row logs the previous review to ``extra_json['review_overrides']``
+    and resets it to ``unreviewed`` (``n_review_overridden``). Among unreviewed rows the run
+    is deterministic/idempotent. New labels never reuse a ``cluster_id`` held by a row this
+    run does not rewrite (``params['label_offset']``). A non-dry run also clears the T10
+    runner's ``cluster`` completion marker for the dataset.
 
     Affinity (D8): if given (a precomputed ``(N, N)`` similarity aligned to the SORTED ids
     of the clustered set, or a provider callable) clustering uses it instead of the internal
@@ -838,6 +853,11 @@ def run_clustering(
 
     conn = connect(db_path)
     try:
+        if not dry_run:
+            # Labels are about to change: any recorded completion of the T10 runner's
+            # cluster stage for this dataset is void (N1b).
+            store.clear_stage_marker(conn, "cluster", dataset)
+
         records = query_records(
             conn, dataset=dataset, species=species_filter, order_by="record_id"
         )
@@ -871,7 +891,24 @@ def run_clustering(
             flank_policy=flank_policy, seed=seed,
         )
 
+        # Label namespace (N1b): never reuse a cluster_id held by a row this run does
+        # not rewrite (reviewed identities, other species, unembedded rows).
+        written = set(result.image_ids)
+        scope = records if species_filter is None else query_records(conn, dataset=dataset)
+        reserved = _reserved_cluster_ids(scope, written)
+        offset = max(reserved) + 1 if reserved else 0
+        if offset:
+            labels = result.labels.copy()
+            labels[labels >= 0] += offset
+            result = dataclasses.replace(result, labels=labels)
+        params["label_offset"] = offset
+        params["n_reserved_ids"] = len(reserved)
+
+        overridden = [r for r in reviewed if force and r.record_id in written]
+
         if not dry_run:
+            for r in overridden:
+                _log_review_override(conn, r)
             for rid, lab, cf, cand in zip(
                 result.image_ids, result.labels.tolist(),
                 result.confidences.tolist(), result.is_candidate_new.tolist(),
@@ -881,10 +918,40 @@ def run_clustering(
         summary = _build_summary(
             dataset=dataset, backend=backend, params=params, result=result,
             orientations=orientations, n_review_preserved=n_review_preserved,
+            n_review_overridden=len(overridden),
         )
         return summary
     finally:
         conn.close()
+
+
+def _reserved_cluster_ids(records, written: set) -> set:
+    """``cluster_id >= 0`` values held by records this run will NOT rewrite."""
+    return {
+        int(r.cluster_id) for r in records
+        if r.record_id not in written and r.cluster_id is not None and r.cluster_id >= 0
+    }
+
+
+def _log_review_override(conn, record) -> None:
+    """Explicit ``force=True`` correction: keep the previous review in
+    ``extra_json['review_overrides']``, then reset the row to ``unreviewed`` so a machine
+    label never sits under a human review status."""
+    try:
+        extra = json.loads(record.extra_json or "{}")
+    except ValueError:
+        extra = {}
+    history = extra.get("review_overrides") if isinstance(extra, dict) else None
+    history = list(history) if isinstance(history, list) else []
+    history.append({
+        "at": datetime.now().isoformat(timespec="seconds"),
+        "reason": "cluster --force",
+        "previous_cluster_id": record.cluster_id,
+        "previous_review_status": record.review_status,
+        "previous_review_note": record.review_note,
+    })
+    store.update_extra(conn, record.record_id, "review_overrides", history)
+    store.update_review(conn, record.record_id, "unreviewed", review_note=None)
 
 
 def _build_summary(
@@ -895,6 +962,7 @@ def _build_summary(
     result: CropClustering,
     orientations: Dict[str, Optional[str]],
     n_review_preserved: int,
+    n_review_overridden: int = 0,
 ) -> ClusterRunSummary:
     labels = result.labels
     n_crops = len(result.image_ids)
@@ -929,6 +997,9 @@ def _build_summary(
     )
     if n_review_preserved:
         sentence += f" ({n_review_preserved} reviewed row(s) preserved)"
+    if n_review_overridden:
+        sentence += (f" ({n_review_overridden} reviewed row(s) re-clustered by --force; "
+                     f"previous reviews logged)")
     sentence += "."
 
     return ClusterRunSummary(
@@ -943,6 +1014,7 @@ def _build_summary(
         per_flank=per_flank,
         n_review_preserved=n_review_preserved,
         sentence=sentence,
+        n_review_overridden=n_review_overridden,
     )
 
 
@@ -986,7 +1058,9 @@ def _build_parser() -> argparse.ArgumentParser:
                         help="override: a single embeddings .pkl used for all records.")
     parser.add_argument("--seed", type=int, default=42, help="determinism seed (default 42).")
     parser.add_argument("--force", action="store_true",
-                        help="re-cluster reviewed rows too (default preserves them).")
+                        help="re-cluster reviewed rows too; each overridden review is logged "
+                             "to extra_json['review_overrides'] and reset to 'unreviewed' "
+                             "(default preserves them).")
     parser.add_argument("--dry-run", action="store_true",
                         help="compute + print the summary but write nothing to the store.")
     parser.add_argument("--json", action="store_true",

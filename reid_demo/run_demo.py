@@ -33,6 +33,7 @@ Importable contract used by downstream/tests:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -117,7 +118,11 @@ class StageSpec:
     # additive (non-contract) wiring helpers:
     dataset: Optional[str] = None
     label: Optional[str] = None            # disambiguates duplicate stage names in logs
-    skip_store_column: Optional[str] = None  # store column whose non-NULL presence = "done"
+    skip_store_column: Optional[str] = None  # column every eligible row must have non-NULL
+    # additive (N1b) completion conditions; see _store_stage_done:
+    skip_store_where: Optional[str] = None   # SQL restricting the eligible rows (default: all)
+    marker: bool = False                     # also require a completion marker for this invocation
+    input_paths: List[str] = field(default_factory=list)  # files whose size/mtime enter the marker key
 
     @property
     def display_label(self) -> str:
@@ -145,6 +150,8 @@ class DemoConfig:
     knn_k: Optional[int] = None             # leiden backend
     resolution: Optional[float] = None      # leiden backend
     n_clusters: Optional[int] = None        # finch backend (target level)
+    # ingest (T02) passthrough (N1/N1b); None => the dataset's recorded scheme / 'path'.
+    record_id_scheme: Optional[str] = None
 
 
 @dataclass
@@ -251,6 +258,7 @@ def build_config(args) -> DemoConfig:
         knn_k=_opt("knn_k"),
         resolution=_opt("resolution"),
         n_clusters=_opt("n_clusters"),
+        record_id_scheme=_opt("record_id_scheme"),
     )
 
 
@@ -303,8 +311,12 @@ def _spec_ingest(cfg: DemoConfig, ds: str) -> StageSpec:
                       "--dataset", ds)
     if cfg.max_identities is not None:
         argv += ["--max-identities", str(cfg.max_identities)]
+    if cfg.record_id_scheme is not None:
+        argv += ["--record-id-scheme", cfg.record_id_scheme]
+    # The store cannot tell which source rows an ingest should produce, so completion is
+    # bound to the exact invocation (e.g. a --smoke run does not satisfy a full run).
     return StageSpec(name="ingest", ticket="T02", critical=True, output_paths=[],
-                     cli=argv, dataset=ds, skip_store_column="crop_path")
+                     cli=argv, dataset=ds, skip_store_column="crop_path", marker=True)
 
 
 def _spec_species(cfg: DemoConfig, ds: str) -> StageSpec:
@@ -318,15 +330,18 @@ def _spec_species(cfg: DemoConfig, ds: str) -> StageSpec:
 
 def _spec_embed(cfg: DemoConfig, ds: str) -> StageSpec:
     argv = _py_module("reid_demo.embed", "--db", cfg.db_path, "--dataset", ds)
+    # Never store-skipped (N1b): embed itself processes only pending/stale rows for the
+    # requested model and loads no model when nothing is pending.
     return StageSpec(name="embed", ticket="T04", critical=True, output_paths=[],
-                     cli=argv, dataset=ds, skip_store_column="embedding_ref")
+                     cli=argv, dataset=ds)
 
 
 def _spec_fisher(cfg: DemoConfig, ds: str) -> StageSpec:
     argv = _py_module("reid_demo.fisher", "--db", cfg.db_path, "--dataset", ds)
-    # accuracy layer never blocks the run (degrades to global clustering on failure)
+    # accuracy layer never blocks the run (degrades to global clustering on failure).
+    # Never store-skipped: fisher checks its own cache (fisher_ref lives in extra_json).
     return StageSpec(name="fisher", ticket="T11", critical=False, output_paths=[],
-                     cli=argv, dataset=ds, skip_store_column="fisher_ref")
+                     cli=argv, dataset=ds)
 
 
 def _spec_fusion(cfg: DemoConfig, ds: str) -> StageSpec:
@@ -359,17 +374,26 @@ def _cluster_tuning(cfg: DemoConfig) -> tuple:
     return cli, kw
 
 
+#: Rows an unforced clustering run must label: unreviewed rows that have an embedding.
+_CLUSTER_ELIGIBLE = "review_status = 'unreviewed' AND embedding_ref IS NOT NULL"
+
+
 def _spec_cluster(cfg: DemoConfig, ds: str, *, affinity_path: Optional[str] = None,
                   force: bool = False, label: Optional[str] = None) -> StageSpec:
     tune_cli, tune_kw = _cluster_tuning(cfg)
+    # Done = no eligible row lacks a label AND the dataset's last clustering was this exact
+    # invocation (both passes share the 'cluster' marker; the last writer wins). N1b.
+    done_kw: Dict[str, Any] = {} if force else {
+        "skip_store_column": "cluster_id", "skip_store_where": _CLUSTER_ELIGIBLE,
+        "marker": True,
+    }
     if affinity_path is None:
         argv = _py_module("reid_demo.cluster", "--db", cfg.db_path, "--dataset", ds,
                           "--flank-policy", "separate", *tune_cli)
         if force:
             argv += ["--force"]
         return StageSpec(name="cluster", ticket="T05", critical=True, output_paths=[],
-                         cli=argv, dataset=ds, label=label,
-                         skip_store_column=None if force else "cluster_id")
+                         cli=argv, dataset=ds, label=label, **done_kw)
     # fused/GV affinity has no CLI flag -> in-process call with the loaded (N,N) matrix.
     return StageSpec(
         name="cluster", ticket="T05", critical=True, output_paths=[],
@@ -377,7 +401,7 @@ def _spec_cluster(cfg: DemoConfig, ds: str, *, affinity_path: Optional[str] = No
         kwargs={"db_path": cfg.db_path, "dataset": ds, "affinity_path": affinity_path,
                 "force": force, "flank_policy": "separate", **tune_kw},
         dataset=ds, label=label or "cluster(fused-affinity)",
-        skip_store_column=None if force else "cluster_id",
+        input_paths=[affinity_path], **done_kw,
     )
 
 
@@ -458,11 +482,12 @@ def plan_stages(config: DemoConfig) -> List[StageSpec]:
             specs.append(_spec_cluster(config, ds, label="cluster(baseline-global)"))
             specs.append(_spec_eval(config, ds, tag=SIGNAL_GLOBAL,
                                     label="eval(baseline-global)"))
-            # Accuracy layer, then re-cluster on the fused affinity.
+            # Accuracy layer, then re-cluster on the fused affinity. Unforced (N1b):
+            # reviewed rows stay untouched; the sidecar is sliced to the clustered rows.
             specs.append(_spec_fisher(config, ds))
             specs.append(_spec_fusion(config, ds))
             affinity = _fusion_npz_path(ds, config.signals)
-            specs.append(_spec_cluster(config, ds, affinity_path=affinity, force=True,
+            specs.append(_spec_cluster(config, ds, affinity_path=affinity,
                                        label=f"cluster({config.signals})"))
             specs.append(_spec_catalogue(config, ds))
             specs.append(_spec_eval(config, ds, tag=_eval_tag(config.signals),
@@ -490,10 +515,28 @@ def _cluster_with_affinity(*, db_path: str, dataset: str, affinity_path: str,
     The fused global+Fisher (or GV-refined) affinity flows straight into whatever backend is
     selected — including the rank/graph backends (finch/leiden) — so Fisher+GV sharpen the
     SAME neighbour graph those methods cluster on.
+
+    The sidecar covers every embedded row, reviewed ones included, so it is passed as a
+    provider that slices it to whichever rows are being clustered (N1b). That lets the
+    fused pass run unforced; a sidecar missing any of those rows raises.
     """
+    import numpy as np
+
     from . import cluster, fusion
 
-    matrix, _ids = fusion.load_affinity(affinity_path)
+    matrix, ids = fusion.load_affinity(affinity_path)
+    pos = {rid: i for i, rid in enumerate(ids)}
+
+    def _sidecar_affinity(sorted_ids, _normalized_embeddings):
+        missing = [rid for rid in sorted_ids if rid not in pos]
+        if missing:
+            raise ValueError(
+                f"fused affinity {affinity_path} lacks {len(missing)} record(s) to be "
+                f"clustered (e.g. {missing[:3]}); re-run the fisher and fusion stages."
+            )
+        idx = [pos[rid] for rid in sorted_ids]
+        return matrix[np.ix_(idx, idx)]
+
     tune = {k: v for k, v in {
         "backend": backend, "eps": eps, "min_samples": min_samples,
         "distance_threshold": distance_threshold,
@@ -504,8 +547,8 @@ def _cluster_with_affinity(*, db_path: str, dataset: str, affinity_path: str,
     if backend_params:
         tune["backend_params"] = backend_params
     return cluster.run_clustering(
-        db_path, dataset=dataset, affinity=matrix, force=force, flank_policy=flank_policy,
-        **tune,
+        db_path, dataset=dataset, affinity=_sidecar_affinity, force=force,
+        flank_policy=flank_policy, **tune,
     )
 
 
@@ -517,9 +560,30 @@ def _outputs_exist(spec: StageSpec) -> bool:
     return bool(spec.output_paths) and all(os.path.exists(p) for p in spec.output_paths)
 
 
+def _stage_config_key(spec: StageSpec) -> str:
+    """Fingerprint of one stage invocation: name, argv or func+kwargs, input-file identity."""
+    inputs = []
+    for path in spec.input_paths:
+        try:
+            st = os.stat(path)
+            inputs.append([path, st.st_size, st.st_mtime_ns])
+        except OSError:
+            inputs.append([path, None, None])
+    payload = {"name": spec.name, "cli": spec.cli, "func": spec.func,
+               "kwargs": spec.kwargs, "inputs": inputs}
+    return hashlib.sha1(
+        json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
+    ).hexdigest()
+
+
 def _store_stage_done(spec: StageSpec, db_path: str) -> bool:
-    """For store-mutating stages: is the relevant column already populated for this dataset?"""
-    if not spec.skip_store_column or not spec.dataset:
+    """For store-mutating stages: is every eligible row of this dataset done?
+
+    Done means the dataset has rows; no eligible row (all rows, or those matching
+    ``skip_store_where``) still has ``skip_store_column`` NULL; and, for ``marker``
+    stages, the last successful run of this stage recorded this exact invocation.
+    """
+    if not spec.dataset or not (spec.skip_store_column or spec.marker):
         return False
     if not os.path.exists(db_path):
         return False
@@ -528,13 +592,34 @@ def _store_stage_done(spec: StageSpec, db_path: str) -> bool:
     except Exception:
         return False
     try:
-        rows = store.query_records(
-            conn, dataset=spec.dataset,
-            where_sql=f"{spec.skip_store_column} IS NOT NULL", limit=1,
-        )
-        return len(rows) > 0
+        if not store.query_records(conn, dataset=spec.dataset, limit=1):
+            return False
+        if spec.marker:
+            marker = store.get_stage_marker(conn, spec.name, spec.dataset)
+            if not marker or marker.get("config") != _stage_config_key(spec):
+                return False
+        if spec.skip_store_column:
+            pending = f"{spec.skip_store_column} IS NULL"
+            if spec.skip_store_where:
+                pending = f"({spec.skip_store_where}) AND {pending}"
+            if store.query_records(conn, dataset=spec.dataset, where_sql=pending, limit=1):
+                return False
+        return True
     except Exception:
         return False
+    finally:
+        conn.close()
+
+
+def _write_stage_marker(spec: StageSpec, db_path: str) -> None:
+    """Record that ``spec`` (this exact invocation) completed for its dataset."""
+    conn = store.connect(db_path, create=False)
+    try:
+        store.set_stage_marker(conn, spec.name, spec.dataset, {
+            "config": _stage_config_key(spec),
+            "label": spec.display_label,
+            "at": datetime.now().isoformat(timespec="seconds"),
+        })
     finally:
         conn.close()
 
@@ -594,6 +679,15 @@ def _run_stage(spec: StageSpec, config: DemoConfig, logs_dir: str) -> StageResul
                 error = _stage_error_message(spec, "in-process call raised", log_path)
     else:  # pragma: no cover - registry guarantees cli or func
         error = _stage_error_message(spec, "no cli/func wired", log_path)
+
+    if ok and spec.marker and spec.dataset:
+        try:
+            _write_stage_marker(spec, config.db_path)
+        except Exception:
+            # The stage itself succeeded; without a marker the next run just repeats it.
+            with open(log_path, "a", encoding="utf-8") as logf:
+                logf.write("\n[run_demo] could not record the completion marker:\n"
+                           + traceback.format_exc())
 
     seconds = round(time.perf_counter() - start, 3)
     status = "ok" if ok else "failed"
@@ -935,6 +1029,8 @@ def _config_to_argv(config: DemoConfig) -> List[str]:
         argv += ["--resolution", str(config.resolution)]
     if config.n_clusters is not None:
         argv += ["--n-clusters", str(config.n_clusters)]
+    if config.record_id_scheme is not None:
+        argv += ["--record-id-scheme", config.record_id_scheme]
     return argv
 
 
@@ -1183,7 +1279,11 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="tiny subset (caps identities) for a fast test run.")
     p.add_argument("--max-identities", type=int, default=None,
                    help=f"cap distinct identities (default when --smoke: {SMOKE_MAX_IDENTITIES}).")
-    p.add_argument("--force", action="store_true", help="re-run stages even if outputs exist.")
+    p.add_argument("--record-id-scheme", default=None, choices=("path", "legacy"),
+                   help="passed to ingest; 'legacy' is required once for a dataset ingested "
+                        "before record-id schemes were tracked (N1).")
+    p.add_argument("--force", action="store_true",
+                   help="re-run stages even if outputs exist (reviewed rows stay protected).")
     p.add_argument("--dry-run", action="store_true", help="print the ordered plan; execute nothing.")
     p.add_argument("--continue-on-error", action="store_true",
                    help="keep going if a non-critical stage fails (flagged in manifest).")

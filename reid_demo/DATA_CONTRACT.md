@@ -47,9 +47,9 @@ same order. NOT NULL / DEFAULT constraints exist but the SQLite `type` (PRAGMA
 | 13 | `species` | TEXT | str | yes | T03 | Human-readable common name (`classes[k].split(';')[-1]`). NULL until T03. |
 | 14 | `species_conf` | REAL | float | yes | T03 | Top species score `[0,1]`. |
 | 15 | `species_class` | TEXT | str | yes | T03 | Full taxonomy string for the top class (raw `classes[k]`). |
-| 16 | `embedding_ref` | TEXT | str | yes | T04 | Key into the embeddings pickle dict (usually `== record_id`). NULL until embedded. **Vector is MODEL-NATIVE dim and NOT L2-normalized (D2).** |
+| 16 | `embedding_ref` | TEXT | str | yes | T04 | Key into the embeddings pickle dict (usually `== record_id`). NULL until embedded. **Vector is MODEL-NATIVE dim and NOT L2-normalized (D2).** Valid only for the model whose cache `embedding_path` names (N1b, see "Embedding currency"). |
 | 17 | `embedding_path` | TEXT | str | yes | T04 | Filesystem path of the `.pkl` containing `embedding_ref`. |
-| 18 | `cluster_id` | INTEGER | int | yes | T05 | Discovered individual id. `>=0` = a cluster; `-1` = noise/unassigned (DBSCAN convention). NULL until T05. |
+| 18 | `cluster_id` | INTEGER | int | yes | T05 | Discovered individual id. `>=0` = a cluster; `-1` = noise/unassigned (DBSCAN convention). NULL until T05. On a reviewed row it is a confirmed identity; on an unreviewed row a temporary proposal that never reuses a confirmed number (N1b, see "Cluster-label namespace"). |
 | 19 | `cluster_conf` | REAL | float | yes | T05 | Strength of this crop's assignment, `[0,1]`. |
 | 20 | `is_candidate_new` | INTEGER | int (0/1) | yes | T05 | 1 if singleton flagged as candidate NEW individual, else 0. (D5: singletons & DBSCAN noise → `cluster_id=-1` AND `is_candidate_new=1`.) |
 | 21 | `orientation` | TEXT | str | yes | T02 | One of `ORIENTATIONS` or NULL. Labeled data populated by T02 from GT (D1); `''`/missing → `'unknown'` at ingest. Drives flank-aware clustering via the `{left,right,other}` 3-bucket policy (D4). |
@@ -168,6 +168,9 @@ def make_scoped_record_id(source_key: str, det_index: int) -> str: ...    # path
 def ingest_upsert_records(conn, records) -> Dict[str, int]: ...          # stage-owned upsert (N1)
 def get_record_id_scheme(conn, dataset) -> Optional[str]: ...
 def set_record_id_scheme(conn, dataset, scheme) -> None: ...             # refuses to change it
+def get_stage_marker(conn, stage, dataset) -> Optional[dict]: ...        # T10 completion marker (N1b)
+def set_stage_marker(conn, stage, dataset, value: dict) -> None: ...
+def clear_stage_marker(conn, stage, dataset=None) -> None: ...           # None = every dataset
 def export_records(conn, out_path, *, fmt="parquet", dataset=None) -> str: ...
 def import_records(conn, in_path: str) -> int: ...
 def to_dataframe(conn, *, dataset=None): ...                 # pandas DataFrame in COLUMNS order
@@ -200,6 +203,39 @@ def to_dataframe(conn, *, dataset=None): ...                 # pandas DataFrame 
   `record_id_scheme:<dataset>` (no schema change). A new dataset defaults to `path`;
   a dataset ingested before schemes were tracked must be re-ingested with
   `--record-id-scheme legacy`, which refuses distinct sources sharing a stem.
+- Stage completion (N1b, 20 Oct 2026). The T10 runner skips a store stage only when
+  every eligible row is done, never because one row has output:
+  - `ingest`: the dataset has rows **and** a completion marker records this exact
+    invocation (argv, e.g. `--max-identities`), so a `--smoke` ingest does not satisfy a
+    full one;
+  - `species`: no row of the dataset has `species` NULL;
+  - `embed` and `fisher`: never skipped by the runner; both are incremental themselves;
+  - `cluster` (baseline and fused): no unreviewed row with an embedding has `cluster_id`
+    NULL **and** the dataset's last clustering was this exact invocation (the fused pass
+    also binds the affinity sidecar's size and mtime). Both passes share one marker.
+  Markers are `meta` rows `stage_done:<stage>:<dataset>` (JSON with the invocation
+  fingerprint), written by the runner after a successful stage. Any non-dry
+  `run_clustering` call clears the `cluster` marker first. File-output stages (fusion,
+  catalogue, eval) still skip when their file exists.
+- Cluster-label namespace (N1b). A non-forced T05 run never writes reviewed rows. Its new
+  labels are offset above every `cluster_id >= 0` held by a row it does not rewrite
+  (reviewed rows, rows outside `--species`, unembedded rows); with nothing reserved the
+  offset is 0. A proposal therefore never reuses a confirmed identity's number, and the
+  T08 merge rule (smaller id wins) keeps the identity's number. T05 never attaches a
+  record to an existing identity; that is a T08 decision (singleton `same` +
+  `target_cluster_id`, or a pair `same`). The T10 fused pass is unforced: it slices the
+  fusion sidecar to the rows being clustered and raises if any is missing.
+- `run_clustering(force=True)` / `--force` is the only path that re-clusters reviewed
+  rows. Each such row first gets its previous `cluster_id`, `review_status` and
+  `review_note` appended to `extra_json['review_overrides']`, then is reset to
+  `unreviewed`.
+- Embedding currency (N1b). `embed_records(only_missing=True)` reuses a vector only if
+  `embedding_path` is the cache this call would write
+  (`{dataset}_{global_embedding_cache_label(model, checkpoint)}.pkl` in the cache dir) and
+  `embedding_ref` is in it. Any other embedding is stale and is recomputed; if that
+  fails, the reference is cleared and `extra_json['embedding_cleared']` records why. The
+  label hashes the checkpoint **path**: write each new checkpoint to a new path, and
+  change the label if `global_embedding` preprocessing changes.
 - `update_extra` reads → parses → merges one key → writes back (preserves other keys);
   raises `KeyError` if the record is absent, `ValueError` if `extra_json` is not a JSON
   object. This is the ONLY sanctioned way to stash module extras.
@@ -242,6 +278,6 @@ python -m reid_demo.store --export <out.parquet|csv> --db <path> [--dataset NAME
    joins `animals_classified.json` → records by `(source_stem, bbox)` nearest-match (D3).
 3. **T04** — `update_embedding(record_id, embedding_ref, embedding_path)`; vectors stay model-native, un-normalized (D2).
 4. **T05** — `update_cluster(record_id, cluster_id, cluster_conf, is_candidate_new)`; runs before T08 (D5).
-5. **T08** — `update_review(record_id, review_status, review_note, cluster_id?)`; preserves non-`unreviewed` rows on T05 re-runs unless `--force` (D5).
+5. **T08** — `update_review(record_id, review_status, review_note, cluster_id?)`; preserves non-`unreviewed` rows on T05 re-runs unless `--force` (D5), which logs and resets them (N1b).
 6. **T06 / T07 / T09 / T10** — READ-ONLY: `query_records`, `count_by`, `to_dataframe`, `get_record` (T07 reads `gt_identity`).
 7. **Any module** — module-specific extras go through `update_extra` only (never raw SQL); the `extra_json` blob is the forward-compat escape hatch so we never need a v2 schema mid-demo.
