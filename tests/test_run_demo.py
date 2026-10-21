@@ -798,3 +798,174 @@ def test_record_id_scheme_passthrough(tmp_path):
     plain = next(s for s in plan_stages(_cfg(tmp_path, datasets=["LeopardID2022"]))
                  if s.name == "ingest")
     assert "--record-id-scheme" not in plain.cli
+
+
+# --------------------------------------------------------------------------- #
+# N1c: fresh file outputs and dependency-aware degradation
+# --------------------------------------------------------------------------- #
+
+def _file_spec(spec, out_path):
+    """Same spec with its output redirected into the test's tmp dir."""
+    import dataclasses
+
+    return dataclasses.replace(spec, output_paths=[str(out_path)])
+
+
+def test_eval_reruns_after_relabel(tmp_path):
+    """An existing eval report is reused only while the scored labels are unchanged
+    (was: reused whenever the file existed)."""
+    import reid_demo.run_demo as rd
+    from reid_demo.store import update_cluster
+
+    ds = "LeopardID2022"
+    cfg = _cfg(tmp_path, datasets=[ds])
+    conn = connect(cfg.db_path)
+    upsert_records(conn, [_rec("a1", dataset=ds, cluster_id=0, gt_identity="L1"),
+                          _rec("a2", dataset=ds, cluster_id=0, gt_identity="L1")])
+    out = tmp_path / "eval" / f"{ds}_global.json"
+    _eval_json(str(out))
+    spec = _file_spec(rd._spec_eval(cfg, ds, tag=SIGNAL_GLOBAL), out)
+    assert rd._stage_done(spec, cfg.db_path) is False          # no marker yet
+    rd._write_stage_marker(spec, cfg.db_path)
+    assert rd._stage_done(spec, cfg.db_path) is True
+    update_cluster(conn, make_record_id("a1", 1), 1, 0.9)
+    conn.close()
+    assert rd._stage_done(spec, cfg.db_path) is False
+
+
+def test_catalogue_reruns_after_review(tmp_path):
+    import reid_demo.run_demo as rd
+    from reid_demo.store import upsert_record
+
+    ds = "LeopardID2022"
+    cfg = _cfg(tmp_path, datasets=[ds])
+    conn = connect(cfg.db_path)
+    upsert_records(conn, [_rec("a1", dataset=ds, cluster_id=0)])
+    out = tmp_path / "cat" / "index.html"
+    out.parent.mkdir(parents=True)
+    out.write_text("<h1>catalogue</h1>")
+    spec = _file_spec(rd._spec_catalogue(cfg, ds), out)
+    rd._write_stage_marker(spec, cfg.db_path)
+    assert rd._stage_done(spec, cfg.db_path) is True
+
+    rec = get_record(conn, make_record_id("a1", 1))
+    rec.detector_conf = 0.42                       # not rendered -> still fresh
+    upsert_record(conn, rec)
+    assert rd._stage_done(spec, cfg.db_path) is True
+    update_review(conn, rec.record_id, "confirmed")
+    conn.close()
+    assert rd._stage_done(spec, cfg.db_path) is False
+
+
+def test_fusion_reruns_on_new_or_reembedded_rows(tmp_path):
+    import reid_demo.run_demo as rd
+    from reid_demo.store import update_embedding
+
+    db, pkl, conn, _emb = _embedded_store(tmp_path)
+    cfg = _cfg(tmp_path, datasets=["DemoDS"], signals=SIGNAL_FULL_FUNNEL)
+    out = tmp_path / "fusion" / "DemoDS.npz"
+    out.parent.mkdir(parents=True)
+    out.write_bytes(b"sidecar")
+    spec = _file_spec(rd._spec_fusion(cfg, "DemoDS"), out)
+    rd._write_stage_marker(spec, db)
+    assert rd._stage_done(spec, db) is True
+
+    update_review(conn, make_record_id("g0k0", 1), "confirmed")   # fusion ignores reviews
+    assert rd._stage_done(spec, db) is True
+
+    new = _rec("late", dataset="DemoDS", cluster_id=None)
+    new.embedding_ref, new.embedding_path = new.record_id, pkl
+    upsert_records(conn, [new])
+    assert rd._stage_done(spec, db) is False                     # new embedded row
+    rd._write_stage_marker(spec, db)
+    assert rd._stage_done(spec, db) is True
+
+    rid = make_record_id("g1k1", 1)
+    update_embedding(conn, rid, rid, str(tmp_path / "other_model.pkl"))
+    conn.close()
+    assert rd._stage_done(spec, db) is False                     # same rows, new model
+
+
+def test_baseline_and_fused_eval_markers_are_separate(tmp_path):
+    import reid_demo.run_demo as rd
+
+    ds = "LeopardID2022"
+    cfg = _cfg(tmp_path, datasets=[ds], signals=SIGNAL_FULL_FUNNEL)
+    conn = connect(cfg.db_path)
+    upsert_records(conn, [_rec("a1", dataset=ds, cluster_id=0)])
+    conn.close()
+    base_out, fused_out = tmp_path / "e" / "global.json", tmp_path / "e" / "funnel.json"
+    _eval_json(str(base_out))
+    _eval_json(str(fused_out), tag="full_funnel")
+    base = _file_spec(rd._spec_eval(cfg, ds, tag=SIGNAL_GLOBAL), base_out)
+    fused = _file_spec(rd._spec_eval(cfg, ds, tag="full_funnel"), fused_out)
+    rd._write_stage_marker(base, cfg.db_path)
+    assert rd._stage_done(base, cfg.db_path) is True
+    assert rd._stage_done(fused, cfg.db_path) is False
+
+
+def test_failed_fusion_skips_fused_pass_and_eval(tmp_path, monkeypatch):
+    """A failed fusion must not leave the fused pass on a stale sidecar: the fused cluster
+    pass and fused eval are skipped, kept out of the bundle and listed as degraded."""
+    import reid_demo.run_demo as rd
+
+    ds = "LeopardID2022"
+    cfg = _cfg(tmp_path, datasets=[ds], signals=SIGNAL_FULL_FUNNEL)
+    acc = str(tmp_path / "acc" / f"{ds}_global.json")
+    _eval_json(acc, tag="global")
+    executed = []
+
+    def fake_run_stage(spec, config, logs_dir):
+        executed.append(spec.display_label)
+        status = "failed" if spec.name == "fusion" else "ok"
+        outs = [acc] if spec.display_label == "eval(baseline-global)" else []
+        return StageResult(spec.name, spec.ticket, status, 0.01, outs, None,
+                           dataset=spec.dataset, label=spec.label,
+                           error="boom" if status == "failed" else None)
+
+    monkeypatch.setattr(rd, "_run_stage", fake_run_stage)
+    br = run_demo(cfg)
+    fused_cluster, fused_eval = f"cluster({SIGNAL_FULL_FUNNEL})", f"eval({SIGNAL_FULL_FUNNEL})"
+    assert fused_cluster not in executed and fused_eval not in executed
+    assert "catalogue" in executed
+    by_label = {s.label: s for s in br.stages if s.label}
+    for label in (fused_cluster, fused_eval):
+        st = by_label[label]
+        assert st.status == "skipped" and st.output_paths == []
+        assert st.error.startswith(rd.UPSTREAM_SKIP_PREFIX)
+    assert br.status == "partial"
+    with open(br.manifest_path, encoding="utf-8") as fh:
+        manifest = json.load(fh)
+    assert manifest["degraded"] == [fused_cluster, fused_eval]
+    with open(os.path.join(br.out_dir, "SUMMARY.md"), encoding="utf-8") as fh:
+        assert "Degraded" in fh.read()
+
+
+def test_failed_fisher_also_skips_fusion(tmp_path, monkeypatch):
+    import reid_demo.run_demo as rd
+
+    cfg = _cfg(tmp_path, datasets=["LeopardID2022"], signals=SIGNAL_FULL_FUNNEL)
+    executed = []
+
+    def fake_run_stage(spec, config, logs_dir):
+        executed.append(spec.name)
+        status = "failed" if spec.name == "fisher" else "ok"
+        return StageResult(spec.name, spec.ticket, status, 0.01, [], None,
+                           dataset=spec.dataset, label=spec.label)
+
+    monkeypatch.setattr(rd, "_run_stage", fake_run_stage)
+    run_demo(cfg)
+    assert "fusion" not in executed
+    assert executed.count("cluster") == 1                         # baseline only
+
+
+def test_file_stage_without_inputs_keeps_presence_skip(tmp_path):
+    import reid_demo.run_demo as rd
+
+    cfg = _cfg(tmp_path, datasets=["MedvednicaDS"])
+    out = tmp_path / "rep" / "medvednica_summary.json"
+    out.parent.mkdir(parents=True)
+    out.write_text("{}")
+    spec = _file_spec(rd._spec_report(cfg, "MedvednicaDS"), out)
+    assert not spec.input_columns and not spec.marker
+    assert rd._stage_done(spec, cfg.db_path) is True               # no store needed

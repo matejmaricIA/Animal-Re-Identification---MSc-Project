@@ -483,3 +483,42 @@ def test_cli_full_build(seeded):
     lines = proc.stdout.strip().splitlines()
     assert os.path.exists(lines[0]), lines
     assert "individuals" in lines[1].lower()
+
+
+# --------------------------------------------------------------------------- #
+# N1c: a rebuild removes files of clusters/records that no longer exist
+# --------------------------------------------------------------------------- #
+
+def test_rebuild_removes_stale_individual_pages(seeded):
+    from pathlib import Path
+
+    from reid_demo.catalogue import _safe_id_token
+    from reid_demo.store import get_record, update_cluster, upsert_record
+
+    out = Path(seeded["out"])
+    res1 = build_catalogue(seeded["db"], dataset=DATASET, out_dir=str(out))
+    assert 2 in res1.individual_pages and res1.n_stale_removed == 0
+    cmix_id = make_record_id("Cmix", 1)
+    cmix_thumb = out / "thumbs" / f"{_safe_id_token(cmix_id)}.jpg"
+    assert cmix_thumb.exists()
+    notes = out / "notes.txt"
+    notes.write_text("not ours")
+    readme = out / "individuals" / "README.txt"
+    readme.write_text("not ours")
+
+    conn = connect(seeded["db"])
+    for stem in ("Cmix2", "Cnull"):
+        update_cluster(conn, make_record_id(stem, 1), 0, 0.9)
+    cmix = get_record(conn, cmix_id)
+    cmix.dataset = "OtherDS"                       # leaves this catalogue's record set
+    upsert_record(conn, cmix)
+    conn.close()
+
+    res2 = build_catalogue(seeded["db"], dataset=DATASET, out_dir=str(out))
+    assert 2 not in res2.individual_pages
+    assert not (out / "individuals" / "individual_2.html").exists()
+    assert (out / "individuals" / "individual_0.html").exists()
+    assert not cmix_thumb.exists()
+    assert (out / "thumbs" / "_placeholder.png").exists()
+    assert res2.n_stale_removed == 2
+    assert notes.exists() and readme.exists()

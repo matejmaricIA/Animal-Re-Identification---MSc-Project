@@ -24,7 +24,9 @@ D1-D8):
 
 ALL store access goes through ``reid_demo.store`` functions — never raw SQL, never
 opening the SQLite file directly. The only fields T08 writes (via
-``store.update_review``) are ``review_status``, ``review_note`` and ``cluster_id``.
+``store.update_review``) are ``review_status``, ``review_note`` and ``cluster_id``,
+plus (N1d, via ``store.update_extra``) the ``extra_json`` keys ``identity_attached``
+and ``identity_rejections`` written by identity-attachment answers.
 
 The must-ship core is purely headless / scriptable:
 ``build_review_queue``, ``apply_decisions`` (+ the decisions-JSON round-trip),
@@ -36,7 +38,9 @@ No third-party web framework is imported anywhere (Flask is not installed). Heav
 optional deps (PIL, numpy) are imported lazily so the module imports cleanly without
 them, and this module does NOT import the T11/T12 Fisher / fusion modules (its hard
 deps stay {T01, T02, T05}); the optional T12 GV/affinity scores arrive purely as a
-caller-supplied ``pair_scores`` mapping.
+caller-supplied ``pair_scores`` mapping. Identity-attachment items (N1d) read T04
+embeddings through ``reid_demo.embed.get_embedding_matrix`` (lazy, read-only); without
+embeddings they are simply not generated.
 """
 
 from __future__ import annotations
@@ -93,6 +97,10 @@ REVIEWS_DIR: str = os.path.join(_REPO_ROOT, "data", "reid_demo", "reviews")
 #: across (D4). ``other``/``unknown``/``None`` is compatible with anything.
 _KNOWN_FLANKS = {"left", "right"}
 
+#: Review statuses that make a row's ``cluster_id`` a confirmed animal ("identity", N1d).
+#: ``rejected`` rows do not define identities.
+IDENTITY_STATUSES: set = {"confirmed", "merged", "split"}
+
 
 # --------------------------------------------------------------------------- #
 # Data shapes (field names mirrored EXACTLY in the JSON — see ticket)
@@ -121,6 +129,10 @@ class ReviewItem:
     crop_path_a: Optional[str] = None
     crop_path_b: Optional[str] = None
     reason: str = ""                       # human-readable why-this-is-here
+    # additive (N1d) — "identity" items: is proposal A the same animal as identity B?
+    proposal_size: Optional[int] = None    # photos in the proposal
+    identity_size: Optional[int] = None    # reviewed photos of the candidate identity
+    similarity: Optional[float] = None     # single-linkage cosine (ordering only)
 
     def to_json(self) -> dict:
         """Plain JSON-serialisable dict (round-trips through ``ReviewItem(**d)``)."""
@@ -150,6 +162,10 @@ def _make_pair_item_id(rid_a: str, rid_b: str) -> str:
 
 def _make_singleton_item_id(rid: str) -> str:
     return f"singleton__{rid}"
+
+
+def _make_identity_item_id(rid: str, identity: int) -> str:
+    return f"identity__{rid}__{identity}"
 
 
 def _flanks_compatible(orient_a: Optional[str], orient_b: Optional[str]) -> bool:
@@ -225,6 +241,144 @@ def _pick_anchor(
 
 
 # --------------------------------------------------------------------------- #
+# Identity-attachment items (N1d)
+# --------------------------------------------------------------------------- #
+
+def _extra(record: DetectionRecord) -> dict:
+    try:
+        blob = json.loads(record.extra_json or "{}")
+    except ValueError:
+        return {}
+    return blob if isinstance(blob, dict) else {}
+
+
+def _rejected_identities(record: DetectionRecord) -> set:
+    """Identities this record was answered "different" for (``identity_rejections``)."""
+    out = set()
+    for entry in _extra(record).get("identity_rejections") or []:
+        if isinstance(entry, dict) and entry.get("identity") is not None:
+            out.add(int(entry["identity"]))
+    return out
+
+
+def _identity_items(
+    conn,
+    records: Sequence[DetectionRecord],
+    *,
+    dataset: str,
+    respect_flanks: bool,
+    min_similarity: Optional[float],
+) -> List[ReviewItem]:
+    """One "is this proposal the same animal as confirmed animal #N?" item per proposal.
+
+    Identity: a ``cluster_id >= 0`` held by a row with ``review_status`` in
+    :data:`IDENTITY_STATUSES`. Proposal: a ``cluster_id >= 0`` whose rows are all
+    unreviewed, or an unreviewed singleton (``is_candidate_new == 1`` / ``-1``). The
+    candidate is the identity with the highest single-linkage cosine (any proposal member
+    vs any REVIEWED identity member), never pairing a known left with a known right, and
+    skipping identities that at least half of the proposal's members were already told
+    "different" for. No embeddings / identities / compatible candidate -> no items.
+    """
+    identities: Dict[int, List[DetectionRecord]] = {}
+    reviewed_cids = set()
+    for r in records:
+        if r.review_status not in (None, "unreviewed") and r.cluster_id is not None:
+            reviewed_cids.add(r.cluster_id)
+            if r.review_status in IDENTITY_STATUSES and r.cluster_id >= 0:
+                identities.setdefault(r.cluster_id, []).append(r)
+    if not identities:
+        return []
+
+    proposals: Dict[tuple, List[DetectionRecord]] = {}
+    for r in records:
+        if r.review_status not in (None, "unreviewed") or r.cluster_id is None:
+            continue
+        if r.is_candidate_new == 1 or r.cluster_id == -1:
+            proposals[("single", r.record_id)] = [r]
+        elif r.cluster_id not in reviewed_cids:
+            proposals.setdefault(("cluster", r.cluster_id), []).append(r)
+    if not proposals:
+        return []
+
+    try:
+        import numpy as np
+
+        from reid_demo.embed import get_embedding_matrix
+        matrix, ids = get_embedding_matrix(conn, dataset=dataset, normalize=True)
+    except Exception:
+        return []   # no usable embeddings -> today's queue
+    if not len(ids):
+        return []
+    pos = {rid: i for i, rid in enumerate(ids)}
+
+    items: List[ReviewItem] = []
+    for (kind, key), members in proposals.items():
+        with_vec = [m for m in members if m.record_id in pos]
+        if not with_vec:
+            continue
+        rep = min(with_vec, key=lambda m: (-(m.cluster_conf if m.cluster_conf is not None
+                                             else float("-inf")), m.record_id))
+        vp = matrix[[pos[m.record_id] for m in with_vec]]
+        best = None   # (similarity, -identity, identity, anchor)
+        for identity, id_members in identities.items():
+            n_rejected = sum(1 for m in members if identity in _rejected_identities(m))
+            if n_rejected * 2 >= len(members):
+                continue
+            id_vec = [m for m in id_members if m.record_id in pos]
+            if not id_vec:
+                continue
+            sims = vp @ matrix[[pos[m.record_id] for m in id_vec]].T
+            if respect_flanks:
+                for a, pm in enumerate(with_vec):
+                    for b, im in enumerate(id_vec):
+                        if not _flanks_compatible(pm.orientation, im.orientation):
+                            sims[a, b] = -np.inf
+            score = float(sims.max())
+            if not np.isfinite(score):
+                continue
+            # Anchor: the identity member closest to the representative if compatible,
+            # else the identity member of the best pair overall.
+            rep_row = sims[with_vec.index(rep)]
+            if np.isfinite(rep_row.max()):
+                anchor = id_vec[int(rep_row.argmax())]
+            else:
+                anchor = id_vec[int(np.unravel_index(int(sims.argmax()), sims.shape)[1])]
+            cand = (score, -identity, identity, anchor)
+            if best is None or cand[:2] > best[:2]:
+                best = cand
+        if best is None or (min_similarity is not None and best[0] < min_similarity):
+            continue
+        score, _neg, identity, anchor = best
+        cid_a = key if kind == "cluster" else rep.cluster_id
+        n_id = len(identities[identity])
+        items.append(ReviewItem(
+            item_id=_make_identity_item_id(rep.record_id, identity),
+            kind="identity",
+            dataset=dataset,
+            record_id_a=rep.record_id,
+            record_id_b=anchor.record_id,
+            cluster_id_a=cid_a,
+            cluster_id_b=identity,
+            cluster_conf=rep.cluster_conf,
+            orientation_a=rep.orientation,
+            orientation_b=anchor.orientation,
+            species_a=rep.species,
+            species_b=anchor.species,
+            crop_path_a=rep.crop_path,
+            crop_path_b=anchor.crop_path,
+            reason=(f"proposal of {len(members)} photo{'' if len(members) == 1 else 's'} · "
+                    f"animal #{identity} has {n_id} reviewed photo{'' if n_id == 1 else 's'}"),
+            proposal_size=len(members),
+            identity_size=n_id,
+            similarity=score,
+        ))
+
+    items.sort(key=lambda it: (-(it.proposal_size or 0), -(it.similarity or 0.0),
+                               it.record_id_a))
+    return items
+
+
+# --------------------------------------------------------------------------- #
 # build_review_queue
 # --------------------------------------------------------------------------- #
 
@@ -237,6 +391,8 @@ def build_review_queue(
     include_singletons: bool = True,
     respect_flanks: bool = True,
     pair_scores: Optional[Mapping[Tuple[str, str], float]] = None,
+    include_identity_items: bool = True,
+    identity_min_similarity: Optional[float] = None,
 ) -> List[ReviewItem]:
     """Read clustered records for ``dataset`` and return a bounded, priority-ordered
     list of :class:`ReviewItem`.
@@ -265,9 +421,28 @@ def build_review_queue(
     changing which items are queued. It is a pure ordering hint with no hard
     dependency on T11/T12; a None / partial / malformed map never changes WHICH items
     are queued and never crashes the builder.
+
+    IDENTITY items (N1d, ``include_identity_items``): once confirmed animals exist, each
+    proposal (an all-unreviewed cluster, or an unreviewed singleton) gets one "is this
+    the same animal as confirmed animal #N?" item against its nearest flank-compatible
+    identity (see :func:`_identity_items`; embeddings read via T04, lazily). They come
+    FIRST, largest proposal first. A singleton with an identity item gets no singleton
+    item (the identity item offers "new"). No embeddings or no identities -> no change.
+    ``identity_min_similarity`` (default None = no floor) drops weaker candidates.
     """
     # ---- Pull every clustered-or-candidate row for this dataset (single read). ----
     records = _store.query_records(conn, dataset=dataset, order_by="record_id")
+
+    identity_items: List[ReviewItem] = []
+    if include_identity_items:
+        identity_items = _identity_items(
+            conn, records, dataset=dataset, respect_flanks=respect_flanks,
+            min_similarity=identity_min_similarity,
+        )
+    covered_singletons = {
+        it.record_id_a for it in identity_items
+        if it.cluster_id_a is None or it.cluster_id_a < 0
+    }
 
     by_id: Dict[str, DetectionRecord] = {r.record_id: r for r in records}
 
@@ -294,7 +469,7 @@ def build_review_queue(
         # ---- SINGLETON: candidate-new (DBSCAN noise OR 1-crop singleton). ----
         # Key on is_candidate_new (authoritative); cluster_id == -1 is the equivalent.
         if r.is_candidate_new == 1 or cid == -1:
-            if include_singletons:
+            if include_singletons and r.record_id not in covered_singletons:
                 singleton_items.append(
                     ReviewItem(
                         item_id=_make_singleton_item_id(r.record_id),
@@ -377,8 +552,8 @@ def build_review_queue(
     if pair_scores:
         pair_items = _reorder_by_pair_scores(pair_items, pair_scores)
 
-    # Singletons are appended AFTER pairs (per the contract), then hard-cap.
-    queue = pair_items + singleton_items
+    # Identity items first (N1d), singletons AFTER pairs (per the contract), then hard-cap.
+    queue = identity_items + pair_items + singleton_items
     if queue_size is not None and queue_size >= 0:
         queue = queue[:queue_size]
     return queue
@@ -490,6 +665,8 @@ def apply_decisions(
     merges_applied = 0
     splits_applied = 0
     new_individuals_confirmed = 0
+    identity_attachments = 0
+    identity_rejections = 0
     skips = 0
 
     # Track the running max cluster id so multiple splits/news in one batch stay unique.
@@ -524,6 +701,19 @@ def apply_decisions(
             elif kind == "split" and muts:
                 splits_applied += 1
                 next_free += 1  # consumed a fresh id
+        elif item.kind == "identity":  # N1d
+            muts, kind = _apply_identity(
+                conn, item, answer, note, dataset, lambda: next_free
+            )
+            mutations.extend(muts)
+            if kind == "attach" and muts:
+                identity_attachments += 1
+            elif kind == "reject_identity" and muts:
+                identity_rejections += 1
+            elif kind in ("new", "confirm_new") and muts:
+                new_individuals_confirmed += 1
+                if kind == "new":
+                    next_free += 1
         else:  # singleton
             muts, kind = _apply_singleton(
                 conn, item, answer, note, target, dataset, lambda: next_free
@@ -549,6 +739,8 @@ def apply_decisions(
             "merges_applied": merges_applied,
             "splits_applied": splits_applied,
             "new_individuals_confirmed": new_individuals_confirmed,
+            "identity_attachments": identity_attachments,
+            "identity_rejections": identity_rejections,
             "skips": skips,
         },
     }
@@ -680,6 +872,82 @@ def _apply_singleton(
     return ([], "noop")
 
 
+def _proposal_members(conn, dataset: str, rec: DetectionRecord) -> List[DetectionRecord]:
+    """Unreviewed rows of ``rec``'s proposal: its cluster (``cluster_id >= 0``) or itself."""
+    if rec.cluster_id is not None and rec.cluster_id >= 0:
+        return [m for m in _store.query_records(conn, dataset=dataset, cluster_id=rec.cluster_id)
+                if m.review_status in (None, "unreviewed")]
+    return [rec] if rec.review_status in (None, "unreviewed") else []
+
+
+def _apply_identity(
+    conn,
+    item: ReviewItem,
+    answer: str,
+    note: Optional[str],
+    dataset: str,
+    next_free_fn,
+) -> Tuple[List[dict], str]:
+    """Apply one IDENTITY decision (N1d): is proposal A the same animal as identity B?
+
+    ``same`` -> every proposal member moves to the identity (status ``merged``, kept id is
+    the identity's, logged in ``extra_json['identity_attached']``); ``different`` -> each
+    member logs ``{identity, at, note}`` in ``extra_json['identity_rejections']`` (no
+    cluster change); ``new`` -> confirm the proposal as a new animal (a cluster keeps its
+    label; a singleton gets ``max+1``). Idempotent on replay. Returns (mutations, kind)
+    with kind in {'attach', 'reject_identity', 'confirm_new', 'new', 'noop'}."""
+    rec_a = _store.get_record(conn, item.record_id_a)
+    identity = item.cluster_id_b
+    if rec_a is None or identity is None:
+        return ([], "noop")
+    now = _now_str()
+
+    if answer == DECISION_SAME:
+        if rec_a.cluster_id == identity:
+            return ([], "noop")   # already attached (replay)
+        members = _proposal_members(conn, dataset, rec_a)
+        if rec_a.cluster_id is not None and rec_a.cluster_id >= 0:
+            muts = _merge_clusters(conn, dataset, keep=identity, drop=rec_a.cluster_id,
+                                   note=note)
+        else:
+            muts = _set_review(conn, rec_a, status="merged", note=note,
+                               new_cluster_id=identity)
+        for m in members:
+            _store.update_extra(conn, m.record_id, "identity_attached",
+                                {"identity": identity, "at": now})
+        return (muts, "attach")
+
+    if answer == DECISION_DIFFERENT:
+        muts: List[dict] = []
+        for m in _proposal_members(conn, dataset, rec_a):
+            if identity in _rejected_identities(m):
+                continue      # replay: never log the same rejection twice
+            log = list(_extra(m).get("identity_rejections") or [])
+            log.append({"identity": identity, "at": now, "note": note})
+            _store.update_extra(conn, m.record_id, "identity_rejections", log)
+            muts.append({
+                "record_id": m.record_id,
+                "old_cluster_id": m.cluster_id, "new_cluster_id": m.cluster_id,
+                "old_status": m.review_status, "new_status": m.review_status,
+                "identity_rejected": identity,
+            })
+        return (muts, "reject_identity")
+
+    if answer == DECISION_NEW:
+        if rec_a.cluster_id is not None and rec_a.cluster_id >= 0:
+            muts = []
+            for m in _proposal_members(conn, dataset, rec_a):
+                muts.extend(_set_review(conn, m, status="confirmed", note=note))
+            return (muts, "confirm_new")
+        if rec_a.review_status == "confirmed":
+            return ([], "noop")
+        fresh = next_free_fn()
+        muts = _set_review(conn, rec_a, status="confirmed", note=note, new_cluster_id=fresh)
+        return (muts, "new")
+
+    return ([], "noop")
+
+
 def _set_review(
     conn,
     record: DetectionRecord,
@@ -762,6 +1030,10 @@ def review_status_summary(conn, *, dataset: str) -> dict:
       * ``new_individuals_confirmed``— ``is_candidate_new == 1`` rows now
                                        ``review_status == 'confirmed'`` with a real id.
       * ``still_unreviewed``         — rows still ``review_status == 'unreviewed'``.
+      * ``identity_attachments``     — photos attached to a confirmed animal by an
+                                       identity item (N1d).
+      * ``identity_rejections``      — photos answered "different" for at least one
+                                       confirmed animal (N1d).
     """
     records = _store.query_records(conn, dataset=dataset)
 
@@ -816,6 +1088,9 @@ def review_status_summary(conn, *, dataset: str) -> dict:
         "splits_applied": splits_applied,
         "new_individuals_confirmed": new_confirmed,
         "still_unreviewed": still_unreviewed,
+        # N1d: photos attached to / rejected for a confirmed animal via identity items.
+        "identity_attachments": sum(1 for r in records if _extra(r).get("identity_attached")),
+        "identity_rejections": sum(1 for r in records if _extra(r).get("identity_rejections")),
     }
 
 
@@ -954,7 +1229,7 @@ def build_pair_image(item: ReviewItem, *, max_side: int = 512):
     panels.append(_load_crop_pil(info_a, max_side))
     captions.append(_caption_for(item, "a"))
 
-    if item.kind == "pair" and item.record_id_b:
+    if item.kind in ("pair", "identity") and item.record_id_b:
         info_b = _meta(item.record_id_b, item.crop_path_b, item.record_id_b)
         panels.append(_load_crop_pil(info_b, max_side))
         captions.append(_caption_for(item, "b"))
@@ -1111,7 +1386,7 @@ _REVIEW_PAGE = """<!DOCTYPE html>
  .flank{color:#a40000;font-size:13px}
 </style></head><body>
 <div id="card">
- <h2>Are these the same individual?</h2>
+ <h2 id="heading">Are these the same individual?</h2>
  <div id="reason" class="meta"></div>
  <div><img id="img" alt="review crops"></div>
  <div class="flank">Left and right flanks are never auto-merged — opposite flanks are
@@ -1136,6 +1411,9 @@ function render(){
     return;
   }
   const it = QUEUE[i];
+  document.getElementById('heading').textContent = (it.kind === 'identity')
+    ? ('Is this the same animal as confirmed animal #' + it.cluster_id_b + '?')
+    : 'Are these the same individual?';
   document.getElementById('reason').textContent =
     '(' + (it.kind) + ') ' + (it.reason || '');
   document.getElementById('img').src = it._img;

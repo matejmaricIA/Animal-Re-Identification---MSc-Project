@@ -81,6 +81,8 @@ B_TRACK_SPECIES: Dict[str, str] = {
 }
 
 EVAL_OUT_DIR: str = "evaluations/clustering"               # T07's single-file output dir
+#: StageResult.error prefix for a stage skipped because an upstream stage failed (N1c).
+UPSTREAM_SKIP_PREFIX: str = "skipped: upstream stage "
 CATALOGUE_STAGING: str = os.path.join("data", "reid_demo", "catalogue")
 FUSION_STAGING: str = os.path.join("data", "reid_demo", "fusion")
 REPORT_STAGING: str = os.path.join("data", "reid_demo", "medvednica_report")
@@ -123,6 +125,10 @@ class StageSpec:
     skip_store_where: Optional[str] = None   # SQL restricting the eligible rows (default: all)
     marker: bool = False                     # also require a completion marker for this invocation
     input_paths: List[str] = field(default_factory=list)  # files whose size/mtime enter the marker key
+    # additive (N1c) freshness of file outputs and dependency-aware degradation:
+    input_columns: List[str] = field(default_factory=list)  # store columns read ('extra.<key>' ok)
+    input_where: Optional[str] = None                        # SQL restricting the rows read
+    depends_on: List[str] = field(default_factory=list)      # labels of upstream specs (same dataset)
 
     @property
     def display_label(self) -> str:
@@ -152,6 +158,9 @@ class DemoConfig:
     n_clusters: Optional[int] = None        # finch backend (target level)
     # ingest (T02) passthrough (N1/N1b); None => the dataset's recorded scheme / 'path'.
     record_id_scheme: Optional[str] = None
+    # embed (T04) passthrough (N1e); None => embed's default (megadescriptor-l-384).
+    embedding_model: Optional[str] = None
+    embedding_checkpoint: Optional[str] = None
 
 
 @dataclass
@@ -259,6 +268,8 @@ def build_config(args) -> DemoConfig:
         resolution=_opt("resolution"),
         n_clusters=_opt("n_clusters"),
         record_id_scheme=_opt("record_id_scheme"),
+        embedding_model=_opt("embedding_model"),
+        embedding_checkpoint=_opt("embedding_checkpoint"),
     )
 
 
@@ -330,6 +341,10 @@ def _spec_species(cfg: DemoConfig, ds: str) -> StageSpec:
 
 def _spec_embed(cfg: DemoConfig, ds: str) -> StageSpec:
     argv = _py_module("reid_demo.embed", "--db", cfg.db_path, "--dataset", ds)
+    if cfg.embedding_model is not None:
+        argv += ["--model", cfg.embedding_model]
+    if cfg.embedding_checkpoint is not None:
+        argv += ["--checkpoint", cfg.embedding_checkpoint]
     # Never store-skipped (N1b): embed itself processes only pending/stale rows for the
     # requested model and loads no model when nothing is pending.
     return StageSpec(name="embed", ticket="T04", critical=True, output_paths=[],
@@ -348,8 +363,13 @@ def _spec_fusion(cfg: DemoConfig, ds: str) -> StageSpec:
     npz = _fusion_npz_path(ds, cfg.signals)
     argv = _py_module("reid_demo.fusion", "--db", cfg.db_path, "--dataset", ds,
                       "--signals", cfg.signals, "--out-dir", FUSION_STAGING)
+    # Fresh only while the embedded rows, their models and Fisher vectors are unchanged (N1c).
     return StageSpec(name="fusion", ticket="T12", critical=False, output_paths=[npz],
-                     cli=argv, dataset=ds, label=f"fusion({cfg.signals})")
+                     cli=argv, dataset=ds, label=f"fusion({cfg.signals})", marker=True,
+                     input_where="embedding_ref IS NOT NULL",
+                     input_columns=["embedding_ref", "embedding_path", "orientation",
+                                    "extra.fisher_ref", "extra.fisher_path"],
+                     depends_on=["fisher"])
 
 
 def _cluster_tuning(cfg: DemoConfig) -> tuple:
@@ -408,16 +428,23 @@ def _spec_cluster(cfg: DemoConfig, ds: str, *, affinity_path: Optional[str] = No
 def _spec_catalogue(cfg: DemoConfig, ds: str) -> StageSpec:
     out = _catalogue_out(ds)
     argv = _py_module("reid_demo.catalogue", "--db", cfg.db_path, "--dataset", ds, "--out", out)
+    # Fresh only while the rendered store columns are unchanged (N1c).
     return StageSpec(name="catalogue", ticket="T06", critical=True,
-                     output_paths=[os.path.join(out, "index.html")], cli=argv, dataset=ds)
+                     output_paths=[os.path.join(out, "index.html")], cli=argv, dataset=ds,
+                     marker=True,
+                     input_columns=["cluster_id", "cluster_conf", "is_candidate_new",
+                                    "review_status", "orientation", "crop_path", "species"])
 
 
 def _spec_eval(cfg: DemoConfig, ds: str, *, tag: str, label: Optional[str] = None) -> StageSpec:
     out = _eval_json_path(ds, tag)
     argv = _py_module("reid_demo.eval", "--dataset", ds, "--db", cfg.db_path,
                       "--tag", tag, "--flank-aware", "--out-dir", EVAL_OUT_DIR)
+    # Fresh only while the scored store columns are unchanged (N1c).
     return StageSpec(name="eval", ticket="T07", critical=False, output_paths=[out],
-                     cli=argv, dataset=ds, label=label or f"eval(tag={tag})")
+                     cli=argv, dataset=ds, label=label or f"eval(tag={tag})", marker=True,
+                     input_columns=["cluster_id", "is_candidate_new", "gt_identity",
+                                    "orientation", "review_status"])
 
 
 def _spec_report(cfg: DemoConfig, ds: str) -> StageSpec:
@@ -485,13 +512,19 @@ def plan_stages(config: DemoConfig) -> List[StageSpec]:
             # Accuracy layer, then re-cluster on the fused affinity. Unforced (N1b):
             # reviewed rows stay untouched; the sidecar is sliced to the clustered rows.
             specs.append(_spec_fisher(config, ds))
-            specs.append(_spec_fusion(config, ds))
+            fusion_spec = _spec_fusion(config, ds)
+            specs.append(fusion_spec)
             affinity = _fusion_npz_path(ds, config.signals)
-            specs.append(_spec_cluster(config, ds, affinity_path=affinity,
-                                       label=f"cluster({config.signals})"))
+            fused = _spec_cluster(config, ds, affinity_path=affinity,
+                                  label=f"cluster({config.signals})")
+            # A failed fusion must not leave this pass on a stale sidecar (N1c).
+            fused.depends_on = [fusion_spec.display_label]
+            specs.append(fused)
             specs.append(_spec_catalogue(config, ds))
-            specs.append(_spec_eval(config, ds, tag=_eval_tag(config.signals),
-                                    label=f"eval({config.signals})"))
+            fused_eval = _spec_eval(config, ds, tag=_eval_tag(config.signals),
+                                    label=f"eval({config.signals})")
+            fused_eval.depends_on = [fused.display_label]
+            specs.append(fused_eval)
 
     if config.stages:
         wanted = set(config.stages)
@@ -560,8 +593,40 @@ def _outputs_exist(spec: StageSpec) -> bool:
     return bool(spec.output_paths) and all(os.path.exists(p) for p in spec.output_paths)
 
 
-def _stage_config_key(spec: StageSpec) -> str:
-    """Fingerprint of one stage invocation: name, argv or func+kwargs, input-file identity."""
+def _marker_name(spec: StageSpec) -> str:
+    """Marker name: the stage name, or ``<name>@<first output>`` for file stages (N1c), so
+    two outputs of one stage (baseline and fused eval) keep separate markers."""
+    return f"{spec.name}@{spec.output_paths[0]}" if spec.output_paths else spec.name
+
+
+def _input_digest(spec: StageSpec, conn) -> str:
+    """sha1 over ``(record_id, *input_columns)`` of the rows the stage reads, in record_id
+    order; ``extra.<key>`` reads a key of ``extra_json`` (N1c)."""
+    digest = hashlib.sha1()
+    for rec in store.query_records(conn, dataset=spec.dataset, where_sql=spec.input_where,
+                                   order_by="record_id"):
+        extra = None
+        values: List[Any] = [rec.record_id]
+        for col in spec.input_columns:
+            if col.startswith("extra."):
+                if extra is None:
+                    try:
+                        extra = json.loads(rec.extra_json or "{}")
+                    except ValueError:
+                        extra = {}
+                    if not isinstance(extra, dict):
+                        extra = {}
+                values.append(extra.get(col[len("extra."):]))
+            else:
+                values.append(getattr(rec, col))
+        digest.update(json.dumps(values, default=str).encode("utf-8"))
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
+def _stage_config_key(spec: StageSpec, conn=None) -> str:
+    """Fingerprint of one stage invocation: name, argv or func+kwargs, input-file identity
+    and, for stages declaring ``input_columns``, a digest of the store rows they read."""
     inputs = []
     for path in spec.input_paths:
         try:
@@ -571,6 +636,8 @@ def _stage_config_key(spec: StageSpec) -> str:
             inputs.append([path, None, None])
     payload = {"name": spec.name, "cli": spec.cli, "func": spec.func,
                "kwargs": spec.kwargs, "inputs": inputs}
+    if spec.input_columns:
+        payload["input_rows"] = _input_digest(spec, conn) if conn is not None else None
     return hashlib.sha1(
         json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
     ).hexdigest()
@@ -595,8 +662,8 @@ def _store_stage_done(spec: StageSpec, db_path: str) -> bool:
         if not store.query_records(conn, dataset=spec.dataset, limit=1):
             return False
         if spec.marker:
-            marker = store.get_stage_marker(conn, spec.name, spec.dataset)
-            if not marker or marker.get("config") != _stage_config_key(spec):
+            marker = store.get_stage_marker(conn, _marker_name(spec), spec.dataset)
+            if not marker or marker.get("config") != _stage_config_key(spec, conn):
                 return False
         if spec.skip_store_column:
             pending = f"{spec.skip_store_column} IS NULL"
@@ -615,13 +682,23 @@ def _write_stage_marker(spec: StageSpec, db_path: str) -> None:
     """Record that ``spec`` (this exact invocation) completed for its dataset."""
     conn = store.connect(db_path, create=False)
     try:
-        store.set_stage_marker(conn, spec.name, spec.dataset, {
-            "config": _stage_config_key(spec),
+        store.set_stage_marker(conn, _marker_name(spec), spec.dataset, {
+            "config": _stage_config_key(spec, conn),
             "label": spec.display_label,
             "at": datetime.now().isoformat(timespec="seconds"),
         })
     finally:
         conn.close()
+
+
+def _stage_done(spec: StageSpec, db_path: str) -> bool:
+    """Skip decision. A file stage needs its outputs AND, if it is marker-gated, a fresh
+    marker (N1c); a store stage needs ``_store_stage_done``."""
+    if spec.output_paths:
+        if not _outputs_exist(spec):
+            return False
+        return _store_stage_done(spec, db_path) if spec.marker else True
+    return _store_stage_done(spec, db_path)
 
 
 def _resolve_func(dotted: str):
@@ -639,8 +716,8 @@ def _run_stage(spec: StageSpec, config: DemoConfig, logs_dir: str) -> StageResul
         log_name = f"{spec.name}_{spec.dataset or 'all'}_{_eval_tag(spec.label)[:24]}"
     log_path = os.path.join(logs_dir, f"{log_name}.log")
 
-    # Skip-if-exists (unless --force).
-    if not config.force and (_outputs_exist(spec) or _store_stage_done(spec, config.db_path)):
+    # Skip-if-done (unless --force).
+    if not config.force and _stage_done(spec, config.db_path):
         return StageResult(
             name=spec.name, ticket=spec.ticket, status="skipped", seconds=0.0,
             output_paths=[p for p in spec.output_paths if os.path.exists(p)],
@@ -722,6 +799,7 @@ def run_demo(config: DemoConfig) -> BundleResult:
 
     results: List[StageResult] = []
     aborted = False
+    unusable: set = set()   # (dataset, label) of stages that failed or were skipped for it
     for spec in specs:
         if aborted:
             results.append(StageResult(
@@ -731,8 +809,21 @@ def run_demo(config: DemoConfig) -> BundleResult:
             ))
             continue
 
+        # Dependency-aware degradation (N1c): never run on a failed stage's stale output.
+        blocked = [d for d in spec.depends_on if (spec.dataset, d) in unusable]
+        if blocked:
+            unusable.add((spec.dataset, spec.display_label))
+            results.append(StageResult(
+                name=spec.name, ticket=spec.ticket, status="skipped", seconds=0.0,
+                output_paths=[], log_path=None, dataset=spec.dataset, label=spec.label,
+                error=f"{UPSTREAM_SKIP_PREFIX}{blocked[0]} failed",
+            ))
+            continue
+
         res = _run_stage(spec, config, logs_dir)
         results.append(res)
+        if res.status == "failed":
+            unusable.add((spec.dataset, spec.display_label))
 
         if res.status == "failed" and spec.critical and not config.continue_on_error:
             aborted = True  # stop launching further stages; still write the bundle
@@ -992,6 +1083,7 @@ def _build_manifest(config: DemoConfig, stage_results: List[StageResult],
         "python": sys.version.split()[0],
         "headline": headline,
         "stages": stages_json,
+        "degraded": _degraded_labels(stage_results),
         "store_counts": store_counts,
         "bundle": {
             "index_html": "index.html",
@@ -1001,6 +1093,12 @@ def _build_manifest(config: DemoConfig, stage_results: List[StageResult],
             "medvednica_report_dir": "medvednica_report",
         },
     }
+
+
+def _degraded_labels(stage_results: List[StageResult]) -> List[str]:
+    """Labels of stages skipped because an upstream stage failed (N1c)."""
+    return [st.label or st.name for st in stage_results
+            if st.status == "skipped" and (st.error or "").startswith(UPSTREAM_SKIP_PREFIX)]
 
 
 def _config_to_argv(config: DemoConfig) -> List[str]:
@@ -1031,7 +1129,23 @@ def _config_to_argv(config: DemoConfig) -> List[str]:
         argv += ["--n-clusters", str(config.n_clusters)]
     if config.record_id_scheme is not None:
         argv += ["--record-id-scheme", config.record_id_scheme]
+    if config.embedding_model is not None:
+        argv += ["--embedding-model", config.embedding_model]
+    if config.embedding_checkpoint is not None:
+        argv += ["--embedding-checkpoint", config.embedding_checkpoint]
     return argv
+
+
+def _config_warnings(config: DemoConfig) -> List[str]:
+    """Plain warnings about risky combinations (N1e); never changes a default."""
+    warnings_out: List[str] = []
+    model = (config.embedding_model or "").lower()
+    if model.startswith("miewid") and config.backend in (None, "dbscan") and config.eps is None:
+        warnings_out.append(
+            "warning: DBSCAN's default eps 0.30 was tuned for MegaDescriptor cosine "
+            "distances; with MiewID consider --backend leiden/finch or an explicit --eps."
+        )
+    return warnings_out
 
 
 # --------------------------------------------------------------------------- #
@@ -1202,6 +1316,12 @@ def _render_summary_md(config: DemoConfig, headline: dict, manifest: dict,
         f"- Status: {manifest['status']}",
         f"- Generated: {manifest['created_at']}",
     ]
+    degraded = manifest.get("degraded") or []
+    if degraded:
+        lines.append(
+            f"- Degraded: an upstream stage failed, so {', '.join(degraded)} did not run; "
+            f"results are global-only"
+        )
     ari = headline.get("adjusted_rand_index")
     vm = headline.get("v_measure")
     if ari is not None or vm is not None:
@@ -1282,6 +1402,12 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--record-id-scheme", default=None, choices=("path", "legacy"),
                    help="passed to ingest; 'legacy' is required once for a dataset ingested "
                         "before record-id schemes were tracked (N1).")
+    p.add_argument("--embedding-model", default=None,
+                   help="passed to embed as --model (default megadescriptor-l-384; "
+                        "'miewid-msv3' = pinned MiewID-msv3).")
+    p.add_argument("--embedding-checkpoint", default=None,
+                   help="passed to embed as --checkpoint (an adapted MiewID checkpoint needs "
+                        "its manifest.json beside it).")
     p.add_argument("--force", action="store_true",
                    help="re-run stages even if outputs exist (reviewed rows stay protected).")
     p.add_argument("--dry-run", action="store_true", help="print the ordered plan; execute nothing.")
@@ -1295,6 +1421,8 @@ def _print_plan(config: DemoConfig) -> None:
     specs = plan_stages(config)
     print(f"Demo plan — run_name={config.run_name}  signals={config.signals}  db={config.db_path}")
     print(f"datasets={config.datasets}  primary={config.primary_dataset}")
+    for line in _config_warnings(config):
+        print(line)
     print("-" * 78)
     for i, s in enumerate(specs, 1):
         invocation = ("python " + " ".join(s.cli)) if s.cli else f"in-process {s.func} {s.kwargs}"
@@ -1314,6 +1442,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         _print_plan(config)
         return 0
 
+    for line in _config_warnings(config):
+        print(line, file=sys.stderr)
     try:
         result = run_demo(config)
     except Exception:

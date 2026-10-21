@@ -85,7 +85,11 @@ class EmbedResult:
 
 def _model_label(model_name: str, checkpoint_path: Optional[str]) -> str:
     """Resolve the cache label via the existing global_embedding helper (lazy import
-    keeps torch out of plain `python3` imports — global_embedding pulls in torch)."""
+    keeps torch out of plain `python3` imports — global_embedding pulls in torch).
+    MiewID names use the N1e label (revision, preprocessing, checkpoint bytes)."""
+    from reid_demo.embed_miewid import is_miewid, miewid_cache_label
+    if is_miewid(model_name):
+        return miewid_cache_label(model_name, checkpoint_path)
     from global_embedding import global_embedding_cache_label
     return global_embedding_cache_label(model_name, checkpoint_path)
 
@@ -165,13 +169,21 @@ def embed_crops(
 
     if to_compute:
         device = _coerce_device(device)
-        from global_embedding import extract_global_embeddings
-        computed = extract_global_embeddings(
-            to_compute,
-            model_name=model_name,
-            device=device,
-            checkpoint_path=checkpoint_path,
-        )
+        from reid_demo.embed_miewid import is_miewid
+        if is_miewid(model_name):
+            # N1e: MiewID via the benchmark loaders (pinned revision / manifest-checked).
+            from reid_demo.embed_miewid import extract_miewid_embeddings
+            computed = extract_miewid_embeddings(
+                to_compute, checkpoint_path=checkpoint_path, device=device,
+            )
+        else:
+            from global_embedding import extract_global_embeddings
+            computed = extract_global_embeddings(
+                to_compute,
+                model_name=model_name,
+                device=device,
+                checkpoint_path=checkpoint_path,
+            )
         # Store RAW, as float32 1-D arrays (exactly as the model emits — D2).
         for key, vec in computed.items():
             cache[key] = np.asarray(vec, dtype=np.float32).reshape(-1)
@@ -474,9 +486,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dataset", default=None,
                         help="dataset selector to scope which records to embed.")
     parser.add_argument("--model", default=DEFAULT_MODEL_NAME,
-                        help=f"global embedding model (default {DEFAULT_MODEL_NAME}).")
+                        help=f"global embedding model (default {DEFAULT_MODEL_NAME}; "
+                             f"'miewid-msv3' = pinned MiewID-msv3, N1e).")
     parser.add_argument("--checkpoint", default=None,
-                        help="optional local checkpoint path (passed through unchanged).")
+                        help="optional local checkpoint path (passed through unchanged; for "
+                             "miewid-msv3 an adapted checkpoint with manifest.json beside it).")
     parser.add_argument("--cache-dir", default=DEFAULT_EMB_DIR,
                         help=f"embeddings cache dir (default {DEFAULT_EMB_DIR}).")
     parser.add_argument("--only-species", default=None,

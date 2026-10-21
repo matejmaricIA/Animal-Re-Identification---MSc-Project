@@ -215,8 +215,19 @@ def to_dataframe(conn, *, dataset=None): ...                 # pandas DataFrame 
     also binds the affinity sidecar's size and mtime). Both passes share one marker.
   Markers are `meta` rows `stage_done:<stage>:<dataset>` (JSON with the invocation
   fingerprint), written by the runner after a successful stage. Any non-dry
-  `run_clustering` call clears the `cluster` marker first. File-output stages (fusion,
-  catalogue, eval) still skip when their file exists.
+  `run_clustering` call clears the `cluster` marker first.
+- File-output freshness (N1c). `fusion`, `catalogue` and `eval` are skipped only when
+  their output exists **and** their marker (`stage_done:<stage>@<output path>:<dataset>`)
+  records the same invocation and the same digest of the store columns they read:
+  fusion `embedding_ref`, `embedding_path`, `orientation`, `extra.fisher_ref`,
+  `extra.fisher_path` of embedded rows; catalogue `cluster_id`, `cluster_conf`,
+  `is_candidate_new`, `review_status`, `orientation`, `crop_path`, `species`; eval
+  `cluster_id`, `is_candidate_new`, `gt_identity`, `orientation`, `review_status`. If an
+  upstream stage fails (fisher → fusion → fused cluster → fused eval), its dependants
+  are skipped with `error="skipped: upstream stage … failed"`, their old artifacts are
+  not copied into the bundle, and `manifest.json` lists them under `degraded`. A
+  catalogue rebuild removes its own pages, thumbnails and montages of clusters/records
+  that no longer exist.
 - Cluster-label namespace (N1b). A non-forced T05 run never writes reviewed rows. Its new
   labels are offset above every `cluster_id >= 0` held by a row it does not rewrite
   (reviewed rows, rows outside `--species`, unembedded rows); with nothing reserved the
@@ -262,6 +273,14 @@ Consumers obtain matrices via the T04 API `reid_demo.embed.get_embedding_matrix(
 and read the dim from the matrix — never hard-code 384, never assume unit norm. This store
 only references vectors by `embedding_ref`; it never assumes a dim or norm.
 
+MiewID (N1e): `--model miewid-msv3` embeds with the pinned MiewID-msv3 (2152-D, raw) via
+`reid_demo.embed_miewid`, which imports the benchmark loaders read-only; `--checkpoint`
+takes an adapted MiewID checkpoint whose trial `manifest.json` sits beside it (validated
+strictly). Preprocessing matches the CzechLynx benchmark (RGB, 440x440 bilinear, ImageNet
+normalisation). Its cache label is `miewid-msv3-<revision[:12]>-pp<version>` plus
+`_ckpt-<sha256(checkpoint)[:12]>`, so it binds the checkpoint's bytes, not just its path.
+The runner passes `--embedding-model` / `--embedding-checkpoint` through to embed.
+
 ## CLI
 
 ```
@@ -278,6 +297,6 @@ python -m reid_demo.store --export <out.parquet|csv> --db <path> [--dataset NAME
    joins `animals_classified.json` → records by `(source_stem, bbox)` nearest-match (D3).
 3. **T04** — `update_embedding(record_id, embedding_ref, embedding_path)`; vectors stay model-native, un-normalized (D2).
 4. **T05** — `update_cluster(record_id, cluster_id, cluster_conf, is_candidate_new)`; runs before T08 (D5).
-5. **T08** — `update_review(record_id, review_status, review_note, cluster_id?)`; preserves non-`unreviewed` rows on T05 re-runs unless `--force` (D5), which logs and resets them (N1b).
+5. **T08** — `update_review(record_id, review_status, review_note, cluster_id?)`; preserves non-`unreviewed` rows on T05 re-runs unless `--force` (D5), which logs and resets them (N1b). Identity-attachment items (N1d) ask whether a proposal (an all-unreviewed cluster, or an unreviewed singleton) is a confirmed animal (a `cluster_id` held by a `confirmed`/`merged`/`split` row): `same` merges the proposal into that animal and sets `extra_json['identity_attached']`; `different` appends `{identity, at, note}` to `extra_json['identity_rejections']` on each member (an animal rejected by at least half of a proposal's members is not offered again); `new` confirms the proposal.
 6. **T06 / T07 / T09 / T10** — READ-ONLY: `query_records`, `count_by`, `to_dataframe`, `get_record` (T07 reads `gt_identity`).
 7. **Any module** — module-specific extras go through `update_extra` only (never raw SQL); the `extra_json` blob is the forward-compat escape hatch so we never need a v2 schema mid-demo.

@@ -621,3 +621,165 @@ def test_cli_apply(seeded, tmp_path):
     res = _run_cli(["--apply", sess, "--db", db])
     assert res.returncode == 0, res.stderr
     assert "applied decisions" in res.stdout
+
+
+# --------------------------------------------------------------------------- #
+# N1d: identity-attachment items ("is this proposal confirmed animal #N?")
+# --------------------------------------------------------------------------- #
+
+def _seed_identity_store(tmp_path):
+    """Confirmed animal X (cluster 0: X0, X1, left) and Y (cluster 1: Y0, left).
+    Proposal P (cluster 5: P0-P2, left, confident, near X); singleton S (near Y, left);
+    proposal R (cluster 6: R0, R1, RIGHT, near X). Vectors in one pickle."""
+    import pickle
+
+    import numpy as np
+
+    rng = np.random.default_rng(3)
+    cx, cy = np.eye(8)[0] * 4.0, np.eye(8)[1] * 4.0
+    db = str(tmp_path / "ident.sqlite")
+    pkl = str(tmp_path / "emb.pkl")
+    conn = connect(db)
+    plan = [  # stem, centre, orientation, cluster, conf, candidate_new
+        ("X0", cx, "left", 0, 0.9, 0), ("X1", cx, "left", 0, 0.9, 0),
+        ("Y0", cy, "left", 1, 0.9, 0),
+        ("P0", cx, "left", 5, 0.95, 0), ("P1", cx, "left", 5, 0.90, 0),
+        ("P2", cx, "left", 5, 0.85, 0),
+        ("S", cy, "left", -1, 0.0, 1),
+        ("R0", cx, "right", 6, 0.9, 0), ("R1", cx, "right", 6, 0.9, 0),
+    ]
+    emb, recs = {}, []
+    for stem, centre, orient, _cid, _conf, _cand in plan:
+        rec = _mk(stem, orient=orient)
+        rec.embedding_ref, rec.embedding_path = rec.record_id, pkl
+        emb[rec.record_id] = (centre + 0.05 * rng.normal(size=8)).astype("float32")
+        recs.append(rec)
+    upsert_records(conn, recs)
+    for stem, _c, _o, cid, conf, cand in plan:
+        update_cluster(conn, make_record_id(stem, 1), cid, conf, is_candidate_new=cand)
+    for stem in ("X0", "X1", "Y0"):
+        update_review(conn, make_record_id(stem, 1), "confirmed")
+    with open(pkl, "wb") as fh:
+        pickle.dump(emb, fh)
+    return conn
+
+
+def _identity(q, rid):
+    return [it for it in q if it.kind == "identity" and it.record_id_a == rid]
+
+
+def test_confident_proposal_gets_identity_item(tmp_path):
+    """A confident proposal of a reviewed animal is asked about (was: no item at all)."""
+    conn = _seed_identity_store(tmp_path)
+    q = build_review_queue(conn, dataset="DemoDS")
+    p = _identity(q, make_record_id("P0", 1))
+    assert len(p) == 1
+    assert p[0].cluster_id_a == 5 and p[0].cluster_id_b == 0
+    assert p[0].record_id_b in {make_record_id("X0", 1), make_record_id("X1", 1)}
+    assert p[0].proposal_size == 3 and p[0].identity_size == 2
+    s = _identity(q, make_record_id("S", 1))
+    assert len(s) == 1 and s[0].cluster_id_b == 1
+    # the singleton is asked via its identity item only
+    assert not [it for it in q if it.kind == "singleton" and it.record_id_a == make_record_id("S", 1)]
+    # today's queue has nothing for the confident proposal
+    old = build_review_queue(conn, dataset="DemoDS", include_identity_items=False)
+    assert not [it for it in old if it.record_id_a.startswith("P")]
+
+
+def test_identity_item_respects_flanks(tmp_path):
+    conn = _seed_identity_store(tmp_path)
+    q = build_review_queue(conn, dataset="DemoDS")
+    assert not [it for it in q if it.kind == "identity" and it.record_id_a.startswith("R")]
+    loose = build_review_queue(conn, dataset="DemoDS", respect_flanks=False)
+    assert [it for it in loose if it.kind == "identity" and it.record_id_a.startswith("R")]
+
+
+def test_identity_same_merges_whole_proposal(tmp_path):
+    conn = _seed_identity_store(tmp_path)
+    item = _identity(build_review_queue(conn, dataset="DemoDS"), make_record_id("P0", 1))[0]
+    summary = apply_decisions(conn, [item], [ReviewDecision(item.item_id, DECISION_SAME)],
+                              dataset="DemoDS", session_path=str(tmp_path / "s.json"))
+    for stem in ("P0", "P1", "P2"):
+        rec = get_record(conn, make_record_id(stem, 1))
+        assert rec.cluster_id == 0 and rec.review_status == "merged"
+        assert json.loads(rec.extra_json)["identity_attached"]["identity"] == 0
+    assert get_record(conn, make_record_id("X0", 1)).cluster_id == 0
+    assert summary["counts"]["identity_attachments"] == 1
+    assert len(summary["mutations"]) == 3
+    assert review_status_summary(conn, dataset="DemoDS")["identity_attachments"] == 3
+
+
+def test_identity_different_logs_and_offers_next(tmp_path):
+    conn = _seed_identity_store(tmp_path)
+    s_id = make_record_id("S", 1)
+    first = _identity(build_review_queue(conn, dataset="DemoDS"), s_id)[0]
+    assert first.cluster_id_b == 1
+    apply_decisions(conn, [first], [ReviewDecision(first.item_id, DECISION_DIFFERENT)],
+                    dataset="DemoDS", session_path=str(tmp_path / "a.json"))
+    rec = get_record(conn, s_id)
+    assert rec.review_status == "unreviewed" and rec.cluster_id == -1
+    assert [e["identity"] for e in json.loads(rec.extra_json)["identity_rejections"]] == [1]
+
+    second = _identity(build_review_queue(conn, dataset="DemoDS"), s_id)[0]
+    assert second.cluster_id_b == 0                       # next-best animal
+    apply_decisions(conn, [second], [ReviewDecision(second.item_id, DECISION_DIFFERENT)],
+                    dataset="DemoDS", session_path=str(tmp_path / "b.json"))
+    q = build_review_queue(conn, dataset="DemoDS")
+    assert not _identity(q, s_id)
+    assert [it for it in q if it.kind == "singleton" and it.record_id_a == s_id]
+    assert review_status_summary(conn, dataset="DemoDS")["identity_rejections"] == 1
+
+
+def test_identity_new_confirms_proposal(tmp_path):
+    conn = _seed_identity_store(tmp_path)
+    q = build_review_queue(conn, dataset="DemoDS")
+    p = _identity(q, make_record_id("P0", 1))[0]
+    s = _identity(q, make_record_id("S", 1))[0]
+    summary = apply_decisions(conn, [p, s],
+                              [ReviewDecision(p.item_id, DECISION_NEW),
+                               ReviewDecision(s.item_id, DECISION_NEW)],
+                              dataset="DemoDS", session_path=str(tmp_path / "s.json"))
+    for stem in ("P0", "P1", "P2"):
+        rec = get_record(conn, make_record_id(stem, 1))
+        assert rec.cluster_id == 5 and rec.review_status == "confirmed"
+    srec = get_record(conn, make_record_id("S", 1))
+    assert srec.review_status == "confirmed" and srec.cluster_id == 7   # max (6) + 1
+    assert summary["counts"]["new_individuals_confirmed"] == 2
+
+
+def test_identity_items_first_and_capped(tmp_path):
+    conn = _seed_identity_store(tmp_path)
+    q = build_review_queue(conn, dataset="DemoDS")
+    kinds = [it.kind for it in q]
+    n_ident = kinds.count("identity")
+    assert n_ident == 2 and kinds[:n_ident] == ["identity"] * n_ident
+    assert q[0].record_id_a == make_record_id("P0", 1)       # largest proposal first
+    capped = build_review_queue(conn, dataset="DemoDS", queue_size=1)
+    assert [it.item_id for it in capped] == [q[0].item_id]
+
+
+def test_no_embeddings_no_identity_items(seeded):
+    conn, _ = seeded
+    update_review(conn, "A1__crop1", "confirmed")         # an identity exists, no vectors
+    q = build_review_queue(conn, dataset="DemoDS")
+    assert not [it for it in q if it.kind == "identity"]
+    old = build_review_queue(conn, dataset="DemoDS", include_identity_items=False)
+    assert [it.item_id for it in q] == [it.item_id for it in old]
+
+
+def test_identity_session_replay_idempotent(tmp_path):
+    conn = _seed_identity_store(tmp_path)
+    q = build_review_queue(conn, dataset="DemoDS")
+    p = _identity(q, make_record_id("P0", 1))[0]
+    s = _identity(q, make_record_id("S", 1))[0]
+    decisions = [ReviewDecision(p.item_id, DECISION_SAME),
+                 ReviewDecision(s.item_id, DECISION_DIFFERENT)]
+    apply_decisions(conn, [p, s], decisions, dataset="DemoDS",
+                    session_path=str(tmp_path / "s1.json"))
+    snapshot = {r.record_id: (r.cluster_id, r.review_status, r.extra_json)
+                for r in query_records(conn, dataset="DemoDS")}
+    again = apply_decisions(conn, [p, s], decisions, dataset="DemoDS",
+                            session_path=str(tmp_path / "s2.json"))
+    assert again["mutations"] == []
+    assert {r.record_id: (r.cluster_id, r.review_status, r.extra_json)
+            for r in query_records(conn, dataset="DemoDS")} == snapshot

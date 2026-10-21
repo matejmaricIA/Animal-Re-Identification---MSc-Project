@@ -94,6 +94,7 @@ class CatalogueResult:
     summary: dict              # same content as catalogue_summary.json (schema below)
     individual_pages: dict     # {cluster_id(int): absolute_html_path(str)}
     montage_pngs: dict = field(default_factory=dict)  # {cluster_id(int): abs_png_path}
+    n_stale_removed: int = 0   # old pages/thumbnails/montages from earlier builds removed (N1c)
 
 
 # --------------------------------------------------------------------------- #
@@ -874,6 +875,15 @@ def build_catalogue(
         cap = max_crops_per_individual if max_crops_per_individual else DEFAULT_MONTAGE_CAP
         montage_pngs = _build_montages(groups, out_root / MONTAGES_DIRNAME, cap=cap)
 
+    # ----- remove files an earlier build wrote for clusters/records that are gone (N1c) -----
+    n_stale = _remove_stale(indiv_dir, "individual_*.html",
+                            {Path(p).name for p in individual_pages.values()})
+    n_stale += _remove_stale(thumbs_dir, "*.jpg",
+                             {Path(rel).name for rel in thumb_rel.values()})
+    if make_montages:
+        n_stale += _remove_stale(out_root / MONTAGES_DIRNAME, "individual_*.png",
+                                 {Path(p).name for p in montage_pngs.values()})
+
     return CatalogueResult(
         out_dir=str(out_root),
         index_html=str(index_path.resolve()),
@@ -881,7 +891,22 @@ def build_catalogue(
         summary=summary,
         individual_pages=individual_pages,
         montage_pngs=montage_pngs,
+        n_stale_removed=n_stale,
     )
+
+
+def _remove_stale(directory: Path, pattern: str, keep: set) -> int:
+    """Delete files matching ``pattern`` in ``directory`` (non-recursive) whose names are
+    not in ``keep``. Only this module's own file patterns are passed in. Returns the
+    number removed."""
+    if not directory.is_dir():
+        return 0
+    removed = 0
+    for path in directory.glob(pattern):
+        if path.is_file() and path.name not in keep:
+            path.unlink()
+            removed += 1
+    return removed
 
 
 # --------------------------------------------------------------------------- #
