@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CzechLynx · Image review</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="page-header">
+    <div><p class="eyebrow">CzechLynx · Input audit</p><h1>A closer look.</h1><p class="subtitle">Review image quality, markings and masks. One photograph at a time.</p></div>
+    <div class="progress-block"><strong id="progress-label">Loading audit…</strong><progress id="progress" value="0" max="321"></progress><span id="remaining-label">Your reviews are saved on the workstation.</span></div>
+  </header>
+
+  <main>
+    <section class="toolbar" aria-label="Review settings">
+      <label class="reviewer-label">Your reviewer name<input id="reviewer" type="text" maxlength="200" placeholder="Enter your name" autocomplete="name"></label>
+      <label>Show<select id="status-filter"><option value="all">All photographs</option><option value="unreviewed">Needs review</option><option value="draft">Drafts</option><option value="reviewed">Reviewed</option><option value="issues">Quality concerns</option></select></label>
+      <label>Cohort<select id="cohort-filter"><option value="all">All cohorts</option></select></label>
+      <label class="search-label">Find an image<input id="search" type="search" placeholder="Image ID…" autocomplete="off"></label>
+      <button id="next-unreviewed" class="secondary" type="button">Next unreviewed</button>
+    </section>
+
+    <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+    <button id="reload-review" type="button" class="secondary" hidden>Reload latest review</button>
+
+    <section id="workspace" hidden>
+      <div class="record-heading">
+        <div><div class="record-position"><span id="position"></span><span id="record-status" class="badge"></span></div><h2 id="image-id"></h2><p id="cohort-label" class="muted"></p></div>
+        <div class="nav-buttons"><button id="previous" type="button" class="secondary">← Previous</button><button id="next" type="button" class="secondary">Next →</button></div>
+      </div>
+
+      <div class="image-grid">
+        <button type="button" class="image-panel" data-view="original" aria-label="Enlarge original photograph"><span class="image-title">01 <strong>Original photograph</strong><span>↗</span></span><div class="canvas-wrap"><canvas id="original"></canvas><span class="image-loading">Loading full resolution image…</span></div><span class="image-caption">Check the entire frame and camera information.</span></button>
+        <button type="button" class="image-panel" data-view="crop" aria-label="Enlarge segmented crop"><span class="image-title">02 <strong>Segmented crop</strong><span>↗</span></span><div class="canvas-wrap"><canvas id="crop"></canvas><span class="image-loading">Loading full resolution image…</span></div><span class="image-caption">Look for visible markings and retained body parts.</span></button>
+        <button type="button" class="image-panel" data-view="overlay" aria-label="Enlarge mask overlay"><span class="image-title">03 <strong>Mask overlay</strong><span>↗</span></span><div class="canvas-wrap"><canvas id="overlay"></canvas><span class="image-loading">Loading full resolution image…</span></div><span class="image-caption">Green: retained pixels. Red: crop boundary.</span></button>
+      </div>
+      <p class="image-help">Click any image to zoom. <span id="image-details"></span></p>
+
+      <form id="review-form">
+        <div class="form-heading"><h3>Your review</h3><span>“Unknown” is a valid answer when you cannot tell.</span></div>
+        <div id="review-fields" class="review-grid"></div>
+        <div class="notes-grid">
+          <label id="evidence-label" hidden>Evidence for verified illumination<textarea id="illumination-evidence" rows="2" maxlength="2000" placeholder="Camera mode, reliable source record or other supporting evidence…"></textarea><span class="field-help">Monochrome appearance alone does not verify day, night or infrared.</span></label>
+          <label>Notes <span class="optional">optional</span><textarea id="notes" rows="2" maxlength="10000" placeholder="Anything ambiguous or worth checking…"></textarea></label>
+        </div>
+        <div class="save-bar"><div><strong id="save-status">Not reviewed yet</strong><p id="review-credit" class="muted"></p><span class="keyboard-help">Ctrl / ⌘ + Enter: save and next · Alt + ← / →: navigate</span></div><div class="save-actions"><button id="save-only" type="button" class="secondary">Save review</button><button id="save-next" type="submit" class="primary">Save and next →</button></div></div>
+      </form>
+    </section>
+    <section id="empty-state" class="empty-state" hidden><h2>No photographs match.</h2><p>Change the filters to continue reviewing.</p></section>
+
+    <section class="export-panel"><div><h3>Take your reviews forward.</h3><p>Exports include all photographs. A final export becomes available when every review is complete.</p></div><div class="export-actions"><button id="export-draft" type="button" class="secondary">Export progress</button><button id="export-final" type="button" class="primary" disabled>Export completed audit</button></div><div id="export-result" hidden><p id="export-summary"></p><a id="export-download" class="download-link">Download CSV</a><label>CSV saved on this workstation<input id="export-path" type="text" readonly></label><p class="muted">Use this dated CSV with the existing audit summarize command. Later reviews create a new export.</p></div></section>
+  </main>
+  <footer>Image quality review · Identity labels are hidden · Saved reviews survive server restarts.</footer>
+
+  <dialog id="image-dialog">
+    <div class="zoom-toolbar"><strong id="zoom-title"></strong><div><button id="zoom-fit" type="button" class="secondary">Fit</button><button id="zoom-actual" type="button" class="secondary">100%</button><label>Zoom <input id="zoom-range" type="range" min="10" max="400" value="100"><output id="zoom-value">100%</output></label><button id="zoom-close" type="button" class="secondary" aria-label="Close enlarged image">Close ✕</button></div></div>
+    <div id="zoom-area"><canvas id="zoom-canvas"></canvas></div><p class="zoom-hint">Scroll to inspect enlarged details. Escape closes this view.</p>
+  </dialog>
+</body>
+</html>

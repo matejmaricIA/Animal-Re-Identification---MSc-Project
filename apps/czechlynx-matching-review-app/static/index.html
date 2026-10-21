@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CzechLynx · Timed matching review</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="page-header">
+    <div><p class="eyebrow">CzechLynx · Timed matching review</p><h1>Same lynx?</h1><p class="subtitle">Compare the photos on the left with one catalogue animal on the right.</p></div>
+    <div class="progress-block"><strong id="progress-label">Loading…</strong><progress id="progress" value="0" max="1"></progress><span id="block-label">Answers are saved on the workstation.</span></div>
+  </header>
+
+  <main>
+    <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+
+    <section id="start" class="card" hidden>
+      <h2>Before you start</h2>
+      <p class="muted">Choose the reviewer slot you were given and answer a few questions about your experience. Your answers stay on this workstation.</p>
+      <form id="profile-form" class="profile-grid">
+        <label>Reviewer slot<select id="reviewer" required><option value="">Choose…</option></select></label>
+        <label>Name or initials<input id="p-name" maxlength="200" autocomplete="name"></label>
+        <label>Years identifying individual animals from camera-trap photos<select id="p-years"><option value="">Choose…</option><option>none</option><option>less than 1</option><option>1–3</option><option>3–10</option><option>more than 10</option></select></label>
+        <label>Species you have identified individually<input id="p-species" maxlength="300" placeholder="e.g. lynx, leopard"></label>
+        <label>Lynx or other felid experience<select id="p-felid"><option value="">Choose…</option><option>none</option><option>some</option><option>extensive</option></select></label>
+        <label>Earlier exposure to CzechLynx photos<select id="p-exposure"><option value="">Choose…</option><option>none</option><option>input audit (321 photos)</option><option>more than the input audit</option></select></label>
+        <label>Do you know how this system ranks candidates?<select id="p-internals"><option value="">Choose…</option><option>no</option><option>roughly</option><option>yes, in detail</option></select></label>
+        <label>Screen<input id="p-device" maxlength="200" placeholder="e.g. 27-inch monitor"></label>
+        <label>Pointing device<select id="p-pointer"><option value="">Choose…</option><option>mouse</option><option>trackpad</option><option>other</option></select></label>
+        <label class="wide">Notes <span class="optional">optional</span><textarea id="p-notes" rows="2" maxlength="1000"></textarea></label>
+        <div class="wide actions"><button id="start-button" type="submit" class="primary">Save and continue</button></div>
+      </form>
+    </section>
+
+    <section id="interstitial" class="card" hidden>
+      <h2 id="inter-title"></h2>
+      <div id="inter-text" class="inter-text"></div>
+      <p id="inter-countdown" class="countdown" hidden></p>
+      <div class="actions"><button id="inter-button" type="button" class="primary">Continue</button><button id="inter-secondary" type="button" class="secondary" hidden></button></div>
+    </section>
+
+    <section id="workspace" hidden>
+      <div class="banner"><h2 id="banner"></h2><span id="position" class="badge"></span></div>
+      <div class="compare">
+        <section class="side" aria-labelledby="query-label">
+          <div class="side-head"><h3 id="query-label"></h3><span id="query-meta" class="muted"></span></div>
+          <div id="query-grid" class="grid query"></div>
+          <button id="query-more" type="button" class="link" hidden>Show all photos</button>
+          <div id="query-extra" class="grid extra" hidden></div>
+        </section>
+        <section class="side" aria-labelledby="candidate-label">
+          <div class="side-head"><h3 id="candidate-label"></h3><span id="candidate-meta" class="muted"></span></div>
+          <div id="candidate-grid" class="grid candidate"></div>
+          <button id="candidate-more" type="button" class="link" hidden>Show more photos of this animal</button>
+          <div id="candidate-extra" class="grid extra" hidden></div>
+        </section>
+      </div>
+      <div class="answer-bar">
+        <div class="answers">
+          <button id="answer-same" type="button" class="primary answer" data-answer="same"><span>Same lynx</span><kbd>S</kbd></button>
+          <button id="answer-different" type="button" class="secondary answer" data-answer="different"><span>Different</span><kbd>D</kbd></button>
+          <button id="answer-unsure" type="button" class="secondary answer" data-answer="unsure"><span>Unsure</span><kbd>U</kbd></button>
+        </div>
+        <div class="tools">
+          <button id="undo" type="button" class="secondary">Undo <kbd>⌫</kbd></button>
+          <button id="variant" type="button" class="secondary">Masked view <kbd>V</kbd></button>
+          <button id="pause" type="button" class="secondary">Pause <kbd>P</kbd></button>
+          <label class="flag"><input id="unidentifiable" type="checkbox"> Photos cannot identify the animal <kbd>F</kbd></label>
+        </div>
+      </div>
+      <div id="feedback" class="feedback" hidden><p id="feedback-text"></p><button id="feedback-next" type="button" class="primary">Continue <kbd>⏎</kbd></button></div>
+      <div id="confirm" class="confirm" hidden><p>Answer recorded. <strong>Enter</strong> goes to the next task; <strong>Backspace</strong> undoes the last answer.</p><button id="confirm-next" type="button" class="primary">Next task <kbd>⏎</kbd></button></div>
+      <p class="help">Click a photo to enlarge it. Unknown or unclear cases are fine: answer <strong>Unsure</strong>. The clock stops while paused.</p>
+    </section>
+
+    <section class="export-panel"><div><h3>Results</h3><p>Exports include every reviewer's answers and timing events. Each export is a new dated file.</p></div><div class="export-actions"><button id="export" type="button" class="secondary">Export results</button></div><div id="export-result" hidden><p id="export-summary"></p><a id="export-download" class="download-link">Download CSV</a><label>Saved on this workstation<input id="export-path" type="text" readonly></label></div></section>
+  </main>
+  <footer>Timed matching review · Identity labels, file names and model scores are hidden · Answers survive server restarts.</footer>
+
+  <div id="pause-overlay" class="overlay" hidden><div class="overlay-card"><h2>Paused</h2><p id="pause-reason" class="muted"></p><button id="resume" type="button" class="primary">Resume</button></div></div>
+
+  <dialog id="zoom">
+    <div class="zoom-toolbar"><strong id="zoom-title"></strong><div><button id="zoom-fit" type="button" class="secondary">Fit</button><button id="zoom-actual" type="button" class="secondary">100%</button><label>Zoom <input id="zoom-range" type="range" min="10" max="400" value="100"><output id="zoom-value">100%</output></label><button id="zoom-close" type="button" class="secondary">Close ✕</button></div></div>
+    <div id="zoom-area"><img id="zoom-img" alt=""></div>
+  </dialog>
+</body>
+</html>
