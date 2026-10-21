@@ -1,0 +1,75 @@
+{
+  "artifact_sha256": {
+    "inner_plan.json": "9351779bc068cdec598f1383d65a7876e5731b900a6a09496603463b1481d316",
+    "manifest.json": "da39c1bfb9c16d3771635a8fcae794109d9fefcbbad0be8fdba910bd1234b55f"
+  },
+  "changed_implementation": [
+    "reid_demo/benchmark_miewid_adaptation.py",
+    "utils/finetune_czechlynx_miewid.py"
+  ],
+  "cross_role_overlap": {
+    "encounter_id": 0,
+    "identity": 0,
+    "image_sha256": 0,
+    "source_sha256": 0
+  },
+  "current_bindings_environment_source": "match",
+  "date": "2026-10-16",
+  "eligible_validation_images": 2460,
+  "exact_inner_plan_matches_v1": true,
+  "fitting_image_mask_bytes": "verified by user prepare-only; audit sample revalidated by read-only receipt check",
+  "fitting_input_digest": "050e50cedcc055f66408f34ac3b83572c48432c4c10936c7c455606826779fef",
+  "ineligible_validation_ids": [],
+  "inner_plan_fingerprint": "ef8d64056a89ef7bce2e37db9d089bd86ce92ff12b922f9f4acbd951db0c88e7",
+  "kind": "czechlynx_fp32_preparation_review",
+  "neural_imports": false,
+  "only_recipe_change": "training_precision",
+  "protected_hashes_matched": 22,
+  "protocol_fingerprint": "e3401b266c0e9af162ecd4d16530c0e9f6d5d7f623920c2e24a6af18c04a5fa5",
+  "rechecked_date": "2026-10-17",
+  "review_receipt_sha256": "ffa4000e8cccc219dc3e53da82df2714263b12f3e878d448416f2031c63c93f3",
+  "reviews_source": "/home/mm-workstation/re-id/czechlynx-review-app/exports/reviews_complete_20261016T130044652360Z_bccd027d.csv",
+  "reviews_source_sha256": "4e5285142551e66a7f1b93301032bcdf2e1b0e54da05515eac9636812af2244e",
+  "roles": {
+    "train": {
+      "atomic_groups": 123,
+      "encounters": 6348,
+      "identities": 131,
+      "images": 14044,
+      "multi_identity_group_sizes": [
+        2,
+        2,
+        2,
+        6
+      ],
+      "sources": {
+        "foe_bohemia": 3023,
+        "foe_carpaths": 6578,
+        "snpa": 4443
+      }
+    },
+    "validation": {
+      "atomic_groups": 33,
+      "encounters": 1297,
+      "identities": 34,
+      "images": 2460,
+      "multi_identity_group_sizes": [
+        2
+      ],
+      "sources": {
+        "foe_bohemia": 515,
+        "foe_carpaths": 707,
+        "snpa": 1238
+      }
+    }
+  },
+  "run_fingerprint": "675d43e66317e459cf7d0672789ed19d4a3db1d91f1e606dc7b8233b3e8cd22d",
+  "status": "prepared",
+  "tests_models_training_benchmarks_executed": false,
+  "training_precision": "float32",
+  "trial": "/home/mm-workstation/re-id/Animal-Re-Identification---MSc-Project/models/czechlynx/miewid_adaptation_v2_fp32",
+  "withheld_pool_overlap": {
+    "calibration": 0,
+    "selection": 0
+  }
+}

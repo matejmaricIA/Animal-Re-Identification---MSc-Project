@@ -1,0 +1,1468 @@
+"""T10 — Demo assembly & end-to-end runner (the conductor).
+
+One command runs the open-set re-ID pipeline on a configured dataset and assembles a
+shareable, static demo bundle (a folder + ``index.html`` + ``SUMMARY.md`` + ``manifest.json``).
+
+T10 contains NO new detection / embedding / clustering / catalogue / eval / report logic.
+It only *orders* the T02–T12 stages, plumbs the shared ``--db``/dataset/out args, captures
+each stage's result, and gathers the outputs into one bundle. Every heavy operation is a
+call into the T02–T12 modules (subprocess CLI or in-process function); the single source of
+wiring truth is :data:`STAGE_REGISTRY`.
+
+Two honest tracks (binding decision; see STATUS_BOARD.md):
+
+* **B-track** (LeopardID2022 default, ATRW optional) — the individual-ID proof:
+  ``ingest -> species -> embed -> [fisher -> fusion] -> cluster -> {catalogue, eval}``.
+  The ``species`` stage is NOT skipped: it runs the cheap, model-free
+  ``T03.set_known_species(species="leopard"|"tiger")`` so every row carries a uniform
+  ``species`` column. ``fisher`` (T11) and ``fusion`` (T12) run ONLY when ``--signals`` is
+  ``global+fisher`` or ``full-funnel``.
+* **A-track** (MedvednicaDS) — the real-field-data filtering report: ``report`` only (T09).
+
+Signal layering (D8, ``--signals``): ``global`` (default; T04 embeddings only — the
+standalone backbone), ``global+fisher`` (T11 Fisher fused into the calibrated affinity),
+``full-funnel`` (the fused affinity PLUS T12 GV reranking on borderline pairs). For the
+non-``global`` sets T10 also re-clusters/evaluates on the global-only backbone so the bundle
+can report the **lift** ("global finds N individuals; with geometric verification, M").
+
+Importable contract used by downstream/tests:
+``build_config``, ``plan_stages``, ``run_demo``, ``assemble_bundle``, ``main`` and the
+``DemoConfig``/``StageSpec``/``StageResult``/``BundleResult`` dataclasses.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+import traceback
+from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from . import store
+
+# --------------------------------------------------------------------------- #
+# Constants / tracks / defaults
+# --------------------------------------------------------------------------- #
+
+MANIFEST_SCHEMA_VERSION: int = 1
+
+DEFAULT_DB_PATH: str = store.DEFAULT_DB_PATH                # data/reid_demo/reid_demo.sqlite
+DEFAULT_OUT_DIR: str = "demo_bundle"
+DEFAULT_DATASETS: List[str] = ["LeopardID2022", "MedvednicaDS"]
+DEFAULT_PRIMARY: str = "LeopardID2022"
+SMOKE_MAX_IDENTITIES: int = 8
+
+# Signal sets (D8). ``global`` is the default — the standalone backbone — so the default
+# dry-run plan is exactly ingest->species->embed->cluster->catalogue->eval (no T11/T12).
+SIGNAL_GLOBAL = "global"
+SIGNAL_GLOBAL_FISHER = "global+fisher"
+SIGNAL_FULL_FUNNEL = "full-funnel"
+SIGNAL_CHOICES = (SIGNAL_GLOBAL, SIGNAL_GLOBAL_FISHER, SIGNAL_FULL_FUNNEL)
+DEFAULT_SIGNALS = SIGNAL_GLOBAL
+
+# Which track a dataset belongs to (extensible).
+DATASET_TRACKS: Dict[str, str] = {
+    "LeopardID2022": "B",
+    "ATRW": "B",
+    "MedvednicaDS": "A",
+}
+# Per-B-track known species, stamped model-free by T03.set_known_species.
+B_TRACK_SPECIES: Dict[str, str] = {
+    "LeopardID2022": "leopard",
+    "ATRW": "tiger",
+}
+
+EVAL_OUT_DIR: str = "evaluations/clustering"               # T07's single-file output dir
+#: StageResult.error prefix for a stage skipped because an upstream stage failed (N1c).
+UPSTREAM_SKIP_PREFIX: str = "skipped: upstream stage "
+CATALOGUE_STAGING: str = os.path.join("data", "reid_demo", "catalogue")
+FUSION_STAGING: str = os.path.join("data", "reid_demo", "fusion")
+REPORT_STAGING: str = os.path.join("data", "reid_demo", "medvednica_report")
+
+# Where each copied stage artifact lands inside the bundle, and how to copy it.
+#   "dir"  -> copy the directory that contains the artifact (catalogue / report)
+#   "file" -> copy the single file (eval json)
+BUNDLE_LAYOUT: Dict[str, tuple] = {
+    "catalogue": ("catalogue", "dir"),
+    "eval": ("accuracy", "file"),
+    "report": ("medvednica_report", "dir"),
+}
+
+
+def _eval_tag(signals: str) -> str:
+    """Filename-safe tag for the funnel eval (baseline eval is always tagged ``global``)."""
+    return signals.replace("+", "_").replace("-", "_")
+
+
+# --------------------------------------------------------------------------- #
+# Dataclasses (interface contract)
+# --------------------------------------------------------------------------- #
+
+@dataclass
+class StageSpec:
+    """A single stage's resolved invocation. Exactly one of ``cli``/``func`` is set."""
+
+    name: str                      # ingest|species|embed|fisher|fusion|cluster|catalogue|eval|report
+    ticket: str                    # "T02".."T12"
+    critical: bool                 # if True, failure aborts the run (unless --continue-on-error)
+    output_paths: List[str]        # declared artifacts; used for skip-if-exists
+    cli: Optional[List[str]] = None        # argv WITHOUT the python exe, run as subprocess
+    func: Optional[str] = None             # "module:function" dotted path, called in-process
+    kwargs: dict = field(default_factory=dict)
+    # additive (non-contract) wiring helpers:
+    dataset: Optional[str] = None
+    label: Optional[str] = None            # disambiguates duplicate stage names in logs
+    skip_store_column: Optional[str] = None  # column every eligible row must have non-NULL
+    # additive (N1b) completion conditions; see _store_stage_done:
+    skip_store_where: Optional[str] = None   # SQL restricting the eligible rows (default: all)
+    marker: bool = False                     # also require a completion marker for this invocation
+    input_paths: List[str] = field(default_factory=list)  # files whose size/mtime enter the marker key
+    # additive (N1c) freshness of file outputs and dependency-aware degradation:
+    input_columns: List[str] = field(default_factory=list)  # store columns read ('extra.<key>' ok)
+    input_where: Optional[str] = None                        # SQL restricting the rows read
+    depends_on: List[str] = field(default_factory=list)      # labels of upstream specs (same dataset)
+
+    @property
+    def display_label(self) -> str:
+        return self.label or self.name
+
+
+@dataclass
+class DemoConfig:
+    datasets: List[str]
+    primary_dataset: str
+    db_path: str
+    out_dir: str
+    run_name: str
+    stages: Optional[List[str]] = None     # None => all applicable
+    smoke: bool = False
+    max_identities: Optional[int] = None
+    force: bool = False
+    continue_on_error: bool = False
+    signals: str = DEFAULT_SIGNALS         # additive (D8): global | global+fisher | full-funnel
+    # clustering (T05) tuning passthrough; None => use cluster.py's own defaults.
+    backend: Optional[str] = None
+    eps: Optional[float] = None
+    min_samples: Optional[int] = None
+    distance_threshold: Optional[float] = None
+    knn_k: Optional[int] = None             # leiden backend
+    resolution: Optional[float] = None      # leiden backend
+    n_clusters: Optional[int] = None        # finch backend (target level)
+    # ingest (T02) passthrough (N1/N1b); None => the dataset's recorded scheme / 'path'.
+    record_id_scheme: Optional[str] = None
+    # embed (T04) passthrough (N1e); None => embed's default (megadescriptor-l-384).
+    embedding_model: Optional[str] = None
+    embedding_checkpoint: Optional[str] = None
+
+
+@dataclass
+class StageResult:
+    name: str
+    ticket: str
+    status: str                    # "ok" | "skipped" | "failed"
+    seconds: float
+    output_paths: List[str]        # resolved, existing artifacts after the stage
+    log_path: Optional[str]
+    error: Optional[str] = None
+    # additive:
+    dataset: Optional[str] = None
+    label: Optional[str] = None
+
+
+@dataclass
+class BundleResult:
+    run_name: str
+    out_dir: str                   # absolute path to demo_bundle/<run_name>/
+    status: str                    # "ok" | "partial" | "failed"
+    stages: List[StageResult]
+    headline: dict
+    manifest_path: str
+    index_html_path: str
+
+
+# --------------------------------------------------------------------------- #
+# Config building
+# --------------------------------------------------------------------------- #
+
+def _load_config_file(path: str) -> dict:
+    """Load a JSON or YAML config override file. YAML requires PyYAML; JSON always works."""
+    with open(path, "r", encoding="utf-8") as fh:
+        text = fh.read()
+    if path.lower().endswith((".yaml", ".yml")):
+        try:
+            import yaml  # type: ignore
+        except ImportError as exc:  # pragma: no cover - environment dependent
+            raise RuntimeError(
+                f"--config {path!r} is YAML but PyYAML is not installed; "
+                "use a .json config or `pip install pyyaml`."
+            ) from exc
+        return yaml.safe_load(text) or {}
+    return json.loads(text or "{}")
+
+
+def build_config(args) -> DemoConfig:
+    """Build a :class:`DemoConfig` from parsed CLI args (an ``argparse.Namespace``-like).
+
+    Precedence: explicit CLI flags > config-file values > built-in defaults. Applies the
+    ``--smoke`` default of ``--max-identities 8`` and the ``<primary>_<timestamp>`` run name.
+    """
+    def _get(name, default=None):
+        return getattr(args, name, default)
+
+    file_cfg: dict = {}
+    cfg_path = _get("config")
+    if cfg_path:
+        file_cfg = _load_config_file(cfg_path)
+
+    datasets = _get("datasets") or file_cfg.get("datasets") or list(DEFAULT_DATASETS)
+    primary = _get("primary_dataset") or file_cfg.get("primary_dataset")
+    if not primary:
+        primary = primary_in(datasets)
+
+    db_path = _get("db") or file_cfg.get("db_path") or DEFAULT_DB_PATH
+    out_dir = _get("out_dir") or file_cfg.get("out_dir") or DEFAULT_OUT_DIR
+    signals = _get("signals") or file_cfg.get("signals") or DEFAULT_SIGNALS
+    stages = _get("stages") or file_cfg.get("stages")
+
+    smoke = bool(_get("smoke") or file_cfg.get("smoke", False))
+    max_identities = _get("max_identities")
+    if max_identities is None:
+        max_identities = file_cfg.get("max_identities")
+    if smoke and max_identities is None:
+        max_identities = SMOKE_MAX_IDENTITIES
+
+    run_name = _get("run_name") or file_cfg.get("run_name")
+    if not run_name:
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        run_name = f"{primary}_{stamp}"
+
+    def _opt(name):
+        v = _get(name)
+        return v if v is not None else file_cfg.get(name)
+
+    return DemoConfig(
+        datasets=list(datasets),
+        primary_dataset=primary,
+        db_path=db_path,
+        out_dir=out_dir,
+        run_name=run_name,
+        stages=list(stages) if stages else None,
+        smoke=smoke,
+        max_identities=max_identities,
+        force=bool(_get("force") or file_cfg.get("force", False)),
+        continue_on_error=bool(_get("continue_on_error") or file_cfg.get("continue_on_error", False)),
+        signals=signals,
+        backend=_opt("backend"),
+        eps=_opt("eps"),
+        min_samples=_opt("min_samples"),
+        distance_threshold=_opt("distance_threshold"),
+        knn_k=_opt("knn_k"),
+        resolution=_opt("resolution"),
+        n_clusters=_opt("n_clusters"),
+        record_id_scheme=_opt("record_id_scheme"),
+        embedding_model=_opt("embedding_model"),
+        embedding_checkpoint=_opt("embedding_checkpoint"),
+    )
+
+
+def primary_in(datasets: List[str]) -> str:
+    """Pick a sensible B-track primary dataset from a list (first B-track, else first)."""
+    for ds in datasets:
+        if DATASET_TRACKS.get(ds) == "B":
+            return ds
+    return datasets[0] if datasets else DEFAULT_PRIMARY
+
+
+# --------------------------------------------------------------------------- #
+# Stage registry (single source of wiring truth)
+# --------------------------------------------------------------------------- #
+#
+# Each builder returns a fully-resolved StageSpec for one (config, dataset). This is the ONE
+# place to edit if a downstream signature changes. Flags below were verified against the
+# T02–T12 module CLIs (see each module's argparse block):
+#   ingest    : python -m reid_demo.ingest    --wildlife-subset DS --db DB --dataset DS [--max-identities N]
+#   species   : python -m reid_demo.species_filter --dataset DS --set-known SPECIES --db DB
+#   embed     : python -m reid_demo.embed     --db DB --dataset DS
+#   fisher    : python -m reid_demo.fisher    --db DB --dataset DS
+#   fusion    : python -m reid_demo.fusion    --db DB --dataset DS --signals SIG --out-dir DIR
+#   cluster   : python -m reid_demo.cluster   --db DB --dataset DS --flank-policy separate [--force]
+#               (fused affinity has NO CLI flag -> run in-process via _cluster_with_affinity)
+#   catalogue : python -m reid_demo.catalogue --db DB --dataset DS --out DIR
+#   eval      : python -m reid_demo.eval      --dataset DS --db DB --tag TAG --flank-aware --out-dir DIR
+#   report    : python -m reid_demo.medvednica_report --data-dir data/DS --out-dir DIR
+
+
+def _py_module(mod: str, *args: str) -> List[str]:
+    """argv (without the python exe) for ``python -m <mod> ...``."""
+    return ["-m", mod, *[str(a) for a in args]]
+
+
+def _catalogue_out(dataset: str) -> str:
+    return os.path.join(CATALOGUE_STAGING, dataset)
+
+
+def _eval_json_path(dataset: str, tag: str) -> str:
+    return os.path.join(EVAL_OUT_DIR, f"{dataset}_{tag}.json")
+
+
+def _fusion_npz_path(dataset: str, signals: str) -> str:
+    return os.path.join(FUSION_STAGING, f"{dataset}_{signals}.npz")
+
+
+def _spec_ingest(cfg: DemoConfig, ds: str) -> StageSpec:
+    argv = _py_module("reid_demo.ingest", "--wildlife-subset", ds, "--db", cfg.db_path,
+                      "--dataset", ds)
+    if cfg.max_identities is not None:
+        argv += ["--max-identities", str(cfg.max_identities)]
+    if cfg.record_id_scheme is not None:
+        argv += ["--record-id-scheme", cfg.record_id_scheme]
+    # The store cannot tell which source rows an ingest should produce, so completion is
+    # bound to the exact invocation (e.g. a --smoke run does not satisfy a full run).
+    return StageSpec(name="ingest", ticket="T02", critical=True, output_paths=[],
+                     cli=argv, dataset=ds, skip_store_column="crop_path", marker=True)
+
+
+def _spec_species(cfg: DemoConfig, ds: str) -> StageSpec:
+    species = B_TRACK_SPECIES.get(ds, "lynx")
+    argv = _py_module("reid_demo.species_filter", "--dataset", ds, "--set-known", species,
+                      "--db", cfg.db_path)
+    return StageSpec(name="species", ticket="T03", critical=True, output_paths=[],
+                     cli=argv, dataset=ds, label=f"species(set_known={species})",
+                     skip_store_column="species")
+
+
+def _spec_embed(cfg: DemoConfig, ds: str) -> StageSpec:
+    argv = _py_module("reid_demo.embed", "--db", cfg.db_path, "--dataset", ds)
+    if cfg.embedding_model is not None:
+        argv += ["--model", cfg.embedding_model]
+    if cfg.embedding_checkpoint is not None:
+        argv += ["--checkpoint", cfg.embedding_checkpoint]
+    # Never store-skipped (N1b): embed itself processes only pending/stale rows for the
+    # requested model and loads no model when nothing is pending.
+    return StageSpec(name="embed", ticket="T04", critical=True, output_paths=[],
+                     cli=argv, dataset=ds)
+
+
+def _spec_fisher(cfg: DemoConfig, ds: str) -> StageSpec:
+    argv = _py_module("reid_demo.fisher", "--db", cfg.db_path, "--dataset", ds)
+    # accuracy layer never blocks the run (degrades to global clustering on failure).
+    # Never store-skipped: fisher checks its own cache (fisher_ref lives in extra_json).
+    return StageSpec(name="fisher", ticket="T11", critical=False, output_paths=[],
+                     cli=argv, dataset=ds)
+
+
+def _spec_fusion(cfg: DemoConfig, ds: str) -> StageSpec:
+    npz = _fusion_npz_path(ds, cfg.signals)
+    argv = _py_module("reid_demo.fusion", "--db", cfg.db_path, "--dataset", ds,
+                      "--signals", cfg.signals, "--out-dir", FUSION_STAGING)
+    # Fresh only while the embedded rows, their models and Fisher vectors are unchanged (N1c).
+    return StageSpec(name="fusion", ticket="T12", critical=False, output_paths=[npz],
+                     cli=argv, dataset=ds, label=f"fusion({cfg.signals})", marker=True,
+                     input_where="embedding_ref IS NOT NULL",
+                     input_columns=["embedding_ref", "embedding_path", "orientation",
+                                    "extra.fisher_ref", "extra.fisher_path"],
+                     depends_on=["fisher"])
+
+
+def _cluster_tuning(cfg: DemoConfig) -> tuple:
+    """Resolve T05 tuning passthrough -> (cli_args, kwargs) of only the set (non-None) values."""
+    cli: List[str] = []
+    kw: Dict[str, Any] = {}
+    if cfg.backend is not None:
+        cli += ["--backend", cfg.backend]; kw["backend"] = cfg.backend
+    if cfg.eps is not None:
+        cli += ["--eps", str(cfg.eps)]; kw["eps"] = cfg.eps
+    if cfg.min_samples is not None:
+        cli += ["--min-samples", str(cfg.min_samples)]; kw["min_samples"] = cfg.min_samples
+    if cfg.distance_threshold is not None:
+        cli += ["--distance-threshold", str(cfg.distance_threshold)]
+        kw["distance_threshold"] = cfg.distance_threshold
+    if cfg.knn_k is not None:
+        cli += ["--knn-k", str(cfg.knn_k)]; kw["knn_k"] = cfg.knn_k
+    if cfg.resolution is not None:
+        cli += ["--resolution", str(cfg.resolution)]; kw["resolution"] = cfg.resolution
+    if cfg.n_clusters is not None:
+        cli += ["--n-clusters", str(cfg.n_clusters)]; kw["n_clusters"] = cfg.n_clusters
+    return cli, kw
+
+
+#: Rows an unforced clustering run must label: unreviewed rows that have an embedding.
+_CLUSTER_ELIGIBLE = "review_status = 'unreviewed' AND embedding_ref IS NOT NULL"
+
+
+def _spec_cluster(cfg: DemoConfig, ds: str, *, affinity_path: Optional[str] = None,
+                  force: bool = False, label: Optional[str] = None) -> StageSpec:
+    tune_cli, tune_kw = _cluster_tuning(cfg)
+    # Done = no eligible row lacks a label AND the dataset's last clustering was this exact
+    # invocation (both passes share the 'cluster' marker; the last writer wins). N1b.
+    done_kw: Dict[str, Any] = {} if force else {
+        "skip_store_column": "cluster_id", "skip_store_where": _CLUSTER_ELIGIBLE,
+        "marker": True,
+    }
+    if affinity_path is None:
+        argv = _py_module("reid_demo.cluster", "--db", cfg.db_path, "--dataset", ds,
+                          "--flank-policy", "separate", *tune_cli)
+        if force:
+            argv += ["--force"]
+        return StageSpec(name="cluster", ticket="T05", critical=True, output_paths=[],
+                         cli=argv, dataset=ds, label=label, **done_kw)
+    # fused/GV affinity has no CLI flag -> in-process call with the loaded (N,N) matrix.
+    return StageSpec(
+        name="cluster", ticket="T05", critical=True, output_paths=[],
+        func="reid_demo.run_demo:_cluster_with_affinity",
+        kwargs={"db_path": cfg.db_path, "dataset": ds, "affinity_path": affinity_path,
+                "force": force, "flank_policy": "separate", **tune_kw},
+        dataset=ds, label=label or "cluster(fused-affinity)",
+        input_paths=[affinity_path], **done_kw,
+    )
+
+
+def _spec_catalogue(cfg: DemoConfig, ds: str) -> StageSpec:
+    out = _catalogue_out(ds)
+    argv = _py_module("reid_demo.catalogue", "--db", cfg.db_path, "--dataset", ds, "--out", out)
+    # Fresh only while the rendered store columns are unchanged (N1c).
+    return StageSpec(name="catalogue", ticket="T06", critical=True,
+                     output_paths=[os.path.join(out, "index.html")], cli=argv, dataset=ds,
+                     marker=True,
+                     input_columns=["cluster_id", "cluster_conf", "is_candidate_new",
+                                    "review_status", "orientation", "crop_path", "species"])
+
+
+def _spec_eval(cfg: DemoConfig, ds: str, *, tag: str, label: Optional[str] = None) -> StageSpec:
+    out = _eval_json_path(ds, tag)
+    argv = _py_module("reid_demo.eval", "--dataset", ds, "--db", cfg.db_path,
+                      "--tag", tag, "--flank-aware", "--out-dir", EVAL_OUT_DIR)
+    # Fresh only while the scored store columns are unchanged (N1c).
+    return StageSpec(name="eval", ticket="T07", critical=False, output_paths=[out],
+                     cli=argv, dataset=ds, label=label or f"eval(tag={tag})", marker=True,
+                     input_columns=["cluster_id", "is_candidate_new", "gt_identity",
+                                    "orientation", "review_status"])
+
+
+def _spec_report(cfg: DemoConfig, ds: str) -> StageSpec:
+    data_dir = os.path.join("data", ds)
+    argv = _py_module("reid_demo.medvednica_report", "--data-dir", data_dir,
+                      "--out-dir", REPORT_STAGING)
+    return StageSpec(name="report", ticket="T09", critical=False,
+                     output_paths=[os.path.join(REPORT_STAGING, "medvednica_summary.json")],
+                     cli=argv, dataset=ds)
+
+
+# Registry: stage name -> the builder used by plan_stages / --dry-run inspection.
+STAGE_REGISTRY: Dict[str, Dict[str, Any]] = {
+    "ingest": {"ticket": "T02", "track": "B", "build": _spec_ingest},
+    "species": {"ticket": "T03", "track": "B", "build": _spec_species},
+    "embed": {"ticket": "T04", "track": "B", "build": _spec_embed},
+    "fisher": {"ticket": "T11", "track": "B", "build": _spec_fisher},
+    "fusion": {"ticket": "T12", "track": "B", "build": _spec_fusion},
+    "cluster": {"ticket": "T05", "track": "B", "build": _spec_cluster},
+    "catalogue": {"ticket": "T06", "track": "B", "build": _spec_catalogue},
+    "eval": {"ticket": "T07", "track": "B", "build": _spec_eval},
+    "report": {"ticket": "T09", "track": "A", "build": _spec_report},
+}
+
+
+# --------------------------------------------------------------------------- #
+# Planning (pure)
+# --------------------------------------------------------------------------- #
+
+def plan_stages(config: DemoConfig) -> List[StageSpec]:
+    """Resolve, per dataset, the ordered list of :class:`StageSpec` in dependency order.
+
+    Pure: no filesystem or subprocess side effects.
+
+    * B-track ``global``: ``ingest -> species -> embed -> cluster -> {catalogue, eval}``.
+    * B-track ``global+fisher`` / ``full-funnel``: baseline global ``cluster -> eval`` first
+      (for the lift), then ``fisher -> fusion`` and the fused ``cluster -> {catalogue, eval}``.
+    * A-track: ``report`` only.
+
+    A ``--stages`` whitelist, if given, filters the resolved specs by name (order preserved).
+    """
+    specs: List[StageSpec] = []
+    funnel = config.signals != SIGNAL_GLOBAL
+
+    for ds in config.datasets:
+        track = DATASET_TRACKS.get(ds, "B")
+        if track == "A":
+            specs.append(_spec_report(config, ds))
+            continue
+
+        # B-track
+        specs.append(_spec_ingest(config, ds))
+        specs.append(_spec_species(config, ds))
+        specs.append(_spec_embed(config, ds))
+
+        if not funnel:
+            specs.append(_spec_cluster(config, ds))
+            specs.append(_spec_catalogue(config, ds))
+            specs.append(_spec_eval(config, ds, tag=SIGNAL_GLOBAL))
+        else:
+            # Baseline global pass first so the bundle can report the lift.
+            specs.append(_spec_cluster(config, ds, label="cluster(baseline-global)"))
+            specs.append(_spec_eval(config, ds, tag=SIGNAL_GLOBAL,
+                                    label="eval(baseline-global)"))
+            # Accuracy layer, then re-cluster on the fused affinity. Unforced (N1b):
+            # reviewed rows stay untouched; the sidecar is sliced to the clustered rows.
+            specs.append(_spec_fisher(config, ds))
+            fusion_spec = _spec_fusion(config, ds)
+            specs.append(fusion_spec)
+            affinity = _fusion_npz_path(ds, config.signals)
+            fused = _spec_cluster(config, ds, affinity_path=affinity,
+                                  label=f"cluster({config.signals})")
+            # A failed fusion must not leave this pass on a stale sidecar (N1c).
+            fused.depends_on = [fusion_spec.display_label]
+            specs.append(fused)
+            specs.append(_spec_catalogue(config, ds))
+            fused_eval = _spec_eval(config, ds, tag=_eval_tag(config.signals),
+                                    label=f"eval({config.signals})")
+            fused_eval.depends_on = [fused.display_label]
+            specs.append(fused_eval)
+
+    if config.stages:
+        wanted = set(config.stages)
+        specs = [s for s in specs if s.name in wanted]
+    return specs
+
+
+# --------------------------------------------------------------------------- #
+# In-process helpers (func stages)
+# --------------------------------------------------------------------------- #
+
+def _cluster_with_affinity(*, db_path: str, dataset: str, affinity_path: str,
+                           force: bool = False, flank_policy: str = "separate",
+                           backend: Optional[str] = None, eps: Optional[float] = None,
+                           min_samples: Optional[int] = None,
+                           distance_threshold: Optional[float] = None,
+                           knn_k: Optional[int] = None, resolution: Optional[float] = None,
+                           n_clusters: Optional[int] = None, **_) -> Any:
+    """Cluster on a precomputed fused/GV affinity (T12 -> T05's pluggable ``affinity=``).
+
+    The fused global+Fisher (or GV-refined) affinity flows straight into whatever backend is
+    selected — including the rank/graph backends (finch/leiden) — so Fisher+GV sharpen the
+    SAME neighbour graph those methods cluster on.
+
+    The sidecar covers every embedded row, reviewed ones included, so it is passed as a
+    provider that slices it to whichever rows are being clustered (N1b). That lets the
+    fused pass run unforced; a sidecar missing any of those rows raises.
+    """
+    import numpy as np
+
+    from . import cluster, fusion
+
+    matrix, ids = fusion.load_affinity(affinity_path)
+    pos = {rid: i for i, rid in enumerate(ids)}
+
+    def _sidecar_affinity(sorted_ids, _normalized_embeddings):
+        missing = [rid for rid in sorted_ids if rid not in pos]
+        if missing:
+            raise ValueError(
+                f"fused affinity {affinity_path} lacks {len(missing)} record(s) to be "
+                f"clustered (e.g. {missing[:3]}); re-run the fisher and fusion stages."
+            )
+        idx = [pos[rid] for rid in sorted_ids]
+        return matrix[np.ix_(idx, idx)]
+
+    tune = {k: v for k, v in {
+        "backend": backend, "eps": eps, "min_samples": min_samples,
+        "distance_threshold": distance_threshold,
+    }.items() if v is not None}
+    backend_params = {k: v for k, v in {
+        "knn_k": knn_k, "resolution": resolution, "n_clusters": n_clusters,
+    }.items() if v is not None}
+    if backend_params:
+        tune["backend_params"] = backend_params
+    return cluster.run_clustering(
+        db_path, dataset=dataset, affinity=_sidecar_affinity, force=force,
+        flank_policy=flank_policy, **tune,
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Stage execution
+# --------------------------------------------------------------------------- #
+
+def _outputs_exist(spec: StageSpec) -> bool:
+    return bool(spec.output_paths) and all(os.path.exists(p) for p in spec.output_paths)
+
+
+def _marker_name(spec: StageSpec) -> str:
+    """Marker name: the stage name, or ``<name>@<first output>`` for file stages (N1c), so
+    two outputs of one stage (baseline and fused eval) keep separate markers."""
+    return f"{spec.name}@{spec.output_paths[0]}" if spec.output_paths else spec.name
+
+
+def _input_digest(spec: StageSpec, conn) -> str:
+    """sha1 over ``(record_id, *input_columns)`` of the rows the stage reads, in record_id
+    order; ``extra.<key>`` reads a key of ``extra_json`` (N1c)."""
+    digest = hashlib.sha1()
+    for rec in store.query_records(conn, dataset=spec.dataset, where_sql=spec.input_where,
+                                   order_by="record_id"):
+        extra = None
+        values: List[Any] = [rec.record_id]
+        for col in spec.input_columns:
+            if col.startswith("extra."):
+                if extra is None:
+                    try:
+                        extra = json.loads(rec.extra_json or "{}")
+                    except ValueError:
+                        extra = {}
+                    if not isinstance(extra, dict):
+                        extra = {}
+                values.append(extra.get(col[len("extra."):]))
+            else:
+                values.append(getattr(rec, col))
+        digest.update(json.dumps(values, default=str).encode("utf-8"))
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
+def _stage_config_key(spec: StageSpec, conn=None) -> str:
+    """Fingerprint of one stage invocation: name, argv or func+kwargs, input-file identity
+    and, for stages declaring ``input_columns``, a digest of the store rows they read."""
+    inputs = []
+    for path in spec.input_paths:
+        try:
+            st = os.stat(path)
+            inputs.append([path, st.st_size, st.st_mtime_ns])
+        except OSError:
+            inputs.append([path, None, None])
+    payload = {"name": spec.name, "cli": spec.cli, "func": spec.func,
+               "kwargs": spec.kwargs, "inputs": inputs}
+    if spec.input_columns:
+        payload["input_rows"] = _input_digest(spec, conn) if conn is not None else None
+    return hashlib.sha1(
+        json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
+    ).hexdigest()
+
+
+def _store_stage_done(spec: StageSpec, db_path: str) -> bool:
+    """For store-mutating stages: is every eligible row of this dataset done?
+
+    Done means the dataset has rows; no eligible row (all rows, or those matching
+    ``skip_store_where``) still has ``skip_store_column`` NULL; and, for ``marker``
+    stages, the last successful run of this stage recorded this exact invocation.
+    """
+    if not spec.dataset or not (spec.skip_store_column or spec.marker):
+        return False
+    if not os.path.exists(db_path):
+        return False
+    try:
+        conn = store.connect(db_path, create=False)
+    except Exception:
+        return False
+    try:
+        if not store.query_records(conn, dataset=spec.dataset, limit=1):
+            return False
+        if spec.marker:
+            marker = store.get_stage_marker(conn, _marker_name(spec), spec.dataset)
+            if not marker or marker.get("config") != _stage_config_key(spec, conn):
+                return False
+        if spec.skip_store_column:
+            pending = f"{spec.skip_store_column} IS NULL"
+            if spec.skip_store_where:
+                pending = f"({spec.skip_store_where}) AND {pending}"
+            if store.query_records(conn, dataset=spec.dataset, where_sql=pending, limit=1):
+                return False
+        return True
+    except Exception:
+        return False
+    finally:
+        conn.close()
+
+
+def _write_stage_marker(spec: StageSpec, db_path: str) -> None:
+    """Record that ``spec`` (this exact invocation) completed for its dataset."""
+    conn = store.connect(db_path, create=False)
+    try:
+        store.set_stage_marker(conn, _marker_name(spec), spec.dataset, {
+            "config": _stage_config_key(spec, conn),
+            "label": spec.display_label,
+            "at": datetime.now().isoformat(timespec="seconds"),
+        })
+    finally:
+        conn.close()
+
+
+def _stage_done(spec: StageSpec, db_path: str) -> bool:
+    """Skip decision. A file stage needs its outputs AND, if it is marker-gated, a fresh
+    marker (N1c); a store stage needs ``_store_stage_done``."""
+    if spec.output_paths:
+        if not _outputs_exist(spec):
+            return False
+        return _store_stage_done(spec, db_path) if spec.marker else True
+    return _store_stage_done(spec, db_path)
+
+
+def _resolve_func(dotted: str):
+    mod_name, _, func_name = dotted.partition(":")
+    import importlib
+
+    module = importlib.import_module(mod_name)
+    return getattr(module, func_name)
+
+
+def _run_stage(spec: StageSpec, config: DemoConfig, logs_dir: str) -> StageResult:
+    """Execute one stage (subprocess or in-process), timing it and capturing logs."""
+    log_name = f"{spec.name}_{spec.dataset or 'all'}"
+    if spec.label and spec.label != spec.name:
+        log_name = f"{spec.name}_{spec.dataset or 'all'}_{_eval_tag(spec.label)[:24]}"
+    log_path = os.path.join(logs_dir, f"{log_name}.log")
+
+    # Skip-if-done (unless --force).
+    if not config.force and _stage_done(spec, config.db_path):
+        return StageResult(
+            name=spec.name, ticket=spec.ticket, status="skipped", seconds=0.0,
+            output_paths=[p for p in spec.output_paths if os.path.exists(p)],
+            log_path=None, dataset=spec.dataset, label=spec.label,
+        )
+
+    os.makedirs(logs_dir, exist_ok=True)
+    start = time.perf_counter()
+    error: Optional[str] = None
+    ok = False
+
+    if spec.cli is not None:
+        argv = [sys.executable, *spec.cli]
+        with open(log_path, "w", encoding="utf-8") as logf:
+            logf.write(f"$ {' '.join(argv)}\n\n")
+            logf.flush()
+            try:
+                proc = subprocess.run(argv, stdout=logf, stderr=subprocess.STDOUT, check=False)
+                ok = proc.returncode == 0
+                if not ok:
+                    error = _stage_error_message(spec, f"non-zero exit {proc.returncode}", log_path)
+            except FileNotFoundError as exc:
+                error = _stage_error_message(spec, f"module/exe not found: {exc}", log_path)
+    elif spec.func is not None:
+        with open(log_path, "w", encoding="utf-8") as logf:
+            logf.write(f"# in-process: {spec.func}  kwargs={spec.kwargs}\n\n")
+            logf.flush()
+            try:
+                fn = _resolve_func(spec.func)
+                with redirect_stdout(logf), redirect_stderr(logf):
+                    fn(**spec.kwargs)
+                ok = True
+            except Exception:
+                tb = traceback.format_exc()
+                logf.write("\n" + tb)
+                error = _stage_error_message(spec, "in-process call raised", log_path)
+    else:  # pragma: no cover - registry guarantees cli or func
+        error = _stage_error_message(spec, "no cli/func wired", log_path)
+
+    if ok and spec.marker and spec.dataset:
+        try:
+            _write_stage_marker(spec, config.db_path)
+        except Exception:
+            # The stage itself succeeded; without a marker the next run just repeats it.
+            with open(log_path, "a", encoding="utf-8") as logf:
+                logf.write("\n[run_demo] could not record the completion marker:\n"
+                           + traceback.format_exc())
+
+    seconds = round(time.perf_counter() - start, 3)
+    status = "ok" if ok else "failed"
+    out_existing = [p for p in spec.output_paths if os.path.exists(p)]
+    return StageResult(
+        name=spec.name, ticket=spec.ticket, status=status, seconds=seconds,
+        output_paths=out_existing, log_path=log_path, error=error,
+        dataset=spec.dataset, label=spec.label,
+    )
+
+
+def _stage_error_message(spec: StageSpec, reason: str, log_path: str) -> str:
+    invocation = ("python " + " ".join(spec.cli)) if spec.cli else f"in-process {spec.func}"
+    return (
+        f"stage '{spec.name}' ({spec.ticket}) failed: {reason}. "
+        f"Expected invocation: `{invocation}`. "
+        f"See {log_path}. If a downstream signature changed, update "
+        f"STAGE_REGISTRY['{spec.name}'] in reid_demo/run_demo.py."
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Orchestration
+# --------------------------------------------------------------------------- #
+
+def run_demo(config: DemoConfig) -> BundleResult:
+    """Execute :func:`plan_stages`, then :func:`assemble_bundle`. Idempotent unless force."""
+    specs = plan_stages(config)
+    bundle_dir = os.path.abspath(os.path.join(config.out_dir, config.run_name))
+    logs_dir = os.path.join(bundle_dir, "logs")
+    os.makedirs(logs_dir, exist_ok=True)
+
+    results: List[StageResult] = []
+    aborted = False
+    unusable: set = set()   # (dataset, label) of stages that failed or were skipped for it
+    for spec in specs:
+        if aborted:
+            results.append(StageResult(
+                name=spec.name, ticket=spec.ticket, status="skipped", seconds=0.0,
+                output_paths=[], log_path=None, dataset=spec.dataset, label=spec.label,
+                error="skipped: a prior critical stage failed",
+            ))
+            continue
+
+        # Dependency-aware degradation (N1c): never run on a failed stage's stale output.
+        blocked = [d for d in spec.depends_on if (spec.dataset, d) in unusable]
+        if blocked:
+            unusable.add((spec.dataset, spec.display_label))
+            results.append(StageResult(
+                name=spec.name, ticket=spec.ticket, status="skipped", seconds=0.0,
+                output_paths=[], log_path=None, dataset=spec.dataset, label=spec.label,
+                error=f"{UPSTREAM_SKIP_PREFIX}{blocked[0]} failed",
+            ))
+            continue
+
+        res = _run_stage(spec, config, logs_dir)
+        results.append(res)
+        if res.status == "failed":
+            unusable.add((spec.dataset, spec.display_label))
+
+        if res.status == "failed" and spec.critical and not config.continue_on_error:
+            aborted = True  # stop launching further stages; still write the bundle
+
+    return assemble_bundle(config, results)
+
+
+# --------------------------------------------------------------------------- #
+# Bundle assembly (pure-ish; testable with stubbed StageResults)
+# --------------------------------------------------------------------------- #
+
+def _copy_artifact(stage: StageResult, bundle_dir: str) -> List[str]:
+    """Copy a stage's primary artifact into the bundle; return bundle-relative paths."""
+    subdir, mode = BUNDLE_LAYOUT[stage.name]
+    dest_root = os.path.join(bundle_dir, subdir)
+    rels: List[str] = []
+
+    if mode == "dir":
+        src = _artifact_dir(stage.output_paths)
+        if src and os.path.isdir(src):
+            shutil.copytree(src, dest_root, dirs_exist_ok=True)
+            for root, _dirs, files in os.walk(dest_root):
+                for f in files:
+                    rels.append(os.path.relpath(os.path.join(root, f), bundle_dir))
+    elif mode == "file":
+        os.makedirs(dest_root, exist_ok=True)
+        for p in stage.output_paths:
+            if os.path.isfile(p):
+                dest = os.path.join(dest_root, os.path.basename(p))
+                shutil.copy2(p, dest)
+                rels.append(os.path.relpath(dest, bundle_dir))
+    return rels
+
+
+def _artifact_dir(output_paths: List[str]) -> Optional[str]:
+    """The directory to copy for a 'dir' stage: parent of index.html, else first path's dir."""
+    for p in output_paths:
+        if os.path.basename(p) == "index.html":
+            return os.path.dirname(p)
+    for p in output_paths:
+        if os.path.isdir(p):
+            return p
+        if os.path.isfile(p):
+            return os.path.dirname(p)
+    return None
+
+
+def _read_eval_json(path: str) -> Optional[dict]:
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except Exception:
+        return None
+
+
+def _headline_from_eval(report: dict) -> dict:
+    """Map a T07 ClusteringReport dict to the biologist-facing headline (no recompute).
+
+    Includes ARI and V-measure alongside the plain-language trio: ``pct`` alone can be
+    inflated by over-segmentation (purer-but-fragmented clusters), so the chance-corrected
+    ARI and the balanced V-measure are carried so the bundle can't flatter a bad result.
+    """
+    return {
+        "individuals_found": report.get("n_found_clusters"),
+        "individuals_true": report.get("n_true_individuals"),
+        "pct_photos_correctly_grouped": report.get("pct_photos_correctly_grouped"),
+        "adjusted_rand_index": report.get("adjusted_rand_index"),
+        "v_measure": report.get("v_measure"),
+    }
+
+
+def _store_block(config: DemoConfig) -> tuple:
+    """Return (store_counts, candidate_new, crops_total) for the primary dataset; defensive."""
+    counts: Dict[str, Any] = {}
+    candidate_new = None
+    crops_total = None
+    if not os.path.exists(config.db_path):
+        return counts, candidate_new, crops_total
+    try:
+        conn = store.connect(config.db_path, create=False)
+    except Exception:
+        return counts, candidate_new, crops_total
+    try:
+        ds = config.primary_dataset
+        counts["by_species"] = store.count_by(conn, "species", dataset=ds)
+        counts["review_status"] = store.count_by(conn, "review_status", dataset=ds)
+        cand = store.count_by(conn, "is_candidate_new", dataset=ds)
+        # count_by keys are stringified column values; sum the truthy ("1") bucket.
+        candidate_new = int(cand.get(1, cand.get("1", 0)))
+        crops_total = sum(int(v) for v in store.count_by(conn, "dataset", dataset=ds).values()) or None
+        # cluster-size histogram (size -> #clusters), excluding noise/candidate-new (-1).
+        rows = store.query_records(conn, dataset=ds, where_sql="cluster_id IS NOT NULL")
+        sizes: Dict[Any, int] = {}
+        for r in rows:
+            cid = getattr(r, "cluster_id", None)
+            if cid is None or cid < 0:
+                continue
+            sizes[cid] = sizes.get(cid, 0) + 1
+        hist: Dict[str, int] = {}
+        for n in sizes.values():
+            hist[str(n)] = hist.get(str(n), 0) + 1
+        counts["by_cluster_size_histogram"] = dict(sorted(hist.items(), key=lambda kv: int(kv[0])))
+    except Exception:
+        pass
+    finally:
+        conn.close()
+    return counts, candidate_new, crops_total
+
+
+def assemble_bundle(config: DemoConfig, stage_results: List[StageResult]) -> BundleResult:
+    """Gather stage artifacts into ``demo_bundle/<run_name>/``; render index/summary/manifest.
+
+    Pure-ish: tests call this with hand-built :class:`StageResult`s pointing at fixture files,
+    so no models run. Artifacts are COPIED (not symlinked) for portability.
+    """
+    bundle_dir = os.path.abspath(os.path.join(config.out_dir, config.run_name))
+    os.makedirs(bundle_dir, exist_ok=True)
+
+    # 1. Copy stage artifacts; record bundle-relative paths per stage.
+    copied: Dict[int, List[str]] = {}
+    for i, st in enumerate(stage_results):
+        if st.name in BUNDLE_LAYOUT and st.status in ("ok", "skipped") and st.output_paths:
+            try:
+                copied[i] = _copy_artifact(st, bundle_dir)
+            except Exception:
+                copied[i] = []
+
+    # 2. Headline + lift from the eval JSON(s) for the primary dataset.
+    headline = _build_headline(config, stage_results)
+
+    # 3. Store-derived counts.
+    store_counts, candidate_new, crops_total = _store_block(config)
+    headline["candidate_new_individuals"] = candidate_new
+    headline["crops_total"] = crops_total
+    headline["dataset"] = config.primary_dataset
+
+    # 4. Overall status.
+    status = _overall_status(config, stage_results)
+
+    # 5. Manifest.
+    manifest = _build_manifest(config, stage_results, copied, headline, store_counts, status)
+    manifest_path = os.path.join(bundle_dir, "manifest.json")
+    with open(manifest_path, "w", encoding="utf-8") as fh:
+        json.dump(manifest, fh, indent=2)
+
+    # 6. index.html + SUMMARY.md.
+    index_path = os.path.join(bundle_dir, "index.html")
+    summary_path = os.path.join(bundle_dir, "SUMMARY.md")
+    has_catalogue = os.path.isfile(os.path.join(bundle_dir, "catalogue", "index.html"))
+    has_report = os.path.isdir(os.path.join(bundle_dir, "medvednica_report"))
+    report_rel = _report_index_rel(bundle_dir)
+    with open(index_path, "w", encoding="utf-8") as fh:
+        fh.write(_render_index_html(config, headline, manifest, has_catalogue, report_rel))
+    with open(summary_path, "w", encoding="utf-8") as fh:
+        fh.write(_render_summary_md(config, headline, manifest, has_catalogue, has_report))
+
+    return BundleResult(
+        run_name=config.run_name, out_dir=bundle_dir, status=status,
+        stages=stage_results, headline=headline,
+        manifest_path=manifest_path, index_html_path=index_path,
+    )
+
+
+def _build_headline(config: DemoConfig, stage_results: List[StageResult]) -> dict:
+    """Read T07's single eval JSON (verbatim) for the primary dataset; add lift if present."""
+    headline: Dict[str, Any] = {
+        "dataset": config.primary_dataset,
+        "individuals_found": None,
+        "individuals_true": None,
+        "pct_photos_correctly_grouped": None,
+        "adjusted_rand_index": None,
+        "v_measure": None,
+        "candidate_new_individuals": None,
+        "crops_total": None,
+    }
+
+    # Collect eval reports for the primary dataset, keyed by their own 'tag'.
+    by_tag: Dict[str, dict] = {}
+    for st in stage_results:
+        if st.name != "eval" or st.dataset != config.primary_dataset:
+            continue
+        if st.status not in ("ok", "skipped"):
+            continue
+        for p in st.output_paths:
+            if p.endswith(".json"):
+                rep = _read_eval_json(p)
+                if rep:
+                    by_tag[str(rep.get("tag", "default"))] = rep
+
+    if not by_tag:
+        return headline
+
+    funnel_tag = _eval_tag(config.signals)
+    primary_report = by_tag.get(funnel_tag) or by_tag.get(SIGNAL_GLOBAL) or next(iter(by_tag.values()))
+    headline.update(_headline_from_eval(primary_report))
+
+    # Lift: baseline (global) vs the funnel run, when both exist.
+    if config.signals != SIGNAL_GLOBAL and SIGNAL_GLOBAL in by_tag and funnel_tag in by_tag:
+        headline["lift"] = {
+            "baseline_signals": SIGNAL_GLOBAL,
+            "global": _headline_from_eval(by_tag[SIGNAL_GLOBAL]),
+            "full_funnel_signals": config.signals,
+            "full_funnel": _headline_from_eval(by_tag[funnel_tag]),
+        }
+    return headline
+
+
+def _overall_status(config: DemoConfig, stage_results: List[StageResult]) -> str:
+    """ok = no failures; partial = only non-critical failed; failed = a critical failed."""
+    critical_names = {s.name for s in plan_stages(config) if s.critical}
+    any_failed = any(r.status == "failed" for r in stage_results)
+    critical_failed = any(r.status == "failed" and r.name in critical_names for r in stage_results)
+    if critical_failed:
+        return "failed"
+    if any_failed:
+        return "partial"
+    return "ok"
+
+
+def _git_commit() -> Optional[str]:
+    try:
+        out = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False)
+        return out.stdout.strip() or None
+    except Exception:
+        return None
+
+
+def _build_manifest(config: DemoConfig, stage_results: List[StageResult],
+                    copied: Dict[int, List[str]], headline: dict,
+                    store_counts: dict, status: str) -> dict:
+    stages_json = []
+    for i, st in enumerate(stage_results):
+        stages_json.append({
+            "name": st.name,
+            "ticket": st.ticket,
+            "dataset": st.dataset,
+            "label": st.label,
+            "status": st.status,
+            "seconds": st.seconds,
+            "output_paths": copied.get(i, []),   # bundle-relative; [] for store-mutating stages
+            "log": (os.path.relpath(st.log_path, os.path.join(config.out_dir, config.run_name))
+                    if st.log_path else None),
+            "error": st.error,
+        })
+
+    return {
+        "schema_version": MANIFEST_SCHEMA_VERSION,
+        "run_name": config.run_name,
+        "created_at": datetime.now().replace(microsecond=0).isoformat(),
+        "status": status,
+        "db_path": config.db_path,
+        "primary_dataset": config.primary_dataset,
+        "datasets": list(config.datasets),
+        "signals": config.signals,
+        "command": "python -m reid_demo.run_demo " + " ".join(_config_to_argv(config)),
+        "git_commit": _git_commit(),
+        "python": sys.version.split()[0],
+        "headline": headline,
+        "stages": stages_json,
+        "degraded": _degraded_labels(stage_results),
+        "store_counts": store_counts,
+        "bundle": {
+            "index_html": "index.html",
+            "summary_md": "SUMMARY.md",
+            "catalogue_dir": "catalogue",
+            "accuracy_dir": "accuracy",
+            "medvednica_report_dir": "medvednica_report",
+        },
+    }
+
+
+def _degraded_labels(stage_results: List[StageResult]) -> List[str]:
+    """Labels of stages skipped because an upstream stage failed (N1c)."""
+    return [st.label or st.name for st in stage_results
+            if st.status == "skipped" and (st.error or "").startswith(UPSTREAM_SKIP_PREFIX)]
+
+
+def _config_to_argv(config: DemoConfig) -> List[str]:
+    argv = ["--datasets", *config.datasets, "--primary-dataset", config.primary_dataset,
+            "--db", config.db_path, "--out-dir", config.out_dir, "--run-name", config.run_name,
+            "--signals", config.signals]
+    if config.smoke:
+        argv.append("--smoke")
+    if config.max_identities is not None:
+        argv += ["--max-identities", str(config.max_identities)]
+    if config.force:
+        argv.append("--force")
+    if config.continue_on_error:
+        argv.append("--continue-on-error")
+    if config.backend is not None:
+        argv += ["--backend", config.backend]
+    if config.eps is not None:
+        argv += ["--eps", str(config.eps)]
+    if config.min_samples is not None:
+        argv += ["--min-samples", str(config.min_samples)]
+    if config.distance_threshold is not None:
+        argv += ["--distance-threshold", str(config.distance_threshold)]
+    if config.knn_k is not None:
+        argv += ["--knn-k", str(config.knn_k)]
+    if config.resolution is not None:
+        argv += ["--resolution", str(config.resolution)]
+    if config.n_clusters is not None:
+        argv += ["--n-clusters", str(config.n_clusters)]
+    if config.record_id_scheme is not None:
+        argv += ["--record-id-scheme", config.record_id_scheme]
+    if config.embedding_model is not None:
+        argv += ["--embedding-model", config.embedding_model]
+    if config.embedding_checkpoint is not None:
+        argv += ["--embedding-checkpoint", config.embedding_checkpoint]
+    return argv
+
+
+def _config_warnings(config: DemoConfig) -> List[str]:
+    """Plain warnings about risky combinations (N1e); never changes a default."""
+    warnings_out: List[str] = []
+    model = (config.embedding_model or "").lower()
+    if model.startswith("miewid") and config.backend in (None, "dbscan") and config.eps is None:
+        warnings_out.append(
+            "warning: DBSCAN's default eps 0.30 was tuned for MegaDescriptor cosine "
+            "distances; with MiewID consider --backend leiden/finch or an explicit --eps."
+        )
+    return warnings_out
+
+
+# --------------------------------------------------------------------------- #
+# Rendering (offline, no JS/CDN)
+# --------------------------------------------------------------------------- #
+
+def _report_index_rel(bundle_dir: str) -> Optional[str]:
+    """Best link target inside medvednica_report/ (index.html > report .md > summary json)."""
+    rdir = os.path.join(bundle_dir, "medvednica_report")
+    if not os.path.isdir(rdir):
+        return None
+    for cand in ("index.html", "medvednica_report.md", "medvednica_summary.json"):
+        if os.path.isfile(os.path.join(rdir, cand)):
+            return f"medvednica_report/{cand}"
+    return "medvednica_report/"
+
+
+def _headline_sentence(headline: dict) -> Optional[str]:
+    found = headline.get("individuals_found")
+    true = headline.get("individuals_true")
+    pct = headline.get("pct_photos_correctly_grouped")
+    if found is None and pct is None:
+        return None
+    parts = []
+    if found is not None and true is not None:
+        parts.append(f"Found {found} individuals vs {true} known")
+    elif found is not None:
+        parts.append(f"Found {found} individuals")
+    if pct is not None:
+        parts.append(f"{pct:g}% of photos correctly grouped")
+    cand = headline.get("candidate_new_individuals")
+    if cand:
+        parts.append(f"{cand} possible new individuals to review")
+    return "; ".join(parts) + "."
+
+
+def _render_index_html(config: DemoConfig, headline: dict, manifest: dict,
+                       has_catalogue: bool, report_rel: Optional[str]) -> str:
+    sentence = _headline_sentence(headline)
+    headline_html = (f"<p class='headline'>{sentence}</p>" if sentence
+                     else "<p class='headline muted'>Individual-ID accuracy not available for this run.</p>")
+
+    cat_card = (
+        "<div class='card'><h3>(B) Proof we can ID individuals</h3>"
+        "<p>Open-set clustering grouped an unlabeled pile of photos into individual animals, "
+        "validated against known identities.</p>"
+        + ("<p><a href='catalogue/index.html'>Open the visual catalogue &rarr;</a></p>"
+           if has_catalogue else "<p class='muted'>Catalogue not produced.</p>")
+        + _accuracy_table_html(headline)
+        + "</div>"
+    )
+
+    report_card = (
+        "<div class='card'><h3>(A) Your footage, filtered</h3>"
+        "<p>Empty frames removed and detections sorted by species on real camera-trap data.</p>"
+        + (f"<p><a href='{report_rel}'>Open the filtering report &rarr;</a></p>"
+           if report_rel else "<p class='muted'>Filtering report not produced.</p>")
+        + "</div>"
+    )
+
+    lift_html = _lift_html(headline)
+    tech_html = _tech_details_html(manifest)
+
+    return f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Re-ID demo — {config.primary_dataset}</title>
+<style>
+ body{{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;
+   background:#f5f6f8;color:#1c2530;line-height:1.5}}
+ .wrap{{max-width:920px;margin:0 auto;padding:32px 20px 64px}}
+ h1{{font-size:1.6rem;margin:0 0 4px}}
+ .sub{{color:#5b6675;margin:0 0 24px}}
+ .headline{{font-size:1.3rem;font-weight:600;background:#0b6b4f;color:#fff;
+   padding:18px 22px;border-radius:10px}}
+ .cards{{display:flex;gap:18px;flex-wrap:wrap;margin-top:24px}}
+ .card{{flex:1 1 360px;background:#fff;border:1px solid #e2e6ec;border-radius:10px;
+   padding:18px 20px}}
+ .card h3{{margin:0 0 8px}}
+ a{{color:#0b6b4f;font-weight:600;text-decoration:none}}
+ a:hover{{text-decoration:underline}}
+ table{{border-collapse:collapse;margin-top:10px;width:100%}}
+ td,th{{border:1px solid #e2e6ec;padding:6px 10px;text-align:left;font-size:.92rem}}
+ .muted{{color:#8a94a3}}
+ details{{margin-top:28px;background:#fff;border:1px solid #e2e6ec;border-radius:10px;padding:8px 18px}}
+ summary{{cursor:pointer;font-weight:600;padding:8px 0}}
+ .lift{{margin-top:24px;background:#fff;border:1px solid #e2e6ec;border-radius:10px;padding:16px 20px}}
+ code{{background:#eef1f4;padding:1px 5px;border-radius:4px}}
+</style></head>
+<body><div class="wrap">
+ <h1>Animal Re-Identification — Demo</h1>
+ <p class="sub">{config.primary_dataset} &middot; signals: <code>{config.signals}</code>
+   &middot; status: {manifest['status']} &middot; {manifest['created_at']}</p>
+ {headline_html}
+ <div class="cards">{report_card}{cat_card}</div>
+ {lift_html}
+ {tech_html}
+</div></body></html>
+"""
+
+
+def _accuracy_table_html(headline: dict) -> str:
+    rows = [
+        ("Individuals found", headline.get("individuals_found")),
+        ("Known individuals", headline.get("individuals_true")),
+        ("% photos correctly grouped", headline.get("pct_photos_correctly_grouped")),
+        ("ARI (corrected for chance, 0–1)", headline.get("adjusted_rand_index")),
+        ("V-measure (0–1)", headline.get("v_measure")),
+        ("Possible new individuals", headline.get("candidate_new_individuals")),
+        ("Total photos", headline.get("crops_total")),
+    ]
+    body = "".join(
+        f"<tr><td>{k}</td><td>{'' if v is None else (f'{v:g}' if isinstance(v, float) else v)}</td></tr>"
+        for k, v in rows if v is not None
+    )
+    if not body:
+        return ""
+    return f"<table>{body}</table>"
+
+
+def _lift_html(headline: dict) -> str:
+    lift = headline.get("lift")
+    if not lift:
+        return ""
+    g = lift["global"]
+    f = lift["full_funnel"]
+
+    def _leg(d):
+        return (f"<b>{d.get('individuals_found')}</b> individuals "
+                f"(ARI {d.get('adjusted_rand_index')}, V-measure {d.get('v_measure')}, "
+                f"{d.get('pct_photos_correctly_grouped')}% grouped)")
+
+    return (
+        "<div class='lift'><h3>Accuracy lift</h3>"
+        f"<p>Global backbone finds {_leg(g)}; "
+        f"with geometric verification (<code>{lift.get('full_funnel_signals')}</code>) "
+        f"&rarr; {_leg(f)}.</p>"
+        "<p class='muted'>ARI / V-measure are the honest, chance-corrected scores; "
+        "“% grouped” alone can rise from over-segmentation, so compare ARI.</p></div>"
+    )
+
+
+def _tech_details_html(manifest: dict) -> str:
+    stage_rows = "".join(
+        f"<tr><td>{s['name']}</td><td>{s['ticket']}</td><td>{s.get('dataset') or ''}</td>"
+        f"<td>{s['status']}</td><td>{s['seconds']:g}</td></tr>"
+        for s in manifest.get("stages", [])
+    )
+    return (
+        "<details><summary>Technical details</summary>"
+        f"<p>Command: <code>{manifest.get('command','')}</code><br>"
+        f"Git: <code>{manifest.get('git_commit')}</code> &middot; "
+        f"Python {manifest.get('python')} &middot; DB <code>{manifest.get('db_path')}</code></p>"
+        "<table><tr><th>stage</th><th>ticket</th><th>dataset</th><th>status</th><th>sec</th></tr>"
+        f"{stage_rows}</table></details>"
+    )
+
+
+def _render_summary_md(config: DemoConfig, headline: dict, manifest: dict,
+                       has_catalogue: bool, has_report: bool) -> str:
+    sentence = _headline_sentence(headline) or "_Individual-ID accuracy not available for this run._"
+    lines = [
+        f"# Re-ID demo — {config.primary_dataset}",
+        "",
+        f"**{sentence}**",
+        "",
+        f"- Signals: `{config.signals}`",
+        f"- Status: {manifest['status']}",
+        f"- Generated: {manifest['created_at']}",
+    ]
+    degraded = manifest.get("degraded") or []
+    if degraded:
+        lines.append(
+            f"- Degraded: an upstream stage failed, so {', '.join(degraded)} did not run; "
+            f"results are global-only"
+        )
+    ari = headline.get("adjusted_rand_index")
+    vm = headline.get("v_measure")
+    if ari is not None or vm is not None:
+        lines.append(
+            f"- Accuracy (honest, chance-corrected): ARI **{ari}** · V-measure **{vm}** "
+            f"— compare these, not “% grouped” (which over-segmentation can inflate)"
+        )
+    lines += [
+        "",
+        "## (A) Your footage, filtered",
+        ("See `medvednica_report/`." if has_report else "_Not produced._"),
+        "",
+        "## (B) Proof we can ID individuals",
+        ("See `catalogue/`." if has_catalogue else "_Not produced._"),
+        "",
+    ]
+    lift = headline.get("lift")
+    if lift:
+        g, f = lift["global"], lift["full_funnel"]
+        lines += [
+            "## Accuracy lift",
+            f"- Global backbone: {g.get('individuals_found')} individuals — "
+            f"ARI {g.get('adjusted_rand_index')}, V-measure {g.get('v_measure')}, "
+            f"{g.get('pct_photos_correctly_grouped')}% grouped",
+            f"- `{lift.get('full_funnel_signals')}`: {f.get('individuals_found')} individuals — "
+            f"ARI {f.get('adjusted_rand_index')}, V-measure {f.get('v_measure')}, "
+            f"{f.get('pct_photos_correctly_grouped')}% grouped",
+            "",
+            "_ARI is the chance-corrected score; a higher “% grouped” with a lower ARI "
+            "means the run over-segmented (split individuals into more clusters)._",
+            "",
+        ]
+    return "\n".join(lines)
+
+
+# --------------------------------------------------------------------------- #
+# CLI
+# --------------------------------------------------------------------------- #
+
+def _build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="python -m reid_demo.run_demo",
+        description="T10 — run the open-set re-ID pipeline and assemble a shareable demo bundle.",
+    )
+    p.add_argument("--config", default=None, help="YAML or JSON config file; overrides defaults.")
+    p.add_argument("--datasets", nargs="+", default=None,
+                   help=f"datasets to process (default: {' '.join(DEFAULT_DATASETS)}).")
+    p.add_argument("--primary-dataset", default=None,
+                   help=f"B-track dataset driving the headline (default: {DEFAULT_PRIMARY}).")
+    p.add_argument("--db", default=None, help=f"shared T01 store (default: {DEFAULT_DB_PATH}).")
+    p.add_argument("--out-dir", default=None, help=f"bundle root (default: {DEFAULT_OUT_DIR}).")
+    p.add_argument("--run-name", default=None, help="default: <primary-dataset>_<timestamp>.")
+    p.add_argument("--stages", nargs="+", default=None, help="subset of stage names to run.")
+    p.add_argument("--signals", default=None, choices=SIGNAL_CHOICES,
+                   help=f"clustering signal set (default: {DEFAULT_SIGNALS}).")
+    # T05 clustering tuning (passthrough; omit to use cluster.py's own defaults).
+    p.add_argument("--backend", default=None,
+                   choices=("dbscan", "agglomerative", "finch", "leiden"),
+                   help="clustering backend. dbscan/agglomerative threshold absolute distance; "
+                        "finch/leiden are rank/graph methods (no eps/k) and far better when "
+                        "embeddings are 1-NN-correct but diffuse (default: cluster's dbscan).")
+    p.add_argument("--eps", type=float, default=None,
+                   help="DBSCAN cosine-distance eps; raise to merge more (default: cluster's 0.30).")
+    p.add_argument("--min-samples", type=int, default=None,
+                   help="DBSCAN min_samples (default: cluster's 2).")
+    p.add_argument("--distance-threshold", type=float, default=None,
+                   help="agglomerative cosine-distance cut (default: cluster's 0.30).")
+    p.add_argument("--knn-k", type=int, default=None,
+                   help="leiden: neighbours per node in the kNN graph (default: cluster's 15).")
+    p.add_argument("--resolution", type=float, default=None,
+                   help="leiden: resolution; higher => more clusters (default: cluster's 1.0).")
+    p.add_argument("--n-clusters", type=int, default=None,
+                   help="finch: pick the hierarchy level closest to this count (default: auto).")
+    p.add_argument("--smoke", action="store_true",
+                   help="tiny subset (caps identities) for a fast test run.")
+    p.add_argument("--max-identities", type=int, default=None,
+                   help=f"cap distinct identities (default when --smoke: {SMOKE_MAX_IDENTITIES}).")
+    p.add_argument("--record-id-scheme", default=None, choices=("path", "legacy"),
+                   help="passed to ingest; 'legacy' is required once for a dataset ingested "
+                        "before record-id schemes were tracked (N1).")
+    p.add_argument("--embedding-model", default=None,
+                   help="passed to embed as --model (default megadescriptor-l-384; "
+                        "'miewid-msv3' = pinned MiewID-msv3).")
+    p.add_argument("--embedding-checkpoint", default=None,
+                   help="passed to embed as --checkpoint (an adapted MiewID checkpoint needs "
+                        "its manifest.json beside it).")
+    p.add_argument("--force", action="store_true",
+                   help="re-run stages even if outputs exist (reviewed rows stay protected).")
+    p.add_argument("--dry-run", action="store_true", help="print the ordered plan; execute nothing.")
+    p.add_argument("--continue-on-error", action="store_true",
+                   help="keep going if a non-critical stage fails (flagged in manifest).")
+    p.add_argument("-v", "--verbose", action="store_true", help="verbose output.")
+    return p
+
+
+def _print_plan(config: DemoConfig) -> None:
+    specs = plan_stages(config)
+    print(f"Demo plan — run_name={config.run_name}  signals={config.signals}  db={config.db_path}")
+    print(f"datasets={config.datasets}  primary={config.primary_dataset}")
+    for line in _config_warnings(config):
+        print(line)
+    print("-" * 78)
+    for i, s in enumerate(specs, 1):
+        invocation = ("python " + " ".join(s.cli)) if s.cli else f"in-process {s.func} {s.kwargs}"
+        crit = "critical" if s.critical else "optional"
+        print(f"{i:2}. [{s.ticket}] {s.display_label}  ({s.dataset or '-'}, {crit})")
+        print(f"      {invocation}")
+        if s.output_paths:
+            print(f"      outputs: {s.output_paths}")
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    config = build_config(args)
+
+    if getattr(args, "dry_run", False):
+        _print_plan(config)
+        return 0
+
+    for line in _config_warnings(config):
+        print(line, file=sys.stderr)
+    try:
+        result = run_demo(config)
+    except Exception:
+        traceback.print_exc()
+        return 1
+
+    print(f"Bundle: {result.out_dir}")
+    print(f"Status: {result.status}")
+    sentence = _headline_sentence(result.headline)
+    if sentence:
+        print(sentence)
+
+    # Exit 0 iff status != failed and the bundle (index + manifest) was written.
+    wrote_bundle = (os.path.exists(result.index_html_path)
+                    and os.path.exists(result.manifest_path))
+    if result.status == "failed" or not wrote_bundle:
+        return 1
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())

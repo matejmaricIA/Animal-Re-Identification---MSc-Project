@@ -1,0 +1,249 @@
+{
+  "assessment_date": "2026-10-14",
+  "target": "Risnjak National Park; reliable lynx clustering and photographed-individual counts",
+  "method": "Static review and read-only saved artifact analysis; limited visual inspection; external primary sources",
+  "executed": {
+    "tests": false,
+    "training": false,
+    "model_inference": false,
+    "benchmarks": false,
+    "outreach": false
+  },
+  "git_head": "c63d533a5d5a8e19b418613c984324f2002aa99e",
+  "working_tree_is_not_clean": true,
+  "source_sha256": {
+    "reid_demo/store.py": "7acd3412713970939150a09b1023941f790ff3324553c3f6327e006a40061cb3",
+    "reid_demo/ingest.py": "79b1140d62fccaef98cde74d2804fae7c2cde68f0d4e2e1dbf6845c5ba2c34a9",
+    "reid_demo/cluster.py": "1679cee20b570dcee09145cd0c6655af5ca7b9ce570ffd06a1e8a17cc6e010e4",
+    "reid_demo/review.py": "38111642bce4595efb37814c178feed9b0ed195ae60c3c27295648297672e6fd",
+    "reid_demo/run_demo.py": "9c9617c0a6bd32f22adaf536f33ea0cc00402edb467b9ca1dca126dd6d91afd4",
+    "reid_demo/embed.py": "2db6f8ad9a8b97af35ad0851d1501568c4e254d1faa4e359d10c035b67e01d13",
+    "reid_demo/fusion.py": "a116dbdd11fe24ab9f41bdd6315c955b25db4c0df1b703a7fbf812dafedcc105",
+    "reid_demo/benchmark.py": "6e3bdef633c2a9448b4e02ba44cb3bbf76f6a5bde9b4e85b3636b80ae1bb0653",
+    "reid_demo/benchmark_embeddings.py": "d9e92502f135aeadc11abf1c56066921b946850375e84927b907e3dc84b21163",
+    "reid_demo/pairwise_matching.py": "afd619e53d61a52714bf139d01d8193ad9646500130aa7189ac84f326b391f05",
+    "reid_demo/benchmark_protocol.py": "f61314fdfc3856c67800882437f39ff8080434094a844fa8deb894d18beaae02",
+    "tools/evaluate_czechlynx.py": "6034974c136d938b155da0ce52553dd0a9ff65acae2576447fd412fecad623ee",
+    "nested_importance_sampling.py": "8fe5fccf3536a8c63aab5832e4430dd542d7e66486ac3f3b2f37667c0340c102",
+    "main.py": "a4a2cdf664fbc84f91ec759145e854b47394793c83aa04af9feac8a3f0e53520",
+    "global_embedding.py": "f62cf3f802a9a4082af3cbb8c0d450c608387655d96ef0af3d7930a833dbebd0",
+    "segmentation/__init__.py": "4fafd9cf15802fc6e0f67cb43ee2e77e3f5c1f4883762142eb3590110cd7d175",
+    "requirements.txt": "0564d5b1ad5ea7fe04ba31c534cc65a7fe8bf33dadd0ab3d1886d5323c1eee46"
+  },
+  "artifact_sha256": {
+    "evaluations/czechlynx/phase2_selection_miewid_global/metrics.json": "addc8a4406b67297220b48ae035cb21b9712056af95328617aad33e8d136957d",
+    "evaluations/czechlynx/dev_masked_miewid_ensamble/metrics.json": "6419cf1e80ee6947d8fc602ac34ebfe93e0af0550ab7839def05c00b0defec03",
+    "evaluations/czechlynx/dev_masked_miewid_ensamble/clustering_metrics.json": "2d7ed06be2a8c7c5984a88514ff937458d9b05002dbcf0dbb8acbf5fcf062a23",
+    "evaluations/czechlynx/roma_pairwise_calibration/summary.json": "615ee81421bb46e8e2bd57428f3dac78bc6609bf0771c887275bd9302c15458e",
+    "evaluations/czechlynx/roma_pairwise_calibration/manifest.json": "00c957cb7f1fb27b671902b576adc60451172a871ea72ce6205bacf8ff329bc2",
+    "evaluations/czechlynx/roma_pairwise_calibration/results.json": "43def7587f79910b3349604fe975f985d468b7a3ca3bf676f56a4e71490bdaaf"
+  },
+  "phase2_selection_metrics": {
+    "global": {
+      "ap_denominator": "min(relevant_gallery_images, K)",
+      "gallery": 2389,
+      "gv_attempted_pairs": 0,
+      "gv_requested_pairs": 0,
+      "gv_skipped_pairs": 0,
+      "known_correct_accept_rate": 0.3688989784335982,
+      "known_false_reject_rate": 0.6174801362088536,
+      "known_queries": 881,
+      "macro_encounter_top1": 0.7035976985976985,
+      "macro_identity_top1": 0.4728288421372878,
+      "map_at_k": 0.3155023220858616,
+      "queries": 2336,
+      "ranking_seconds": 0.6593710947781801,
+      "retrieval_depth": 50,
+      "shortlist_recall": 0.9330306469920545,
+      "threshold": 0.5372944474220277,
+      "threshold_evaluation": "selection validation (frozen calibration thresholds)",
+      "top1": 0.637911464245176,
+      "top5": 0.793416572077185,
+      "unknown_false_accept_rate": 0.03161512027491409,
+      "unknown_queries": 1455
+    }
+  },
+  "historical_clustering_metrics": {
+    "full-funnel": {
+      "adjusted_mutual_info": 0.28141648917636125,
+      "adjusted_rand_index": 0.08631854588401758,
+      "backend": "networkx_louvain",
+      "completeness": 0.5481091695025074,
+      "found_clusters": 8,
+      "gv_capped_pairs": 0,
+      "gv_pairs": 210,
+      "gv_skipped_pairs": 0,
+      "homogeneity": 0.29151709796128694,
+      "images": 560,
+      "merge_errors": 8,
+      "noise_metric_policy": "one distinct predicted label per unassigned image",
+      "pairwise_f1": 0.12480689486950157,
+      "pairwise_precision": 0.07424066550590055,
+      "pairwise_recall": 0.39138194798572157,
+      "sampling": "seeded images from query partition; no target cluster count",
+      "split_errors": 48,
+      "true_individuals": 60,
+      "unassigned_images": 0,
+      "v_measure": 0.38060551617087685
+    },
+    "global": {
+      "adjusted_mutual_info": 0.21690349252413735,
+      "adjusted_rand_index": 0.04855825677949822,
+      "backend": "networkx_louvain",
+      "completeness": 0.4957827636121418,
+      "found_clusters": 6,
+      "homogeneity": 0.21372355449928512,
+      "images": 560,
+      "merge_errors": 6,
+      "noise_metric_policy": "one distinct predicted label per unassigned image",
+      "pairwise_f1": 0.0911253931355121,
+      "pairwise_precision": 0.05103697576815856,
+      "pairwise_recall": 0.42478327383987763,
+      "sampling": "seeded images from query partition; no target cluster count",
+      "split_errors": 49,
+      "true_individuals": 60,
+      "unassigned_images": 0,
+      "v_measure": 0.29868783911808616
+    },
+    "global+fisher": {
+      "adjusted_mutual_info": 0.28899223295229487,
+      "adjusted_rand_index": 0.08726055762421991,
+      "backend": "networkx_louvain",
+      "completeness": 0.5626738165600637,
+      "found_clusters": 8,
+      "homogeneity": 0.2934362488788165,
+      "images": 560,
+      "merge_errors": 8,
+      "noise_metric_policy": "one distinct predicted label per unassigned image",
+      "pairwise_f1": 0.12610117330255818,
+      "pairwise_precision": 0.07425361301137136,
+      "pairwise_recall": 0.4178990311065783,
+      "sampling": "seeded images from query partition; no target cluster count",
+      "split_errors": 47,
+      "true_individuals": 60,
+      "unassigned_images": 0,
+      "v_measure": 0.38571884793591393
+    }
+  },
+  "roma": {
+    "status": "complete",
+    "matcher_errors": 0,
+    "manifest_code_hashes_match_current": {
+      "constants.py": true,
+      "feature_extraction.py": true,
+      "reid_demo/benchmark.py": true,
+      "reid_demo/benchmark_masks.py": true,
+      "reid_demo/benchmark_protocol.py": true,
+      "reid_demo/pairwise_benchmark.py": true,
+      "reid_demo/pairwise_matching.py": true,
+      "tools/evaluate_czechlynx.py": true,
+      "tools/evaluate_czechlynx_pairs.py": true
+    },
+    "queries": 100,
+    "known_queries": 68,
+    "known_shortlist_hits": 52,
+    "groups_all": {
+      "disk_lightglue": {
+        "median_seconds_uncached": 0.0262704249471426,
+        "pairs": 1000,
+        "peak_gpu_allocated_mb": 87.556640625,
+        "positive_pairs": 247,
+        "scores": {
+          "coverage_min": {
+            "auc_all_pairs_errors_as_zero": 0.6339876660698636,
+            "auc_successful_pairs": 0.6339876660698636,
+            "different_median": 0.07017543859649122,
+            "same_median": 0.07692307692307693
+          },
+          "inlier_fraction": {
+            "auc_all_pairs_errors_as_zero": 0.3433176874149824,
+            "auc_successful_pairs": 0.3433176874149824,
+            "different_median": 0.22727272727272727,
+            "same_median": 0.16666666666666666
+          },
+          "n_inliers": {
+            "auc_all_pairs_errors_as_zero": 0.695826679785581,
+            "auc_successful_pairs": 0.695826679785581,
+            "different_median": 5,
+            "same_median": 6
+          }
+        },
+        "status_counts": {
+          "geometry_failed": 3,
+          "insufficient_matches": 24,
+          "verified": 973
+        }
+      },
+      "roma": {
+        "median_seconds_uncached": 0.6836503613740206,
+        "pairs": 1000,
+        "peak_gpu_allocated_mb": 4357.8603515625,
+        "positive_pairs": 247,
+        "scores": {
+          "coverage_min": {
+            "auc_all_pairs_errors_as_zero": 0.6085643929007317,
+            "auc_successful_pairs": 0.6085643929007317,
+            "different_median": 0.10416666666666667,
+            "same_median": 0.11538461538461539
+          },
+          "inlier_fraction": {
+            "auc_all_pairs_errors_as_zero": 0.4437177067707577,
+            "auc_successful_pairs": 0.4437177067707577,
+            "different_median": 0.19921875,
+            "same_median": 0.1875
+          },
+          "n_inliers": {
+            "auc_all_pairs_errors_as_zero": 0.4462984768080176,
+            "auc_successful_pairs": 0.4462984768080176,
+            "different_median": 101,
+            "same_median": 96
+          }
+        },
+        "status_counts": {
+          "verified": 1000
+        }
+      }
+    },
+    "notes": [
+      "Exploratory, stratified calibration sample; not held-out retrieval accuracy or park abundance.",
+      "No ranking, fusion, rejection threshold, Fisher model or clustering is changed.",
+      "Pair ROC AUC is descriptive; pairs share queries/identities and are not independent trials.",
+      "Confidence scales differ between matchers; neither is a probability of animal identity.",
+      "Near-monochrome is an appearance proxy, not verified night/infrared.",
+      "A single homography is only an approximation for animal deformation.",
+      "Missing correct shortlist identities cannot be recovered by pair verification.",
+      "Timing excludes model initialization and DISK pre-extraction, reported separately in manifest.",
+      "Cached timings describe their original computation; uncached timing medians exclude cache hits."
+    ]
+  },
+  "visual_examples_inspected": [
+    "1a25a1cb57c06389d9ab93ea.png",
+    "ebc2f822116f5ce10200192a.png",
+    "e8664489520d3c5919f94e0b.png",
+    "454ed3151b27eb2b16ef1fb5.png"
+  ],
+  "current_test_execution": "Not performed; historical receipts only",
+  "untracked_files_over_10_MiB_found": [],
+  "static_findings_status": "Code paths inspected; additional fixtures/tests not executed in this assessment. Historical filename-collision and ingestion-reset reproductions are documented in the September readiness assessment.",
+  "external_source_access_date": "2026-10-14",
+  "external_sources": [
+    "https://www.np-risnjak.hr/en/mammals/",
+    "https://www.croris.hr/crosbi/publikacija/prilog-casopis/916070",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC12104966/",
+    "https://np-plitvicka-jezera.hr/ris/",
+    "https://www.wildme.org/wildbook-for-lynx.html",
+    "https://community.wildme.org/t/miewid-v4-announcement/5406",
+    "https://www.imageclef.org/AnimalCLEF2026",
+    "https://arxiv.org/html/2607.16453v1",
+    "https://arxiv.org/html/2408.12930v1",
+    "https://arxiv.org/html/2312.05287v2",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC7156508/",
+    "https://camtrap-dp.tdwg.org/"
+  ],
+  "access_limitations": [
+    "Publisher full-text retrieval for DOI 10.1111/jzo.70095 failed; author-associated CroRIS abstract reviewed.",
+    "Public MiewID v4 checkpoint availability and exact training provenance not established.",
+    "No Risnjak dataset, current camera inventory or partner availability supplied.",
+    "Only four RoMa/DISK visualisations inspected; full visual review remains open."
+  ]
+}

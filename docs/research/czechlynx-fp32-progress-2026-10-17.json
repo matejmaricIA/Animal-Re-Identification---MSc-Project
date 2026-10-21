@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-17",
+  "full_completed_trial_review": false,
+  "kind": "czechlynx_fp32_provisional_progress",
+  "manifest_status_at_read": "running",
+  "notes": "Read-only snapshot; reported window ends at epoch 6 even if later epochs have subsequently been saved. Macro identity-averaged inner holdout; no count or field accuracy claim. No model/tests/training/benchmarks executed by assistant.",
+  "provisional": true,
+  "reported_epoch_window": [
+    {
+      "epoch": 0,
+      "macro_recall_at_50": 0.9263512632411912,
+      "macro_top1": 0.654233938880621,
+      "seconds": 17.69671236909926
+    },
+    {
+      "epoch": 1,
+      "macro_recall_at_50": 0.9263512632411912,
+      "macro_top1": 0.654233938880621,
+      "seconds": 92.07947422936559
+    },
+    {
+      "epoch": 2,
+      "macro_recall_at_50": 0.9417463487839633,
+      "macro_top1": 0.7065203703363014,
+      "seconds": 282.6615801434964
+    },
+    {
+      "epoch": 3,
+      "macro_recall_at_50": 0.9459470174382749,
+      "macro_top1": 0.7141681302410788,
+      "seconds": 275.7486519664526
+    },
+    {
+      "epoch": 4,
+      "macro_recall_at_50": 0.9518099703582633,
+      "macro_top1": 0.7119374032771224,
+      "seconds": 279.18575288541615
+    },
+    {
+      "epoch": 5,
+      "macro_recall_at_50": 0.9487863274585183,
+      "macro_top1": 0.7078816387672914,
+      "seconds": 282.0929273478687
+    },
+    {
+      "epoch": 6,
+      "macro_recall_at_50": 0.9531567743895188,
+      "macro_top1": 0.713711365736728,
+      "seconds": 289.06936039216816
+    }
+  ],
+  "run_fingerprint": "675d43e66317e459cf7d0672789ed19d4a3db1d91f1e606dc7b8233b3e8cd22d",
+  "saved_epoch_count_at_read": 7,
+  "snapshot_reference_time_utc": "2026-10-17 13:19:03 UTC",
+  "source_artifact_sha256": {
+    "epochs.json": "811f838465002dae265386e798be776f2171c59782dce4eec20a012fe50ffd19",
+    "manifest.json": "a43565065f69e11fdc21a35b42bc138bbf011a33d85860f31c3195d333bcf798"
+  },
+  "trial": "/home/mm-workstation/re-id/Animal-Re-Identification---MSc-Project/models/czechlynx/miewid_adaptation_v2_fp32"
+}

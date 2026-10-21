@@ -82,7 +82,6 @@ segmentation_test_results/
 utils/yolo_output/
 # Snyk Security Extension - AI Rules (auto-generated)
 .cursor/rules/snyk_rules.mdc
-AGENTS.md
 GEMINI.md
 venv_wildlife_tools/
 .venv_thesis/
@@ -92,9 +91,16 @@ test-scripts/wildlifereid10k_splits/*
 notebooks/mantiuk_sweep.ipynb
 
 # Large generated artifacts / local research assets
+demo_bundle/
 docs/papers/
 docs/thesis.pdf
 visualization_suite/output/
 evaluations/classifications/
 evaluations/full_evals/
 evaluations/final_evals/
+
+# Generated CzechLynx benchmark reports and thumbnails
+evaluations/czechlynx/
+# Review-app state (SQLite reviews, exports, logs): backed up separately, see RESTORE.md in the Drive backup
+apps/*/data/
+apps/*/exports/

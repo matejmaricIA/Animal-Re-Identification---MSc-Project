@@ -1,0 +1,497 @@
+{
+  "stage": "development",
+  "query_count": 560,
+  "gallery_count": 750,
+  "known_queries": 303,
+  "runs": {
+    "masked_megadescriptor_global": {
+      "known": {
+        "queries": 303,
+        "hits": {
+          "1": 61,
+          "5": 107,
+          "10": 135,
+          "20": 177,
+          "50": 235
+        },
+        "top1": 0.20132013201320131
+      },
+      "near_monochrome": {
+        "queries": 97,
+        "hits": {
+          "1": 27,
+          "5": 35,
+          "10": 43,
+          "20": 54,
+          "50": 74
+        },
+        "top1": 0.27835051546391754
+      },
+      "colour": {
+        "queries": 206,
+        "hits": {
+          "1": 34,
+          "5": 72,
+          "10": 92,
+          "20": 123,
+          "50": 161
+        },
+        "top1": 0.1650485436893204
+      },
+      "only_opposite_colour_proxy_gallery": {
+        "queries": 27,
+        "hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "20": 2,
+          "50": 11
+        },
+        "top1": 0.0
+      },
+      "same_colour_proxy_positive_available": {
+        "queries": 276,
+        "hits": {
+          "1": 61,
+          "5": 107,
+          "10": 135,
+          "20": 175,
+          "50": 224
+        },
+        "top1": 0.2210144927536232
+      },
+      "only_other_camera_gallery": {
+        "queries": 103,
+        "hits": {
+          "1": 10,
+          "5": 24,
+          "10": 29,
+          "20": 41,
+          "50": 67
+        },
+        "top1": 0.0970873786407767
+      },
+      "same_camera_positive_available": {
+        "queries": 200,
+        "hits": {
+          "1": 51,
+          "5": 83,
+          "10": 106,
+          "20": 136,
+          "50": 168
+        },
+        "top1": 0.255
+      },
+      "accepted": {
+        "total": 32,
+        "correct": 6,
+        "wrong_known": 14,
+        "unknown": 12,
+        "precision": 0.1875
+      }
+    },
+    "masked_megadescriptor_full": {
+      "known": {
+        "queries": 303,
+        "hits": {
+          "1": 89,
+          "5": 120,
+          "10": 149,
+          "20": 175,
+          "50": 228
+        },
+        "top1": 0.29372937293729373
+      },
+      "near_monochrome": {
+        "queries": 97,
+        "hits": {
+          "1": 26,
+          "5": 40,
+          "10": 46,
+          "20": 57,
+          "50": 71
+        },
+        "top1": 0.26804123711340205
+      },
+      "colour": {
+        "queries": 206,
+        "hits": {
+          "1": 63,
+          "5": 80,
+          "10": 103,
+          "20": 118,
+          "50": 157
+        },
+        "top1": 0.3058252427184466
+      },
+      "only_opposite_colour_proxy_gallery": {
+        "queries": 27,
+        "hits": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "20": 0,
+          "50": 8
+        },
+        "top1": 0.0
+      },
+      "same_colour_proxy_positive_available": {
+        "queries": 276,
+        "hits": {
+          "1": 89,
+          "5": 120,
+          "10": 149,
+          "20": 175,
+          "50": 220
+        },
+        "top1": 0.322463768115942
+      },
+      "only_other_camera_gallery": {
+        "queries": 103,
+        "hits": {
+          "1": 15,
+          "5": 23,
+          "10": 31,
+          "20": 37,
+          "50": 65
+        },
+        "top1": 0.14563106796116504
+      },
+      "same_camera_positive_available": {
+        "queries": 200,
+        "hits": {
+          "1": 74,
+          "5": 97,
+          "10": 118,
+          "20": 138,
+          "50": 163
+        },
+        "top1": 0.37
+      },
+      "accepted": {
+        "total": 65,
+        "correct": 45,
+        "wrong_known": 8,
+        "unknown": 12,
+        "precision": 0.6923076923076923
+      }
+    },
+    "masked_miewid_global": {
+      "known": {
+        "queries": 303,
+        "hits": {
+          "1": 156,
+          "5": 188,
+          "10": 202,
+          "20": 223,
+          "50": 253
+        },
+        "top1": 0.5148514851485149
+      },
+      "near_monochrome": {
+        "queries": 97,
+        "hits": {
+          "1": 49,
+          "5": 57,
+          "10": 61,
+          "20": 65,
+          "50": 77
+        },
+        "top1": 0.5051546391752577
+      },
+      "colour": {
+        "queries": 206,
+        "hits": {
+          "1": 107,
+          "5": 131,
+          "10": 141,
+          "20": 158,
+          "50": 176
+        },
+        "top1": 0.5194174757281553
+      },
+      "only_opposite_colour_proxy_gallery": {
+        "queries": 27,
+        "hits": {
+          "1": 5,
+          "5": 8,
+          "10": 8,
+          "20": 8,
+          "50": 14
+        },
+        "top1": 0.18518518518518517
+      },
+      "same_colour_proxy_positive_available": {
+        "queries": 276,
+        "hits": {
+          "1": 151,
+          "5": 180,
+          "10": 194,
+          "20": 215,
+          "50": 239
+        },
+        "top1": 0.5471014492753623
+      },
+      "only_other_camera_gallery": {
+        "queries": 103,
+        "hits": {
+          "1": 47,
+          "5": 63,
+          "10": 67,
+          "20": 74,
+          "50": 86
+        },
+        "top1": 0.4563106796116505
+      },
+      "same_camera_positive_available": {
+        "queries": 200,
+        "hits": {
+          "1": 109,
+          "5": 125,
+          "10": 135,
+          "20": 149,
+          "50": 167
+        },
+        "top1": 0.545
+      },
+      "accepted": {
+        "total": 118,
+        "correct": 97,
+        "wrong_known": 9,
+        "unknown": 12,
+        "precision": 0.8220338983050848
+      }
+    }
+  },
+  "appearance_proxy": "Existing foreground chroma_p90 <= 5 at 128px; not verified day/night or IR labels",
+  "appearance_data_sha256": "1479d8080ff0e31cc28d7f9e5e961e3a6bc8c7343e947c8b572c8df007be1d55",
+  "cross_appearance_cases": [
+    {
+      "query_image_id": "clx_02aefa04062edd9895de2484",
+      "identity": "lynx_155",
+      "near_monochrome": true,
+      "first_positive_rank": null,
+      "top1_id": "clx_ae714ae18532196880d411ee"
+    },
+    {
+      "query_image_id": "clx_0b1b4fd99f052187f38e5987",
+      "identity": "lynx_155",
+      "near_monochrome": true,
+      "first_positive_rank": null,
+      "top1_id": "clx_3104e00a60986b1fdecdb582"
+    },
+    {
+      "query_image_id": "clx_17e5ffde408664d46503a81f",
+      "identity": "lynx_155",
+      "near_monochrome": true,
+      "first_positive_rank": null,
+      "top1_id": "clx_ae714ae18532196880d411ee"
+    },
+    {
+      "query_image_id": "clx_1b94aadce7ecfaf39d5e0c2c",
+      "identity": "lynx_146",
+      "near_monochrome": false,
+      "first_positive_rank": 48,
+      "top1_id": "clx_690ac14b2a47491784e4c939"
+    },
+    {
+      "query_image_id": "clx_31250987fbf15b8ba9e7832d",
+      "identity": "lynx_146",
+      "near_monochrome": false,
+      "first_positive_rank": null,
+      "top1_id": "clx_1bc831d78965c0950d2861e1"
+    },
+    {
+      "query_image_id": "clx_31bfc4073866d874e6c857f7",
+      "identity": "lynx_203",
+      "near_monochrome": true,
+      "first_positive_rank": 1,
+      "top1_id": "clx_a645f23caaf1af60a05aa2fa"
+    },
+    {
+      "query_image_id": "clx_390f7806a7cc6693904c496b",
+      "identity": "lynx_203",
+      "near_monochrome": true,
+      "first_positive_rank": 5,
+      "top1_id": "clx_fb479ca9e02aa0c6d486df0f"
+    },
+    {
+      "query_image_id": "clx_3ddc5d5d3101c804ec2b7396",
+      "identity": "lynx_155",
+      "near_monochrome": true,
+      "first_positive_rank": 46,
+      "top1_id": "clx_698a8b8122a0a4e374ad1b6d"
+    },
+    {
+      "query_image_id": "clx_4651991145d397902cb304cc",
+      "identity": "lynx_110",
+      "near_monochrome": true,
+      "first_positive_rank": 32,
+      "top1_id": "clx_8458703b3c50298b7a59af34"
+    },
+    {
+      "query_image_id": "clx_53c4e50f8a59bc289b0ff46e",
+      "identity": "lynx_155",
+      "near_monochrome": true,
+      "first_positive_rank": 2,
+      "top1_id": "clx_2cbc4a77bcb9be8d251004cc"
+    },
+    {
+      "query_image_id": "clx_5b8e348ee0261481b6943446",
+      "identity": "lynx_155",
+      "near_monochrome": true,
+      "first_positive_rank": null,
+      "top1_id": "clx_ae714ae18532196880d411ee"
+    },
+    {
+      "query_image_id": "clx_703ef207e276258035ba8be9",
+      "identity": "lynx_203",
+      "near_monochrome": true,
+      "first_positive_rank": 1,
+      "top1_id": "clx_1e6921acd2c120467137b7be"
+    },
+    {
+      "query_image_id": "clx_76031244c797e362353766d5",
+      "identity": "lynx_203",
+      "near_monochrome": true,
+      "first_positive_rank": 1,
+      "top1_id": "clx_a645f23caaf1af60a05aa2fa"
+    },
+    {
+      "query_image_id": "clx_772ad8185acfbd1f5f89e8a0",
+      "identity": "lynx_146",
+      "near_monochrome": false,
+      "first_positive_rank": null,
+      "top1_id": "clx_3b40459a5d176a64081a44ed"
+    },
+    {
+      "query_image_id": "clx_853c1d4531ade1aad25ee35f",
+      "identity": "lynx_146",
+      "near_monochrome": false,
+      "first_positive_rank": null,
+      "top1_id": "clx_cd60c5080e72e2d8d0a73139"
+    },
+    {
+      "query_image_id": "clx_855e5c5f7d0310e39a557d77",
+      "identity": "lynx_155",
+      "near_monochrome": true,
+      "first_positive_rank": null,
+      "top1_id": "clx_c78c1d2204564e9df29a82e9"
+    },
+    {
+      "query_image_id": "clx_92fa66d1c1409d4093a94660",
+      "identity": "lynx_203",
+      "near_monochrome": true,
+      "first_positive_rank": 24,
+      "top1_id": "clx_e898269b5a318560dfa03f0f"
+    },
+    {
+      "query_image_id": "clx_942f59508130701852cef75d",
+      "identity": "lynx_146",
+      "near_monochrome": false,
+      "first_positive_rank": null,
+      "top1_id": "clx_c9718d1381d04981127d951b"
+    },
+    {
+      "query_image_id": "clx_94d9dc98a8ef68a28ebdecf7",
+      "identity": "lynx_155",
+      "near_monochrome": true,
+      "first_positive_rank": null,
+      "top1_id": "clx_a23474bdc249764c6b34ae59"
+    },
+    {
+      "query_image_id": "clx_9d6558000948249cbfbc116e",
+      "identity": "lynx_291",
+      "near_monochrome": false,
+      "first_positive_rank": null,
+      "top1_id": "clx_43c8e576ddd6c1d40af76cc2"
+    },
+    {
+      "query_image_id": "clx_a00535c9bfd74fe1cfaba918",
+      "identity": "lynx_291",
+      "near_monochrome": false,
+      "first_positive_rank": null,
+      "top1_id": "clx_837b0e855c6e0dba5497df56"
+    },
+    {
+      "query_image_id": "clx_a033fd7e8015f62a30247419",
+      "identity": "lynx_203",
+      "near_monochrome": true,
+      "first_positive_rank": 1,
+      "top1_id": "clx_a645f23caaf1af60a05aa2fa"
+    },
+    {
+      "query_image_id": "clx_aa8578fc43296af05a65880f",
+      "identity": "lynx_146",
+      "near_monochrome": false,
+      "first_positive_rank": null,
+      "top1_id": "clx_34cac30fc2a73da596e75407"
+    },
+    {
+      "query_image_id": "clx_c4f24198c6a8783aa3e25cef",
+      "identity": "lynx_155",
+      "near_monochrome": true,
+      "first_positive_rank": 27,
+      "top1_id": "clx_3104e00a60986b1fdecdb582"
+    },
+    {
+      "query_image_id": "clx_ca4a05c37f3fae2f8b257ff3",
+      "identity": "lynx_203",
+      "near_monochrome": true,
+      "first_positive_rank": 1,
+      "top1_id": "clx_12f1e1a33e0bfb66a7184f9f"
+    },
+    {
+      "query_image_id": "clx_f19af0dc4e7aea78cdf9cd45",
+      "identity": "lynx_203",
+      "near_monochrome": true,
+      "first_positive_rank": 21,
+      "top1_id": "clx_e898269b5a318560dfa03f0f"
+    },
+    {
+      "query_image_id": "clx_fc70346961a0622200b81a52",
+      "identity": "lynx_203",
+      "near_monochrome": true,
+      "first_positive_rank": 3,
+      "top1_id": "clx_fb479ca9e02aa0c6d486df0f"
+    }
+  ],
+  "remaining_error_buckets": {
+    "correct_identity_at_ranks_2_to_10": 46,
+    "correct_identity_at_ranks_11_to_50": 51,
+    "no_correct_identity_in_top50": 50
+  },
+  "vs_previous_full_pipeline": {
+    "fixed": 84,
+    "worsened": 17
+  },
+  "verified_same_inputs": {
+    "gallery_ids": true,
+    "query_ids": true,
+    "metadata_sha256": true,
+    "input_mode": true,
+    "stage": true,
+    "split": true
+  },
+  "reference_hashes_match": {
+    "manifest": true,
+    "predictions": true
+  },
+  "source_sha256": {
+    "evaluations/czechlynx/dev_masked_ensamble/predictions_global.json": "91ed3bd22da288a51279c0ee262d0fd53d23e758ac778a49720604c4a554ec7c",
+    "evaluations/czechlynx/dev_masked_ensamble/predictions_full-funnel.json": "d6ed29e03ea3002abc8a9076a952b0d401a68c83b4d7638333622ce04abe6fe4",
+    "evaluations/czechlynx/dev_masked_miewid_global/predictions_global.json": "d50631e32e810cc5346943d2524efb2588c3412a63a16d0945ae8d91f85098fc",
+    "evaluations/czechlynx/dev_masked_miewid_global/manifest.json": "db2ed86f93191c79a677cb51a26a017a15479806ac0675c8f68340b53972af0a",
+    "evaluations/czechlynx/dev_masked_miewid_global/query.csv": "cbcea75914f3ae22fb5fb2c7120a6b72027052c97862e99881ef323dd94a7a9f",
+    "evaluations/czechlynx/dev_masked_miewid_global/gallery.csv": "01346404da4c544ea0f6052292f0f06bbd2dad98933e1076e43b54f424ca2c89"
+  },
+  "camera_grouping": "Recorded camera key=(source, trap_id). Other-camera-only means no correct gallery reference at the query camera; this is not a camera-disjoint training/evaluation experiment.",
+  "cross_appearance_success_identity_counts": {
+    "lynx_203": 5
+  },
+  "cross_appearance_success_encounters": [
+    "foe_bohemia:15209",
+    "foe_bohemia:15218",
+    "foe_bohemia:15220"
+  ]
+}

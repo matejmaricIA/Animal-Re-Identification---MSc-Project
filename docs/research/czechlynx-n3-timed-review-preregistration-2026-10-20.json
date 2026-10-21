@@ -1,0 +1,211 @@
+{
+  "allocation": {
+    "N2|A": 16,
+    "N2|A+": 4,
+    "N2|D": 8,
+    "N2|K1": 35,
+    "N2|K2": 35,
+    "N2|N": 12,
+    "N2|P": 20,
+    "N2|P+": 5,
+    "N2|S": 12,
+    "N2|S+": 3,
+    "W1|K1": 60,
+    "W1|K2": 58,
+    "W1|K3": 20,
+    "W1|N": 12
+  },
+  "artifacts": {
+    "images.json": "ae08e486f8a23334c0f2e373c30eb3944b720ac9ba72d6b43af4f848c39fc538",
+    "tasks.json": "8345197676ed7ff6faaf4d236944cafc27dd104b38677b07c46981fc0f517fd9",
+    "truth.json": "9bcc70bef16df2f297c8ebf098d9c1bb053048ce524fa8b7c35666a9838ccb71"
+  },
+  "candidate_tag": "N2/region/eps0.001/min1/cos0/merge1/err0.0/rep0/tau0.99",
+  "counts": {
+    "N2|A|audit_glance": 100,
+    "N2|D|disagreement_check": 44,
+    "N2|K1|rank1_comparison": 822,
+    "N2|K2|further_comparison": 368,
+    "N2|K2|rank1_comparison": 124,
+    "N2|N|further_comparison": 506,
+    "N2|N|rank1_comparison": 54,
+    "N2|P|pair_question": 163,
+    "N2|S|second_comparison": 159,
+    "N2|X|extra_animal": 10,
+    "W1|K1|rank1_comparison": 1479,
+    "W1|K2|further_comparison": 634,
+    "W1|K2|rank1_comparison": 202,
+    "W1|K3|further_comparison": 1442,
+    "W1|K3|rank1_comparison": 69,
+    "W1|N|further_comparison": 1431,
+    "W1|N|rank1_comparison": 54,
+    "W1|X|extra_animal": 14
+  },
+  "date": "2026-10-20",
+  "implementation": {
+    "allocation": {
+      "N2|A": 16,
+      "N2|A+": 4,
+      "N2|D": 8,
+      "N2|K1": 35,
+      "N2|K2": 35,
+      "N2|N": 12,
+      "N2|P": 20,
+      "N2|P+": 5,
+      "N2|S": 12,
+      "N2|S+": 3,
+      "W1|K1": 60,
+      "W1|K2": 58,
+      "W1|K3": 20,
+      "W1|N": 12
+    },
+    "candidate_tag": "N2/region/eps0.001/min1/cos0/merge1/err0.0/rep0/tau0.99",
+    "code": {
+      "reid_demo/benchmark_gated_matching.py": "7007e4c918a73649effdc58bc8d5c8967f5f55d6efafaf4d63127aa6ac725a67",
+      "reid_demo/benchmark_nonmatch_pruning.py": "965ab9cb50fd577dd2939ebfd56be5e64beaa22aa6ccc7ebe9775f156d4f58c0",
+      "reid_demo/benchmark_pruning_safeguards.py": "892d706d5c8e6ed3750d6615db5a0e4a583c0c71320441ac3103ade440b0980c",
+      "reid_demo/benchmark_review_simulation.py": "85d4c6ccd564b9d2c950e0ac9b699ca17e4f2b0367cdce25ebe96c5da2ca62df",
+      "reid_demo/benchmark_timed_review.py": "9415705fffdb08f0eef94b6b8e3bb0e386f30c491d5270c1871c70d664a4a18e",
+      "tools/build_czechlynx_timed_review_tasks.py": "f542a3573d5038acde9dbf5ef6a734b013379cd7759a2ac532ecbada5601503b",
+      "tools/recost_czechlynx_timed_review.py": "4868feab5ee472154ab945d7917d5512d0c12e36c3516bc8893208340eadec4d",
+      "tools/simulate_czechlynx_pruning_safeguards.py": "f4abf96ff3febe8f23b2a45c6fe955a6d8bdb693f77b651e146bc6a9b10f21d5"
+    },
+    "exemplars": 4,
+    "more_exemplars": 20,
+    "practice": {
+      "N2|A": 2,
+      "N2|D": 1,
+      "N2|K1": 2,
+      "N2|K2": 2,
+      "N2|N": 1,
+      "N2|P": 1,
+      "N2|S": 1,
+      "W1|K1": 4,
+      "W1|K2": 3,
+      "W1|K3": 1,
+      "W1|N": 2
+    },
+    "query_cap": 24,
+    "rule": {
+      "bootstrap_resamples": 2000,
+      "bootstrap_seed": 42,
+      "cap_seconds": 120.0,
+      "count_audit_comparison": "excluded, as in the N2 hours",
+      "early_stop_blocks": 8,
+      "estimator": "stratified mean capped decision time x full-replay decisions per (arm, stratum, kind)",
+      "extra_animal_sensitivity_seconds": 25.0,
+      "idle_pause_seconds": 120,
+      "injected_time_weight": 0,
+      "merge_confirmation": "costed as the measured pair-question mean",
+      "reframe_saving": 0.25,
+      "resimulation_seeds": 5,
+      "sensitivity_caps": [
+        60.0,
+        null
+      ],
+      "success_saving": 0.4,
+      "unsure": "neither correct nor an error (sensitivity: an error); the workflow treats it as Different",
+      "untimed_seconds": {
+        "extra_animal": 5.0
+      },
+      "w1_favourable_quantile": 0.25,
+      "w1_favourable_strata": [
+        "K3",
+        "N"
+      ]
+    },
+    "version": "calibration_timed_review_v1",
+    "w1_reference_tag": "reference/full_scan_no_safeguards/err0.0/cosine/eps0.0/tauNone"
+  },
+  "kind": "calibration_timed_review_v1",
+  "photos": 6352,
+  "populations": {
+    "N2|A": 100,
+    "N2|D": 44,
+    "N2|K1": 822,
+    "N2|K2": 124,
+    "N2|N": 54,
+    "N2|P": 163,
+    "N2|S": 54,
+    "W1|K1": 1479,
+    "W1|K2": 202,
+    "W1|K3": 69,
+    "W1|N": 54
+  },
+  "practice_shortfalls": {},
+  "rule": {
+    "bootstrap_resamples": 2000,
+    "bootstrap_seed": 42,
+    "cap_seconds": 120.0,
+    "count_audit_comparison": "excluded, as in the N2 hours",
+    "early_stop_blocks": 8,
+    "estimator": "stratified mean capped decision time x full-replay decisions per (arm, stratum, kind)",
+    "extra_animal_sensitivity_seconds": 25.0,
+    "idle_pause_seconds": 120,
+    "injected_time_weight": 0,
+    "merge_confirmation": "costed as the measured pair-question mean",
+    "reframe_saving": 0.25,
+    "resimulation_seeds": 5,
+    "sensitivity_caps": [
+      60.0,
+      null
+    ],
+    "success_saving": 0.4,
+    "unsure": "neither correct nor an error (sensitivity: an error); the workflow treats it as Different",
+    "untimed_seconds": {
+      "extra_animal": 5.0
+    },
+    "w1_favourable_quantile": 0.25,
+    "w1_favourable_strata": [
+      "K3",
+      "N"
+    ]
+  },
+  "sampled": {
+    "N2|A": 16,
+    "N2|A+": 4,
+    "N2|D": 8,
+    "N2|K1": 35,
+    "N2|K2": 35,
+    "N2|N": 12,
+    "N2|P": 20,
+    "N2|P+": 5,
+    "N2|S": 12,
+    "N2|S+": 3,
+    "W1|K1": 60,
+    "W1|K2": 58,
+    "W1|K3": 20,
+    "W1|N": 12
+  },
+  "saved_decisions": {
+    "N2": 2350,
+    "W1": 5325
+  },
+  "saved_kinds": {
+    "N2": {
+      "audit_glance": 100,
+      "count_audit_comparison": 0,
+      "disagreement_check": 44,
+      "extra_animal": 10,
+      "further_comparison": 874,
+      "merge_confirmation": 0,
+      "pair_question": 163,
+      "rank1_comparison": 1000,
+      "second_comparison": 159
+    },
+    "W1": {
+      "audit_glance": 0,
+      "count_audit_comparison": 0,
+      "disagreement_check": 0,
+      "extra_animal": 14,
+      "further_comparison": 3507,
+      "merge_confirmation": 0,
+      "pair_question": 0,
+      "rank1_comparison": 1804,
+      "second_comparison": 0
+    }
+  },
+  "schema": 1,
+  "shortfalls": {},
+  "w1_reference_tag": "reference/full_scan_no_safeguards/err0.0/cosine/eps0.0/tauNone"
+}
