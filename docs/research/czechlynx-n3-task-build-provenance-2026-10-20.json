@@ -1,0 +1,123 @@
+{
+ "attempts": [
+  {
+   "attempt": 1,
+   "code": "checkout (99e9a2da)",
+   "result": "refused at calibration loading (cluster.py binding); nothing written"
+  },
+  {
+   "attempt": 2,
+   "code": "7ade3225 export",
+   "manifest_sha256": "2540847a92b29f30f37cabeaa4b59ac9cc334e01decc18c9fab92b14f9aae004",
+   "out_dir": "evaluations/czechlynx/timed_review_tasks_v1",
+   "result": "reference check passed; failed at the whole-file leak scan: chance bytes 'LYNx8' inside compressed JPEG scan data of calibration image 602 (byte 560,531 of 566,749; scan data starts at 609); failed manifest preserved"
+  },
+  {
+   "attempt": 3,
+   "code": "7ade3225 export + user-approved metadata-only leak scan",
+   "out_dir": "evaluations/czechlynx/timed_review_tasks_v1_r2",
+   "result": "complete"
+  }
+ ],
+ "code": {
+  "branch_head_at_build": "99e9a2da (feat/reid-demo-pipeline)",
+  "n3_file_sha256": {
+   "reid_demo/benchmark_timed_review.py": "9415705fffdb08f0eef94b6b8e3bb0e386f30c491d5270c1871c70d664a4a18e",
+   "tests/test_benchmark_timed_review.py": "8f8d4f9046d9880f698def329999bf85da1f1eb62ce4422033a7b1ae7a664780",
+   "tools/build_czechlynx_timed_review_tasks.py": "f542a3573d5038acde9dbf5ef6a734b013379cd7759a2ac532ecbada5601503b",
+   "tools/recost_czechlynx_timed_review.py": "4868feab5ee472154ab945d7917d5512d0c12e36c3516bc8893208340eadec4d"
+  },
+  "reason": "N1b commit 99e9a2da changed reid_demo/cluster.py, which the calibration clustering report binds by SHA-256; every calibration-loading tool refuses while it differs. 7ade3225 still matches the binding.",
+  "source": "git archive 7ade3225 into the session scratchpad, plus the four N3 files (byte-identical to the checkout)",
+  "verified_before_run": {
+   "calibration_report_implementation_binding_equal": true,
+   "n2_run_code_binding_equal": true,
+   "n3_files_identical_to_checkout": true
+  }
+ },
+ "date": "2026-10-20",
+ "input_audit_app_unchanged": {
+  "all_files_digest": "8556e455a9eb1a90e5e63ff9de68f18d2aed50de14b1a5be843da6212c62212a",
+  "reviews.sqlite3": "0dd295d6c39417ba151cc5779e8317b77369ef96ed4dd0866950ec41eea83abe",
+  "reviews_complete_csv": "4e5285142551e66a7f1b93301032bcdf2e1b0e54da05515eac9636812af2244e"
+ },
+ "kind": "czechlynx_n3_task_build_provenance",
+ "next": "The re-costing re-simulation also loads calibration: run it from the same kind of export unless the cluster.py binding issue is resolved first.",
+ "preregistration_copy": {
+  "equals_task_set_artifact": true,
+  "path": "docs/research/czechlynx-n3-timed-review-preregistration-2026-10-20.json",
+  "sha256": "7a7630d25f6a783a9c503b3c35d61ef892a6c9b4917281ac3d3299fadd28a5aa"
+ },
+ "schema": 1,
+ "task_set": {
+  "artifacts": {
+   "contact_sheet.html": "ed61d07fbee3d22b926d83f05cbb941343866005f91e83188267e4dc55405108",
+   "images.json": "ae08e486f8a23334c0f2e373c30eb3944b720ac9ba72d6b43af4f848c39fc538",
+   "pre_registration.json": "7a7630d25f6a783a9c503b3c35d61ef892a6c9b4917281ac3d3299fadd28a5aa",
+   "strata_counts.csv": "9438c67515d177c9f9551b3ce49a8cb09b07010d21bdda3b3f84e10bd07beb63",
+   "tasks.json": "8345197676ed7ff6faaf4d236944cafc27dd104b38677b07c46981fc0f517fd9",
+   "truth.json": "9bcc70bef16df2f297c8ebf098d9c1bb053048ce524fa8b7c35666a9838ccb71"
+  },
+  "dir": "evaluations/czechlynx/timed_review_tasks_v1_r2",
+  "manifest_sha256": "7ed7dfd88706e13cb34fc34806b2167bfcbf4c000a3c6b1a42c5759f44924029",
+  "reference_check": {
+   "n2_fields": [
+    "decisions",
+    "automation",
+    "misassigned_photos",
+    "count_error",
+    "pruning_duplicate_events",
+    "duplicate_merges",
+    "wrong_duplicate_merges",
+    "auto_bundles",
+    "rank1_comparison",
+    "further_comparison",
+    "second_comparison",
+    "disagreement_check",
+    "pair_question",
+    "audit_glance",
+    "count_audit_comparison",
+    "extra_animal",
+    "merge_confirmation"
+   ],
+   "n2_problems": [],
+   "passed": true,
+   "w1_live_decisions": 5325,
+   "w1_problems": []
+  },
+  "run_fingerprint": "a01965b91e99027fc76a7d36ea0a003b879403ce9e86ee3338dedef492113c8f",
+  "status": "complete",
+  "summary": {
+   "main_tasks": 300,
+   "n2_decisions": 2350,
+   "practice_shortfalls": {},
+   "practice_tasks": 20,
+   "sampled": {
+    "N2|A": 16,
+    "N2|A+": 4,
+    "N2|D": 8,
+    "N2|K1": 35,
+    "N2|K2": 35,
+    "N2|N": 12,
+    "N2|P": 20,
+    "N2|P+": 5,
+    "N2|S": 12,
+    "N2|S+": 3,
+    "W1|K1": 60,
+    "W1|K2": 58,
+    "W1|K3": 20,
+    "W1|N": 12
+   },
+   "served_images": 5771,
+   "shortfalls": {},
+   "w1_decisions": 5325
+  },
+  "task_set_fingerprint": "580d922d9ad498c77bd5c66ec3e7fab98e9b35eb31ba8cf970f584a8ac2f47ba",
+  "timing_seconds": {
+   "n2_replay": 73.96712918579578,
+   "tasks": 5.909327516332269,
+   "total": 85.21682936511934,
+   "w1_replay": 0.6267897561192513
+  }
+ }
+}

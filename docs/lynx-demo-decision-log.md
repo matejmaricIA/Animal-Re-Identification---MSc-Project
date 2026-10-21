@@ -17,6 +17,7 @@ Every agent working here updates this section at start, at each milestone and at
 | **(d) Pitch-readiness analysis and improvement research** (read-only audit, web research, gated roadmap; no code/tests/models) | Claude Code session, 19 Oct 2026 | **Done; awaiting the user's decision on the Now items (N1–N5)** | 1 ☑ claim · 2 ☑ audit receipts/results docs · 3 ☑ web research (monitoring practice, reporting, expert baselines, tools, buyers) · 4 ☑ improvement literature A–H · 5 ☑ write [analysis doc](research/pitch-readiness-analysis-2026-10-19.md) · 6 ☑ dated decision-log entry · 7 ☑ close row. No code, tests, models or outputs touched; committed `161ec5aa` (not pushed) | `docs/research/pitch-readiness-analysis-2026-10-19.md` is final; no files claimed. |
 | **(e) N1 ingestion/store integrity + N2 pruning floor and duplicate-merge second check** ([N1](n1-ingestion-integrity-proposal-2026-10-19.md), [N2](czechlynx-n2-pruning-safeguards-proposal-2026-10-19.md), [N2 results](research/czechlynx-n2-pruning-safeguards-results-2026-10-19.md)) | Claude Code session, 19 Oct 2026 | **Done; committed at the user's request (not pushed)** | 1 ☑ claim · 2 ☑ read code · 3 ☑ proposals · 4 ☑ approval · 5 ☑ N1 implemented (static checks pass) · 6 ☑ N1 tests (user-run 19 Oct: focused 87 passed in 16.08 s; full suite 723 passed, 960 upstream warnings, 96.12 s) · 7 ☑ N2 implemented · 8 ☑ N2 tests (18 new; 57 with related suites) · 9 ☑ N2 calibration run (2,188 s; reference reproduced exactly) · 10 ☑ results + docs · 11 ☑ committed 19 Oct: pitch analysis `161ec5aa`, N1 `fc852933`, N2 + decision log in the next commit (see git log); not pushed; disk submodule excluded | Output `evaluations/czechlynx/pruning_safeguards_f1_v1/` is final; do not modify. No files claimed. |
 | **N1b pipeline integrity** (stage-done any-row check, forced re-clustering of reviewed rows, cluster-label namespace, model-blind embedding skips) — [handoff prompt](n1b-pipeline-integrity-handoff-2026-10-19.md), [proposal](n1b-pipeline-integrity-proposal-2026-10-20.md) | Claude Code session (N1b), 20 Oct 2026 | **Done; committed at the user's request (see git log; not pushed)** | All four defects verified in code and reproduced on temporary stores (scratch script, no models, not a test run). 1 ☑ claim · 2 ☑ verify defects in code · 3 ☑ proposal · 4 ☑ approval (20 Oct, as written, reserved labels 3a) · 5 ☑ implement (4 source files, 21 new tests, 1 disclosed assertion edit) · 6 ☑ static checks (py_compile; Ruff F no new findings) · 7 ☑ tests (assistant-run at the user's request, 20 Oct: focused 170 passed; full suite 762 passed, 91 s) · 8 ☑ docs (DATA_CONTRACT, AGENTS.md, decision log) · 9 ☑ committed 20 Oct at the user's request (N1b files only; disk submodule and N3 files excluded; not pushed) | `docs/n1b-pipeline-integrity-proposal-2026-10-20.md` (new). Planned, after approval only: `reid_demo/run_demo.py`, `reid_demo/cluster.py`, `reid_demo/embed.py`, `reid_demo/store.py`, `reid_demo/DATA_CONTRACT.md`, `tests/test_run_demo.py`, `tests/test_cluster.py`, `tests/test_embed.py`, `tests/test_store.py`. No benchmark modules, outputs or `review.py`/`ingest.py`/`fusion.py`. |
+| **N3 timed reviewer trial** (measured seconds and error per decision, W1 vs assisted workflow, calibration only) — [handoff prompt](czechlynx-n3-timed-review-handoff-2026-10-19.md), [proposal](czechlynx-n3-timed-review-proposal-2026-10-20.md) | Claude Code session (N3), 20 Oct 2026 | **Pre-registered: task set `timed_review_tasks_v1_r2` (fingerprint `580d922d…`) and rule committed 21 Oct at the user's request (see git log; not pushed). Next: the contact-sheet check and the reviewer sessions (user-run)** | 1 ☑ claim · 2 ☑ read code/docs · 3 ☑ proposal · 4 ☑ user approval · 5 ☑ implement · 6 ☑ static checks (py_compile, Ruff F, `node --check`) · 7 ☑ user-run tests (20 Oct: repo 54 passed in 5.02 s, 57 upstream SciPy deprecation warnings; app 12 OK in 1.89 s) · 8 ☑ task build (attempt 3, 20 Oct, 85 s; reference check passed) ☑ pre-registration commit (21 Oct, user's request; not pushed) · 9 ☐ user-run reviewer sessions · 10 ☐ re-costing + results + docs | Created (uncommitted): `reid_demo/benchmark_timed_review.py`, `tools/build_czechlynx_timed_review_tasks.py`, `tools/recost_czechlynx_timed_review.py`, `tests/test_benchmark_timed_review.py`, and the new sibling app `/home/mm-workstation/re-id/czechlynx-matching-review-app/` (no `data/` or `exports/` yet). Outputs: `evaluations/czechlynx/timed_review_tasks_v1/` (attempt 2, failed; manifest preserved); `evaluations/czechlynx/timed_review_tasks_v1_r2/` (attempt 3, the task set in use); planned `evaluations/czechlynx/timed_review_recost_v1/`. Code for builds and re-costing: a scratch export of `7ade3225` plus the N3 files (see the 20 Oct entries). Read-only: the existing input-audit app, its `data/` and `exports/`, `evaluations/czechlynx/pruning_safeguards_f1_v1/`, committed benchmark modules. |
 
 Open questions for the user: what the audit's left/right labels meant (pose geometry suggests facing direction, not the anatomical flank).
 
@@ -113,7 +114,105 @@ These priorities do not approve new implementation or benchmark runs. Present co
 
 ## Dated updates
 
+### 2026-10-21
+
+**N3 leak-scan test passed (user-run).** `venv/bin/python -m pytest tests/test_benchmark_timed_review.py -q`: **19 passed in 0.84 s**. This includes the new metadata-only leak-scan test.
+- The four N3 files and the `_r2` task-set manifest still match the digests in the [provenance receipt](research/czechlynx-n3-task-build-provenance-2026-10-20.json), so the tested code is the code that built the task set.
+- **Next:** the pre-registration commit, with the user's permission, before session 1. Then the contact-sheet check and the reviewer sessions (user-run).
+
+**N3 pre-registration committed at the user's request (not pushed; `disk` submodule excluded).** The commit holds:
+- the four N3 code and test files;
+- the proposal and its handoff note;
+- the provenance receipt and the pre-registration copy (identical to the task set's `pre_registration.json`; task-set fingerprint `580d922d9ad498c77bd5c66ec3e7fab98e9b35eb31ba8cf970f584a8ac2f47ba`);
+- the N3 section of `docs/czechlynx-benchmark.md`;
+- only the N3 lines of this log.
+
+The other session's uncommitted N1c/N1d/N1e rows and entries stay in the working tree. After this commit, no task, stratum, cap or estimator may change.
+
 ### 2026-10-20
+
+**N3 task set built (attempt 3); reference check passed; ready for the pre-registration commit.** The user approved the metadata-only leak scan and the `_r2` rebuild. [Provenance receipt](research/czechlynx-n3-task-build-provenance-2026-10-20.json); [pre-registration copy](research/czechlynx-n3-timed-review-preregistration-2026-10-20.json), identical to the task set's own file.
+- **Leak-scan change** (`tools/build_czechlynx_timed_review_tasks.py`, `readable_metadata`): scan JPEG APPn/COM segments and bytes after the end-of-image marker, PNG tEXt/zTXt/iTXt/eXIf chunks, and any other format whole. Compressed pixel data is no longer scanned; every served file is still hash-checked. One new test (19 in the file); static checks pass; the user-run test is pending.
+- **Code:** the same `7ade3225` export plus the four N3 files (re-copied and re-verified: bindings equal, files identical).
+- **Run:** complete in 85 s (N2 replay 74 s). Reference check passed: the N2 candidate row (2,350, all kinds) and W1 (5,325) are reproduced; the strata sum back to both.
+- **Task set** `evaluations/czechlynx/timed_review_tasks_v1_r2/` (fingerprint `580d922d9ad498c77bd5c66ec3e7fab98e9b35eb31ba8cf970f584a8ac2f47ba`):
+  - 300 main tasks (150 per arm), no stratum shortfall, plus 20 practice tasks;
+  - 12 injected; 5,771 served images;
+  - 12 blocks of 25 per slot: R1/R3 ABBA, R2/R4 BAAB; all slots get the same 300 tasks.
+- **Expected load:** about 1,430 decisions per reviewer if every answer matches the reference (W1 1,054, N2 379).
+- **Checks:** aggregate checks found no identity, path, truth or stratum text in the browser payloads; feedback appears only on practice tasks. The app's `TaskSet` loads the set as its default. The input-audit app's hashes are unchanged.
+- **Remaining:**
+  - user-run tests of the leak-scan change;
+  - a visual check of `contact_sheet.html` (practice images only);
+  - the pre-registration commit (user's permission), before session 1;
+  - the reviewer sessions;
+  - re-costing (its re-simulation needs the same export while the `cluster.py` binding differs).
+
+**N3 task build attempt 2 (user-chosen remedy): reference check passed; stopped at the leak scan, a false positive.**
+- **Provenance:** run from a scratch export of `7ade3225` (`git archive`) plus the four N3 files. Verified before the run: the calibration-report implementation binding and the saved N2 run's code binding are equal, and the four N3 files are byte-identical to the checkout.
+- **Reference check passed:** the traced replays reproduce the saved N2 candidate row (all ledger kinds) and W1 (5,325 = 1,804 / 3,507 / 14); the strata sum back to both.
+- **The stop:** the builder then refused calibration image 602 (row 602 of the calibration `collection.csv`). Its original JPEG contains the bytes `LYNx8` at byte 560,531 of 566,749. That is inside the compressed scan data (which starts at byte 609), among random binary, so it is a chance byte sequence, not metadata; the masked crop has no match.
+- `evaluations/czechlynx/timed_review_tasks_v1/manifest.json` records status `failed` and is preserved. No tasks were written.
+- **Proposed fix:** scan only image metadata (JPEG APPn/COM segments and trailing bytes; PNG text and Exif chunks).
+
+**N3 task build blocked by a binding change from N1b; nothing written.** The user authorized the assistant to run the build. It exited at calibration loading: "Clustering report is incomplete, damaged or from a different implementation". No output directory was created.
+- **Cause (verified):** `facing_adaptation_calibration_classes_v1/clustering/manifest.json` binds `reid_demo/cluster.py` by SHA-256. That file is unchanged at `7ade3225` and changed by N1b commit `99e9a2da` (+78/−4). The other seven bound files and all dependency versions still match.
+- **Consequence:** every tool that loads this calibration report refuses to run while `cluster.py` differs. That covers the N3 builder and the N3 re-costing re-simulation, and also the existing N2, (a) and frozen-review calibration tools.
+- Saved outputs are unaffected. Nothing was changed to work around the check; the remedy is the user's choice.
+
+**N3 tests passed (user-run).** repo `pytest tests/test_benchmark_timed_review.py tests/test_benchmark_pruning_safeguards.py tests/test_benchmark_nonmatch_pruning.py -q`: 54 passed, 57 upstream SciPy L-BFGS-B deprecation warnings, 5.02 s; app `unittest`: 12 tests OK, 1.89 s. The repo run covers the 18 new tests plus the N2 and (a) suites they build on. The app tests ran on a synthetic task set and loopback server. Neither establishes behaviour on real data: the task build's exact reference reproduction, a browser walkthrough and the reviewer sessions remain. Next: the task build (user-run, or assistant-run with the user's authorization), then a pre-registration commit (with the user's permission) before session 1.
+
+**N3 implemented; static checks pass; user-run tests pending.** The user approved the [proposal](czechlynx-n3-timed-review-proposal-2026-10-20.md) as written and asked the assistant to implement it and run static checks only.
+
+New repo files (no existing source edited; committed benchmark modules and saved outputs untouched):
+- `reid_demo/benchmark_timed_review.py`:
+  - `TracedSafeguardSimulation`, which copies `place` / `duplicate_check` with trace records and per-kind reviewers;
+  - `traced_w1`;
+  - a catalogue that reconstructs earlier states across merges;
+  - strata and decision counts, stratified task sampling with injected opposite-answer tasks, and payload building;
+  - event-based timing (pauses, undo, a pause carried into a task), the stratified estimator, bootstrap, secondary estimates, error rates, agreement, `MeasuredReviewer` and the decision rule.
+- `tools/build_czechlynx_timed_review_tasks.py`:
+  - must reproduce the saved N2 candidate row (all ledger kinds) and W1 (5,325 = 1,804 / 3,507 / 14) exactly, and the strata must sum back to both;
+  - scans every served image for identity strings and every browser payload for labels, image IDs and file names;
+  - writes tasks, images, truth, strata counts, the pre-registration and a practice-only contact sheet.
+- `tools/recost_czechlynx_timed_review.py`: verifies the task-set and export bindings and applies the rule. It re-simulates W1 and the N2 candidate at the measured error rates (5 seeds).
+- `tests/test_benchmark_timed_review.py`: 18 synthetic tests.
+
+New sibling app `/home/mm-workstation/re-id/czechlynx-matching-review-app/`:
+- files: `server.py`, `static/` (3 files), `run.sh`, `README.md` and `tests/test_matching_app.py` (12 unittest tests);
+- port 8767, standard library only;
+- it never opens `truth.json` and refuses to store anything inside the input-audit app.
+
+Static checks: py_compile and Ruff F are clean on all new Python; `node --check` passes on `app.js`. No tests, task build or sessions were run by the assistant.
+
+Additions beyond the proposal, disclosed:
+- a confirmation bar after the final answer (Enter continues; Backspace undoes); its time is not decision time;
+- answers within 0.2 s of a screen appearing are ignored (double presses);
+- the contact sheet shows practice images only, so the user (reviewer R1) does not see main tasks;
+- test counts are 18 repo and 12 app tests, vs about 14 and 16 estimated.
+
+The input-audit app's database and exports hashes were re-checked and are unchanged.
+
+**N3 timed reviewer trial: claimed and proposed; awaiting approval; no code changed.** [Proposal](czechlynx-n3-timed-review-proposal-2026-10-20.md).
+
+Why: all expert-time figures so far rest on placeholder costs. On calibration, the N2 candidate needs 2,350 decisions vs 5,325 for W1, but on different kinds of work:
+- 1,485 of W1's comparisons (28%) are new-animal full scans, likely fast;
+- N2 leaves mostly hard comparisons.
+
+Read from the saved rows, the plausible time saving ranges from about 24% to 56% [inferred]. Only measurement can settle P2.
+
+Proposed design:
+- **App:** a new sibling app `/home/mm-workstation/re-id/czechlynx-matching-review-app/` on port 8767. The input-audit app (still serving on 8766) is not edited. A read-only hash baseline of its database and exports is recorded in the proposal and will be re-checked at every milestone.
+- **Tasks:** precomputed from traced perfect-reviewer replays of W1 and the N2 candidate (region folds). The builder must reproduce the saved rows exactly.
+- **Screens:** one candidate per screen, Same / Different / Unsure, each click mapped to one ledger kind. No scores, identities or file names are shown.
+- **Sampling:** 300 stratified tasks per reviewer (150 per arm), identical for both reviewers, in ABBA blocks, plus 20 practice tasks. About 20% injected opposite-answer tasks in second checks, pair questions and audits; these count for error rates only.
+- **Reviewer time:** about 3.5 h each, in 4 sessions.
+- **Pre-registered rule:**
+  - primary saving S = 1 − Σ N<sub>s,k</sub> t̄<sub>s,k</sub> (N2) / Σ N<sub>s,k</sub> t̄<sub>s,k</sub> (W1), using stratified mean capped decision times;
+  - SUCCESS at ≥ 40% with per-kind error CIs reported; 25–40% partial; < 25% reframe the pitch to error reduction.
+  - Unsure and unidentifiable rates and second-check reliability are always reported.
+  - Measured error rates are fed back into the sequential simulations.
+- **Scope:** 4 new repo files and a new app of about 6 files. Committed benchmark modules and saved outputs stay untouched.
 
 **N1b committed at the user's request (not pushed).** Only N1b files: the 4 `reid_demo` source files, `DATA_CONTRACT.md`, the 4 test files, the proposal, the handoff and the N1b parts of this log. The disk submodule and the N3 session's files and log entries are excluded.
 

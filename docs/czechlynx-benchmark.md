@@ -611,6 +611,56 @@ Oracle connectivity removes different-identity candidate edges using evaluation 
 
 Review examples select up to eight high-score wrong candidate pairs, eight low-score same-identity pairs and eight same-identity pairs in disconnected unthresholded oracle groups, using fixed score/ID ordering. They are diagnostic extremes with a recorded selection policy, not a representative full visual audit. Direct-edge and component-pair precision have different populations; differences are descriptive. Use the evidence to propose the next method change, then freeze an improved method before evaluating selection. [Approved scope and limitations](czechlynx-clustering-diagnostics-proposal-2026-10-14.md).
 
+## Timed reviewer trial (N3)
+
+Measures real seconds per decision and reviewer error rates for W1 (full ranked matching) vs the N2 candidate, on *calibration* only. [Approved proposal](czechlynx-n3-timed-review-proposal-2026-10-20.md); the reviewer instructions are in the sibling app's `README.md`.
+
+**1. Tests (user-run):**
+
+    venv/bin/python -m pytest tests/test_benchmark_timed_review.py tests/test_benchmark_pruning_safeguards.py tests/test_benchmark_nonmatch_pruning.py -q
+    python3 -m unittest discover -s /home/mm-workstation/re-id/czechlynx-matching-review-app/tests -v
+
+**2. Task build** (CPU, no inference; the user runs it or authorizes the assistant):
+
+    venv/bin/python tools/build_czechlynx_timed_review_tasks.py --calibration-dir evaluations/czechlynx/facing_adaptation_calibration_classes_v1/clustering --raw-metadata data/czechlynx/raw/CzechLynxDataset-Metadata-Real.csv --out-dir evaluations/czechlynx/timed_review_tasks_v1_r2 --threads 4 --seed 42
+
+- **Reference check, or nothing is written:** the build must reproduce the saved N2 candidate row (`evaluations/czechlynx/pruning_safeguards_f1_v1`, all ledger kinds) and W1 (`nonmatch_pruning_facing_classes_v1` split 1,804 / 3,507 / 14; live total 5,325). Per-stratum decision counts must sum back to both.
+- **Leak checks:** it scans every served image file for identity strings, and the browser payloads for identity labels, image IDs and file names.
+- **Outputs:** `tasks.json` and `images.json` (read by the app); `truth.json` (evaluation only; the app never opens it); `strata_counts.csv`; `pre_registration.json`; `contact_sheet.html` (practice images only); `manifest.json` with the task-set fingerprint.
+
+**While the calibration binding differs:** N1b commit `99e9a2da` changed `reid_demo/cluster.py`, which the calibration clustering report binds by hash. The builder and the re-costing re-simulation must therefore run from an export of `7ade3225` plus the four N3 files, with absolute paths. The 20 Oct build did exactly this; see `docs/research/czechlynx-n3-task-build-provenance-2026-10-20.json`.
+
+    git archive 7ade3225 | tar -x -C <export-dir>
+    cp reid_demo/benchmark_timed_review.py <export-dir>/reid_demo/
+    cp tools/build_czechlynx_timed_review_tasks.py tools/recost_czechlynx_timed_review.py <export-dir>/tools/
+    venv/bin/python <export-dir>/tools/recost_czechlynx_timed_review.py --tasks-dir $PWD/evaluations/czechlynx/timed_review_tasks_v1_r2 --export <export.csv> --out-dir $PWD/evaluations/czechlynx/timed_review_recost_v1
+
+The leak scan reads image metadata only: JPEG APPn/COM segments and trailing bytes, PNG text and Exif chunks. Compressed pixel data was dropped from the scan after a chance byte run in one calibration JPEG stopped attempt 2; every served file is still hash-checked.
+
+**3. Sessions:** commit the proposal and the pre-registration before session 1, with the user's permission. Then run the app:
+
+    bash /home/mm-workstation/re-id/czechlynx-matching-review-app/run.sh --tasks-dir /home/mm-workstation/re-id/Animal-Re-Identification---MSc-Project/evaluations/czechlynx/timed_review_tasks_v1_r2 --port 8767
+
+**4. Re-costing** (after the sessions, using the app's export):
+
+    venv/bin/python tools/recost_czechlynx_timed_review.py --tasks-dir evaluations/czechlynx/timed_review_tasks_v1_r2 --export /home/mm-workstation/re-id/czechlynx-matching-review-app/exports/matching_decisions_STAMP_ID.csv --out-dir evaluations/czechlynx/timed_review_recost_v1
+
+**Primary estimate:** decision times are recomputed from the raw events; the client's values are a cross-check. The saving is S = 1 − T<sub>N2</sub>/T<sub>W1</sub>, where T<sub>arm</sub> = Σ N<sub>s,k</sub> · mean capped seconds over cells s,k:
+- the means come from natural (non-injected) tasks, capped at 120 s;
+- N<sub>s,k</sub> are the full-replay decisions per stratum and kind;
+- the 95% CI comes from a stratified bootstrap over tasks.
+
+**Verdict:** SUCCESS at S ≥ 40% with per-kind error CIs reported; PARTIAL at 25–40%; REFRAME below 25%.
+
+**Secondary estimates and checks:**
+- the pooled per-kind formula, a Horvitz–Thompson total and medians;
+- caps of 60 s and none, a W1-favourable bound, and extra-animal at 25 s;
+- error rates by kind and stratum, with unsure and unidentifiable rates;
+- agreement and second-check reliability;
+- a re-simulation of W1 and the N2 candidate at the measured error rates (5 seeds, region folds).
+
+`--allow-incomplete` permits an interim look only; the verdict is then not evaluated.
+
 ## Results and interpretation
 
 Each completed directory includes:
