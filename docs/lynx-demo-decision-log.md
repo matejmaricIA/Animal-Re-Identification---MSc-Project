@@ -21,6 +21,7 @@ Every agent working here updates this section at start, at each milestone and at
 | **N1c artifact freshness** (fusion, catalogue and eval outputs skipped on file presence) — [proposal](n1c-artifact-freshness-proposal-2026-10-20.md) | Claude Code session (N1b), 20 Oct 2026 | **Done; committed at the user's request (see git log; not pushed)** | Verified in code: fusion, catalogue and eval skip on file presence; a failed fusion leaves the fused pass on a stale sidecar; old catalogue pages are never removed. 1 ☑ claim · 2 ☑ verify in code · 3 ☑ proposal · 4 ☑ approval · 5 ☑ implement (run_demo, catalogue; 8 new tests) · 6 ☑ tests (focused user-run 21 Oct; full suite 787 passed + 1 skipped, assistant-run at the user's request) · 7 ☑ docs · 8 ☑ committed 21 Oct at the user's request (not pushed; disk submodule and other sessions' files excluded) | `docs/n1c-artifact-freshness-proposal-2026-10-20.md` (new). Code only after approval. |
 | **N1d identity-attachment review questions** (ask whether a proposal belongs to a confirmed animal) — [proposal](n1d-identity-attachment-review-proposal-2026-10-20.md) | Claude Code session (N1b), 20 Oct 2026 | **Done; committed at the user's request (see git log; not pushed)** | Verified in code: confident proposal clusters get no review item; the browser page cannot attach a singleton to an animal. 1 ☑ claim · 2 ☑ verify in code · 3 ☑ proposal · 4 ☑ approval · 5 ☑ implement (review.py; 8 new tests) · 6 ☑ tests (focused user-run 21 Oct; full suite 787 passed + 1 skipped, assistant-run at the user's request) · 7 ☑ docs · 8 ☑ committed 21 Oct at the user's request (not pushed; disk submodule and other sessions' files excluded) | `docs/n1d-identity-attachment-review-proposal-2026-10-20.md` (new). Code only after approval. |
 | **N1e MiewID in the demo embedding stage** — [proposal](n1e-miewid-demo-embedding-proposal-2026-10-20.md) | Claude Code session (N1b), 20 Oct 2026 | **Done; committed at the user's request (see git log; not pushed)** | Verified in code: MiewID loads only in benchmark adapters; the demo embed path and runner cannot select it. 1 ☑ claim · 2 ☑ verify in code · 3 ☑ proposal · 4 ☑ approval · 5 ☑ implement (new embed_miewid.py, embed, run_demo; 9 new tests, 1 skipped by default) · 6 ☑ tests (stub device bug fixed; rerun 8 passed + 1 skipped; full suite 787 passed + 1 skipped, assistant-run at the user's request) · 7 ☑ docs · 8 ☑ committed 21 Oct at the user's request (not pushed; disk submodule and other sessions' files excluded) | `docs/n1e-miewid-demo-embedding-proposal-2026-10-20.md` (new). Code only after approval; benchmark modules stay read-only. |
+| **N1b–N1e real-run validation** (real MiewID test; `run_demo --smoke` LeopardID2022 run twice) — [results](research/n1-demo-real-run-validation-2026-10-21.md) | Claude Code session (N1b), 21 Oct 2026 | **Done; committed at the user's request (see git log; not pushed)** ([results](research/n1-demo-real-run-validation-2026-10-21.md)) | 1 ☑ claim · 2 ☑ real MiewID test (passed; weights verified real) · 3 ☑ smoke run 1 (ok, 14 s) · 4 ☑ smoke run 2 (ok, 4 s; every fresh stage skipped) · 5 ☑ results + docs | Everything is written under `/tmp/n1_smoke/` (work dir, store, bundle, staging), run from that directory with read-only symlinks to `data/all_datasets.csv` and the kagglehub WildlifeReID-10k cache. Nothing is written into the repo's `data/` or `evaluations/`. |
 
 Open questions for the user: what the audit's left/right labels meant (pose geometry suggests facing direction, not the anatomical flank).
 
@@ -118,6 +119,22 @@ These priorities do not approve new implementation or benchmark runs. Present co
 ## Dated updates
 
 ### 2026-10-21
+
+**N1b–N1e real-run validation (assistant-run at the user's request): both checks passed.** [Results](research/n1-demo-real-run-validation-2026-10-21.md).
+- **Real MiewID test** (`REID_DEMO_REAL_MIEWID=1`): 1 passed in 4.80 s; 2,152-D finite output.
+  - It emitted 695 "meta parameter … no-op" warnings, so the weights were checked directly: all 700 parameters and 510 buffers are on CUDA with real values (51.1 M parameters).
+  - The warnings come from `transformers` initialising the model with placeholder tensors.
+- **`run_demo --smoke --datasets LeopardID2022`**, twice, into a fresh `/tmp/n1_smoke`:
+  - **Setup:** run from a `/tmp` working directory with read-only symlinks to `data/all_datasets.csv` and the kagglehub WildlifeReID-10k cache, so the repository's June LeopardID2022 demo outputs were not overwritten.
+  - **Run 1:** ok in 14 s; 47 crops embedded; markers written.
+  - **Run 2:** ok in 4 s. Ingest, species, cluster, catalogue and eval were skipped as fresh; embed ran with 0 embedded and 47 skipped. The headline was identical (8 found vs 18 flank-aware labels, 68.09% grouped, ARI 0.367), and the bundle status was `ok` with nothing degraded.
+- **Not exercised:**
+  - full-funnel/fusion degradation;
+  - reruns after a review or new photos;
+  - N1d questions in the browser;
+  - a legacy pre-N1 database;
+  - MiewID inside `run_demo`;
+  - field accuracy.
 
 **N1c, N1d and N1e committed at the user's request (not pushed).** The commit contains only these files:
 - the source files `reid_demo/run_demo.py`, `catalogue.py`, `embed.py`, `review.py` and the new `embed_miewid.py`;
